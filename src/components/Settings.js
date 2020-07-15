@@ -4,7 +4,6 @@ import {bindActionCreators} from "redux";
 import SwipeableViews from 'react-swipeable-views';
 import $ from "jquery";
 import CKEditor from "./CKEditor";
-import FormEditor from "./Fields";
 
 import {
     Grid,

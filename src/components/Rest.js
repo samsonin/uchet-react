@@ -33,7 +33,11 @@ export default function fetchPost(url , method = 'GET', data = '') {
     }
     if (data) init.body = JSON.stringify(data);
 
-    return fetch(SERVER + '/' + url, init)
+    console.log(JSON.parse(window.localStorage.getItem('auth')))
+
+    let server = SERVER;
+
+    return fetch(server + '/' + url, init)
         .then(res => {
             response =  {
                 status: res.status,
