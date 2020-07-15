@@ -1,0 +1,49 @@
+{
+  "name": "uchet.store",
+  "version": "0.1.4",
+  "description ": "CRM для мастерских по ремонту техники",
+  "private": true,
+  "dependencies": {
+    "@ckeditor/ckeditor5-basic-styles": "^16.0.0",
+    "@ckeditor/ckeditor5-build-classic": "^16.0.0",
+    "@ckeditor/ckeditor5-react": "^2.0.0",
+    "@ckeditor/ckeditor5-real-time-collaboration": "^16.0.0",
+    "@date-io/date-fns": "^2.6.2",
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.5.1",
+    "@material-ui/lab": "^4.0.0-alpha.56",
+    "dotenv": "^8.2.0",
+    "jquery": "^3.5.1",
+    "jsbarcode": "^3.11.0",
+    "jss": "^10.3.0",
+    "jss-camel-case": "^6.1.0",
+    "mdbreact": "4.19.1",
+    "notistack": "^0.9.17",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-number-format": "^4.3.1",
+    "react-redux": "^7.1.3",
+    "react-router-dom": "latest",
+    "react-scripts": "^3.3.0",
+    "react-swipeable-views": "latest",
+    "redux": "^4.0.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "node test",
+    "eject": "react-scripts eject",
+    "rename": "renamer --find App-clear.js --replace App.js ./src/App-clear.js && renamer --find style.css --replace index.css ./src/style.css ",
+    "remove-demo": "rimraf ./src/assets ./src/components ./src/pages ./src/Routes.js ./src/App.js ./src/index.css && npm run rename"
+  },
+  "devDependencies": {
+    "renamer": "^1.1.4",
+    "rimraf": "^2.7.1"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}
