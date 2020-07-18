@@ -39,26 +39,13 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
     componentDidMount() {
 
-        let state = {}
-
+        let state = []
         this.props.app.fields.allElements
             .filter(field => field.index === this.state.index)
-            .map(v => console.log(v))
-
-        // for (let key in arr) {
-            // console.log(obj[key])
-            // state[key] = arr[key]
-            // console.log(state)
-        // }
-        // .map(field => {
-        //     state.push(field)
-        // })
-
-        // console.log(arr)
-        // console.log(state)
-
-
-        this.setState(state)
+            .map(v => {
+                state.push(v);
+            })
+        this.setState({fields: state})
 
     }
 
@@ -86,10 +73,6 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
             let index = this.state.index;
 
-            console.log(JSON.stringify(this.state.fields))
-            console.log(JSON.stringify(this.props.app.fields.allElements
-                .filter(field => field.index === index)))
-
             return <Paper style={{padding: '1rem'}}>
                 <Grid container direction="row" justify="space-evenly"
                       style={{marginBottom: '1rem'}}
@@ -101,7 +84,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                         value={this.state.index}
                         onChange={e => this.indexHandle(e.target.value)}
                     >
-                        {['order', 'customer'].map(i => <MenuItem value={i}>
+                        {['order', 'customer'].map(i => <MenuItem value={i} key={"fieldindexmenuuywgvf" + i}>
                                 {this.props.app.fields.alliases[i]}
                             </MenuItem>
                         )}
@@ -146,17 +129,17 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                             endAdornment={
                                 <InputAdornment position="end">
                                     <IconButton
-                                        onClick={() => this.changeForm(index, field.name, 'down')}
+                                        // onClick={() => this.changeForm(index, field.name, 'down')}
                                     >
                                         {<ArrowDownwardIcon/>}
                                     </IconButton>
                                     <IconButton
-                                        onClick={() => this.changeForm(index, field.name, 'up')}
+                                        // onClick={() => this.changeForm(index, field.name, 'up')}
                                     >
                                         {< ArrowUpwardIcon/>}
                                     </IconButton>
                                     <IconButton
-                                        onClick={() => this.removeField(index, field.name, field.value)}
+                                        onClick={() => this.changeForm(index, field.name, field.value)}
                                     >
                                         {<DeleteIcon/>}
                                     </IconButton>
@@ -168,10 +151,9 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
                 <Grid container justify="flex-end">
                     <Button
-                        // disabled={
-                        //     JSON.stringify(this.state.fields) === JSON.stringify(this.props.app.fields.allElements
-                        //         .filter(field => field.index === index))
-                        // }
+                        disabled={JSON.stringify(this.state.fields) === JSON.stringify(this.props.app.fields.allElements
+                                .filter(field => field.index === index))
+                        }
                         variant="contained"
                         color="primary"
                         style={{margin: '1rem'}}
