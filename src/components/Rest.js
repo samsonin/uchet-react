@@ -13,7 +13,7 @@ const SERVER = isLocalhost ?
 
 let response = {};
 
-export default function fetchPost(url , method = 'GET', data = '') {
+export default function fetchPost(url, method = 'GET', data = '') {
 
     let jwt = JSON.parse(window.localStorage.getItem('auth')).jwt;
 
@@ -33,13 +33,13 @@ export default function fetchPost(url , method = 'GET', data = '') {
     }
     if (data) init.body = JSON.stringify(data);
 
-    // console.log(JSON.parse(window.localStorage.getItem('auth')))
-
-    let server = SERVER;
+    let server = JSON.parse(window.localStorage.getItem('auth')).organization_id === 5 ?
+        'https://api.uchet.store' :
+        SERVER;
 
     return fetch(server + '/' + url, init)
         .then(res => {
-            response =  {
+            response = {
                 status: res.status,
                 ok: res.ok
             };
