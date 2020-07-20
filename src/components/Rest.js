@@ -24,8 +24,8 @@ export default function fetchPost(url, method = 'GET', data = '') {
 
     let init = {
         method,
-        mode: 'cors', // no-cors, cors, *same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        mode: 'cors',
+        cache: 'no-cache',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + jwt
@@ -33,6 +33,7 @@ export default function fetchPost(url, method = 'GET', data = '') {
     }
     if (data) init.body = JSON.stringify(data);
 
+    // тестовая организация
     let server = JSON.parse(window.localStorage.getItem('auth')).organization_id === 5 ?
         'https://api.uchet.store' :
         SERVER;

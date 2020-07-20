@@ -15,12 +15,9 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import {Link} from "react-router-dom";
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import TableCell from "@material-ui/core/TableCell/TableCell";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
-import Icon from "@material-ui/core/Icon";
 
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -37,14 +34,39 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         customerFieldsCounter: 0
     }
 
+    // componentWillUpdate(p, nextState) {
+    //
+    //     console.log(this.props.app.fields.allElements
+    //         .filter(field => field.index === this.state.index))
+    //     console.log(nextState)
+    //
+    // }
+
     componentDidMount() {
+
+        let fields = []
+        this.props.app.fields.allElements.map(v => {
+            if (v.index === this.state.index) fields.push(v);
+            if (v.name === 'prepaid') {
+                console.log(v.is_valid)
+            }
+        })
+
+        this.setState({
+            fields,
+            systemFieldsHandle: 0,
+            customerFieldsCounter: 0
+        })
+
+    }
+
+    reset() {
 
         let fields = []
         this.props.app.fields.allElements
             .filter(field => field.index === this.state.index)
-            .map(v => {
-                fields.push(v);
-            })
+            .map(v => fields.push(v))
+
         this.setState({
             fields,
             systemFieldsHandle: 0,
@@ -123,12 +145,22 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
     deleteField(field) {
 
-        let fields = field.is_system ?
+        let fields = [];
+        if (field.is_system) {
+
             this.state.fields.map(f => {
-                if (f.name === field.name) f.is_valid = false;
-                return f;
-            }) :
-            this.state.fields.filter(f => f.name !== field.name);
+                if (f.name === field.name) {
+                    f.is_valid = false;
+                }
+                fields.push(f)
+            })
+
+        } else {
+
+            fields = this.state.fields.filter(f => f.name !== field.name);
+
+        }
+        // console.log(this.state.fields.find(f => f.name === field.name).is_valid)
 
         this.setState({fields})
 
@@ -245,97 +277,6 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                 </Grid>
 
             </Paper>
-
-            // let arr = [];
-            // for (let i in this.props.app.fields.allElements) {
-            //     arr.push(
-            //         <div key={"divkey" + i}>
-            //             <Typography key={"typkey" + i} variant="h5" className={"w-50"}>
-            //                 {this.props.app.fields.alliases[i]}
-            //             </Typography>
-            //             <MDBBtn key={"mdbkey" + i} className="btn-sm m-2" color="success"
-            //                     disabled={this.state !== null && this.state.newFields[i] !== undefined}
-            //                     onClick={(e) => this.addLocal(i)}
-            //             >
-            //                 + Добавить поле
-            //             </MDBBtn>
-            //
-            //
-            //         </div>
-            //     )
-            //
-            //     if (this.state !== null && this.state.newFields[i] !== undefined) {
-            //         arr.push(
-            //             <FormControl key={"eleavqerm" + i} className={"m-2 p-2 w-100"}>
-            //                 <Input
-            //                     onChange={(e) => this.changeLocal(i, e.target.value)}
-            //                     endAdornment={
-            //                         <InputAdornment position="end">
-            //                             {this.state.newFields[i] === '' ? '' :
-            //                                 <IconButton
-            //                                     onClick={(e) => this.saveLocal(i, e.target.value)}
-            //                                 >
-            //                                     {<DoneIcon/>}
-            //                                 </IconButton>
-            //                             }
-            //                             <IconButton
-            //                                 onClick={(e) => this.deleteLocal(i)}
-            //                             >
-            //                                 {<DeleteIcon/>}
-            //                             </IconButton>
-            //                         </InputAdornment>
-            //                     }
-            //                 />
-            //             </FormControl>
-            //         )
-            //     }
-            //
-            //     this.props.app.fields.allElements[i].map((val, index) => {
-            //
-            //         if (val.isValid && !val.isOnlySystem) {
-            //             arr.push(
-            //                 <FormControl key={"elem" + i + index + val.name} className={"m-2 p-2 w-100"}>
-            //                     <Input
-            //                         // defaultValue={val.value}
-            //                         value={this.state === null ?
-            //                             '' : this.state.allElements === undefined ?
-            //                                 '' : this.state.allElements[i][index] === undefined ?
-            //                                     '' : this.state.allElements[i][index].value
-            //                         }
-            //                         disabled={val.isSystem}
-            //                         onChange={(e) => this.ckeckChange(index, val.name, e.target.value)}
-            //                         endAdornment={
-            //                             <InputAdornment position="end">
-            //                                 {val.isChanged ? <IconButton
-            //                                     onClick={(e) => this.changeForm(index, val.name, 'update')}
-            //                                 >
-            //                                     {<DoneIcon/>}
-            //                                 </IconButton> : ''
-            //                                 }
-            //                                 <IconButton
-            //                                     onClick={(e) => this.changeForm(index, val.name, 'down')}
-            //                                 >
-            //                                     {<ArrowDownwardIcon/>}
-            //                                 </IconButton>
-            //                                 <IconButton
-            //                                     onClick={(e) => this.changeForm(index, val.name, 'up')}
-            //                                 >
-            //                                     {< ArrowUpwardIcon/>}
-            //                                 </IconButton>
-            //                                 <IconButton
-            //                                     onClick={(e) => this.removeField(index, val.name, val.value)}
-            //                                 >
-            //                                     {<DeleteIcon/>}
-            //                                 </IconButton>
-            //                             </InputAdornment>
-            //                         }
-            //                     />
-            //                 </FormControl>
-            //             )
-            //         }
-            //     })
-            // }
-            // return arr;
 
         } else return '';
 
