@@ -1,42 +1,50 @@
-import $ from "jquery";
 import React from "react";
 
 export default class {
 
     focus(e) {
-        let div = $(e.target).closest('div');
-        div.find('label').addClass('active');
-        div.find('input').focus();
+        let div = e.target.closest('div')
+
+        div.querySelector('label').classList.add('active')
+        div.querySelector('input').focus()
     }
 
     blur(e) {
-        if ($(e.target).val() === '') $(e.target).removeClass('invalid valid').closest('div').find('label').removeClass('active');
+        if (e.target.value === '' && e.target.value.trim() === '') {
+            e.target.classList.remove('invalid', 'valid')
+            e.target.closest('div').querySelector('label').classList.remove('active')
+        }
     }
 
     getElement(any) {
-        return typeof any === 'string' ?
-            any.substr(0, 1) === '#' ?
-                $(any) : $('#' + any)
-            : $(any.target);
+        return typeof any === 'string'
+            ?  any.substr(0, 1) === '#'
+                ?  document.querySelector(any)
+                :  document.querySelector('#' + any)
+            :  any.target
     }
 
     isValid = (input_id) => {
 
         let input = this.getElement(input_id);
 
-        let result = input.val() === '';
+        let result = input.value === '';
+
         result ?
-            input.removeClass('valid').addClass('invalid'):
-            input.removeClass('invalid').addClass('valid');
+            input.classList.remove('valid').add('invalid') :
+            input.classList.remove('invalid').add('valid')
+
         return !result;
 
     };
 
     validate_email_phone_number(current_input_selector, other_div_selector) {
 
-        $(current_input_selector).val() === "" ?
-            $(other_div_selector).show() :
-            $(other_div_selector).hide();
+        const otherDiv = document.querySelector(other_div_selector)
+
+        document.querySelector(current_input_selector).value.trim() === "" ?
+            otherDiv.classList.remove('hideBlock') :
+            otherDiv.classList.add('hideBlock')
 
     }
 
@@ -45,10 +53,11 @@ export default class {
         let email = this.getElement(id_selector_elem);
 
         let r = /^\w+@\w+\.\w{2,5}$/i;
-        let result = r.test(email.val());
+        let result = r.test(email.value);
+
         result ?
-            email.removeClass('invalid').addClass('valid') :
-            email.removeClass('valid').addClass('invalid');
+            email.classList.remove('invalid').add('valid') :
+            email.classList.remove('valid').add('invalid')
         return result;
 
     };
@@ -56,13 +65,13 @@ export default class {
     validate_phone_number = (id_selector_elem) => {
 
         let phone_number = this.getElement(id_selector_elem);
-        let number = +phone_number.val();
+        let number = +phone_number.value;
 
         if (isNaN(number) || number < 999999 || number > 99999999999999) {
-            phone_number.removeClass('valid').addClass('invalid');
+            phone_number.classList.remove('valid').add('invalid')
             return false;
         } else {
-            phone_number.removeClass('invalid').addClass('valid');
+            phone_number.classList.remove('invalid').add('valid')
             return true;
         }
 
@@ -72,15 +81,15 @@ export default class {
 
         if (isNeedCheckAll) {
             if (this.isValid(password_1_id) && this.isValid(password_2_id)) {
-                let password = $('#' + password_1_id);
-                let password2 = $('#' + password_2_id);
-                if (password.val() !== password2.val()) {
-                    password.removeClass('valid').addClass('invalid');
-                    password2.removeClass('valid').addClass('invalid');
+                let password = document.querySelector('#' + password_1_id);
+                let password2 = document.querySelector('#' + password_2_id);
+                if (password.value !== password2.value) {
+                    password.classList.remove('valid').add('invalid');
+                    password2.classList.remove('valid').add('invalid');
                     return false;
                 } else {
-                    password.removeClass('invalid').addClass('valid');
-                    password2.removeClass('invalid').addClass('valid');
+                    password.classList.remove('invalid').add('valid');
+                    password2.classList.remove('invalid').add('valid');
                     return true;
                 }
             }

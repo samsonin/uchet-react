@@ -1,7 +1,5 @@
 import React, {Component} from "react";
 import {MDBBtn, MDBNavLink} from "mdbreact";
-import $ from 'jquery';
-
 import {siteMap, permission} from "./SiteMap";
 
 import {connect} from "react-redux";
@@ -9,14 +7,19 @@ import {connect} from "react-redux";
 class Sidebar extends Component {
 
     componentDidMount() {
-        $('.List-item').hide();
+        document.querySelectorAll('.List-item')
+            .forEach(item => item.classList.add('hideBlock'))
     }
 
     nextDivToggle(e) {
-        let nex_div = $(e.target).next('div');
-        let is_hidden = nex_div.is(":hidden");
-        $('.List-item').slideUp('slow');
-        if (is_hidden) nex_div.slideToggle();
+        const nextDiv = e.currentTarget.nextSibling;
+
+        if (nextDiv) {
+            nextDiv.classList.contains('hideBlock')
+                ? nextDiv.classList.remove('hideBlock')
+                : nextDiv.classList.add('hideBlock')
+        }
+
     };
 
     linkRender(name, arr) {
@@ -24,7 +27,7 @@ class Sidebar extends Component {
         return (
             <div>
                 <MDBBtn className="list-group-item list-group-item-action bg-light"
-                        onClick={this.nextDivToggle}>{name}</MDBBtn>
+                        onClick={event => this.nextDivToggle(event)}>{name}</MDBBtn>
                 <div className="List-item">
                     {arr.map(id => {
                             let obj = siteMap.find(v => v.id === id);
@@ -42,6 +45,7 @@ class Sidebar extends Component {
     }
 
     render() {
+
         return (
             <div className="bg-light border-right d-print-none" id="sidebar-wrapper">
                 <div className="list-group list-group-flush mt-1">

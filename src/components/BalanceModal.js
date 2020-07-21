@@ -9,7 +9,6 @@ import {
 import {bindActionCreators} from "redux";
 import {init_user} from "../actions/actionCreator";
 import {connect} from "react-redux";
-import $ from 'jquery';
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Radio from "@material-ui/core/Radio";
@@ -35,12 +34,19 @@ class balanceModal extends Component {
     toggle = () => this.setState({isOpen: false});
 
     sumChange = () => {
-        let sum = +$('#paymentSum').val();
+        const paymentSum = document.querySelector('#paymentSum')
+        let sum = +paymentSum.value;
         if (sum < 10 ) sum = 10;
         this.setState({sum});
     };
 
     radioChange = event => this.setState({paymentType: event.target.value});
+
+    paymentFormSubmitter = event => {
+        event.preventDefault()
+        document.querySelector('#paymentForm')
+            .submit()
+    }
 
     render() {
         return (
@@ -99,8 +105,12 @@ class balanceModal extends Component {
                 </MDBModalBody>
 
                 <MDBModalFooter>
-                    <MDBBtn color="secondary" onClick={this.toggle}>Отмена</MDBBtn>
-                    <MDBBtn color="primary" onClick={() => $('#paymentForm').submit()}>Пополнить</MDBBtn>
+                    <MDBBtn color="secondary" onClick={this.toggle}>
+                        Отмена
+                    </MDBBtn>
+                    <MDBBtn color="primary" onClick={this.paymentFormSubmitter}>
+                        Пополнить
+                    </MDBBtn>
                 </MDBModalFooter>
 
             </MDBModal>
