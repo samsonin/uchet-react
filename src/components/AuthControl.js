@@ -30,9 +30,13 @@ export default class {
 
         let result = input.value === '';
 
-        result ?
-            input.classList.remove('valid').add('invalid') :
-            input.classList.remove('invalid').add('valid')
+        if (result) {
+            input.classList.remove('valid');
+            input.classList.add('invalid')
+        } else {
+            input.classList.remove('invalid');
+            input.classList.add('valid')
+        }
 
         return !result;
 
@@ -54,9 +58,14 @@ export default class {
         let r = /^\w+@\w+\.\w{2,5}$/i;
         let result = r.test(email.value);
 
-        result ?
-            email.classList.remove('invalid').add('valid') :
-            email.classList.remove('valid').add('invalid')
+        if (result) {
+            email.classList.remove('invalid');
+            email.classList.add('valid')
+        } else {
+            email.classList.remove('valid');
+            email.classList.add('invalid')
+        }
+
         return result;
 
     };
@@ -67,10 +76,12 @@ export default class {
         let number = +phone_number.value;
 
         if (isNaN(number) || number < 999999 || number > 99999999999999) {
-            phone_number.classList.remove('valid').add('invalid')
+            phone_number.classList.remove('valid')
+            phone_number.classList.add('invalid')
             return false;
         } else {
-            phone_number.classList.remove('invalid').add('valid')
+            phone_number.classList.remove('invalid')
+            phone_number.classList.add('valid')
             return true;
         }
 
@@ -83,12 +94,16 @@ export default class {
                 let password = document.querySelector('#' + password_1_id);
                 let password2 = document.querySelector('#' + password_2_id);
                 if (password.value !== password2.value) {
-                    password.classList.remove('valid').add('invalid');
-                    password2.classList.remove('valid').add('invalid');
+                    password.classList.remove('valid');
+                    password.classList.add('invalid');
+                    password2.classList.remove('valid');
+                    password2.classList.add('invalid');
                     return false;
                 } else {
-                    password.classList.remove('invalid').add('valid');
-                    password2.classList.remove('invalid').add('valid');
+                    password.classList.remove('invalid');
+                    password.classList.add('valid');
+                    password2.classList.remove('invalid');
+                    password2.classList.add('valid');
                     return true;
                 }
             }
