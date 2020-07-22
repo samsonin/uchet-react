@@ -18,13 +18,13 @@ export default class {
 
     getElement(any) {
         return typeof any === 'string'
-            ?  any.substr(0, 1) === '#'
-                ?  document.querySelector(any)
-                :  document.querySelector('#' + any)
-            :  any.target
+            ? any.substr(0, 1) === '#'
+                ? document.querySelector(any)
+                : document.querySelector('#' + any)
+            : any.target
     }
 
-    isValid = (input_id) => {
+    isValid = input_id => {
 
         let input = this.getElement(input_id);
 
@@ -48,10 +48,9 @@ export default class {
 
     }
 
-    validate_email = (id_selector_elem) => {
+    validate_email = id_selector_elem => {
 
         let email = this.getElement(id_selector_elem);
-
         let r = /^\w+@\w+\.\w{2,5}$/i;
         let result = r.test(email.value);
 
@@ -62,7 +61,7 @@ export default class {
 
     };
 
-    validate_phone_number = (id_selector_elem) => {
+    validate_phone_number = id_selector_elem => {
 
         let phone_number = this.getElement(id_selector_elem);
         let number = +phone_number.value;
@@ -101,31 +100,27 @@ export default class {
     }
 
     renderUserNameDiv(input_id, isReadonly) {
-        return (
-            <div className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
-                <i className="fas fa-user prefix grey-text"/>
-                <input type="text" id={input_id} onBlur={this.blur}
-                       onChange={this.isValid}
-                       className="form-control validate" readOnly={isReadonly}/>
-                <label className="">
-                    Имя
-                </label>
-            </div>
-        )
+        return <div className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
+            <i className="fas fa-user prefix grey-text"/>
+            <input type="text" id={input_id} onBlur={this.blur}
+                   onChange={this.isValid}
+                   className="form-control validate" readOnly={isReadonly}/>
+            <label className="">
+                Имя
+            </label>
+        </div>
     }
 
     renderEmailDiv(div_id, input_id, onChange, isReadonly) {
-        return (
-            <div id={div_id} className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
-                <i className="fas fa-envelope prefix grey-text"/>
-                <input type="text" id={input_id} onBlur={this.blur}
-                       onChange={onChange}
-                       className="form-control validate" readOnly={isReadonly}/>
-                <label className="">
-                    Email
-                </label>
-            </div>
-        )
+        return <div id={div_id} className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
+            <i className="fas fa-envelope prefix grey-text"/>
+            <input type="text" id={input_id} onBlur={this.blur}
+                   onChange={onChange}
+                   className="form-control validate" readOnly={isReadonly}/>
+            <label className="">
+                Email
+            </label>
+        </div>
     }
 
     renderPhoneNumberDiv(div_id, input_id, onChange, isReadonly = false) {
@@ -140,28 +135,23 @@ export default class {
     }
 
     renderPasswordDiv(div_id, input_id, onChange, label, isReadOnly = false) {
-        return (
-            <div id={'div_' + div_id} className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
-                <i className="fas fa-lock prefix grey-text"/>
-                <input type="password" id={input_id} onBlur={this.blur} onChange={e => onChange}
-                       className="form-control validate" readOnly={isReadOnly}/>
-                <label>
-                    {label}
-                </label>
-            </div>
-        )
+        return <div id={'div_' + div_id} className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
+            <i className="fas fa-lock prefix grey-text"/>
+            <input type="password" id={input_id} onBlur={this.blur} onChange={e => onChange}
+                   className="form-control validate" readOnly={isReadOnly}/>
+            <label>
+                {label}
+            </label>
+        </div>
     }
 
     renderConfirmationCodeDiv(input_id, label) {
-        return (
-            <div className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
-                <i className="fas fa-check-circle prefix grey-text"/>
-                <input type="text" id={input_id} onBlur={this.blur} onChange={this.isValid}
-                       className="form-control validate"/>
-                <label className="">{label}</label>
-            </div>
-
-        )
+        return <div className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
+            <i className="fas fa-check-circle prefix grey-text"/>
+            <input type="text" id={input_id} onBlur={this.blur} onChange={this.isValid}
+                   className="form-control validate"/>
+            <label className="">{label}</label>
+        </div>
     }
 
 }
