@@ -1,14 +1,13 @@
-import React, { Component } from 'react';
-import { MDBBtn, MDBModal, MDBRow, MDBCol } from 'mdbreact';
-import $ from 'jquery';
+import React, {Component} from 'react';
+import {MDBBtn, MDBModal, MDBRow, MDBCol} from 'mdbreact';
 import request from "./Request";
 import restRequest from "./Rest";
-import { connect } from "react-redux";
-import { init_user, upd_app, enqueueSnackbar, closeSnackbar } from "../actions/actionCreator";
+import {connect} from "react-redux";
+import {init_user, upd_app, enqueueSnackbar, closeSnackbar} from "../actions/actionCreator";
 import Notifier from "./Notifier";
-import { bindActionCreators } from 'redux';
+import {bindActionCreators} from 'redux';
 import AuthControl from './AuthControl';
-import { inputToA } from "./EditorFunctions";
+import {inputToA} from "./EditorFunctions";
 
 let authControl = new AuthControl();
 
@@ -92,9 +91,9 @@ class authModal extends Component {
 
             request({
                 action: "sign_in",
-                phone_number: +$('#phone_number').val(),
-                email: $('#email').val(),
-                password: $('#password').val()
+                phone_number: +document.querySelector('#phone_number').value,
+                email: document.querySelector('#email').value,
+                password: document.querySelector('#password').value
             })
                 .then(data => {
 
@@ -122,8 +121,8 @@ class authModal extends Component {
 
             request({
                 action: "confirmation_code_request",
-                phone_number: +$('#phone_number').val(),
-                email: $('#email').val(),
+                phone_number: +document.querySelector('#phone_number').value,
+                email: document.querySelector('#email').value,
             })
                 .then(data => {
                     if (data.result) {
@@ -131,7 +130,7 @@ class authModal extends Component {
                             'register_invitation_confirm' : 'register_confirm';
                         this.setState({
                             status,
-                            password_for_register: $('#password').val(),
+                            password_for_register: document.querySelector('#password').value,
                             org_id: data.org_id,
                             org_name: data.org_name
                         })
@@ -151,9 +150,9 @@ class authModal extends Component {
                                     variant: 'warning',
                                 },
                             });
-                            $('#phone_number').removeClass('valid').addClass('invalid');
+                            document.querySelector('#phone_number').classList
+                                .remove('valid').add('invalid')
                         }
-                        // console.log(data);
                     }
 
                 });
@@ -166,18 +165,19 @@ class authModal extends Component {
 
         if (this.validate_email() || this.validate_phone_number()) {
 
-
             request({
                 action: "password_restore_request",
-                email: $('#email').val(),
-                phone_number: +$('#phone_number').val()
+                email: document.querySelector('#email').value,
+                phone_number: +document.querySelector('#phone_number').value
             })
                 .then(data => {
                     if (data.result) {
                         this.setState({status: 'restore_confirm'})
                     } else {
                         if (data.error === 'not_user') {
-                            $('#phone_number').removeClass('valid').addClass('invalid');
+
+                            document.querySelector('#phone_number').classList
+                                .remove('valid').add('invalid')
                             this.props.enqueueSnackbar({
                                 message: 'Пользователь не существует',
                                 options: {
@@ -197,28 +197,29 @@ class authModal extends Component {
 
         if (authControl.isValid('#confirmation_code') && authControl.isValid('#user_name') && (this.validate_email() || this.validate_phone_number()) && this.validate_passsword()) {
 
-
             request({
                 action: "registration",
-                user_name: $('#user_name').val(),
-                email: $('#email').val(),
-                phone_number: +$('#phone_number').val(),
+                user_name: document.querySelector('#user_name').value,
+                email: document.querySelector('#email').value,
+                phone_number: +document.querySelector('#phone_number').value,
                 password: this.state.password_for_register,
-                confirmation_code: $('#confirmation_code').val(),
+                confirmation_code: document.querySelector('#confirmation_code').value,
                 org_id: this.state.org_id,
                 isInvitation
             })
                 .then(data => {
+
                     try {
                         if (this.init(data)) this.setState({status: 'login'});
                     } catch (e) {
-                        // console.log(e, data);
+
                         this.props.enqueueSnackbar({
                             message: 'Ошибка регистрации',
                             options: {
                                 variant: 'warning',
                             },
                         });
+
                     }
 
                 });
@@ -234,10 +235,10 @@ class authModal extends Component {
 
             request({
                 action: "password_change",
-                email: $('#email').val(),
-                phone_number: +$('#phone_number').val(),
-                password: $('#password').val(),
-                confirmation_code: $('#confirmation_code').val(),
+                email: document.querySelector('#email').value,
+                phone_number: +document.querySelector('#phone_number').value,
+                password: document.querySelector('#password').value,
+                confirmation_code: document.querySelector('#confirmation_code').value,
             })
                 .then(data => {
                     try {
@@ -280,8 +281,12 @@ class authModal extends Component {
 
     register_confirm_btn(isInvitation = true) {
         return isInvitation ?
-            <MDBBtn className="btn-sm" onClick={this.register_confirm}>Подтвердить</MDBBtn> :
-            <MDBBtn className="btn-sm" onClick={this.register_confirm}>Нет, зарегистрировать новую организацию</MDBBtn>;
+            <MDBBtn className="btn-sm" onClick={this.register_confirm}>
+                Подтвердить
+            </MDBBtn> :
+            <MDBBtn className="btn-sm" onClick={this.register_confirm}>
+                Нет, зарегистрировать новую организацию
+            </MDBBtn>;
     }
 
     register_invitation_confirm_btn() {
@@ -314,99 +319,88 @@ class authModal extends Component {
         switch (this.state.status) {
 
             case "login":
-                return (
-                    <div className="modal-footer d-flex justify-content-center">
-                        {this.enter_btn()}
-                        {this.registretion_tab_btn()}
-                        {this.restore_tab_btn()}
-                    </div>
-                );
+                return <div className="modal-footer d-flex justify-content-center">
+                    {this.enter_btn()}
+                    {this.registretion_tab_btn()}
+                    {this.restore_tab_btn()}
+                </div>
 
             case "register":
-                return (
-                    <div className="modal-footer d-flex justify-content-center">
-                        {this.enter_tab_btn()}
-                        {this.registration_btn()}
-                    </div>
-                );
+                return <div className="modal-footer d-flex justify-content-center">
+                    {this.enter_tab_btn()}
+                    {this.registration_btn()}
+                </div>
 
             case "restore":
-                return (
-                    <div className="modal-footer d-flex justify-content-center">
-                        {this.enter_tab_btn()}
-                        {this.restore_btn()}
-                    </div>
-                );
+                return <div className="modal-footer d-flex justify-content-center">
+                    {this.enter_tab_btn()}
+                    {this.restore_btn()}
+                </div>
 
             case "register_confirm":
-                return (
-                    <div className="modal-footer d-flex justify-content-center">
-                        {this.enter_tab_btn()}
-                        {this.register_confirm_btn()}
-                    </div>
-                );
+                return <div className="modal-footer d-flex justify-content-center">
+                    {this.enter_tab_btn()}
+                    {this.register_confirm_btn()}
+                </div>
 
             case "register_invitation_confirm":
-                return (
-                    <div>
-                        <div className="modal-footer d-flex justify-content-center">
-                            Вы были добавленны в Uchet.Store, как сотрудник "
-                            {this.state.org_name}", хотите присоединиться с этой организации?
-                        </div>
-                        <div className="modal-footer d-flex justify-content-center">
-                            {this.register_invitation_confirm_btn()}
-                            {this.register_confirm_btn(false)}
-                        </div>
-                        <div className="modal-footer d-flex justify-content-center">
-                            {this.enter_tab_btn()}
-                        </div>
+                return <div>
+                    <div className="modal-footer d-flex justify-content-center">
+                        Вы были добавленны в Uchet.Store, как сотрудник "
+                        {this.state.org_name}", хотите присоединиться с этой организации?
                     </div>
-                );
-
-            case "restore_confirm":
-                return (
+                    <div className="modal-footer d-flex justify-content-center">
+                        {this.register_invitation_confirm_btn()}
+                        {this.register_confirm_btn(false)}
+                    </div>
                     <div className="modal-footer d-flex justify-content-center">
                         {this.enter_tab_btn()}
-                        {this.restore_confirm_btn()}
                     </div>
-                );
+                </div>
+
+            case "restore_confirm":
+                return <div className="modal-footer d-flex justify-content-center">
+                    {this.enter_tab_btn()}
+                    {this.restore_confirm_btn()}
+                </div>
 
         }
     }
 
     render() {
         let isConfirm = this.state.status.substr(-7) === 'confirm';
-        return (
-            <div onKeyPress={this.key_press}>
-                <Notifier/>
-                <MDBModal id="authModal" isOpen={this.props.auth.user_id === 0} toggle={this.key_press}>
+        return <div onKeyPress={this.key_press}>
+            <Notifier/>
+            <MDBModal id="authModal" isOpen={this.props.auth.user_id === 0} toggle={this.key_press}>
 
-                    <div className="modal-header text-center">
-                        <MDBRow>
-                            <MDBCol className="flex-center">
-                                <img src="https://uchet.store/src/images/uchet.gif" className="imgdiv" width="120"
-                                     alt="Uchet.store"/>
-                            </MDBCol>
-                        </MDBRow>
-                    </div>
+                <div className="modal-header text-center">
+                    <MDBRow>
+                        <MDBCol className="flex-center">
+                            <img src="https://uchet.store/src/images/uchet.gif" className="imgdiv" width="120"
+                                 alt="Uchet.store"/>
+                        </MDBCol>
+                    </MDBRow>
+                </div>
 
-                    <div className="modal-body mx-3">
+                <div className="modal-body mx-3">
 
-                        {this.state.status.substr(0, 8) === 'register' ?
-                            authControl.renderUserNameDiv('user_name', isConfirm) : ''}
-                        {authControl.renderEmailDiv('div_email', 'email', this.validate_email, isConfirm)}
-                        {authControl.renderPhoneNumberDiv('div_phone_number', 'phone_number', this.validate_phone_number, isConfirm)}
-                        {this.password_div('password')}
-                        {this.password_div('password2')}
-                        {isConfirm ? authControl.renderConfirmationCodeDiv('confirmation_code', 'Код подтверждения') : ''}
+                    {this.state.status.substr(0, 8) === 'register' ?
+                        authControl.renderUserNameDiv('user_name', isConfirm) :
+                        ''}
+                    {authControl.renderEmailDiv('div_email', 'email', this.validate_email, isConfirm)}
+                    {authControl.renderPhoneNumberDiv('div_phone_number', 'phone_number', this.validate_phone_number, isConfirm)}
+                    {this.password_div('password')}
+                    {this.password_div('password2')}
+                    {isConfirm ?
+                        authControl.renderConfirmationCodeDiv('confirmation_code', 'Код подтверждения') :
+                        ''}
 
-                    </div>
+                </div>
 
-                    {this.buttons()}
+                {this.buttons()}
 
-                </MDBModal>
-            </div>
-        )
+            </MDBModal>
+        </div>
     }
 
 }
