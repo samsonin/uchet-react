@@ -150,8 +150,8 @@ class authModal extends Component {
                                     variant: 'warning',
                                 },
                             });
-                            document.querySelector('#phone_number').classList
-                                .remove('valid').add('invalid')
+                            document.querySelector('#phone_number').classList.remove('valid')
+                            document.querySelector('#phone_number').classList.add('invalid')
                         }
                     }
 
@@ -176,8 +176,8 @@ class authModal extends Component {
                     } else {
                         if (data.error === 'not_user') {
 
-                            document.querySelector('#phone_number').classList
-                                .remove('valid').add('invalid')
+                            document.querySelector('#phone_number').classList.remove('valid')
+                            document.querySelector('#phone_number').classList.add('invalid')
                             this.props.enqueueSnackbar({
                                 message: 'Пользователь не существует',
                                 options: {
