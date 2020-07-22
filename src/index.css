@@ -8,7 +8,7 @@ body {
 }
 
 body.modal-open {
-   width: 100%;
+    width: 100%;
 }
 
 #menu-toggle {
@@ -127,4 +127,14 @@ label.MuiInputLabel-shrink {
 
 tr:hover{
     background-color: rgba(32, 252, 178, 0.11);
+}
+
+.List-item {
+    transition: all .5s;
+    height: 100%;
+}
+
+.hideBlock {
+    height: 0;
+    display: none;
 }

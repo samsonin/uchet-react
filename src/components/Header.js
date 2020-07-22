@@ -84,7 +84,7 @@ class NavbarPage extends Component {
                 </MDBDropdown>
     }
 
-    // ballanceModal = () => this.setState({balanceModalCounter: this.state.balanceModalCounter + 1});
+    ballanceModal = () => this.setState({balanceModalCounter: this.state.balanceModalCounter + 1});
 
     exit = () => {
         const {init_user, exit_app} = this.props;
