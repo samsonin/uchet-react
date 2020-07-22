@@ -2,7 +2,7 @@ import React, {Component, Fragment} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import SwipeableViews from 'react-swipeable-views';
-import $ from "jquery";
+// import $ from "jquery";
 import CKEditor from "./CKEditor";
 
 import {
@@ -331,9 +331,9 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         if (authControl.isValid('setting_user_name_input_id')) {
             if (this.state.isUserNamePasswordAsk) {
                 if (authControl.isValid('userNamePasswordAskInputId')) {
-                    let user = $('#setting_user_name_input_id');
-                    this.request($('#userNamePasswordAskInputId').val(), 'user', user.val());
-                    user.val('');
+                    let user = document.querySelector('#setting_user_name_input_id');
+                    this.request(document.querySelector('#userNamePasswordAskInputId').value, 'user', user.value);
+                    user.value = '';
                 }
             } else this.setState({isUserNamePasswordAsk: true})
         }
@@ -343,7 +343,12 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         if (authControl.validate_email('setting_email_input_id')) {
             if (this.state.isEmailPasswordAsk) {
                 if (authControl.isValid('emailPasswordAskInputId')) {
-                    this.request($('#emailPasswordAskInputId').val(), 'email', $('#setting_email_input_id').val(), $('#setting_email_confirmation_code_input_id').val());
+                    this.request(
+                        document.querySelector('#emailPasswordAskInputId').value,
+                        'email',
+                        document.querySelector('#setting_email_input_id').value,
+                        document.querySelector('#setting_email_confirmation_code_input_id').value
+                    );
                 }
             } else this.setState({isEmailPasswordAsk: true});
         }
@@ -353,7 +358,11 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         if (authControl.validate_phone_number('setting_phone_number_input_id')) {
             if (this.state.isPhoneNumberPasswordAsk) {
                 if (authControl.isValid('phoneNumberPasswordAskInputId')) {
-                    this.request($('#phoneNumberPasswordAskInputId').val(), 'phone_number', $('#setting_phone_number_input_id').val(), $('#setting_phone_number_confirmation_code_input_id').val());
+                    this.request(
+                        document.querySelector('#phoneNumberPasswordAskInputId').value,
+                        'phone_number',
+                        document.querySelector('#setting_phone_number_input_id').value,
+                        document.querySelector('#setting_phone_number_confirmation_code_input_id').value);
                 }
             } else this.setState({isPhoneNumberPasswordAsk: true});
         }
@@ -363,10 +372,10 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         if (authControl.validate_passwords('setting_password_input_id', 'setting_password2_input_id', true)) {
             if (this.state.isPasswordPasswordAsk) {
                 if (authControl.isValid('passwordPasswordAskInputId')) {
-                    let pass = $('#setting_password_input_id');
-                    this.request($('#passwordPasswordAskInputId').val(), 'pass', pass.val());
-                    pass.val('');
-                    $('#setting_password2_input_id').val('');
+                    let pass = document.querySelector('#setting_password_input_id');
+                    this.request(document.querySelector('#passwordPasswordAskInputId').value, 'pass', pass.value);
+                    pass.value = '';
+                    document.querySelector('#setting_password2_input_id').value = '';
                 }
             } else this.setState({isPasswordPasswordAsk: true})
         }
@@ -378,7 +387,12 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
             <div className="card border-light mb-3">
 
-                <div className="card-header" onClick={(e) => $(e.target).next("div").slideToggle(350)}>
+                <div className="card-header" onClick={(e) => {
+                    const nextDiv = e.currentTarget.nextSibling
+                    nextDiv.classList.contains('hideBlock')
+                        ?  nextDiv.classList.remove('hideBlock')
+                        :  nextDiv.classList.add('hideBlock')
+                }}>
                     Ремонт
                 </div>
 
@@ -390,7 +404,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                             <div className="input-group input-group-sm">
                                 <input type="number" className="form-control form-control-sm"
                                        defaultValue={this.props.app.config.rem_sum}
-                                       onChange={(e) => this.requestSettings('changeConfig', '', 'rem_sum', e.target.value)}
+                                       onChange={e => this.requestSettings('changeConfig', '', 'rem_sum', e.target.value)}
                                 />
                                 <div className="input-group-append">
                                     <span className="input-group-text">RUR</span>
@@ -402,7 +416,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                             <div className="input-group input-group-sm">
                                 <input type="number" className="form-control form-control-sm"
                                        defaultValue={this.props.app.config.rem_assessed_value}
-                                       onChange={(e) => this.requestSettings('changeConfig', '', 'rem_assessed_value', e.target.value)}
+                                       onChange={e => this.requestSettings('changeConfig', '', 'rem_assessed_value', e.target.value)}
                                 />
                                 <div className="input-group-append">
                                     <span className="input-group-text">RUR</span>
@@ -414,7 +428,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                             <div className="input-group input-group-sm">
                                 <input type="number" className="form-control form-control-sm"
                                        defaultValue={this.props.app.config.remont_warranty}
-                                       onChange={(e) => this.requestSettings('changeConfig', '', 'remont_warranty', e.target.value)}
+                                       onChange={e => this.requestSettings('changeConfig', '', 'remont_warranty', e.target.value)}
                                 />
                                 <div className="input-group-append"><span className="input-group-text">дней</span>
                                 </div>
@@ -467,7 +481,12 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
             <div className="card border-light mb-3">
 
-                <div className="card-header" onClick={(e) => $(e.target).next("div").slideToggle(350)}>
+                <div className="card-header" onClick={(e) => {
+                    const nextDiv = e.currentTarget.nextSibling
+                    nextDiv.classList.contains('hideBlock')
+                        ?  nextDiv.classList.remove('hideBlock')
+                        :  nextDiv.classList.add('hideBlock')
+                }}>
                     Залог
                 </div>
 
@@ -503,7 +522,12 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
             </div>
 
             <div className="card border-light mb-3">
-                <div className="card-header" onClick={(e) => $(e.target).next("div").slideToggle(350)}>
+                <div className="card-header" onClick={(e) => {
+                    const nextDiv = e.currentTarget.nextSibling
+                    nextDiv.classList.contains('hideBlock')
+                        ?  nextDiv.classList.remove('hideBlock')
+                        :  nextDiv.classList.add('hideBlock')
+                }}>
                     Зарплата
                 </div>
                 <div className="card-body">
@@ -687,7 +711,12 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
             </div>
 
             <div className="card border-light mb-3">
-                <div className="card-header" onClick={(e) => $(e.target).next("div").slideToggle(350)}>
+                <div className="card-header" onClick={(e) => {
+                    const nextDiv = e.currentTarget.nextSibling
+                    nextDiv.classList.contains('hideBlock')
+                        ?  nextDiv.classList.remove('hideBlock')
+                        :  nextDiv.classList.add('hideBlock')
+                }}>
                     Локация
                 </div>
                 <div className="card-body">
@@ -715,7 +744,12 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
             </div>
 
             <div className="card border-light mb-3">
-                <div className="card-header" onClick={(e) => $(e.target).next("div").slideToggle(350)}>
+                <div className="card-header" onClick={(e) => {
+                    const nextDiv = e.currentTarget.nextSibling
+                    nextDiv.classList.contains('hideBlock')
+                        ?  nextDiv.classList.remove('hideBlock')
+                        :  nextDiv.classList.add('hideBlock')
+                }}>
                     Гарантийные обязательства
                 </div>
                 <div className="card-body">
@@ -1074,7 +1108,6 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                         <Tab className="MyAppBar__item" label="Точки"/>
                         <Tab className="MyAppBar__item" label="Программа"/>
                         <Tab className="MyAppBar__item" label="Документы"/>
-                        <Tab label="Формы"/>
                     </Tabs>
                 </MyAppBar>
                 <SwipeableViews enableMouseEvents
