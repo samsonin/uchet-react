@@ -37,19 +37,25 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         customerFieldsCounter: 0
     }
 
-    // componentWillUpdate(p, nextState) {
-    //
-    //     console.log(this.props.app.fields.allElements
-    //         .filter(field => field.index === this.state.index))
-    //     console.log(nextState)
-    //
-    // }
+
+    // Логика:
+    // в Redux-store храниться состояние с сервера
+    // в componentDidMount это состояние переноситься в state
+    // при добавлении, удалении и редактировании полей они меняются локально
+    // при нажатии сохранить изменения отправляются на сервер и затем попадают в Redux-store
+    // при нажатии Отмена требуется восстановить в state состояние из Redux-store
+
 
     componentDidMount() {
 
         let fields = []
         this.props.app.fields.allElements.map(v => {
             if (v.index === this.state.index) fields.push(v);
+
+            // TODO исправить некорректное восстановление из Redux-store
+            // при удалении полей с is_system = true они не удаляются и выставляется флаг is_valid = false
+            // при попытки восстановления состояния, некоторые поля с is_system не восстанавливают is_valid в true
+
             if (v.name === 'prepaid') {
                 console.log(v.is_valid)
             }
