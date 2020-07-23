@@ -18,6 +18,7 @@ import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
+import restRequest from "./Rest";
 
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -25,6 +26,8 @@ const mapDispatchToProps = dispatch => bindActionCreators({
     closeSnackbar,
     upd_app
 }, dispatch);
+
+let request = false;
 
 export default connect(state => (state), mapDispatchToProps)(class extends Component {
 
@@ -166,6 +169,18 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
     }
 
+    save() {
+        console.log(this.state.fields)
+
+        request = true;
+        restRequest('fields', 'PATCH', this.state.fields)
+            .then(res => {
+                console.log(res)
+                request = false;
+            })
+
+    }
+
     render() {
 
         if (typeof this.state.fields === "object") {
@@ -264,13 +279,13 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                         Отмена
                     </Button>
                     <Button
-                        disabled={JSON.stringify(this.state.fields) === JSON.stringify(this.props.app.fields.allElements
+                        disabled={!request && JSON.stringify(this.state.fields) === JSON.stringify(this.props.app.fields.allElements
                             .filter(field => field.index === index))
                         }
                         variant="contained"
                         color="primary"
                         style={{margin: '1rem'}}
-                        // onClick={}
+                        onClick={() => this.save()}
                     >
                         Сохранить
                     </Button>

@@ -22,44 +22,41 @@ class Sidebar extends Component {
 
     };
 
-    linkRender(name, arr) {
-
-        return (
-            <div>
-                <MDBBtn className="list-group-item list-group-item-action bg-light"
-                        onClick={event => this.nextDivToggle(event)}>{name}</MDBBtn>
-                <div className="List-item">
-                    {arr.map(id => {
-                            let obj = siteMap.find(v => v.id === id);
-                            return obj ? permission(id, this.props) ?
-                                <MDBNavLink className="sb-drp" to={'/' + obj.path}
-                                            key={"mdblnksdbkey" + id}>
-                                    {obj.text}
-                                </MDBNavLink> : ''
-                                : ''
-                        }
-                    )}
-                </div>
-            </div>
-        )
-    }
-
     render() {
 
-        return (
-            <div className="bg-light border-right d-print-none" id="sidebar-wrapper">
-                <div className="list-group list-group-flush mt-1">
+        return <div className="bg-light border-right d-print-none" id="sidebar-wrapper">
+            <div className="list-group list-group-flush mt-1">
 
-                    {this.linkRender("Услуги", [1, 2, 3])}
-                    {this.linkRender("Склад", [11, 12, 13, 14])}
-                    {this.linkRender("Клиенты", [21, 22, 23])}
-                    {/*{this.linkRender("Аналитика", [24, 25, 26, 27, 28, 29, 30])}*/}
-                    {this.linkRender("Настройки", [47])}
-                    {this.linkRender("Интеграции", [51, 52])}
+                {[
+                    {name: 'Услуги', arr: [1, 2, 3]},
+                    {name: 'Склад', arr: [11, 12, 13, 14]},
+                    {name: 'Клиенты', arr: [21, 22, 23]},
+                    // {name: 'Аналитика', arr: [24, 25, 26, 27, 28, 29, 30]},
+                    {name: 'Настройки', arr: [47]},
+                    {name: 'Интеграции', arr: [51, 52]},
+                ].map(v => <div key={'sidebararrkey' + v.name}>
+                        <MDBBtn className="list-group-item list-group-item-action bg-light"
+                                onClick={event => this.nextDivToggle(event)}>
+                            {v.name}
+                        </MDBBtn>
+                        <div className="List-item">
+                            {v.arr.map(id => {
+                                    let obj = siteMap.find(v => v.id === id);
+                                    return obj ? permission(id, this.props) ?
+                                        <MDBNavLink className="sb-drp" to={'/' + obj.path}
+                                                    key={"mdblnksdbkey" + id}>
+                                            {obj.text}
+                                        </MDBNavLink> : ''
+                                        : ''
+                                }
+                            )}
+                        </div>
+                    </div>
+                )
+                }
 
-                </div>
             </div>
-        )
+        </div>
     }
 }
 
