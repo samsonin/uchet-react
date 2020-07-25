@@ -11,7 +11,6 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import Typography from "@material-ui/core/Typography";
 import {Button} from "@material-ui/core";
-import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
@@ -19,7 +18,6 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import restRequest from "./Rest";
-
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     enqueueSnackbar,
@@ -33,49 +31,21 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
     state = {
         index: 'customer',
-        systemFieldsHandle: 0,
-        customerFieldsCounter: 0
     }
-
-    // componentWillUpdate(p, nextState) {
-    //
-    //     console.log(this.props.app.fields.allElements
-    //         .filter(field => field.index === this.state.index))
-    //     console.log(nextState)
-    //
-    // }
 
     componentDidMount() {
-
         let fields = []
         this.props.app.fields.allElements.map(v => {
-            if (v.index === this.state.index) fields.push(v);
-            if (v.name === 'prepaid') {
-                console.log(v.is_valid)
+            if (v.index === this.state.index) {
+                fields.push({...v});
             }
+
+            this.setState({
+                fields,
+                systemFieldsHandle: 0,
+                customerFieldsCounter: 0
+            })
         })
-
-        this.setState({
-            fields,
-            systemFieldsHandle: 0,
-            customerFieldsCounter: 0
-        })
-
-    }
-
-    reset() {
-
-        let fields = []
-        this.props.app.fields.allElements
-            .filter(field => field.index === this.state.index)
-            .map(v => fields.push(v))
-
-        this.setState({
-            fields,
-            systemFieldsHandle: 0,
-            customerFieldsCounter: 0
-        })
-
     }
 
     indexHandle(index) {
@@ -148,22 +118,12 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
     deleteField(field) {
 
-        let fields = [];
-        if (field.is_system) {
-
-            this.state.fields.map(f => {
-                if (f.name === field.name) {
-                    f.is_valid = false;
-                }
-                fields.push(f)
-            })
-
-        } else {
-
-            fields = this.state.fields.filter(f => f.name !== field.name);
-
-        }
-        // console.log(this.state.fields.find(f => f.name === field.name).is_valid)
+        const fields = field.is_system ?
+            this.state.fields.map(el => (el === field)
+                ? {...el, is_valid: false}
+                : el
+            ) :
+            this.state.fields.filter(f => f.name !== field.name);
 
         this.setState({fields})
 
