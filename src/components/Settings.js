@@ -1,35 +1,20 @@
 import React, {Component, Fragment} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-import SwipeableViews from 'react-swipeable-views';
-// import $ from "jquery";
-import CKEditor from "./CKEditor";
 
 import {
     Grid,
-    Tab,
-    Tabs,
-    AppBar,
     Typography,
     Box,
     Fab,
-    FormControlLabel,
-    Switch,
-    TextField,
-    styled, InputLabel,
-    IconButton,
     Button
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
 import {MDBBtn} from "mdbreact";
 
 import AuthControl from './AuthControl';
 import request from "./Request";
 import {closeSnackbar, enqueueSnackbar, upd_app} from "../actions/actionCreator";
-import FormControl from "@material-ui/core/FormControl";
-import FilledInput from "@material-ui/core/FilledInput";
-import Autocomplete from '@material-ui/lab/Autocomplete';
 
 let authControl = new AuthControl();
 
@@ -53,33 +38,6 @@ const mapDispatchToProps = dispatch => bindActionCreators({
     closeSnackbar,
     upd_app
 }, dispatch);
-
-const MyAppBar = styled(AppBar)({
-    flexGrow: 0,
-    color: "grey",
-    backgroundColor: "white",
-    boxShadow: '0 2px 3px 5px rgba(155, 105, 135, .3)',
-    width: '95%',
-    height: '50px',
-    boxSizing: 'border-box',
-});
-
-function TabPanel(props) {
-    const {children, value, index, ...other} = props;
-
-    return (
-        <Typography
-            component="div"
-            role="tabpanel"
-            hidden={value !== index}
-            id={`tabpanel-${index}`}
-            aria-labelledby={`tab-${index}`}
-            {...other}
-        >
-            <Box p={1}>{children}</Box>
-        </Typography>
-    );
-}
 
 export default connect(state => (state), mapDispatchToProps)(class extends Component {
 
@@ -206,113 +164,67 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
             })
     };
 
-    getSuggest = (e, inn) => {
 
-        if (inn === '') return false;
-        this.setState({innValue: inn});
-        if (inn.length < 5) return true;
+    // deletePoint = id => {
+    //     this.props.enqueueSnackbar({
+    //         message: 'Подтвердите удаление',
+    //         options: {
+    //             variant: 'error',
+    //             anchorOrigin: {
+    //                 vertical: 'top',
+    //                 horizontal: 'center',
+    //             },
+    //             action: <Fragment>
+    //                 <Button onClick={() => {
+    //                     this.requestSettings('deletePoint', id)
+    //                 }}>
+    //                     Удалить
+    //                 </Button>
+    //             </Fragment>
+    //         },
+    //         autoHideDuration: 3000,
+    //     });
+    // };
+    //
+    // add = () => {
+    //
+    //     let action = this.state.tab === 2 ? 'addEmployee' : this.state.tab === 3 ? 'addPoint' : false;
+    //
+    //     if (action === 'addPoint') {
+    //         this.props.app.stocks.map(value => {
+    //             if (value.name === '') {
+    //                 this.props.enqueueSnackbar({
+    //                     message: 'Существует точка без названия, создать новую невозможно!',
+    //                     options: {
+    //                         variant: 'warning',
+    //                     }
+    //                 });
+    //                 action = false;
+    //             }
+    //             return value;
+    //         })
+    //     }
+    //
+    //     if (action === 'addEmployee') {
+    //         this.setState({isAddEmployee: true});
+    //         return;
+    //     }
+    //
+    //     if (action) {
+    //
+    //
+    //         request({action}, '/settings', this.props.auth.jwt)
+    //             .then(data => {
+    //
+    //                 if (data.result) {
+    //                     const {upd_app} = this.props;
+    //                     upd_app(this.props.app.balance, this.props.app.stock_id, data.stocks, this.props.app.users, this.props.app.organization, this.props.app.config, this.props.app.docs, this.props.app.fields, this.props.app.providers, this.props.app.categories);
+    //                 }
+    //             });
+    //
+    //     }
+    // };
 
-        this.requestSettings('getSuggest', '', 'inn', inn);
-
-    };
-
-    setInn = (e, value) => {
-
-        if (value === null) {
-            this.setState({innValue: ""});
-            return false;
-        }
-        this.setState({innValue: value.inn});
-
-        this.requestSettings('setByInn', '', 'inn', value.inn);
-
-    };
-
-    deletePoint = id => {
-        this.props.enqueueSnackbar({
-            message: 'Подтвердите удаление',
-            options: {
-                variant: 'error',
-                anchorOrigin: {
-                    vertical: 'top',
-                    horizontal: 'center',
-                },
-                action: <Fragment>
-                    <Button onClick={() => {
-                        this.requestSettings('deletePoint', id)
-                    }}>
-                        Удалить
-                    </Button>
-                </Fragment>
-            },
-            autoHideDuration: 3000,
-        });
-    };
-
-    add = () => {
-
-        let action = this.state.tab === 2 ? 'addEmployee' : this.state.tab === 3 ? 'addPoint' : false;
-
-        if (action === 'addPoint') {
-            this.props.app.stocks.map(value => {
-                if (value.name === '') {
-                    this.props.enqueueSnackbar({
-                        message: 'Существует точка без названия, создать новую невозможно!',
-                        options: {
-                            variant: 'warning',
-                        }
-                    });
-                    action = false;
-                }
-                return value;
-            })
-        }
-
-        if (action === 'addEmployee') {
-            this.setState({isAddEmployee: true});
-            return;
-        }
-
-        if (action) {
-
-
-            request({action}, '/settings', this.props.auth.jwt)
-                .then(data => {
-
-                    if (data.result) {
-                        const {upd_app} = this.props;
-                        upd_app(this.props.app.balance, this.props.app.stock_id, data.stocks, this.props.app.users, this.props.app.organization, this.props.app.config, this.props.app.docs, this.props.app.fields, this.props.app.providers, this.props.app.categories);
-                    }
-                });
-
-        }
-    };
-
-    renderFab = () => this.state.tab === 2 || this.state.tab === 3 ?
-        <Fab color="primary" aria-label="add" className="addfab" onClick={this.add}>
-            {this.state.tab === 3 ?
-                <AddIcon/> :
-                <i className="fas fa-user-plus"/>}
-        </Fab>
-        : '';
-
-    renderAddEmployee = () => {
-        return (
-            <TextField id="add-employee" className="addfab"
-                       variant="outlined" label="Контакт сотрудника"
-                       onChange={this.validateWait}
-            />
-        )
-    }
-
-    renderAddEmployeeEnter = () => <Fab color="primary"
-                                        aria-label="add"
-                                        className="addfab2"
-                                        onClick={
-                                            this.requestSettings('addEmployee', '', '', document.getElementById('add-employee').value)
-                                        }>
-        <i className="fas fa-plus"/>
-    </Fab>
 
     validateWait = e => {
         if (authControl.isValid("#add-employee")) {
@@ -322,10 +234,6 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
             })
         }
     }
-
-    tabChange = (event, newValue) => this.setState({tab: newValue});
-
-    handleChangeIndex = index => this.setState({tab: index});
 
     userNameHandler = () => {
         if (authControl.isValid('setting_user_name_input_id')) {
@@ -380,10 +288,6 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
             } else this.setState({isPasswordPasswordAsk: true})
         }
     };
-
-    renderDocs() {
-        return <CKEditor/>
-    }
 
     renderOwnSettings() {
         return <div>
@@ -494,240 +398,12 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         </div>
     }
 
-    renderOrganization() {
-
-        return <Grid container direction="row" className="m-2 p-3">
-
-            <FormControl fullWidth variant="filled" className="w-75 m-1">
-                <InputLabel className="mt-2 font-weight-bold">Название:</InputLabel>
-                <FilledInput
-                    id="organizationName"
-                    defaultValue={this.props.app.organization.name}
-                    onBlur={(e) => this.requestSettings('changeOrganization', '', 'name', e.target.value)}
-                />
-            </FormControl>
-
-            <Autocomplete
-                options={this.state.autocomplete}
-                inputValue={this.state.innValue}
-                onInputChange={(e, v) => this.getSuggest(e, v)}
-                onChange={(e, v) => this.setInn(e, v)}
-                getOptionLabel={option => (option.string)}
-                className="w-75 m-1"
-                renderInput={params => (
-                    <TextField {...params}
-                               label="ИНН"
-                               variant="filled"
-                               fullWidth
-                    />
-                )}
-            />
-
-            <FormControl fullWidth variant="filled" className="w-75 m-1">
-                <InputLabel className="mt-2 font-weight-bold">КПП:</InputLabel>
-                <FilledInput
-                    id="organizationKpp"
-                    defaultValue={this.props.app.organization.kpp}
-                    onBlur={(e) => this.requestSettings('changeOrganization', '', 'kpp', e.target.value)}
-                />
-            </FormControl>
-            <FormControl fullWidth variant="filled" className="w-75 m-1">
-                <InputLabel className="mt-2 font-weight-bold">ОГРН:</InputLabel>
-                <FilledInput
-                    id="organizationOgrn"
-                    defaultValue={this.props.app.organization.ogrn}
-                    onBlur={(e) => this.requestSettings('changeOrganization', '', 'ogrn', e.target.value)}
-                />
-            </FormControl>
-            <FormControl fullWidth variant="filled" className="w-75 m-1">
-                <InputLabel className="mt-2 font-weight-bold">Юридическое наименование:</InputLabel>
-                <FilledInput
-                    id="organizationOrganization"
-                    defaultValue={this.props.app.organization.organization}
-                    onBlur={(e) => this.requestSettings('changeOrganization', '', 'organization', e.target.value)}
-                />
-            </FormControl>
-            <FormControl fullWidth variant="filled" className="w-75 m-1">
-                <InputLabel className="mt-2 font-weight-bold">Юридический адрес:</InputLabel>
-                <FilledInput
-                    id="organizationLegalAddress"
-                    defaultValue={this.props.app.organization.legal_address}
-                    onBlur={(e) => this.requestSettings('changeOrganization', '', 'legal_address', e.target.value)}
-                />
-            </FormControl>
-            <FormControl fullWidth variant="filled" className="w-75 m-1">
-                <InputLabel className="mt-2 font-weight-bold">ОКВЕД:</InputLabel>
-                <FilledInput
-                    id="organizationOkved"
-                    defaultValue={this.props.app.organization.okved}
-                    onBlur={(e) => this.requestSettings('changeOrganization', '', 'okved', e.target.value)}
-                />
-            </FormControl>
-            <FormControl fullWidth variant="filled" className="w-75 m-1">
-                <InputLabel className="mt-2 font-weight-bold">БИК:</InputLabel>
-                <FilledInput
-                    defaultValue={this.props.app.organization.bank_code}
-                    onBlur={(e) => this.requestSettings('changeOrganization', '', 'bank_code', e.target.value)}
-                />
-            </FormControl>
-
-            <FormControl fullWidth variant="filled" className="w-75 m-1">
-                <FilledInput
-                    readOnly
-                    value={this.state.bankName ? this.state.bankName : "Банк"}
-                />
-            </FormControl>
-            <FormControl fullWidth variant="filled" className="w-75 m-1">
-                <InputLabel className="mt-2 font-weight-bold">Расчетный счет:</InputLabel>
-                <FilledInput
-                    defaultValue={this.props.app.organization.settlement_number}
-                    onBlur={(e) => this.requestSettings('changeOrganization', '', 'settlement_number', e.target.value)}
-                />
-            </FormControl>
-
-        </Grid>
-    }
-
-    renderEmployee() {
-        return this.props.app.users.map(v => {
-            if (typeof (v.verified_contact) === 'string') return (
-                <Grid container direction="row" className="hoverable m-2 p-3" key={"grusKey" + v.id}>
-                    <Grid item xs={9}>
-                        <InputLabel className="mt-2 font-weight-bold">Ждет подтверждения:</InputLabel>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <IconButton color="secondary"
-                                    onClick={() => this.requestSettings('deleteWait', '', '', v.verified_contact)}>
-                            <DeleteIcon/>
-                        </IconButton>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            defaultValue={v.verified_contact} className="w-75" InputProps={{
-                            readOnly: true,
-                        }}
-                        />
-                    </Grid>
-                </Grid>
-            )
-            else return (
-                <Grid container direction="row" className="hoverable m-2 p-3" key={"grusKey" + v.id}>
-                    <Grid item xs={6}>
-                        <Typography variant="h3">
-                            <i className="fas fa-user"/>
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <FormControlLabel
-                            label={v.is_valid ? 'Работает' : 'Уволен'}
-                            control={<Switch checked={v.is_valid}
-                                             onChange={(e) => this.requestSettings('changeEmployee', v.id, 'is_valid', e.target.checked)}
-                                             color="primary"/>}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <InputLabel className="mt-2 font-weight-bold">Имя:</InputLabel>
-                        <TextField
-                            defaultValue={v.name} className="w-75"
-                            onBlur={(e) => this.requestSettings('changeEmployee', v.id, 'user', e.target.value)}
-                        />
-                    </Grid>
-                </Grid>
-            )
-        })
-    }
-
-    renderPoints() {
-        return this.props.app.stocks.map(v => {
-            return (
-                <Grid container direction="row" className="hoverable m-2 p-3" key={"grKey" + v.id}>
-                    <Grid item xs={9}>
-                        <Typography variant="h3">
-                            <i className="fas fa-store"/>
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <FormControlLabel
-                            label={v.is_valid ? 'Активна' : 'Не активна'}
-                            control={<Switch checked={v.is_valid}
-                                             onChange={e => this.requestSettings('changePoint', v.id, 'is_valid', e.target.checked)}
-                                             color="primary"/>}
-                        />
-                        {/*{!v.is_valid && v.canDelete ?*/}
-                        {/*    <IconButton color="secondary" onClick={() => this.deletePoint(v.id)}>*/}
-                        {/*        <DeleteIcon/>*/}
-                        {/*    </IconButton> : ''}*/}
-                    </Grid>
-                    <Grid item xs={12}>
-                        <InputLabel className="mt-2 font-weight-bold">Название:</InputLabel>
-                        <TextField
-                            defaultValue={v.name} className="w-75"
-                            onBlur={e => this.requestSettings('changePoint', v.id, 'name', e.target.value)}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <InputLabel className="mt-2 font-weight-bold">Адрес:</InputLabel>
-                        <TextField
-                            defaultValue={v.address} className="w-75"
-                            onBlur={(e) => this.requestSettings('changePoint', v.id, 'address', e.target.value)}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <InputLabel className="mt-2 font-weight-bold">Телефон:</InputLabel>
-                        <TextField
-                            defaultValue={v.phone_number} className="w-75"
-                            onBlur={e => this.requestSettings('changePoint', v.id, 'phone_number', e.target.value)}
-                        />
-                    </Grid>
-                </Grid>
-            )
-        })
-    }
-
     render() {
-        return this.props.auth.admin ?
-            <Grid container item xs={12} className="m-3">
-                <MyAppBar position="static">
-                    <Tabs value={this.state.tab}
-                          onChange={this.tabChange}
-                          variant="scrollable"
-                          scrollButtons="on"
-                          indicatorColor="primary"
-                    >
-                        <Tab className="MyAppBar__item" label="Личные"/>
-                        <Tab className="MyAppBar__item" label="Организация"/>
-                        <Tab className="MyAppBar__item" label="Сотрудники"/>
-                        <Tab className="MyAppBar__item" label="Точки"/>
-                        {/*<Tab className="MyAppBar__item" label="Программа"/>*/}
-                        <Tab className="MyAppBar__item" label="Документы"/>
-                    </Tabs>
-                </MyAppBar>
-                <SwipeableViews enableMouseEvents
-                                index={this.state.tab}
-                                onChangeIndex={this.handleChangeIndex}
-                >
-                    <TabPanel value={this.state.tab} index={0}>
-                        {this.renderOwnSettings()}
-                    </TabPanel>
-                    <TabPanel value={this.state.tab} index={1}>
-                        {this.renderOrganization()}
-                    </TabPanel>
-                    <TabPanel value={this.state.tab} index={2}>
-                        {this.renderEmployee()}
-                    </TabPanel>
-                    <TabPanel value={this.state.tab} index={3}>
-                        {this.renderPoints()}
-                    </TabPanel>
-                    <TabPanel value={this.state.tab} index={5}>
-                        {this.renderDocs()}
-                    </TabPanel>
-                </SwipeableViews>
-                {this.state.isAddEmployee && this.state.tab === 2 ?
-                    this.renderAddEmployee() : this.renderFab()}
-                {this.state.isCanAddEmployee && this.state.tab === 2 ?
-                    this.renderAddEmployeeEnter() : ''}
-            </Grid> :
-            <div className="container-fluid m-4">{this.renderOwnSettings()}</div>;
+
+        return <div className="container-fluid m-4">
+            {this.renderOwnSettings()}
+        </div>;
+
     }
 
 });
