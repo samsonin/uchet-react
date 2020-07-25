@@ -30,6 +30,7 @@ export const siteMap = [
     // {id: 1, onlyWe: false, onlyAdmin: false, path: "saleseach", text: "Поиск по продажам"},
     // {id: 1, onlyWe: false, onlyAdmin: false, path: "inventory", text: "Акты инвенторизации"},
     // {id: 1, onlyWe: false, onlyAdmin: false, path: "barcodeinventory", text: "Инвенторизация по штрихкодам"},
+    {id: 46, onlyWe: false, onlyAdmin: false, path: "settings/config", text: "Исходные данные"},
     {id: 47, onlyWe: false, onlyAdmin: false, path: "settings/fields", text: "Поля"},
     {id: 51, onlyWe: false, onlyAdmin: false, path: "integration/mango", text: "mango-office.ru"},
     {id: 52, onlyWe: false, onlyAdmin: false, path: "integration/sms_ru", text: "sms.ru"},

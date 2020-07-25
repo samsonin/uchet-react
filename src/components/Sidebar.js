@@ -32,7 +32,7 @@ class Sidebar extends Component {
                     {name: 'Склад', arr: [11, 12, 13, 14]},
                     {name: 'Клиенты', arr: [21, 22, 23]},
                     // {name: 'Аналитика', arr: [24, 25, 26, 27, 28, 29, 30]},
-                    {name: 'Настройки', arr: [47]},
+                    {name: 'Настройки', arr: [46, 47]},
                     {name: 'Интеграции', arr: [51, 52]},
                 ].map(v => <div key={'sidebararrkey' + v.name}>
                         <MDBBtn className="list-group-item list-group-item-action bg-light"

@@ -19,7 +19,8 @@ import restRequest from "./components/Rest";
 import GoodModal from "./components/GoodModal"
 import Barcodes from "./components/Barcodes";
 import Goods from "./components/Goods";
-import Fields from "./components/Fields";
+import {Config} from "./components/Settings/Config";
+import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
 
@@ -111,6 +112,7 @@ class App extends Component {
                         <Route path="/queue" component={Queue}/>
                         <Route path="/arrival" component={Arrival}/>
                         <Route path="/goods" component={Goods}/>
+                        <Route path="/settings/config" component={Config}/>
                         <Route path="/settings/fields" component={Fields}/>
                         <Route path="/integration/mango"
                                component={() => <IntegrationMango

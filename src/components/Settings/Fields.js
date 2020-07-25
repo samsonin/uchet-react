@@ -1,7 +1,7 @@
 import {bindActionCreators} from "redux";
-import {closeSnackbar, enqueueSnackbar, upd_app} from "../actions/actionCreator";
+import {closeSnackbar, enqueueSnackbar, upd_app} from "../../actions/actionCreator";
 import {connect} from "react-redux";
-import React, {Component, Fragment} from "react";
+import React, {Component} from "react";
 import FormControl from "@material-ui/core/FormControl";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import IconButton from "@material-ui/core/IconButton";
@@ -17,7 +17,7 @@ import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
-import restRequest from "./Rest";
+import restRequest from "../Rest";
 
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -30,18 +30,14 @@ let request = false;
 
 export default connect(state => (state), mapDispatchToProps)(class extends Component {
 
-    state = {
-        index: 'customer',
-    }
-
-
-    // Логика:
     // в Redux-store храниться состояние с сервера
     // в componentDidMount это состояние переноситься в state
     // при добавлении, удалении и редактировании полей они меняются локально
     // при нажатии сохранить изменения отправляются на сервер и затем попадают в Redux-store
-    // при нажатии Отмена требуется восстановить в state состояние из Redux-store
 
+    state = {
+        index: 'customer',
+    }
 
     componentDidMount() {
 
@@ -145,14 +141,12 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
             fields = this.state.fields.filter(f => f.name !== field.name);
 
         }
-        // console.log(this.state.fields.find(f => f.name === field.name).is_valid)
 
         this.setState({fields})
 
     }
 
     save() {
-        console.log(this.state.fields)
 
         request = true;
         restRequest('fields', 'PATCH', this.state.fields)
@@ -179,7 +173,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                         value={index}
                         onChange={e => this.indexHandle(e.target.value)}
                     >
-                        {['order', 'customer'].map(i => <MenuItem value={i} key={"fieldindexmenuuywgvf" + i}>
+                        {['order', 'customer', 'entity'].map(i => <MenuItem value={i} key={"fieldindexmenuuywgvf" + i}>
                                 <Typography variant="h5">
                                     {this.props.app.fields.alliases[i]}
                                 </Typography>
