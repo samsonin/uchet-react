@@ -50,7 +50,6 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
             this.setState({
                 fields,
                 systemFieldsHandle: 0,
-                customerFieldsCounter: 0
             })
         })
 
@@ -64,27 +63,18 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         })
     }
 
-    systemFieldsHandle(systemFieldsHandle) {
-        this.setState({systemFieldsHandle})
-    }
-
     addField() {
 
         let fields = this.state.fields
         if (this.state.systemFieldsHandle === 0) {
 
-            let cf = ++this.state.customerFieldsCounter;
             fields.splice(0, 0, {
                 index: this.state.index,
-                name: 'cf' + cf,
                 value: '',
                 is_system: false,
                 is_valid: true,
             })
-            this.setState({
-                fields,
-                customerFieldsCounter: cf
-            })
+            this.setState({fields})
 
         } else {
 
@@ -126,21 +116,12 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
     deleteField(field) {
 
-        let fields = [];
-        if (field.is_system) {
-
-            this.state.fields.map(f => {
-                if (f.name === field.name) {
-                    f.is_valid = false;
-                }
-                fields.push(f)
-            })
-
-        } else {
-
-            fields = this.state.fields.filter(f => f.name !== field.name);
-
-        }
+        const fields = field.is_system ?
+            this.state.fields.map(el => el === field
+                ? {...el, is_valid: false}
+                : el
+            ) :
+            this.state.fields.filter(f => f.name !== field.name);
 
         this.setState({fields})
 
@@ -190,7 +171,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                         <Select
                             variant="outlined"
                             value={this.state.systemFieldsHandle}
-                            onChange={e => this.systemFieldsHandle(e.target.value)}
+                            onChange={e => this.setState({systemFieldsHandle: e.target.value})}
                         >
                             <MenuItem value="0" key={"addsysmfield"}>
                                 Новое поле
