@@ -19,6 +19,7 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import restRequest from "./Rest";
 
+
 const mapDispatchToProps = dispatch => bindActionCreators({
     enqueueSnackbar,
     closeSnackbar,
@@ -33,7 +34,17 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         index: 'customer',
     }
 
+
+    // Логика:
+    // в Redux-store храниться состояние с сервера
+    // в componentDidMount это состояние переноситься в state
+    // при добавлении, удалении и редактировании полей они меняются локально
+    // при нажатии сохранить изменения отправляются на сервер и затем попадают в Redux-store
+    // при нажатии Отмена требуется восстановить в state состояние из Redux-store
+
+
     componentDidMount() {
+
         let fields = []
         this.props.app.fields.allElements.map(v => {
             if (v.index === this.state.index) {
@@ -46,6 +57,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                 customerFieldsCounter: 0
             })
         })
+
     }
 
     indexHandle(index) {
@@ -118,12 +130,22 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
     deleteField(field) {
 
-        const fields = field.is_system ?
-            this.state.fields.map(el => (el === field)
-                ? {...el, is_valid: false}
-                : el
-            ) :
-            this.state.fields.filter(f => f.name !== field.name);
+        let fields = [];
+        if (field.is_system) {
+
+            this.state.fields.map(f => {
+                if (f.name === field.name) {
+                    f.is_valid = false;
+                }
+                fields.push(f)
+            })
+
+        } else {
+
+            fields = this.state.fields.filter(f => f.name !== field.name);
+
+        }
+        // console.log(this.state.fields.find(f => f.name === field.name).is_valid)
 
         this.setState({fields})
 
