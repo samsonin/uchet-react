@@ -185,7 +185,10 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                     </FormControl>
 
                     <Tooltip title="Добавить">
-                        <IconButton onClick={() => this.addField()}>
+                        <IconButton
+                            onClick={() => this.addField()}
+                            disabled={this.state.fields[0].value === ''}
+                        >
                             <AddCircleIcon/>
                         </IconButton>
                     </Tooltip>
@@ -193,7 +196,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                 </Grid>
 
                 {this.state.fields.map(field => field.is_valid ?
-                    <FormControl key={"elem" + index + field.name}
+                    <FormControl key={"elem" + index + field.name + field.value}
                                  style={{
                                      width: '100%',
                                      padding: '1rem'
