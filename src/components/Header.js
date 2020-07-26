@@ -57,18 +57,19 @@ class NavbarPage extends Component {
 
     acess_point() {
 
-        let validStocks = this.props.app.stocks.find(v => v.is_valid);
+        if (!this.props.app) return '';
 
-        return (!validStocks || validStocks.length < 2) ?
-            '' :
-            this.props.app.stock_id ?
-                <MDBDropdown>
+        let validStocks = this.props.app.stocks.filter(v => v.is_valid);
+
+        return (!validStocks || validStocks.length < 2)
+            ? ''
+            : this.props.app.stock_id
+                ? <MDBDropdown>
                     <strong className="white-text">
                         {this.props.app.stocks.find(v => +v.id === this.props.app.stock_id).name}
                     </strong>
                 </MDBDropdown>
-                :
-                <MDBDropdown>
+                : <MDBDropdown>
                     <MDBDropdownToggle nav caret>
                         <div className="d-none d-md-inline">Выбрать точку</div>
                     </MDBDropdownToggle>
@@ -76,7 +77,8 @@ class NavbarPage extends Component {
                         {this.props.app.stocks.map(v => {
                             return v.is_valid ?
                                 <MDBDropdownItem onClick={this.pointChange}
-                                                 value={v.id} key={"mdbdkey" + v.id}>
+                                                 value={v.id}
+                                                 key={"mdbdkey" + v.id}>
                                     {v.name}
                                 </MDBDropdownItem> : '';
                         })}
@@ -95,7 +97,7 @@ class NavbarPage extends Component {
 
     getUserName() {
 
-        if (this.props.app.users === []) return '';
+        if (!this.props.app) return '';
         let user = this.props.app.users.find(v => +v.id === +this.props.auth.user_id);
         return user === undefined ? '' : user.name;
 
@@ -125,10 +127,11 @@ class NavbarPage extends Component {
                         Подписка до: {unixConverter(this.props.auth.expiration_time)}
                     </MDBNavLink>
                 </MDBDropdownItem>
-                <MDBDropdownItem onClick={this.ballanceModal}>
-                    Баланс: {currencyConverter(this.props.app.balance)}
-                </MDBDropdownItem>
-
+                {this.props.app
+                    ? <MDBDropdownItem onClick={this.ballanceModal}>
+                        Баланс: {currencyConverter(this.props.app.balance)}
+                    </MDBDropdownItem>
+                    : ''}
                 <MDBBtn className="btn btn-sm mx-4" color="danger" onClick={this.exit}>
                     Выйти
                 </MDBBtn>

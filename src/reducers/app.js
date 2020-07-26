@@ -1,4 +1,5 @@
 import {UPD_APP} from "../constants";
+import {EXIT_APP} from "../constants";
 
 let initialState = {
     balance: 0,
@@ -19,15 +20,23 @@ const app = (state = JSON.parse(window.localStorage.getItem('app')) || initialSt
 
         let newState = {};
         Object.keys(state).map(k => {
+
+            console.log(k)
+
             newState[k] = state[k]
         });
-        if (typeof(action.data) === 'object') {
+        if (typeof (action.data) === 'object') {
             Object.keys(action.data).map(k => {
                 newState[k] = action.data[k]
             });
         }
         window.localStorage.setItem('app', JSON.stringify(newState));
         return newState;
+
+    } else if (action.type === EXIT_APP) {
+
+        window.localStorage.removeItem('app');
+        return initialState
 
     } else {
         return state

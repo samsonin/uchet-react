@@ -40,12 +40,18 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
     }
 
     componentDidMount() {
+        this.initial()
+    }
+
+    initial() {
 
         let fields = []
         this.props.app.fields.allElements.map(v => {
             if (v.index === this.state.index) {
                 fields.push({...v});
             }
+
+            fields.sort((a, b) => a.id - b.id)
 
             this.setState({
                 fields,
@@ -132,10 +138,10 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         request = true;
         restRequest('fields', 'PATCH', this.state.fields)
             .then(res => {
-                console.log(res)
+                upd_app(res.body)
+                this.initial()
                 request = false;
             })
-
     }
 
     render() {
@@ -187,7 +193,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                     <Tooltip title="Добавить">
                         <IconButton
                             onClick={() => this.addField()}
-                            disabled={this.state.fields[0].value === ''}
+                            // disabled={this.state.fields[0].value === ''}
                         >
                             <AddCircleIcon/>
                         </IconButton>
@@ -195,8 +201,8 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
                 </Grid>
 
-                {this.state.fields.map(field => field.is_valid ?
-                    <FormControl key={"elem" + index + field.name + field.value}
+                {this.state.fields.map((field, i) => field.is_valid ?
+                    <FormControl key={"elem" + index + i}
                                  style={{
                                      width: '100%',
                                      padding: '1rem'
@@ -234,7 +240,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                         variant="contained"
                         color="secondary"
                         style={{margin: '1rem'}}
-                        onClick={() => this.componentDidMount()}
+                        onClick={() => this.initial()}
                     >
                         Отмена
                     </Button>
