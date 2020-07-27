@@ -1,13 +1,13 @@
-import {Fab, FormControlLabel, Grid, InputLabel, Switch, TextField, Typography} from "@material-ui/core";
 import React from "react";
-
-import AddIcon from '@material-ui/icons/Add';
-
 import {bindActionCreators} from "redux";
-import {closeSnackbar, enqueueSnackbar, upd_app} from "../../actions/actionCreator";
 import {connect} from "react-redux";
-import request from '../../components/Request';
+import {closeSnackbar, enqueueSnackbar, upd_app} from "../../actions/actionCreator";
+
+import {Fab, FormControlLabel, Grid, InputLabel, Switch, TextField, Typography} from "@material-ui/core";
+import AddIcon from '@material-ui/icons/Add';
 import IconButton from "@material-ui/core/IconButton";
+
+import request from '../../components/Request';
 
 // TODO избавиться от classname и переписать используя @material-ui
 // сократить и оптимизировать код
@@ -34,53 +34,59 @@ function Points(props) {
                 }
             });
         } else {
-            request({action: 'addPoint'}, '/settings', props.auth.jwt)
-                .then(data => {
-                    if (data.result) {
-                        const {upd_app} = this.props;
-                        upd_app({stocks: data.stocks})
-                    }
-                });
 
+            if (!isRequest) {
+                isRequest = true
+                request({action: 'addPoint'}, '/settings', props.auth.jwt)
+                    .then(data => {
+
+                        isRequest = false
+                        if (data.result) {
+                            const {upd_app} = this.props;
+                            upd_app({stocks: data.stocks})
+                        }
+                    });
+            }
         }
     }
 
     const renderFab = () => <Fab color="primary" aria-label="add" className="addfab" onClick={add}>
-        <AddIcon />
+        <AddIcon/>
     </Fab>
 
     const requestSettings = (id, index, value) => {
 
         if (value === '') return false;
 
-        isRequest = true
+        if (!isRequest) {
+            isRequest = true
+            request({
+                action: 'changePoint',
+                id,
+                index,
+                value
+            }, '/settings', props.auth.jwt)
+                .then(data => {
 
-        request({
-            action: 'changePoint',
-            id,
-            index,
-            value
-        }, '/settings', props.auth.jwt)
-            .then(data => {
+                    isRequest = false
+                    if (data.result) {
 
-                isRequest = false
-                if (data.result) {
+                        const {upd_app} = props;
+                        upd_app({stocks: data.stocks})
 
-                    const {upd_app} = props;
-                    upd_app({stocks: data.stocks})
-
-                } else {
-                    let message = 'ошибка';
-                    if (data.error === 'already_used') message = 'Такой пользователь уже зарегистрирован!';
-                    if (data.error === 'wrong_format') message = 'Неправильный формат контакта!';
-                    props.enqueueSnackbar({
-                        message,
-                        options: {
-                            variant: 'warning',
-                        }
-                    });
-                }
-            })
+                    } else {
+                        let message = 'ошибка';
+                        if (data.error === 'already_used') message = 'Такой пользователь уже зарегистрирован!';
+                        if (data.error === 'wrong_format') message = 'Неправильный формат контакта!';
+                        props.enqueueSnackbar({
+                            message,
+                            options: {
+                                variant: 'warning',
+                            }
+                        });
+                    }
+                })
+        }
     };
 
 
