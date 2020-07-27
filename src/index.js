@@ -16,6 +16,8 @@ import Circularln from './components/CircularIndeterminate';
 
 import registerServiceWorker from './registerServiceWorker';
 
+require('dotenv').config();
+
 ReactDOM.render((
     <Provider store={store}>
         <BrowserRouter>
