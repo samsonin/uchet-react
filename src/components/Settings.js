@@ -2,14 +2,6 @@ import React, {Component, Fragment} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 
-import {
-    Grid,
-    Typography,
-    Box,
-    Fab,
-    Button
-} from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
 import {MDBBtn} from "mdbreact";
 
 import AuthControl from './AuthControl';

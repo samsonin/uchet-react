@@ -3,7 +3,6 @@ import {
   FormControlLabel,
   Grid,
   IconButton,
-  InputLabel,
   Switch,
   TextField,
   Typography,
@@ -155,7 +154,7 @@ export const Employees = ({ app }) => {
               label={v.is_valid ? "Работает" : "Уволен"}
               control={
                 <Switch
-                  checked={v.is_valid}
+                  checked={!!v.is_valid}
                   onChange={(e) =>
                     requestSettings(
                       "changeEmployee",

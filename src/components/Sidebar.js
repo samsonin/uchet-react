@@ -1,19 +1,26 @@
-import React, { Component } from "react";
-import { MDBBtn, MDBNavLink } from "mdbreact";
-import { siteMap, permission } from "./SiteMap";
+import React, {Component} from "react";
+import {MDBBtn, MDBNavLink} from "mdbreact";
+import {siteMap, permission} from "./SiteMap";
 
-import { connect } from "react-redux";
+import {connect} from "react-redux";
 
 class Sidebar extends Component {
-  componentDidMount() {
-    document
-      .querySelectorAll(".List-item")
-      .forEach((item) => item.classList.add("hideBlock"));
-  }
+    componentDidMount() {
+        document
+            .querySelectorAll(".List-item")
+            .forEach((item) => item.classList.add("hideBlock"));
+    }
 
-  nextDivToggle(e) {
-    const nextDiv = e.currentTarget.nextSibling;
-    console.log(nextDiv);
+    nextDivToggle(e) {
+        const nextDiv = e.currentTarget.nextSibling;
+
+        if (nextDiv) {
+            nextDiv.classList.contains('hideBlock')
+                ? nextDiv.classList.remove('hideBlock')
+                : nextDiv.classList.add('hideBlock')
+        }
+
+    };
 
     render() {
 
@@ -47,7 +54,9 @@ class Sidebar extends Component {
                     </div>
                 )
                 }
-
+            </div>
+        </div>
+    }
 }
 
 export default connect((state) => state.auth)(Sidebar);
