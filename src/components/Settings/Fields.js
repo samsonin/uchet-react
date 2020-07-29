@@ -43,10 +43,10 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         this.initial()
     }
 
-    initial() {
+    initial(newFields) {
 
-        let fields = []
-        this.props.app.fields.allElements.map(v => {
+        let fields = [];
+        (newFields || this.props.app.fields.allElements).map(v => {
             if (v.index === this.state.index) {
                 fields.push({...v});
             }
@@ -138,9 +138,10 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         request = true;
         restRequest('fields', 'PATCH', this.state.fields)
             .then(res => {
-                upd_app(res.body)
-                this.initial()
                 request = false;
+                const {upd_app} = this.props;
+                upd_app(res.body)
+                this.initial(res.body.fields.allElements)
             })
     }
 
@@ -201,12 +202,12 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
                 </Grid>
 
-                {this.state.fields.map((field, i) => field.is_valid ?
-                    <FormControl key={"elem" + index + i}
-                                 style={{
-                                     width: '100%',
-                                     padding: '1rem'
-                                 }}>
+                {this.state.fields.map((field, i) => field.is_valid
+                    ? <FormControl key={"elem" + index + i}
+                                   style={{
+                                       width: '100%',
+                                       padding: '1rem'
+                                   }}>
                         <Input
                             value={field.value}
                             disabled={field.is_system}
@@ -231,8 +232,8 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                                 </InputAdornment>
                             }
                         />
-                    </FormControl> :
-                    ''
+                    </FormControl>
+                    : ''
                 )}
 
                 <Grid container justify="flex-end">

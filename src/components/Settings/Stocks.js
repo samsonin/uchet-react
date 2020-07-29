@@ -7,7 +7,7 @@ import {Fab, FormControlLabel, Grid, InputLabel, Switch, TextField, Typography} 
 import AddIcon from '@material-ui/icons/Add';
 import IconButton from "@material-ui/core/IconButton";
 
-import request from '../../components/Request';
+import rest from '../../components/Rest';
 
 // TODO избавиться от classname и переписать используя @material-ui
 // сократить и оптимизировать код
@@ -20,9 +20,9 @@ const mapDispatchToProps = dispatch => bindActionCreators({
     upd_app
 }, dispatch);
 
-let isRequest = false;
+function Stocks(props) {
 
-function Points(props) {
+    const [isRequest, setIsRequest] = React.useState(false);
 
     const add = () => {
 
@@ -36,13 +36,13 @@ function Points(props) {
         } else {
 
             if (!isRequest) {
-                isRequest = true
-                request({action: 'addPoint'}, '/settings', props.auth.jwt)
+                setIsRequest(true);
+                rest('stocks', 'POST', {})
                     .then(data => {
 
-                        isRequest = false
+                        setIsRequest(false);
                         if (data.result) {
-                            const {upd_app} = this.props;
+                            const {upd_app} = props;
                             upd_app({stocks: data.stocks})
                         }
                     });
@@ -59,8 +59,8 @@ function Points(props) {
         if (value === '') return false;
 
         if (!isRequest) {
-            isRequest = true
-            request({
+            setIsRequest(true);
+            rest({
                 action: 'changePoint',
                 id,
                 index,
@@ -68,7 +68,7 @@ function Points(props) {
             }, '/settings', props.auth.jwt)
                 .then(data => {
 
-                    isRequest = false
+                    setIsRequest(false);
                     if (data.result) {
 
                         const {upd_app} = props;
@@ -88,7 +88,6 @@ function Points(props) {
                 })
         }
     };
-
 
     return props.app.stocks.map(v => {
         return <div key={"grKeydiv" + v.id}>
@@ -141,4 +140,4 @@ function Points(props) {
 
 }
 
-export default connect(state => (state), mapDispatchToProps)(Points)
+export default connect(state => (state), mapDispatchToProps)(Stocks)

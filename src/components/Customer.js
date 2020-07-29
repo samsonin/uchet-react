@@ -7,11 +7,11 @@ import {Paper, Grid, Typography, Button} from "@material-ui/core";
 import styled from "@material-ui/core/styles/styled";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 
 import restRequest from "./Rest";
 import Field from "./Field";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 
 
 const types = {
@@ -89,24 +89,24 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                       justify="space-between"
                 >
                     <Grid item>
-                        <Typography variant="h6">
-                            {this.state.customer.id > 0 ?
-                                '#' + this.state.customer.id :
-                                'Физ. лицо'}
-                        </Typography>
+                        {/*<Typography variant="h6">*/}
+                        {/*    {this.state.customer.id > 0 ?*/}
+                        {/*        '#' + this.state.customer.id :*/}
+                        {/*        'Физ. лицо'}*/}
+                        {/*</Typography>*/}
                     </Grid>
                     <Grid item>
                         <Tooltip title={
-                            this.state.isDetails ?
-                                '' :
-                                'Подробнее'
+                            this.state.isDetails
+                                ? ''
+                                : 'Подробнее'
                         }>
                             <IconButton
                                 onClick={() => this.setState({isDetails: !this.state.isDetails})}
                             >
-                                {this.state.isDetails ?
-                                    <ExpandLessIcon/> :
-                                    <ExpandMoreIcon/>
+                                {this.state.isDetails
+                                    ? <ExpandLessIcon/>
+                                    : <ExpandMoreIcon/>
                                 }
                             </IconButton>
                         </Tooltip>
@@ -128,13 +128,14 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                     }
                 </Grid>
                 <Grid item>
-                    {/*<MyButton*/}
-                    {/*    variant="contained"*/}
-                    {/*    color="secondary"*/}
-                    {/*    size="small"*/}
-                    {/*>*/}
-                    {/*    Отмена*/}
-                    {/*</MyButton>*/}
+                    <MyButton
+                        variant="contained"
+                        color="secondary"
+                        size="small"
+                        disabled={true}
+                    >
+                        Отмена
+                    </MyButton>
                     <MyButton
                         variant="contained"
                         color="primary"
