@@ -70,7 +70,7 @@ export const Employees = ({ app }) => {
     return (
       <TextField
         id="add-employee"
-        className={`${classes.fab2} ${classes.ml45}`}
+        className={`${classes.fab} ${classes.ml45}`}
         variant="outlined"
         label="Контакт сотрудника"
         onChange={validateWait}
@@ -82,7 +82,7 @@ export const Employees = ({ app }) => {
     <Fab
       color="primary"
       aria-label="add"
-      className={`${classes.fab2} ${classes.ml35}`}
+      className={`${classes.fab} ${classes.ml35}`}
       onClick={requestSettings(
         "addEmployee",
         "",
@@ -98,7 +98,7 @@ export const Employees = ({ app }) => {
     <Fab
       color="primary"
       aria-label="add"
-      className={`${classes.fab2} ${classes.ml45}`}
+      className={`${classes.fab} ${classes.ml45}`}
       onClick={add}
     >
       <PersonAddIcon size="large" />
