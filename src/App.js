@@ -22,7 +22,7 @@ import Goods from "./components/Goods";
 import {Config} from "./components/Settings/Config";
 import {Organization} from "./components/Settings/Organization";
 import {Employees} from "./components/Settings/Employees";
-import Points from "./components/Settings/Points";
+import Stocks from "./components/Settings/Stocks";
 import Docs from "./components/Settings/Docs";
 import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
@@ -117,7 +117,7 @@ class App extends Component {
                         <Route path="/arrival" component={Arrival}/>
                         <Route path="/goods" component={Goods}/>
                         <Route path="/settings/organization" component={Organization}/>
-                        <Route path="/settings/points" component={Points}/>
+                        <Route path="/settings/stocks" component={Stocks}/>
                         <Route path="/settings/config" component={Config}/>
                         <Route path="/settings/config" component={Config}/>
                         <Route path="/settings/fields" component={Fields}/>

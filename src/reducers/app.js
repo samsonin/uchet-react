@@ -20,9 +20,6 @@ const app = (state = JSON.parse(window.localStorage.getItem('app')) || initialSt
 
         let newState = {};
         Object.keys(state).map(k => {
-
-            console.log(k)
-
             newState[k] = state[k]
         });
         if (typeof (action.data) === 'object') {

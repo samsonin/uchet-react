@@ -33,7 +33,7 @@ export const siteMap = [
 
     {id: 41, onlyWe: false, onlyAdmin: false, path: "settings/organization", text: "Организация"},
     {id: 42, onlyWe: false, onlyAdmin: false, path: "settings/employees", text: "Сотрудники"},
-    {id: 43, onlyWe: false, onlyAdmin: false, path: "settings/points", text: "Точки"},
+    {id: 43, onlyWe: false, onlyAdmin: false, path: "settings/stocks", text: "Точки"},
     {id: 46, onlyWe: false, onlyAdmin: false, path: "settings/config", text: "Условия"},
     {id: 47, onlyWe: false, onlyAdmin: false, path: "settings/fields", text: "Поля"},
     {id: 48, onlyWe: false, onlyAdmin: false, path: "settings/docs", text: "Документы"},
