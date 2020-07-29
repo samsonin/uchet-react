@@ -1,9 +1,9 @@
-import React, {Component} from "react";
-import {Route} from "react-router-dom";
-import {connect} from "react-redux";
+import React, { Component } from "react";
+import { Route } from "react-router-dom";
+import { connect } from "react-redux";
 
 import "./index.css";
-import Header from './components/Header';
+import Header from "./components/Header";
 import Customers from "./components/Customers";
 import Customer from "./components/Customer";
 import Providers from "./components/Providers";
@@ -13,10 +13,10 @@ import Authmodal from "./components/Authmodal";
 import Settings from "./components/Settings";
 import Subscribe from "./components/Subscribe";
 import Queue from "./components/Queue";
-import WebSocketAdapter from './components/WebSocketAdapter';
+import WebSocketAdapter from "./components/WebSocketAdapter";
 import Arrival from "./components/Arrival";
 import restRequest from "./components/Rest";
-import GoodModal from "./components/GoodModal"
+import GoodModal from "./components/GoodModal";
 import Barcodes from "./components/Barcodes";
 import Goods from "./components/Goods";
 import {Config} from "./components/Settings/Config";
@@ -29,16 +29,51 @@ import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
 
 class App extends Component {
+  state = {
+    barcode: "",
+    good: {},
+  };
 
-    state = {
-        barcode: '',
-        good: {},
-    }
+  componentDidMount() {
+    document.addEventListener("keydown", this.handleKeyPress);
+  }
 
-    componentDidMount() {
+  closeGoodModal = () => this.setState({ good: {} });
 
-        document.addEventListener('keydown', this.handleKeyPress);
+  handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      if (
+        ["112116", "103100"].includes(this.state.barcode.substr(0, 6)) ||
+        this.state.barcode.length === 15
+      ) {
+        e.preventDefault();
 
+        restRequest("goods/" + this.state.barcode).then((data) => {
+          if (data.ok) {
+            data.body.barcode = this.state.barcode;
+            this.setState({
+              good: data.body,
+            });
+          }
+        });
+      } else if (
+        this.state.barcode.substr(0, 1) === "R" &&
+        this.state.barcode.length === 13
+      ) {
+        e.preventDefault();
+
+        let stock_id = +this.state.barcode.substr(1, 3);
+        let rem_id = +this.state.barcode.substr(4, 8);
+
+        // console.log('stock_id', stock_id)
+        // console.log('rem_id', rem_id)
+      }
+      this.setState({ barcode: "" });
+    } else {
+      let newChar = String.fromCharCode(e.keyCode);
+      if (newChar === "R") this.setState({ barcode: newChar });
+      else if (e.keyCode > 47 && e.keyCode < 58)
+        this.setState({ barcode: this.state.barcode + newChar });
     }
 
     closeGoodModal = () => this.setState({good: {}});
@@ -139,12 +174,17 @@ class App extends Component {
                     good={this.state.good}
                     close={this.closeGoodModal}
                 />
-                <WebSocketAdapter/>
-
-            </>
-        )
-    }
-
+              )}
+            />
+            <Route path="/integration/sms_ru" component={IntegrationSmsRu} />
+          </div>
+        </div>
+        <Authmodal />
+        <GoodModal good={this.state.good} close={this.closeGoodModal} />
+        <WebSocketAdapter />
+      </>
+    );
+  }
 }
 
-export default connect(state => (state))(App);
+export default connect((state) => state)(App);

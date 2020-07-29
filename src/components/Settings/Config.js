@@ -1,417 +1,325 @@
 import React from "react";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+import {
+  closeSnackbar,
+  enqueueSnackbar,
+  upd_app,
+} from "../../actions/actionCreator";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  Collapse,
+  CardActions,
+  TextField,
+  FormControl,
+  InputAdornment,
+  Typography,
+  FormControlLabel,
+  Checkbox,
+  Grid,
+} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 
+const useStyles = makeStyles({
+  card: {
+    marginBottom: "10px",
+  },
+  cardHeader: {
+    backgroundColor: "#F7F7F7",
+    width: "100%",
+    borderBottom: "1px solid #e9ecef",
+  },
 
+  adornment: {
+    backgroundColor: "#E9ECEF",
+    color: "black",
+    height: "100%",
+    width: "50px",
+    textAlign: "center",
+    padding: 10,
+  },
+});
 // TODO переделать компонент на функциональный,
 // избавиться от classname и переписать используя @material-ui
 // сократить и оптимизировать код
 // пожалуйста, работайте в отдельной ветке гита
 
-export const Config = () => {
+const mapDispatchToProps = (dispatch) =>
+  bindActionCreators(
+    {
+      enqueueSnackbar,
+      closeSnackbar,
+      upd_app,
+    },
+    dispatch
+  );
 
-    return '';
+const SimpleCard = ({ title, children }) => {
+  const [expanded, setExpanded] = React.useState(true);
 
-    return <form id="form_app_settings">
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+  };
+  const classes = useStyles();
 
-        <div className="card border-light mb-3">
+  return (
+    <Card className={classes.card}>
+      <CardActions
+        onClick={handleExpandClick}
+        aria-expanded={expanded}
+        style={{ padding: 0 }}
+      >
+        <CardHeader
+          title={title}
+          className={classes.cardHeader}
+          titleTypographyProps={{ variant: "subtitle1" }}
+        />
+      </CardActions>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <CardContent>
+          <Grid container spacing={1}>
+            {children}
+          </Grid>
+        </CardContent>
+      </Collapse>
+    </Card>
+  );
+};
+const CustomInputWithLabel = ({ title, defVal, end, fullWidth, width }) => {
+  const classes = useStyles();
 
-            <div className="card-header" onClick={(e) => {
-                const nextDiv = e.currentTarget.nextSibling
-                nextDiv.classList.contains('hideBlock')
-                    ?  nextDiv.classList.remove('hideBlock')
-                    :  nextDiv.classList.add('hideBlock')
-            }}>
-                Ремонт
-            </div>
+  return (
+    <FormControl margin="normal">
+      <Typography variant="subtitle1" gutterBottom>
+        {title}
+      </Typography>
+      <TextField
+        defaultValue={defVal}
+        type="number"
+        InputProps={{
+          endAdornment: (
+            <InputAdornment
+              position="end"
+              variant="filled"
+              className={classes.adornment}
+            >
+              {end}
+            </InputAdornment>
+          ),
+          style: {
+            height: "30px",
+            color: "gray",
+            paddingRight: 0,
+            marginRight: 40,
+            minWidth: width ? "0" : "400px",
+            width: width,
+          },
+        }}
+        variant="outlined"
+        size="small"
+        fullWidth={fullWidth}
+      />
+    </FormControl>
+  );
+};
 
-            <div className="card-body">
+const Config = ({ app }) => {
+  const requestSettings = () => {
+    //ф-я отсуствовала я добавил заглушку чтобы приложение не крашилось
+  };
+  const [state, setState] = React.useState({
+    checkedA: false,
+    checkedB: false,
+    checkedF: false,
+    checkedG: false,
+  });
+  const handleChange = (event) => {
+    setState({ ...state, [event.target.name]: event.target.checked });
+  };
+  return (
+    <>
+      <form id="form_app_settings">
+        <SimpleCard title="Ремонт">
+          <Grid item md xs={4} sm={3}>
+            <CustomInputWithLabel
+              title="Стоимость ремонта по умолчанию"
+              defVal={800}
+              end="RUR"
+            />
+            <CustomInputWithLabel
+              title="Оценочная стоимость оборудования"
+              defVal={100}
+              end="RUR"
+            />
+            <CustomInputWithLabel
+              title="Срок гарантии"
+              defVal={30}
+              end="дней"
+            />
+            <CustomInputWithLabel
+              title="Срок бесплатного хранения после ремонта"
+              defVal={60}
+              end="дней"
+            />
+            <CustomInputWithLabel title="Предоплата" defVal={0} end="RUR" />
+            <CustomInputWithLabel title="Срок ремонта" defVal={60} end="дней" />
+          </Grid>
+        </SimpleCard>
+        <SimpleCard title="Залог">
+          <Grid item md xs={4} sm={3}>
+            <CustomInputWithLabel
+              title="Минимальная переплата за залог"
+              defVal={500}
+              end="RUR"
+            />
+            <CustomInputWithLabel
+              title="Ежедневный процент за залог"
+              defVal={5}
+              end="5"
+            />
+          </Grid>
+        </SimpleCard>
+        <SimpleCard title="Зарплата">
+          <Grid item>
+            <Typography variant="h6">За заказы</Typography>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={state.checkedA}
+                  onChange={handleChange}
+                  name="checkedA"
+                  color="primary"
+                />
+              }
+              label="Включить зарплату за приемку в себестоимость заказа и считать непосредственно тому кто принял"
+            />
+            <CustomInputWithLabel
+              title="Минимальная сумма с которой считать что заказ выгодный и с него платить за приемку"
+              defVal={800}
+              end="RUR"
+              fullWidth={true}
+            />
+            <br />
+            <CustomInputWithLabel
+              title="   Cумма за прием заказа (по точкам)"
+              defVal={0}
+              end="RUR"
+            />
 
-                <div className="form-row">
-                    <div className="form-group col">
-                        <label htmlFor="rem_sum">Стоимость ремонта по умолчанию</label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.rem_sum}
-                                   onChange={e => this.requestSettings('changeConfig', '', 'rem_sum', e.target.value)}
-                            />
-                            <div className="input-group-append">
-                                <span className="input-group-text">RUR</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="form-group col">
-                        <label htmlFor="rem_assessed_value">Оценочная стоимость оборудования</label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.rem_assessed_value}
-                                   onChange={e => this.requestSettings('changeConfig', '', 'rem_assessed_value', e.target.value)}
-                            />
-                            <div className="input-group-append">
-                                <span className="input-group-text">RUR</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="form-group col">
-                        <label htmlFor="remont_warranty">Срок гарантии</label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.remont_warranty}
-                                   onChange={e => this.requestSettings('changeConfig', '', 'remont_warranty', e.target.value)}
-                            />
-                            <div className="input-group-append"><span className="input-group-text">дней</span>
-                            </div>
+            <CustomInputWithLabel
+              title="Сумма за внесение запчастей"
+              defVal={150}
+              end="%"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={state.checkedB}
+                  onChange={handleChange}
+                  name="checkedB"
+                  color="primary"
+                />
+              }
+              label="Включить зарплату за закрытие в себестоимость заказа и начислить тому кто непосредственно закрыл"
+            />
+            <br />
+            <CustomInputWithLabel
+              title="Процент за закрытие заказа"
+              defVal={2}
+              end="%"
+            />
+            <CustomInputWithLabel
+              title="Процент мастеру за выполнение заказа"
+              defVal={35}
+              end="%"
+            />
+            <CustomInputWithLabel
+              title="Уменьшение процента мастеру за выполнение заказа при повторном обращении по гарантии"
+              defVal={2}
+              end="%"
+              fullWidth={true}
+            />
 
-                        </div>
-                    </div>
-                </div>
-                <div className="form-row">
-                    <div className="form-group col">
-                        <label htmlFor="free_save">Срок бесплатного хранения после ремонта</label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.free_save}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'free_save', e.target.value)}
-                            />
-                            <div className="input-group-append"><span className="input-group-text">дней</span>
-                            </div>
+            <Typography variant="h6">За товары</Typography>
 
-                        </div>
-                    </div>
-                    <div className="form-group col">
-                        <label htmlFor="prepayment">Предоплата</label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.prepayment}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'prepayment', e.target.value)}
-                            />
-                            <div className="input-group-append"><span
-                                className="input-group-text">RUR</span></div>
+            <CustomInputWithLabel
+              width={220}
+              title="За покупку техники"
+              defVal={50}
+              end="RUR"
+            />
+            <CustomInputWithLabel
+              width={220}
+              title="За залог"
+              defVal={75}
+              end="RUR"
+            />
 
-                        </div>
-                    </div>
-                    <div className="form-group col">
-                        <label htmlFor="time_remont">Срок ремонта</label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.time_remont}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'time_remont', e.target.value)}
-                            />
-                            <div className="input-group-append"><span className="input-group-text">дней</span>
-                            </div>
+            <CustomInputWithLabel
+              width={220}
+              title="За продажу техники"
+              defVal={25}
+              end="%"
+            />
 
-                        </div>
-                    </div>
-                </div>
+            <CustomInputWithLabel
+              width={220}
+              title="За продажу аксессуаров"
+              defVal={25}
+              end="%"
+            />
+            <Typography variant="h6">За выход</Typography>
+            <CustomInputWithLabel
+              title="Минимальная зарпалата продавца-приемщика в день"
+              defVal={200}
+              end="RUR"
+            />
+          </Grid>
+        </SimpleCard>
 
-            </div>
+        <SimpleCard title="Локация">
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={state.checkedC}
+                onChange={handleChange}
+                name="checkedC"
+                color="primary"
+              />
+            }
+            label="Привязать сотрудника к точке"
+          />
 
-        </div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={state.checkedD}
+                onChange={handleChange}
+                name="checkedD"
+                color="primary"
+              />
+            }
+            label="Проверять локацию при авторизации на точке"
+          />
+        </SimpleCard>
 
-        <div className="card border-light mb-3">
+        <SimpleCard title="Гарантийные обязательства">
+          <CustomInputWithLabel
+            title="Гарантийный срок при продаже техники"
+            defVal={14}
+            end="дней"
+          />
+          <CustomInputWithLabel
+            title="Гарантийный срок при продаже остальных товаров"
+            defVal={14}
+            end="дней"
+          />
+        </SimpleCard>
+      </form>
+    </>
+  );
+};
 
-            <div className="card-header" onClick={(e) => {
-                const nextDiv = e.currentTarget.nextSibling
-                nextDiv.classList.contains('hideBlock')
-                    ?  nextDiv.classList.remove('hideBlock')
-                    :  nextDiv.classList.add('hideBlock')
-            }}>
-                Залог
-            </div>
-
-            <div className="card-body">
-                <div className="form-row">
-                    <div className="form-group col">
-                        <label htmlFor="zalog_min_sum">Минимальная переплата за залог</label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zalog_min_sum}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zalog_min_sum', e.target.value)}
-                            />
-                            <div className="input-group-append"><span
-                                className="input-group-text">RUR</span></div>
-
-                        </div>
-                    </div>
-
-                    <div className="form-group col">
-                        <label htmlFor="zalog_day_percent">Ежедневный процент за залог</label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zalog_day_percent}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zalog_day_percent', e.target.value)}
-                            />
-                            <div className="input-group-append"><span className="input-group-text">%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div className="card border-light mb-3">
-            <div className="card-header" onClick={(e) => {
-                const nextDiv = e.currentTarget.nextSibling
-                nextDiv.classList.contains('hideBlock')
-                    ?  nextDiv.classList.remove('hideBlock')
-                    :  nextDiv.classList.add('hideBlock')
-            }}>
-                Зарплата
-            </div>
-            <div className="card-body">
-
-                <h5 className="card-title roll">За заказы</h5>
-                <div className="form-row">
-
-                    <div className="form-group col-12">
-                        <div className="form-group form-check">
-                            <input type="checkbox" className="form-check-input"
-                                   defaultValue={this.props.app.config.zp_for_take}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_for_take', e.target.checked)}
-                            />
-                            <label htmlFor="zp_for_take">
-                                Включить зарплату за приемку в себестоимость заказа и считать непосредственно тому
-                                кто принял
-                            </label>
-                        </div>
-                    </div>
-
-                    <div className="form-group col-12">
-                        <label htmlFor="zp_take_min_sum">
-                            Минимальная сумма с которой считать что заказ выгодный и с него платить за приемку
-                        </label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zp_take_min_sum}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_take_min_sum', e.target.value)}
-                            />
-                            <div className="input-group-append"><span
-                                className="input-group-text">RUR</span></div>
-
-                        </div>
-                    </div>
-
-                    <div className="col-12">Cумма за прием заказа (по точкам)</div>
-
-                    <div className="form-group col-12">
-                        <label htmlFor="zp_add_part">Сумма за внесение запчастей</label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zp_add_part}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_add_part', e.target.value)}
-                            />
-                            <div className="input-group-append"><span
-                                className="input-group-text">RUR</span></div>
-                        </div>
-                    </div>
-
-                    <div className="form-group col-6">
-                        <div className="form-group form-check">
-                            <input type="checkbox" className="form-check-input"
-                                   defaultValue={this.props.app.config.zp_for_checkout}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_for_checkout', e.target.checked)}
-                            />
-                            <label htmlFor="zp_for_checkout">
-                                Включить зарплату за закрытие в себестоимость заказа и начислить тому кто
-                                непосредственно закрыл
-                            </label>
-                        </div>
-                    </div>
-
-                    <div className="form-group col-6">
-                        <label htmlFor="zp_saler_per">
-                            Процент за закрытие заказа
-                        </label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zp_saler_per}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_saler_per', e.target.value)}
-                            />
-                            <div className="input-group-append"><span className="input-group-text">%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="form-group col-12">
-                        <label htmlFor="zp_master_per">
-                            Процент мастеру за выполнение заказа
-                        </label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zp_master_per}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_master_per', e.target.value)}
-                            />
-                            <div className="input-group-append"><span className="input-group-text">%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="form-group col-12">
-                        <label htmlFor="zp_repeat_per">
-                            Уменьшение процента мастеру за выполнение заказа при повторном обращении по гарантии
-                        </label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zp_repeat_per}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_repeat_per', e.target.value)}
-                            />
-                            <div className="input-group-append"><span className="input-group-text">%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <h5 className="card-title roll">За товары</h5>
-                <div className="form-row">
-                    <div className="form-group col-auto">
-                        <label htmlFor="zp_salary_buy">
-                            За покупку техники
-                        </label>
-                        <div className="input-group input-group-sm">
-                            <input type="text" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zp_salary_buy}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_salary_buy', e.target.value)}
-                            />
-                            <div className="input-group-append"><span
-                                className="input-group-text">RUR</span></div>
-                        </div>
-                    </div>
-
-                    <div className="form-group col-auto">
-                        <label htmlFor="zp_salary_zalog">
-                            За залог
-                        </label>
-                        <div className="input-group input-group-sm">
-                            <input type="text" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zp_salary_zalog}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_salary_zalog', e.target.value)}
-                            />
-                            <div className="input-group-append"><span
-                                className="input-group-text">RUR</span></div>
-
-                        </div>
-                    </div>
-
-                    <div className="form-group col-auto">
-                        <label htmlFor="zp_salary_sell">За продажу техники</label>
-                        <div className="input-group input-group-sm">
-                            <input type="text" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zp_salary_sell}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_salary_sell', e.target.value)}
-                            />
-                            <div className="input-group-append"><span
-                                className="input-group-text">%</span></div>
-
-                        </div>
-                    </div>
-
-                    <div className="form-group col-auto">
-                        <label htmlFor="zp_salary_goods">За продажу аксессуаров</label>
-                        <div className="input-group input-group-sm">
-                            <input type="text" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zp_salary_goods}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_salary_goods', e.target.value)}
-                            />
-                            <div className="input-group-append"><span
-                                className="input-group-text">%</span></div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <h5 className="card-title roll">За выход</h5>
-                <div className="form-row">
-                    <div className="form-group col-12">
-                        <label htmlFor="zp_daily_min">Минимальная зарплата продавца-приемщика в день</label>
-                        <div className="input-group input-group-sm">
-                            <input type="text" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.zp_daily_min}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'zp_daily_min', e.target.value)}
-                            />
-                            <div className="input-group-append"><span
-                                className="input-group-text">RUR</span></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <div className="card border-light mb-3">
-            <div className="card-header" onClick={(e) => {
-                const nextDiv = e.currentTarget.nextSibling
-                nextDiv.classList.contains('hideBlock')
-                    ?  nextDiv.classList.remove('hideBlock')
-                    :  nextDiv.classList.add('hideBlock')
-            }}>
-                Локация
-            </div>
-            <div className="card-body">
-                <div className="form-row">
-                    <div className="form-group col-12">
-                        <div className="form-group form-check">
-                            <input type="checkbox" className="form-check-input"
-                                   defaultValue={this.props.app.config.one_point}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'one_point', e.target.checked)}
-                            />
-                            <label htmlFor="one_point">Привязать сотрудника к точке</label>
-                        </div>
-                    </div>
-                    <div className="form-group col-12">
-                        <div className="form-group form-check">
-                            <input type="checkbox" className="form-check-input"
-                                   defaultValue={this.props.app.config.location_check}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'location_check', e.target.checked)}
-                            />
-                            <label htmlFor="location_check">Проверять локацию при авторизации на точке</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div className="card border-light mb-3">
-            <div className="card-header" onClick={(e) => {
-                const nextDiv = e.currentTarget.nextSibling
-                nextDiv.classList.contains('hideBlock')
-                    ?  nextDiv.classList.remove('hideBlock')
-                    :  nextDiv.classList.add('hideBlock')
-            }}>
-                Гарантийные обязательства
-            </div>
-            <div className="card-body">
-                <div className="form-row">
-                    <div className="form-group col-auto">
-                        <label htmlFor="goods_phones_warranty">Гарантийный срок при продаже техники</label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.goods_phones_warranty}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'goods_phones_warranty', e.target.value)}
-                            />
-                            <div className="input-group-append"><span className="input-group-text">дней</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="form-group col-auto">
-                        <label htmlFor="goods_accessories_warranty">
-                            Гарантийный срок при продаже остальных товаров
-                        </label>
-                        <div className="input-group input-group-sm">
-                            <input type="number" className="form-control form-control-sm"
-                                   defaultValue={this.props.app.config.goods_accessories_warranty}
-                                   onChange={(e) => this.requestSettings('changeConfig', '', 'goods_accessories_warranty', e.target.value)}
-                            />
-                            <div className="input-group-append"><span className="input-group-text">дней</span>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-    </form>
-
-}
+export default connect((state) => state, mapDispatchToProps)(Config);
