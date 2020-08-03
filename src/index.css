@@ -1,138 +1,144 @@
 #root {
-  background: #faf9de;
+    background: #faf9de;
 }
 
 body {
-  overflow-x: hidden;
+    overflow-x: hidden;
 }
 
 body.modal-open {
-  width: 100%;
+    width: 100%;
 }
 
 #menu-toggle {
-  background-color: #e0e0e0;
+    background-color: #e0e0e0;
 }
 
 #sidebar-wrapper {
-  min-height: 100vh;
-  margin-left: -15rem;
-  -webkit-transition: margin 0.25s ease-out;
-  -moz-transition: margin 0.25s ease-out;
-  -o-transition: margin 0.25s ease-out;
-  transition: margin 0.25s ease-out;
+    text-align: center;
+    min-height: 100vh;
+    margin-left: -15rem;
+    -webkit-transition: margin 0.25s ease-out;
+    -moz-transition: margin 0.25s ease-out;
+    -o-transition: margin 0.25s ease-out;
+    transition: margin 0.25s ease-out;
 }
 
 #sidebar-wrapper .list-group {
-  width: 15rem;
+    width: 15rem;
 }
 
 #page-content-wrapper {
-  min-width: 100vw;
+    min-width: 100vw;
 }
 
 #wrapper.toggled #sidebar-wrapper {
-  margin-left: 0;
+    margin-left: 0;
 }
 
 @media (min-width: 768px) {
-  #sidebar-wrapper {
-    margin-left: 0;
-    text-align: center;
-  }
+    #sidebar-wrapper {
+        margin-left: 0;
+        text-align: center;
+    }
 
-  #page-content-wrapper {
-    min-width: 0;
-    width: 100%;
-  }
+    #page-content-wrapper {
+        min-width: 0;
+        width: 100%;
+    }
 
-  #wrapper.toggled #sidebar-wrapper {
-    margin-left: -15rem;
-  }
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: -15rem;
+    }
 }
 
 @media print {
-  @page {
-    padding: 0;
-    margin: 0;
-  }
+    @page {
+        padding: 0;
+        margin: 0;
+    }
 }
 
-.sb-drp:hover {
-  font-weight: bold;
+.link_items:hover {
+    font-weight: bold;
 }
+.link_items {
+}
+.List-item > .link_items {
+    opacity: 100%;
+    height: 38px;
+    transition: height 150ms;
+}
+
+.hideBlock > .link_items {
+    opacity: 0%;
+    height: 0px;
+    transition: height 150ms;
+}
+
 
 .btn-l {
-  color: white !important;
-  font-family: "Roboto", sans-serif !important;
-  font-size: medium !important;
-  font-weight: bold !important;
-  text-transform: none !important;
+    color: white !important;
+    font-family: "Roboto", sans-serif !important;
+    font-size: medium !important;
+    font-weight: bold !important;
+    text-transform: none !important;
 }
 
 #page-content-wrapper .btn:hover {
-  transform: scale(1.01);
+    transform: scale(1.01);
 }
 
 #sidebaredivider {
-  border-width: 0 0 0 2px;
-  border-style: solid;
-  color: #ff8cb0;
+    border-width: 0 0 0 2px;
+    border-style: solid;
+    color: #ff8cb0;
 }
 
 .circular_progress {
-  position: fixed;
-  z-index: 2000;
-  margin-left: 45%;
-  margin-top: 10rem;
+    position: fixed;
+    z-index: 2000;
+    margin-left: 45%;
+    margin-top: 10rem;
 }
 
 .modal-body > .md-form:focus {
-  transform: translateY(-20px);
-  color: blue;
+    transform: translateY(-20px);
+    color: blue;
 }
 
 label.active {
-  transform: translateY(-14px) scale(0.8);
-  font-size: 1rem;
+    transform: translateY(-14px) scale(0.8);
+    font-size: 1rem;
 }
+
 label.MuiInputLabel-shrink {
-  transform: translateY(-8px) scale(0.8) !important;
-  font-size: 1rem !important;
+    transform: translateY(-8px) scale(0.8) !important;
+    font-size: 1rem !important;
 }
 
 .imgdiv {
-  margin-left: 10em;
+    margin-left: 10em;
 }
 
 .point-name {
-  font-size: 45px;
+    font-size: 45px;
 }
 
 .addfab {
-  position: fixed !important;
-  z-index: 2000;
-  margin-left: 45% !important;
-  bottom: 5% !important;
+    position: fixed !important;
+    z-index: 2000;
+    margin-left: 45% !important;
+    bottom: 5% !important;
 }
 
 .addfab2 {
-  position: fixed !important;
-  z-index: 2000;
-  margin-left: 35% !important;
-  bottom: 5% !important;
+    position: fixed !important;
+    z-index: 2000;
+    margin-left: 35% !important;
+    bottom: 5% !important;
 }
 
 tr:hover {
-  background-color: rgba(32, 252, 178, 0.11);
-}
-
-.List-item {
-  transition: all 0.5s;
-  height: 100%;
-}
-
-.hideBlock {
-  height: 0;
-  display: none;
+    background-color: rgba(32, 252, 178, 0.11);
 }

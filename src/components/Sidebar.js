@@ -1,8 +1,9 @@
 import React, {Component} from "react";
-import {MDBBtn, MDBNavLink} from "mdbreact";
-import {siteMap, permission} from "./SiteMap";
-
 import {connect} from "react-redux";
+import {Link} from "react-router-dom";
+
+import {siteMap, permission} from "./SiteMap";
+import Button from "@material-ui/core/Button";
 
 class Sidebar extends Component {
 
@@ -28,7 +29,7 @@ class Sidebar extends Component {
     render() {
 
         return <div className="bg-light border-right d-print-none" id="sidebar-wrapper">
-            <div className="list-group list-group-flush mt-1">
+            <div className="list-group  mt-2">
 
                 {[
                     {name: 'Услуги', arr: [1, 2, 3]},
@@ -38,19 +39,32 @@ class Sidebar extends Component {
                     {name: 'Настройки', arr: [41, 42, 43, 46, 47, 48]},
                     {name: 'Интеграции', arr: [51, 52]},
                 ].map(v => <div key={'sidebararrkey' + v.name}>
-                        <MDBBtn className="list-group-item list-group-item-action bg-light"
-                                onClick={event => this.nextDivToggle(event)}>
+                        <Button
+                            style={{
+                                marginRight: -14,
+                                width: '100%',
+                                marginBottom: 10,
+                                backgroundColor: '#2bbbad',
+                                color: 'white',
+                            }}
+                            size="large"
+                            onClick={event => this.nextDivToggle(event)}>
                             {v.name}
-                        </MDBBtn>
+                        </Button>
                         <div className="List-item">
                             {v.arr.map(id => {
                                     let obj = siteMap.find(v => v.id === id);
-                                    return obj ? permission(id, this.props) ?
-                                        <MDBNavLink className="sb-drp" to={'/' + obj.path}
-                                                    key={"mdblnksdbkey" + id}>
-                                            {obj.text}
-                                        </MDBNavLink> : ''
-                                        : ''
+                                    return obj
+                                        ? permission(id, this.props)
+                                            ? <div className="link_items">
+                                                <Link to={'/' + obj.path}
+                                                      key={"mdblnksdbkey" + id}
+                                                >
+                                                    {obj.text}
+                                                </Link>
+                                            </div>
+                                            : null
+                                        : null
                                 }
                             )}
                         </div>
