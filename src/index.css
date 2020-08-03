@@ -15,6 +15,7 @@ body.modal-open {
 }
 
 #sidebar-wrapper {
+    width: 15rem;
     text-align: center;
     min-height: 100vh;
     margin-left: -15rem;
@@ -24,9 +25,8 @@ body.modal-open {
     transition: margin 0.25s ease-out;
 }
 
-#sidebar-wrapper .list-group {
-    width: 15rem;
-}
+/*#sidebar-wrapper .list-group {*/
+/*}*/
 
 #page-content-wrapper {
     min-width: 100vw;
@@ -62,8 +62,7 @@ body.modal-open {
 .link_items:hover {
     font-weight: bold;
 }
-.link_items {
-}
+
 .List-item > .link_items {
     opacity: 100%;
     height: 38px;
@@ -86,7 +85,7 @@ body.modal-open {
 }
 
 #page-content-wrapper .btn:hover {
-    transform: scale(1.01);
+    transform: scale(1.02);
 }
 
 #sidebaredivider {

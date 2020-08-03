@@ -12,11 +12,13 @@ import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 
 import restRequest from "./Rest";
 import Field from "./Field";
+import ReferalSelect from "./ReferalSelect";
 
 
 const types = {
     birthday: 'date',
     doc_date: 'date',
+    referal_id: 'referal_id',
 }
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -83,18 +85,18 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         return this.state.customer ?
             <Grid container component={Paper} spacing={1} justify="space-around">
 
-                <Grid container
+                <Grid container="true"
                       style={{margin: '1rem'}}
                       direction="row"
                       justify="space-between"
                 >
-                    <Grid item>
+                    {/*<Grid >*/}
                         {/*<Typography variant="h6">*/}
                         {/*    {this.state.customer.id > 0 ?*/}
                         {/*        '#' + this.state.customer.id :*/}
                         {/*        'Физ. лицо'}*/}
                         {/*</Typography>*/}
-                    </Grid>
+                    {/*</Grid>*/}
                     <Grid item>
                         <Tooltip title={
                             this.state.isDetails
@@ -118,8 +120,14 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                         this.props.app.fields.allElements
                             .filter(field => field.index === 'customer' && field.is_valid)
                             .filter(field => this.state.isDetails || ['fio', 'phone_number'].includes(field.name))
-                            .map(field => <Field
-                                key={'customerfieldskey' + field.name}
+                            .map(field => field.name === 'referal_id'
+                                ? <ReferalSelect
+                                    key={'customerfieldskey' + field.name}
+                                    value={this.state.customer[field.name]}
+                                    onChange={e => this.handleChange(field.name, e.target.value)}
+                                />
+                                : <Field
+                                key={'customerfieldskey' + field.name + field.index + field.value}
                                 type={types[field.name] || 'text'}
                                 label={field.value}
                                 value={this.state.customer[field.name]}

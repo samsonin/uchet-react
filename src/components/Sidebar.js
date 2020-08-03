@@ -2,22 +2,36 @@ import React, {Component} from "react";
 import {connect} from "react-redux";
 import {Link} from "react-router-dom";
 
-import {siteMap, permission} from "./SiteMap";
+import {makeStyles} from '@material-ui/core/styles';
 import Button from "@material-ui/core/Button";
+
+import {siteMap, permission} from "./SiteMap";
+
+
+const useStyles = makeStyles({
+    list: {
+        width: '15rem',
+        marginTop: '1rem',
+    },
+    button: {
+        marginRight: -14,
+        width: '100%',
+        marginBottom: 10,
+        backgroundColor: '#2bbbad',
+        color: 'white',
+    },
+});
 
 const Sidebar = props => {
 
-    const hideAll = () => {
-        document.querySelectorAll(".List-item")
-            .forEach(item => item.classList.add('hideBlock'));
-    }
+    const classes = useStyles();
 
-    const nextDivToggle = e => {
-        const nextDiv = e.currentTarget.nextSibling;
+    const nextDivToggle = nextDiv => {
 
         if (nextDiv) {
             if (nextDiv.classList.contains('hideBlock')) {
-                hideAll()
+                document.querySelectorAll(".List-item")
+                    .forEach(item => item.classList.add('hideBlock'));
                 nextDiv.classList.remove('hideBlock')
             } else {
                 nextDiv.classList.add('hideBlock')
@@ -26,8 +40,9 @@ const Sidebar = props => {
 
     };
 
-    return <div className="bg-light border-right d-print-none" id="sidebar-wrapper">
-        <div className="list-group mt-2">
+    return <div id="sidebar-wrapper"
+                className="bg-light border-right d-print-none">
+        <div className={classes.list}>
 
             {[
                 {name: 'Услуги', arr: [1, 2, 3]},
@@ -38,15 +53,9 @@ const Sidebar = props => {
                 {name: 'Интеграции', arr: [51, 52]},
             ].map(v => <div key={'sidebararrkey' + v.name}>
                     <Button
-                        style={{
-                            marginRight: -14,
-                            width: '100%',
-                            marginBottom: 10,
-                            backgroundColor: '#2bbbad',
-                            color: 'white',
-                        }}
+                        className={classes.button}
                         size="large"
-                        onClick={event => nextDivToggle(event)}>
+                        onClick={e => nextDivToggle(e.currentTarget.nextSibling)}>
                         {v.name}
                     </Button>
                     <div className="List-item hideBlock">
@@ -54,9 +63,10 @@ const Sidebar = props => {
                                 let obj = siteMap.find(v => v.id === id);
                                 return obj
                                     ? permission(id, props)
-                                        ? <div className="link_items">
+                                        ? <div className="link_items"
+                                               key={"mdblnksdbkey" + id}
+                                        >
                                             <Link to={'/' + obj.path}
-                                                  key={"mdblnksdbkey" + id}
                                             >
                                                 {obj.text}
                                             </Link>
