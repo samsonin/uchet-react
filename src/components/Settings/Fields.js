@@ -57,6 +57,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                 fields,
                 systemFieldsHandle: 0,
             })
+            return v;
         })
 
     }

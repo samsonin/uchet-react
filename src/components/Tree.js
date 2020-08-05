@@ -50,6 +50,7 @@ export default function ControlledTreeView(props) {
                 childrens.push(newChild);
 
             }
+            return v;
 
         })
         return childrens;

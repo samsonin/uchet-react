@@ -8,10 +8,10 @@ export default function Field(props) {
             width: '100%',
             padding: '1rem',
         }}
-        type={ props.type }
-        label={ props.label }
-        value={ props.value }
-        onChange={ props.onChange }
+        type={props.type}
+        label={props.label}
+        value={props.value}
+        onChange={props.onChange}
     />
 
 }

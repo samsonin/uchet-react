@@ -5,7 +5,7 @@ import {connect} from "react-redux";
 import "./index.css";
 import Header from "./components/Header";
 import Customers from "./components/Customers";
-import Customer from "./components/Customer";
+import {Customer} from "./components/common/Customer";
 import Providers from "./components/Providers";
 import Sidebar from "./components/Sidebar";
 import Main from "./components/Main";
