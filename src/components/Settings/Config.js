@@ -41,10 +41,6 @@ const useStyles = makeStyles({
     padding: 10,
   },
 });
-// TODO переделать компонент на функциональный,
-// избавиться от classname и переписать используя @material-ui
-// сократить и оптимизировать код
-// пожалуйста, работайте в отдельной ветке гита
 
 const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
