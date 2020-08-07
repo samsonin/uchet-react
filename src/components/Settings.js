@@ -89,9 +89,9 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         }
 
       });
-  };
+  }
 
-  validateWait = e => {
+  validateWait = () => {
     if (authControl.isValid("#add-employee")) {
       this.setState({
         isCanAddEmployee: authControl.validate_phone_number("#add-employee")

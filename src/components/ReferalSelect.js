@@ -29,7 +29,7 @@ const ReferalSelect = props => {
           </MenuItem>)}
       </Select>
     </FormControl>
-    : ''
+    : null
 
 }
 
