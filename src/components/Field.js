@@ -1,7 +1,7 @@
 import React from 'react';
 import TextField from "@material-ui/core/TextField/TextField";
 
-export default function Field(props) {
+export default function (props) {
 
     return <TextField
         style={{
