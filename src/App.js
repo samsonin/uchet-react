@@ -27,6 +27,7 @@ import Docs from "./components/Settings/Docs";
 import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
+import {Records} from "./components/Records";
 
 class App extends Component {
     state = {
@@ -102,6 +103,7 @@ class App extends Component {
                     <Route exact path="/customers" component={Customers}/>
                     <Route exact path="/customers/:id" component={Customer}/>
                     <Route path="/providers" component={Providers}/>
+                    <Route path="/call_records" component={Records}/>
                     {/*<Route path="/orders" component={Orders}/>*/}
                     {/*<Route path="/order" component={Order}/>*/}
                     <Route path="/queue" component={Queue}/>

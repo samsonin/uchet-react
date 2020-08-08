@@ -1,30 +1,33 @@
-import {Button, Grid, Paper, Typography} from "@material-ui/core";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ReferalSelect from "../ReferalSelect";
 import Field from "../Field";
 import React, {useState} from "react";
 import {connect} from "react-redux";
-import {bindActionCreators} from "redux";
-import {enqueueSnackbar, upd_app} from "../../actions/actionCreator";
-import styled from "@material-ui/core/styles/styled";
 
+import {makeStyles} from "@material-ui/core/styles";
+import {Button, Grid, Paper} from "@material-ui/core";
+import Tooltip from "@material-ui/core/Tooltip/Tooltip";
+import IconButton from "@material-ui/core/IconButton";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
-const MyButton = styled(Button)({
-  borderRadius: 3,
-  margin: '1rem'
-});
 
 const types = {
   birthday: 'date',
   doc_date: 'date',
 }
 
+const useStyles = makeStyles(theme => ({
+  button: {
+    borderRadius: 3,
+    margin: '1rem'
+  }
+}));
+
 const View = props => {
 
   const [isDetails, setDetails] = useState(false)
+
+  const classes = useStyles();
 
   return <Grid container component={Paper} spacing={1} justify="space-around">
 
@@ -71,37 +74,42 @@ const View = props => {
             />)
       }
     </Grid>
+
     <Grid item>
-      <MyButton
+      <Button
+        className={classes.button}
         variant="contained"
-        color="secondary"
         size="small"
+        color="secondary"
         onClick={() => props.reset()}
         disabled={props.disabled}
       >
         Отмена
-      </MyButton>
-      {props.customer
-        ? <MyButton
+      </Button>
+      {props.customer.id === undefined
+        ? <Button
+          className={classes.button}
           variant="contained"
-          color="primary"
           size="small"
+          color="primary"
           onClick={() => props.create()}
           disabled={props.disabled}
         >
           Создать
-        </MyButton>
-        : <MyButton
+        </Button>
+        : <Button
+          className={classes.button}
           variant="contained"
-          color="primary"
           size="small"
+          color="primary"
           onClick={() => props.update()}
           disabled={props.disabled}
         >
           Сохранить
-        </MyButton>
+        </Button>
       }
     </Grid>
+
   </Grid>
 
 }
