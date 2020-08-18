@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+
 import Grid from "@material-ui/core/Grid";
 import TableContainer from "@material-ui/core/TableContainer";
 import {Paper} from "@material-ui/core";
@@ -11,30 +12,48 @@ import Input from "@material-ui/core/Input/Input";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchIcon from '@material-ui/icons/Search';
 import TableBody from "@material-ui/core/TableBody";
-import CircularProgress from '@material-ui/core/CircularProgress';
+import LinearProgress from "@material-ui/core/LinearProgress";
 
 import rest from "./Rest";
-import {makeStyles} from "@material-ui/core/styles";
-import LinearProgress from "@material-ui/core/LinearProgress";
 import {Player} from "./Player";
 
+let request = false;
+let searchStr = '';
 
-export const Records = props => {
+export const Records = () => {
 
-  const [request, setRequest] = useState(false)
   const [data, setData] = useState()
 
   const handleSearch = value => {
     console.log(value)
+
+    searchStr = value;
+
+    if (!request) {
+      request = true;
+
+      rest('records?phone_number=' + value)
+        .then(res => {
+          if (res.ok) {
+            if (searchStr === value) {
+              setData(res.body);
+            } else {
+
+            }
+          }
+          request = false;
+        })
+
+    }
   }
 
   if (!request && !data) {
-    setRequest(true)
+    request = true;
 
     rest('records')
       .then(res => {
         if (res.ok) setData(res.body);
-        setRequest(false)
+        request = false;
       })
 
   }
