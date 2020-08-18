@@ -25,7 +25,6 @@ export const Records = () => {
   const [data, setData] = useState()
 
   const handleSearch = value => {
-    console.log(value)
 
     searchStr = value;
 
@@ -34,14 +33,11 @@ export const Records = () => {
 
       rest('records?phone_number=' + value)
         .then(res => {
-          if (res.ok) {
-            if (searchStr === value) {
-              setData(res.body);
-            } else {
-
-            }
-          }
           request = false;
+
+          if (res.ok) setData(res.body);
+          if (searchStr !== value) handleSearch(searchStr)
+
         })
 
     }

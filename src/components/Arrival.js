@@ -142,7 +142,7 @@ class Arrival extends React.Component {
         this.setState({newState})
     }
 
-    handleCategories = (id) => {
+    handleCategories = id => {
 
         let newState = this.state;
         if (id) newState.consignment.products[this.state.currentTr].categoryId = +id;
@@ -268,9 +268,7 @@ class Arrival extends React.Component {
                                             getOptionLabel={option => option.name}
                                             getOptionSelected={option => option.id}
                                             renderInput={
-                                                params => {
-                                                    return <TextField {...params} label="Поставщик" />
-                                                }
+                                                params => <TextField {...params} label="Поставщик" />
                                             }
                                         />
                                     </TableCell>
