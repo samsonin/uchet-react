@@ -18,11 +18,24 @@ import rest from "./Rest";
 import {Player} from "./Player";
 
 let request = false;
-let searchStr = '';
+let searchStr = false;
 
 export const Records = () => {
 
   const [data, setData] = useState()
+
+  const getTime = timestamp => {
+
+    let d = new Date(timestamp * 1000);
+
+    let h = d.getHours();
+    if (h < 10) h = '0' + h;
+
+    let m = d.getMinutes();
+    if (m < 10) m = '0' + m;
+
+    return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate() + ' ' + h + ':' + m
+  }
 
   const handleSearch = value => {
 
@@ -31,29 +44,32 @@ export const Records = () => {
     if (!request) {
       request = true;
 
-      rest('records?phone_number=' + value)
+      let url = value === ''
+        ? 'records'
+        : 'records?phone_number=' + value
+
+      rest(url)
         .then(res => {
           request = false;
 
-          if (res.ok) setData(res.body);
-          if (searchStr !== value) handleSearch(searchStr)
+          if (res.ok) setData(res.status === 200
+            ? res.body
+            : null);
+
+          if (searchStr !== value) {
+
+            console.log('searchStr', searchStr)
+            console.log('value', value)
+
+            handleSearch(searchStr)
+          }
 
         })
 
     }
   }
 
-  if (!request && !data) {
-    request = true;
-
-    rest('records')
-      .then(res => {
-        if (res.ok) setData(res.body);
-        request = false;
-      })
-
-  }
-
+  if (!request && data === undefined) handleSearch('');
 
   return <Grid conteiner>
     <Grid item>
@@ -86,7 +102,7 @@ export const Records = () => {
 
             {data
               ? data.map(v => <TableRow key={'tablerowkeyaudrecs' + v.recording_id}>
-                <TableCell>{v.created_at}</TableCell>
+                <TableCell>{getTime(v.created_at)}</TableCell>
                 <TableCell>{v.phone_number}</TableCell>
                 <TableCell>
                   <Player recordingId={v.recording_id}/>
@@ -94,7 +110,9 @@ export const Records = () => {
               </TableRow>)
               : <TableRow>
                 <TableCell colSpan={3}>
-                    <LinearProgress />
+                  {data === undefined
+                    ? <LinearProgress/>
+                    : 'Нет данных'}
                 </TableCell>
               </TableRow>
             }
