@@ -66,8 +66,7 @@ const Sidebar = props => {
                                         ? <div className="link_items"
                                                key={"mdblnksdbkey" + id}
                                         >
-                                            <Link to={'/' + obj.path}
-                                            >
+                                            <Link to={'/' + obj.path}>
                                                 {obj.text}
                                             </Link>
                                         </div>

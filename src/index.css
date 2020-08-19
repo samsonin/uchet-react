@@ -59,6 +59,10 @@ body.modal-open {
     }
 }
 
+.link_items {
+    text-decoration-color: #808000;
+}
+
 .link_items:hover {
     font-weight: bold;
 }
@@ -74,7 +78,6 @@ body.modal-open {
     height: 0px;
     transition: height 150ms;
 }
-
 
 .btn-l {
     color: white !important;

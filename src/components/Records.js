@@ -109,7 +109,7 @@ export const Records = () => {
                 </TableCell>
               </TableRow>)
               : <TableRow>
-                <TableCell colSpan={3}>
+                <TableCell colSpan={3} style={{textAlign: 'center'}}>
                   {data === undefined
                     ? <LinearProgress/>
                     : 'Нет данных'}
