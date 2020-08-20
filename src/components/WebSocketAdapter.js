@@ -106,7 +106,7 @@ class WebSocketAdapter extends Component {
       // console.error("ws " + e)
     }
 
-    return undefined;
+    return true;
 
   }
 

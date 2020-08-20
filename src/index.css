@@ -68,13 +68,13 @@ body.modal-open {
 }
 
 .List-item > .link_items {
-    opacity: 100%;
+    opacity: 1;
     height: 38px;
     transition: height 150ms;
 }
 
 .hideBlock > .link_items {
-    opacity: 0%;
+    opacity: 0;
     height: 0px;
     transition: height 150ms;
 }

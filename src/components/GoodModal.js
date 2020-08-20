@@ -26,7 +26,6 @@ import Tree from "./Tree";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 
-
 const JsBarcode = require('jsbarcode');
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -36,6 +35,20 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 let good;
+
+const woAlliases = {
+  stock_id: "Точка",
+  remid: "Заказ",
+  sale: "Продан",
+  use: "В пользовании",
+  loss: "Потерян",
+  shortrage: "Недостача",
+  remself: "Ремонт для продажи",
+  reject: "В браке",
+  refund: "Вернули",
+  t: "В транзите",
+}
+
 
 export default connect(state => (state), mapDispatchToProps)(class extends Component {
 
@@ -98,22 +111,11 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
         good = this.props.good;
 
+        console.log('good', good)
+
         if (good.id === undefined) return '';
 
         let isBarcodePrinted = this.props.auth.admin || 12 > Math.round((Date.now() - Date.parse(good.time)) / 360000);
-
-        const woAlliases = {
-            stock_id: "Точка",
-            remid: "Заказ",
-            sale: "Продан",
-            use: "В пользовании",
-            loss: "Потерян",
-            shortrage: "Недостача",
-            remself: "Ремонт для продажи",
-            reject: "В браке",
-            refund: "Вернули",
-            t: "В транзите",
-        }
 
         let wo = {
             action: 'Израсходован'
@@ -167,11 +169,11 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
         return <>
             <MDBModal
-                isOpen={good.id !== undefined}
+                isOpen={this.state.isOpen}
                 centered
             >
                 <MDBModalHeader
-                    toggle={this.props.close}
+                    // toggle={() => this.setState({isOpen: false})}
                 >
                     {'#' + good.id}
 

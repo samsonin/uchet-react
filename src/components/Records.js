@@ -16,37 +16,58 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 
 import rest from "./Rest";
 import {Player} from "./Player";
+import TextField from "@material-ui/core/TextField";
 
 let request = false;
-let searchStr = false;
+let searchPhone = false;
+
+const getStr = int => {
+  return (int < 10
+    ? '0'
+    : '') + int
+}
+
+const getTime = timestamp => {
+
+  let d = new Date(timestamp * 1000);
+
+  let month = getStr(d.getMonth() + 1);
+  let date = getStr(d.getDate());
+  let h = getStr(d.getHours());
+  let m = getStr(d.getMinutes());
+
+  return d.getFullYear() + '-' + month + '-' + date + ' ' + h + ':' + m
+}
+
+const getUrl = (searchDate, searchPhone) => {
+
+  let url = 'records?'
+  if (searchDate) url = url + 'date=' + searchDate + '&'
+  if (searchPhone) url = url + 'phone_number=' + searchPhone + '&'
+
+  return url;
+
+}
+
+let dateObj = new Date();
+let month = getStr(dateObj.getMonth() + 1)
+let date = getStr(dateObj.getDate())
+
+let searchDate = dateObj.getFullYear() + '-' + month + '-' + date
 
 export const Records = () => {
 
   const [data, setData] = useState()
 
-  const getTime = timestamp => {
-
-    let d = new Date(timestamp * 1000);
-
-    let h = d.getHours();
-    if (h < 10) h = '0' + h;
-
-    let m = d.getMinutes();
-    if (m < 10) m = '0' + m;
-
-    return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate() + ' ' + h + ':' + m
-  }
-
   const handleSearch = value => {
 
-    searchStr = value;
+    if (value.date !== undefined) searchDate = value.date
+    if (value.phone !== undefined) searchPhone = value.phone
 
     if (!request) {
       request = true;
 
-      let url = value === ''
-        ? 'records'
-        : 'records?phone_number=' + value
+      let url = getUrl(searchDate, searchPhone);
 
       rest(url)
         .then(res => {
@@ -56,12 +77,11 @@ export const Records = () => {
             ? res.body
             : null);
 
-          if (searchStr !== value) {
-
-            console.log('searchStr', searchStr)
-            console.log('value', value)
-
-            handleSearch(searchStr)
+          if (url !== getUrl(searchDate, searchPhone)) {
+            handleSearch({
+              date: searchDate,
+              phone: searchPhone,
+            })
           }
 
         })
@@ -69,7 +89,7 @@ export const Records = () => {
     }
   }
 
-  if (!request && data === undefined) handleSearch('');
+  if (!request && data === undefined) handleSearch({date: searchDate});
 
   return <Grid conteiner>
     <Grid item>
@@ -79,12 +99,19 @@ export const Records = () => {
             <TableRow>
               <TableCell style={{weight: '40%'}}>
                 <Typography variant="h5">
-                  Записи разговоров
+                  <TextField
+                    type="date"
+                    defaultValue={searchDate}
+                    onChange={e => handleSearch({date: e.target.value})}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
                 </Typography>
               </TableCell>
               <TableCell colSpan={2}>
                 <Input
-                  onChange={e => handleSearch(e.target.value)}
+                  onChange={e => handleSearch({phone: e.target.value})}
                   endAdornment={
                     <InputAdornment position="end">
                       <SearchIcon/>

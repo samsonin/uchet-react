@@ -1,45 +1,44 @@
 import React from "react";
+import {Button} from "@material-ui/core";
 
 const JsBarcode = require('jsbarcode');
 
+const Barcode = require('react-barcode');
+
 const barcodes = [
-    '123456789012',
-    '092345676583',
-    '257247525754',
+  '123456789012',
+  '092345676583',
+  '257247525754',
 ]
 
-export default class extends React.Component {
 
-    componentDidMount() {
+export const Barcodes = () => {
 
-        barcodes.map((v, i) => {
+  return <div
+    style={{
+      width: '30mm',
+    }}
+  >
+    {barcodes.map(b => <Barcode
+      value={b}
+      format={'EAN13'}
+      width={1}
+      height={50}
+    />)}
 
-            JsBarcode("#barcode" + i, v, {
-                    format: "EAN13",
-                    width: 1,
-                    height: 45,
-                    displayValue: false
-                }
-            );
 
-        })
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={() => window.print()}
+      className={'d-print-none'}
+      style={{
+        margin: 20,
+      }}
+    >
+      Печать
+    </Button>
 
-    }
+  </div>
 
-    render() {
-
-        return <div style={{
-            width: "32mm",
-        }}>
-            {barcodes.map((v, i) => <svg id={"barcode" + i}
-                     style={{
-                         overflow: "hidden",
-                         position: "relative",
-                         width: "30mm",
-                         height: "20mm",
-                     }}
-                     key={"bcheirun" + i}
-                />)}
-        </div>
-    }
 }
