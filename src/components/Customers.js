@@ -18,8 +18,7 @@ import Typography from "@material-ui/core/Typography";
 import {Paper} from "@material-ui/core";
 import TableContainer from "@material-ui/core/TableContainer";
 
-import restRequest from "./Rest";
-
+import rest from "./Rest";
 
 let request = false;
 
@@ -32,7 +31,7 @@ export default class extends React.Component {
   componentDidMount() {
 
     request = true;
-    restRequest('customers')
+    rest('customers')
       .then(res => {
         if (res.ok) this.setState({customers: res.body});
         request = false;
@@ -46,7 +45,7 @@ export default class extends React.Component {
     if (!request) {
       request = true;
 
-      restRequest('customers?all=' + v)
+      rest('customers?all=' + v)
         .then(res => {
           if (res.ok) this.setState({customers: res.body});
           request = false;

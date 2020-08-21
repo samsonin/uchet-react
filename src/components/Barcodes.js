@@ -20,6 +20,7 @@ export const Barcodes = () => {
     }}
   >
     {barcodes.map(b => <Barcode
+      key={'barcodeskey' + b}
       value={b}
       format={'EAN13'}
       width={1}

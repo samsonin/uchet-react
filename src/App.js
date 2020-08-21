@@ -29,55 +29,64 @@ import IntegrationSmsRu from "./components/IntegrationSmsRu";
 import {Records} from "./components/Records";
 
 let barcode = '';
-let good = {};
-
-document.addEventListener("keydown", function (e) {
-
-  if (e.key === "Enter") {
-
-    if (["112116", "103100"].includes(barcode.substr(0, 6)) ||
-      barcode.length === 15) {
-
-      e.preventDefault();
-
-      rest("goods/" + barcode).then(data => {
-        if (data.ok) {
-
-          data.body.barcode = barcode;
-          good = data.body
-
-        }
-      });
-
-    } else if (barcode.substr(0, 1) === "R" &&
-      barcode.length === 13) {
-
-      e.preventDefault();
-
-      let stock_id = +barcode.substr(1, 3);
-      let rem_id = +barcode.substr(4, 8);
-
-      console.log('stock_id', stock_id)
-      console.log('rem_id', rem_id)
-
-    }
-
-    barcode = ''
-
-  } else {
-
-    let newChar = String.fromCharCode(e.keyCode);
-
-    if (newChar === "R") barcode = 'R'
-    else if (e.keyCode > 47 && e.keyCode < 58) barcode = barcode + newChar
-
-  }
-
-});
 
 class App extends Component {
 
+  state = {
+    good: {},
+  }
 
+  componentDidMount() {
+
+    document.addEventListener('keydown', this.handleKeyPress);
+
+  }
+
+  handleKeyPress = e => {
+
+    if (e.key === "Enter") {
+
+      if (["112116", "103100"].includes(barcode.substr(0, 6)) ||
+        barcode.length === 15) {
+
+        e.preventDefault();
+
+        rest("goods/" + barcode).then(data => {
+          if (data.ok) {
+
+            data.body.barcode = barcode;
+            this.setState({
+              good: data.body,
+            });
+
+          }
+        });
+
+      } else if (barcode.substr(0, 1) === "R" &&
+        barcode.length === 13) {
+
+        e.preventDefault();
+
+        let stock_id = +barcode.substr(1, 3);
+        let rem_id = +barcode.substr(4, 8);
+
+        console.log('stock_id', stock_id)
+        console.log('rem_id', rem_id)
+
+      }
+
+      barcode = ''
+
+    } else {
+
+      let newChar = String.fromCharCode(e.keyCode);
+
+      if (newChar === "R") barcode = 'R'
+      else if (e.keyCode > 47 && e.keyCode < 58) barcode = barcode + newChar
+
+    }
+
+  }
 
   closeGoodModal = () => this.setState({good: {}});
 
@@ -133,7 +142,7 @@ class App extends Component {
       </div>
       <Authmodal/>
       <GoodModal
-        good={good}
+        good={this.state.good}
         close={this.closeGoodModal}
       />
 
