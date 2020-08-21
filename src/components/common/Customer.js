@@ -5,6 +5,7 @@ import View from '../../components/customer/View'
 
 
 export const Customer = props => {
+
   const [isRequesting, setRequesting] = useState(false)
   const [serverCustomer, setServerCustomer] = useState({})
   const [customer, setCustomer] = useState({})

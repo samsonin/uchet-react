@@ -15,7 +15,7 @@ export const siteMap = [
   // {id: 14, onlyAdmin: false, path: "reject", text: "Брак"},
   // {id: 15, onlyAdmin: false, path: "prepaid", text: "Предоплаты"},
   {id: 21, onlyAdmin: false, path: "customers", text: "Физические лица"},
-  {id: 22, onlyAdmin: false, path: "providers", text: "Юридические лица"},
+  {id: 22, onlyAdmin: false, path: "entities", text: "Юридические лица"},
   // {id: 1, onlyAdmin: false, path: "accounting_documents", text: "Документы"},
   {id: 24, onlyAdmin: false, path: "call_records", text: "Записи разговоров"},
   // {id: 1, onlyAdmin: false, path: "messages", text: "Сообщения"},

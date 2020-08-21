@@ -17,7 +17,7 @@ const ReferalSelect = props => {
     >
       <InputLabel>Источник информации о нас</InputLabel>
       <Select
-        value
+        value={props.value}
         onChange={props.onChange}
       >
         {props.referals.filter(item => item.is_valid)

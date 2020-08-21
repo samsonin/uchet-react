@@ -1,15 +1,17 @@
-import ReferalSelect from "../ReferalSelect";
-import Field from "../Field";
 import React, {useState} from "react";
 import {connect} from "react-redux";
+import {Link} from "react-router-dom";
 
 import {makeStyles} from "@material-ui/core/styles";
 import {Button, Grid, Paper} from "@material-ui/core";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
+import ReferalSelect from "../ReferalSelect";
+import Field from "../Field";
 
 const types = {
   birthday: 'date',
@@ -36,6 +38,15 @@ const View = props => {
           direction="row"
           justify="space-between"
     >
+      <Grid item>
+        <Tooltip title={'Все физ. лица'}>
+          <Link to="/customers">
+            <IconButton>
+              <ArrowBackIcon/>
+            </IconButton>
+          </Link>
+        </Tooltip>
+      </Grid>
       <Grid item>
         <Tooltip title={
           isDetails

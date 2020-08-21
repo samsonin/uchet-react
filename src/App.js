@@ -6,7 +6,7 @@ import "./index.css";
 import Header from "./components/Header";
 import Customers from "./components/Customers";
 import {Customer} from "./components/common/Customer";
-import Providers from "./components/Providers";
+import Entities from "./components/Entities";
 import Sidebar from "./components/Sidebar";
 import Main from "./components/Main";
 import Authmodal from "./components/Authmodal";
@@ -15,7 +15,7 @@ import Subscribe from "./components/Subscribe";
 import Queue from "./components/Queue";
 import WebSocketAdapter from "./components/WebSocketAdapter";
 import Arrival from "./components/Arrival";
-import restRequest from "./components/Rest";
+import rest from "./components/Rest";
 import GoodModal from "./components/GoodModal";
 import {Barcodes} from "./components/Barcodes";
 import Config from "./components/Settings/Config";
@@ -40,7 +40,7 @@ document.addEventListener("keydown", function (e) {
 
       e.preventDefault();
 
-      restRequest("goods/" + barcode).then(data => {
+      rest("goods/" + barcode).then(data => {
         if (data.ok) {
 
           data.body.barcode = barcode;
@@ -105,7 +105,7 @@ class App extends Component {
           <Route path="/subscribe" component={Subscribe}/>
           <Route exact path="/customers" component={Customers}/>
           <Route exact path="/customers/:id" component={Customer}/>
-          <Route path="/providers" component={Providers}/>
+          <Route path="/entities" component={Entities}/>
           <Route path="/call_records" component={Records}/>
           {/*<Route path="/orders" component={Orders}/>*/}
           {/*<Route path="/order" component={Order}/>*/}
