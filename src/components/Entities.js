@@ -17,7 +17,7 @@ import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import {Link} from "react-router-dom";
 import IconButton from "@material-ui/core/IconButton";
 import EditIcon from '@material-ui/icons/Edit';
-
+import ReceiptIcon from '@material-ui/icons/Receipt';
 
 const Entities = ({providers}) => {
 
@@ -56,6 +56,15 @@ const Entities = ({providers}) => {
                       <EditIcon/>
                     </IconButton>
                   </Link>
+                </Tooltip>
+              </TableCell>
+              <TableCell>
+                <Tooltip title="Взаиморасчеты">
+                  {/*<Link to={"/entities/" + p.id}>*/}
+                    <IconButton>
+                      <ReceiptIcon/>
+                    </IconButton>
+                  {/*</Link>*/}
                 </Tooltip>
               </TableCell>
             </TableRow>
