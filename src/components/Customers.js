@@ -87,7 +87,7 @@ export default class extends React.Component {
   }
 
   render() {
-    return <Grid conteiner>
+    return <Grid container>
       <Grid item>
         <TableContainer component={Paper}>
           <Table size="small">

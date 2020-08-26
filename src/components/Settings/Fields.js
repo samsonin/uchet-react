@@ -21,248 +21,249 @@ import restRequest from "../Rest";
 
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-    enqueueSnackbar,
-    closeSnackbar,
-    upd_app
+  enqueueSnackbar,
+  closeSnackbar,
+  upd_app
 }, dispatch);
 
 let request = false;
 
 export default connect(state => (state), mapDispatchToProps)(class extends Component {
 
-    // в Redux-store храниться состояние с сервера
-    // в componentDidMount это состояние переноситься в state
-    // при добавлении, удалении и редактировании полей они меняются локально
-    // при нажатии сохранить изменения отправляются на сервер и затем попадают в Redux-store
+  // в Redux-store храниться состояние с сервера
+  // в componentDidMount это состояние переноситься в state
+  // при добавлении, удалении и редактировании полей они меняются локально
+  // при нажатии сохранить изменения отправляются на сервер и затем попадают в Redux-store
 
-    state = {
-        index: 'customer',
-    }
+  state = {
+    index: 'customer',
+  }
 
-    componentDidMount() {
-        this.initial()
-    }
+  componentDidMount() {
+    this.initial()
+  }
 
-    initial(newFields) {
+  initial(newFields) {
 
-        let fields = [];
-        (newFields || this.props.app.fields.allElements).map(v => {
-            if (v.index === this.state.index) {
-                fields.push({...v});
-            }
+    let fields = [];
+    (newFields || this.props.app.fields.allElements).map(v => {
+      if (v.index === this.state.index) {
+        fields.push({...v});
+      }
 
-            fields.sort((a, b) => a.id - b.id)
+      fields.sort((a, b) => a.id - b.id)
 
-            this.setState({
-                fields,
-                systemFieldsHandle: 0,
-            })
-            return v;
-        })
+      this.setState({
+        fields,
+        systemFieldsHandle: 0,
+      })
+      return v;
+    })
 
-    }
+  }
 
-    indexHandle(index) {
-        this.setState({
-            index,
-            fields: this.props.app.fields.allElements
-                .filter(field => field.index === index)
-        })
-    }
+  indexHandle(index) {
+    this.setState({
+      index,
+      fields: this.props.app.fields.allElements
+        .filter(field => field.index === index)
+    })
+  }
 
-    addField() {
+  addField() {
 
-        let fields = this.state.fields
-        if (this.state.systemFieldsHandle === 0) {
+    let fields = this.state.fields
+    if (this.state.systemFieldsHandle === 0) {
 
-            fields.splice(0, 0, {
-                index: this.state.index,
-                value: '',
-                is_system: false,
-                is_valid: true,
-            })
-            this.setState({fields})
+      fields.splice(0, 0, {
+        index: this.state.index,
+        value: '',
+        is_system: false,
+        is_valid: true,
+      })
+      this.setState({fields})
 
-        } else {
+    } else {
 
-            let fields = this.state.fields.map(f => {
-                if (f.name === this.state.systemFieldsHandle) f.is_valid = true;
-                return f;
-            })
-            this.setState({
-                fields,
-                systemFieldsHandle: 0
-            })
-
-        }
-    }
-
-    fieldHandle(name, value) {
-
-        let fields = this.state.fields
-        fields.find(field => field.name === name).value = value
-        this.setState({fields})
+      let fields = this.state.fields.map(f => {
+        if (f.name === this.state.systemFieldsHandle) f.is_valid = true;
+        return f;
+      })
+      this.setState({
+        fields,
+        systemFieldsHandle: 0
+      })
 
     }
+  }
 
-    moveField(name, direction) {
+  fieldHandle(name, value) {
 
-        let field = this.state.fields.filter(f => f.name === name)[0]
-        let i = this.state.fields.indexOf(field)
-        let fields = this.state.fields.filter(f => f.name !== name)
+    let fields = this.state.fields
+    fields.find(field => field.name === name).value = value
+    this.setState({fields})
 
-        if (direction === 'up') i--
-        if (direction === 'down') i++
-        if (i === -1) i = 0
+  }
 
-        fields.splice(i, 0, field)
+  moveField(name, direction) {
 
-        this.setState({fields})
+    let field = this.state.fields.filter(f => f.name === name)[0]
+    let i = this.state.fields.indexOf(field)
+    let fields = this.state.fields.filter(f => f.name !== name)
 
-    }
+    if (direction === 'up') i--
+    if (direction === 'down') i++
+    if (i === -1) i = 0
 
-    deleteField(field) {
+    fields.splice(i, 0, field)
 
-        const fields = field.is_system ?
-            this.state.fields.map(el => el === field
-                ? {...el, is_valid: false}
-                : el
-            ) :
-            this.state.fields.filter(f => f.name !== field.name);
+    this.setState({fields})
 
-        this.setState({fields})
+  }
 
-    }
+  deleteField(field) {
 
-    save() {
+    const fields = field.is_system ?
+      this.state.fields.map(el => el === field
+        ? {...el, is_valid: false}
+        : el
+      ) :
+      this.state.fields.filter(f => f.name !== field.name);
 
-        request = true;
-        restRequest('fields', 'PATCH', this.state.fields)
-            .then(res => {
-                request = false;
-                const {upd_app} = this.props;
-                upd_app(res.body)
-                this.initial(res.body.fields.allElements)
-            })
-    }
+    this.setState({fields})
 
-    render() {
+  }
 
-        if (typeof this.state.fields === "object") {
+  save() {
 
-            let index = this.state.index;
+    request = true;
+    restRequest('fields', 'PATCH', this.state.fields)
+      .then(res => {
+        request = false;
+        const {upd_app} = this.props;
+        upd_app(res.body)
+        this.initial(res.body.fields.allElements)
+      })
+  }
 
-            return <Paper style={{padding: '1rem'}}>
-                <Grid container direction="row" justify="space-evenly"
-                      style={{marginBottom: '1rem'}}
-                >
+  render() {
 
-                    <Select
-                        style={{width: '75%'}}
-                        value={index}
-                        onChange={e => this.indexHandle(e.target.value)}
-                    >
-                        {['order', 'customer', 'entity'].map(i => <MenuItem value={i} key={"fieldindexmenuuywgvf" + i}>
-                                <Typography variant="h5">
-                                    {this.props.app.fields.alliases[i]}
-                                </Typography>
-                            </MenuItem>
-                        )}
-                    </Select>
+    if (typeof this.state.fields === "object") {
 
-                </Grid>
+      let index = this.state.index;
 
-                <Grid container direction="row" justify="space-evenly"
-                      style={{marginBottom: '1rem'}}
-                >
-                    <FormControl style={{width: '75%'}}>
-                        <Select
-                            variant="outlined"
-                            value={this.state.systemFieldsHandle}
-                            onChange={e => this.setState({systemFieldsHandle: e.target.value})}
-                        >
-                            <MenuItem value="0" key={"addsysmfield"}>
-                                Новое поле
-                            </MenuItem>
-                            {this.state.fields.map(v => v.is_system && !v.is_valid ?
-                                <MenuItem value={v.name} key={"addsysmfield" + v.name}>
-                                    {v.value}
-                                </MenuItem> : ''
-                            )}
-                        </Select>
-                    </FormControl>
+      let disabled = !request && JSON.stringify(this.state.fields) === JSON.stringify(this.props.app.fields.allElements
+        .filter(field => field.index === index))
 
-                    <Tooltip title="Добавить">
-                        <IconButton
-                            onClick={() => this.addField()}
-                            // disabled={this.state.fields[0].value === ''}
-                        >
-                            <AddCircleIcon/>
-                        </IconButton>
-                    </Tooltip>
+      return <Paper style={{padding: '1rem'}}>
+        <Grid container direction="row" justify="space-evenly"
+              style={{marginBottom: '1rem'}}
+        >
 
-                </Grid>
+          <Select
+            style={{width: '75%'}}
+            value={index}
+            onChange={e => this.indexHandle(e.target.value)}
+          >
+            {['order', 'customer', 'entity'].map(i => <MenuItem value={i} key={"fieldindexmenuuywgvf" + i}>
+                <Typography variant="h5">
+                  {this.props.app.fields.alliases[i]}
+                </Typography>
+              </MenuItem>
+            )}
+          </Select>
 
-                {this.state.fields.map((field, i) => field.is_valid
-                    ? <FormControl key={"elem" + index + i}
-                                   style={{
-                                       width: '100%',
-                                       padding: '1rem'
-                                   }}>
-                        <Input
-                            value={field.value}
-                            disabled={field.is_system}
-                            onChange={e => this.fieldHandle(field.name, e.target.value)}
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        onClick={() => this.moveField(field.name, 'down')}
-                                    >
-                                        {<ArrowDownwardIcon/>}
-                                    </IconButton>
-                                    <IconButton
-                                        onClick={() => this.moveField(field.name, 'up')}
-                                    >
-                                        {< ArrowUpwardIcon/>}
-                                    </IconButton>
-                                    <IconButton
-                                        onClick={() => this.deleteField(field)}
-                                    >
-                                        {<DeleteIcon/>}
-                                    </IconButton>
-                                </InputAdornment>
-                            }
-                        />
-                    </FormControl>
-                    : ''
-                )}
+        </Grid>
 
-                <Grid container justify="flex-end">
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        style={{margin: '1rem'}}
-                        onClick={() => this.initial()}
-                    >
-                        Отмена
-                    </Button>
-                    <Button
-                        disabled={!request && JSON.stringify(this.state.fields) === JSON.stringify(this.props.app.fields.allElements
-                            .filter(field => field.index === index))
-                        }
-                        variant="contained"
-                        color="primary"
-                        style={{margin: '1rem'}}
-                        onClick={() => this.save()}
-                    >
-                        Сохранить
-                    </Button>
-                </Grid>
+        <Grid container direction="row" justify="space-evenly"
+              style={{marginBottom: '1rem'}}
+        >
+          <FormControl style={{width: '75%'}}>
+            <Select
+              variant="outlined"
+              value={this.state.systemFieldsHandle}
+              onChange={e => this.setState({systemFieldsHandle: e.target.value})}
+            >
+              <MenuItem value="0" key={"addsysmfield"}>
+                Новое поле
+              </MenuItem>
+              {this.state.fields.map(v => v.is_system && !v.is_valid ?
+                <MenuItem value={v.name} key={"addsysmfield" + v.name}>
+                  {v.value}
+                </MenuItem> : ''
+              )}
+            </Select>
+          </FormControl>
 
-            </Paper>
+          <Tooltip title="Добавить">
+            <IconButton
+              onClick={() => this.addField()}
+            >
+              <AddCircleIcon/>
+            </IconButton>
+          </Tooltip>
 
-        } else return '';
+        </Grid>
 
-    }
+        {this.state.fields.map((field, i) => field.is_valid
+          ? <FormControl key={"elem" + index + i}
+                         style={{
+                           width: '100%',
+                           padding: '1rem'
+                         }}>
+            <Input
+              value={field.value}
+              disabled={field.is_system}
+              onChange={e => this.fieldHandle(field.name, e.target.value)}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => this.moveField(field.name, 'down')}
+                  >
+                    {<ArrowDownwardIcon/>}
+                  </IconButton>
+                  <IconButton
+                    onClick={() => this.moveField(field.name, 'up')}
+                  >
+                    {< ArrowUpwardIcon/>}
+                  </IconButton>
+                  <IconButton
+                    onClick={() => this.deleteField(field)}
+                  >
+                    {<DeleteIcon/>}
+                  </IconButton>
+                </InputAdornment>
+              }
+            />
+          </FormControl>
+          : ''
+        )}
+
+        <Grid container
+              justify="space-evenly"
+        >
+          <Button
+            disabled={disabled}
+            variant="contained"
+            color="secondary"
+            onClick={() => this.initial()}
+          >
+            Отмена
+          </Button>
+          <Button
+            disabled={disabled}
+            variant="contained"
+            color="primary"
+            onClick={() => this.save()}
+          >
+            Сохранить
+          </Button>
+        </Grid>
+
+      </Paper>
+
+    } else return '';
+
+  }
 
 })

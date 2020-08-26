@@ -91,7 +91,7 @@ export const Records = () => {
 
   if (!request && data === undefined) handleSearch({date: searchDate});
 
-  return <Grid conteiner>
+  return <Grid container>
     <Grid item>
       <TableContainer component={Paper}>
         <Table size="small">

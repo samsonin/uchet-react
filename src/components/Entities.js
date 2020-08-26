@@ -18,6 +18,7 @@ import {Link} from "react-router-dom";
 import IconButton from "@material-ui/core/IconButton";
 import EditIcon from '@material-ui/icons/Edit';
 import ReceiptIcon from '@material-ui/icons/Receipt';
+import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 const Entities = ({providers}) => {
 
@@ -28,6 +29,11 @@ const Entities = ({providers}) => {
         <TableHead>
           <TableRow>
             <TableCell>
+              <Typography variant="h5">
+                Юр. лица
+              </Typography>
+            </TableCell>
+            <TableCell colSpan={3}>
               <Input
                 // onChange={e => handleSearch({phone: e.target.value})}
                 endAdornment={
@@ -39,6 +45,21 @@ const Entities = ({providers}) => {
           </TableRow>
         </TableHead>
         <TableBody>
+          <TableRow>
+            <TableCell>Наименование</TableCell>
+            <TableCell>ИНН</TableCell>
+            <TableCell/>
+            <TableCell>
+              <Tooltip title="Добавить">
+                <Link to="/entities/0">
+                  <IconButton>
+                    <AddCircleIcon/>
+                  </IconButton>
+                </Link>
+              </Tooltip>
+            </TableCell>
+          </TableRow>
+
           {providers.map(p => p.is_valid
             ? <TableRow
               key={'entitiesrowkey' + p.id}

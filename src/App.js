@@ -7,6 +7,7 @@ import Header from "./components/Header";
 import Customers from "./components/Customers";
 import {Customer} from "./components/common/Customer";
 import Entities from "./components/Entities";
+import Entity from "./components/Entity";
 import Sidebar from "./components/Sidebar";
 import Main from "./components/Main";
 import Authmodal from "./components/Authmodal";
@@ -114,7 +115,8 @@ class App extends Component {
           <Route path="/subscribe" component={Subscribe}/>
           <Route exact path="/customers" component={Customers}/>
           <Route exact path="/customers/:id" component={Customer}/>
-          <Route path="/entities" component={Entities}/>
+          <Route exact path="/entities" component={Entities}/>
+          <Route exact path="/entities/:id" component={Entity}/>
           <Route path="/call_records" component={Records}/>
           {/*<Route path="/orders" component={Orders}/>*/}
           {/*<Route path="/order" component={Order}/>*/}
