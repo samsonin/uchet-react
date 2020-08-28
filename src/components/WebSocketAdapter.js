@@ -1,16 +1,13 @@
+import {useEffect} from "react";
 import {closeSnackbar, enqueueSnackbar, upd_app, init_user} from "../actions/actionCreator";
 import {connect} from "react-redux";
 import {bindActionCreators} from 'redux';
-import {Component} from 'react';
-import restRequest from "./Rest";
 
-let ws;
+import rest from "./Rest";
 
-class WebSocketAdapter extends Component {
+const WebSocketAdapter = props => {
 
-  state = {isConnect: !!ws};
-
-  notifyMe(text) {
+  const notifyMe = text => {
 
     // Let's check if the browser supports notifications
     if (!("Notification" in window)) {
@@ -38,20 +35,16 @@ class WebSocketAdapter extends Component {
     // want to be respectful there is no need to bother them any more.
   }
 
-  constructor(props) {
-    super(props);
+  useEffect(() => {
 
-    let jwt = this.props.auth.jwt;
-    if (!jwt) return false;
+    const {jwt, upd_app} = props;
 
-    const {upd_app} = this.props;
-
-    restRequest('initial')
+    rest('initial')
       .then(res => upd_app(res.body))
 
     try {
 
-      ws = new WebSocket('wss://appblog.ru:3333/' + jwt);
+      let ws = new WebSocket('wss://appblog.ru:3333/' + jwt);
       // let ws = new WebSocket('ws://localhost:3333/'  + jwt);
 
       ws.onmessage = response => {
@@ -71,9 +64,9 @@ class WebSocketAdapter extends Component {
 
           } else if (data.type === "notification") {
 
-            if (!this.notifyMe(data.text)) {
+            if (!notifyMe(data.text)) {
 
-              this.props.enqueueSnackbar({
+              props.enqueueSnackbar({
                 message: data.text,
                 options: {
                   variant: 'success',
@@ -99,30 +92,23 @@ class WebSocketAdapter extends Component {
       //     console.log('onclose');
       // };
 
-      // restRequest('initial', 'PUT')
+      // rest('initial', 'PUT')
       //     .then(res => upd_app(res.body))
 
     } catch (e) {
       // console.error("ws " + e)
     }
 
-    return true;
 
-  }
+  }, [])
 
-  render() {
-
-    return '';
-
-  }
+  return null;
 
 }
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   enqueueSnackbar,
-  closeSnackbar,
-  init_user,
   upd_app
 }, dispatch);
 
-export default connect(state => (state), mapDispatchToProps)(WebSocketAdapter);
+export default connect(state => state.auth, mapDispatchToProps)(WebSocketAdapter);

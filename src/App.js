@@ -148,7 +148,7 @@ class App extends Component {
         close={this.closeGoodModal}
       />
 
-      {/*<WebSocketAdapter/>*/}
+      <WebSocketAdapter/>
 
     </>
   }

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {connect} from "react-redux";
 import {Link} from "react-router-dom";
 
@@ -11,15 +11,9 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import TextField from "@material-ui/core/TextField/TextField";
 import {Paper} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
-import {makeStyles} from "@material-ui/core/styles";
 
+import rest from "./Rest";
 
-const useStyles = makeStyles(theme => ({
-  button: {
-    borderRadius: 3,
-    margin: '1rem'
-  }
-}));
 
 let serverEntity;
 
@@ -28,7 +22,6 @@ const Entity = (props) => {
   const [isDetails, setDetails] = useState(false)
   const [entity, setEntity] = useState(null)
   const [disabled, setDisabled] = useState(true)
-  const classes = useStyles();
 
   useEffect(() => {
 
@@ -42,30 +35,28 @@ const Entity = (props) => {
 
   let id = +props.match.params.id;
 
-  const fieldHandler = (name, value) => {
-
-    console.log(name)
-
-    entity[name] = value;
-
-    setEntity(prev => {
-      return {...prev, [name]: value}
-    })
+  useEffect(() => {
 
     setDisabled(JSON.stringify(serverEntity) === JSON.stringify(entity))
 
+  }, [entity])
+
+  const fieldHandler = (name, value) => {
+
+    setEntity(prev => ({...prev, [name]: value}))
+
   }
 
-  const cancel = () => {
-
-    setEntity({...serverEntity})
-    setDisabled(true)
-
-  }
+  const cancel = () => setEntity({...serverEntity})
 
   const save = () => {
 
-    console.log(entity)
+    rest('entities/' + entity.id,
+      'PUT',
+      entity
+    ).then(res => console.log('res', res)
+
+  )
 
   }
 
@@ -109,8 +100,6 @@ const Entity = (props) => {
           .filter(elem => elem.index === 'entity' && elem.is_valid)
           .map(elem => {
 
-              // if (elem.name === 'entity_name') console.log(elem)
-
               return <TextField
                 style={{
                   width: '100%',
@@ -120,9 +109,7 @@ const Entity = (props) => {
                 key={'entityfieldskey' + elem.id}
                 label={elem.value}
                 value={id > 0
-                  ? elem.name === 'entity_name'
-                    ? entity.name
-                    : entity[elem.name]
+                  ? entity[elem.name]
                   : ''}
                 disabled={elem.name === 'saldo'}
                 onChange={e => fieldHandler(elem.name, e.target.value)}
