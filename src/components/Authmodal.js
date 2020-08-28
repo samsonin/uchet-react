@@ -371,7 +371,7 @@ class authModal extends Component {
         let isConfirm = this.state.status.substr(-7) === 'confirm';
         return <div onKeyPress={this.key_press}>
             <Notifier/>
-            <MDBModal id="authModal" isOpen={this.props.auth.user_id === 0} toggle={this.key_press}>
+            <MDBModal id="authModal" isOpen={+this.props.auth.user_id < 1} toggle={this.key_press}>
 
                 <div className="modal-header text-center">
                     <MDBRow>

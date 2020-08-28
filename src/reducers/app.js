@@ -18,15 +18,18 @@ const app = (state = JSON.parse(window.localStorage.getItem('app')) || initialSt
 
     if (action.type === UPD_APP) {
 
-        let newState = {};
-        Object.keys(state).map(k => {
-            newState[k] = state[k]
-        });
+        let newState = {...state}
+
         if (typeof (action.data) === 'object') {
+
+            // newState = {...action.data}
+
             Object.keys(action.data).map(k => {
                 newState[k] = action.data[k]
             });
+
         }
+
         window.localStorage.setItem('app', JSON.stringify(newState));
         return newState;
 

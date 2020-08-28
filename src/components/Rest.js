@@ -4,7 +4,11 @@ let response = {};
 
 export default function fetchPost(url, method = 'GET', data = '') {
 
-    let jwt = JSON.parse(window.localStorage.getItem('auth')).jwt;
+    let auth = JSON.parse(window.localStorage.getItem('auth'));
+
+    if (!auth) return false;
+
+    let jwt = auth.jwt;
 
     if (typeof jwt !== "string") return false;
 

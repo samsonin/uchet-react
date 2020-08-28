@@ -105,50 +105,55 @@ class App extends Component {
       <div className="d-flex" id="wrapper">
         <Sidebar/>
         <div className="d-print-none" id="sidebaredivider"/>
-        <div className="m-2 p-2">
-          <Route exact path="/" component={
-            this.props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0) ?
-              Main : Subscribe
-          }/>
-          <Route path="/barcodes" component={Barcodes}/>
-          <Route exact path="/settings" component={Settings}/>
-          <Route path="/subscribe" component={Subscribe}/>
-          <Route exact path="/customers" component={Customers}/>
-          <Route exact path="/customers/:id" component={Customer}/>
-          <Route exact path="/entities" component={Entities}/>
-          <Route exact path="/entities/:id" component={Entity}/>
-          <Route path="/call_records" component={Records}/>
-          {/*<Route path="/orders" component={Orders}/>*/}
-          {/*<Route path="/order" component={Order}/>*/}
-          <Route path="/queue" component={Queue}/>
-          <Route path="/arrival" component={Arrival}/>
+        {
+          +this.props.auth.user_id > 0
+            ? <div className="m-2 p-2">
+              <Route exact path="/" component={
+                this.props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0) ?
+                  Main : Subscribe
+              }/>
+              <Route path="/barcodes" component={Barcodes}/>
+              <Route exact path="/settings" component={Settings}/>
+              <Route path="/subscribe" component={Subscribe}/>
+              <Route exact path="/customers" component={Customers}/>
+              <Route exact path="/customers/:id" component={Customer}/>
+              <Route exact path="/entities" component={Entities}/>
+              <Route exact path="/entities/:id" component={Entity}/>
+              <Route path="/call_records" component={Records}/>
+              {/*<Route path="/orders" component={Orders}/>*/}
+              {/*<Route path="/order" component={Order}/>*/}
+              <Route path="/queue" component={Queue}/>
+              <Route path="/arrival" component={Arrival}/>
 
-          <Route path="/settings/organization" component={Organization}/>
-          <Route path="/settings/employees" component={Employees}/>
-          <Route path="/settings/stocks" component={Stocks}/>
-          <Route path="/settings/config" component={Config}/>
-          <Route path="/settings/config" component={Config}/>
-          <Route path="/settings/fields" component={Fields}/>
-          <Route path="/settings/docs" component={Docs}/>
-          <Route path="/integration/mango"
-                 component={() => <IntegrationMango
-                   org_id={this.props.auth.organization_id}
-                   vpbx_api_key={'секретный ключ'}
-                   vpbx_api_salt={'секретная соль'}
-                   keyHandle={this.keyHandle}
-                   saltHandle={this.saltHandle}
-                 />}
-          />
-          <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
-        </div>
+              <Route path="/settings/organization" component={Organization}/>
+              <Route path="/settings/employees" component={Employees}/>
+              <Route path="/settings/stocks" component={Stocks}/>
+              <Route path="/settings/config" component={Config}/>
+              <Route path="/settings/config" component={Config}/>
+              <Route path="/settings/fields" component={Fields}/>
+              <Route path="/settings/docs" component={Docs}/>
+              <Route path="/integration/mango"
+                     component={() => <IntegrationMango
+                       org_id={this.props.auth.organization_id}
+                       vpbx_api_key={'секретный ключ'}
+                       vpbx_api_salt={'секретная соль'}
+                       keyHandle={this.keyHandle}
+                       saltHandle={this.saltHandle}
+                     />}
+              />
+              <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
+
+              <GoodModal
+                good={this.state.good}
+                close={this.closeGoodModal}
+              />
+
+              <WebSocketAdapter/>
+
+            </div>
+            : <Authmodal/>
+        }
       </div>
-      <Authmodal/>
-      <GoodModal
-        good={this.state.good}
-        close={this.closeGoodModal}
-      />
-
-      <WebSocketAdapter/>
 
     </>
   }

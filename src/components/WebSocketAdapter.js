@@ -1,5 +1,5 @@
 import {useEffect} from "react";
-import {closeSnackbar, enqueueSnackbar, upd_app, init_user} from "../actions/actionCreator";
+import {enqueueSnackbar, upd_app} from "../actions/actionCreator";
 import {connect} from "react-redux";
 import {bindActionCreators} from 'redux';
 
