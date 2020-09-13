@@ -6,8 +6,6 @@ import InputLabel from "@material-ui/core/InputLabel/InputLabel";
 
 const ReferalSelect = props => {
 
-  let value = props.value || 1;
-
   return typeof props.referals === 'object'
     ? <FormControl
       style={{

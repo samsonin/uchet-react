@@ -12,7 +12,26 @@ export const Organization = () => {
         this.setState({innValue: inn});
         if (inn.length < 5) return true;
 
-        this.requestSettings('getSuggest', '', 'inn', inn);
+        // this.requestSettings('getSuggest', '', 'inn', inn);
+
+        let url = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/party";
+        let query = "7707083893";
+
+        const options = {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": "Token " + process.env.REACT_APP_DADATA_TOKEN
+            },
+            body: JSON.stringify({query})
+        }
+
+        fetch(url, options)
+            .then(response => response.text())
+            .then(result => console.log(result))
+            .catch(error => console.log("error", error));
 
     };
 
@@ -28,7 +47,6 @@ export const Organization = () => {
 
     };
 
-
     return <Grid container direction="row" className="m-2 p-3">
 
         <FormControl fullWidth variant="filled" className="w-75 m-1">
@@ -43,7 +61,7 @@ export const Organization = () => {
         <Autocomplete
             options={this.state.autocomplete}
             inputValue={this.state.innValue}
-            onInputChange={(e, v) => this.getSuggest(e, v)}
+            onInputChange={(e, v) => getSuggest(e, v)}
             onChange={(e, v) => this.setInn(e, v)}
             getOptionLabel={option => (option.string)}
             className="w-75 m-1"
