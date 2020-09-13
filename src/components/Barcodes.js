@@ -1,8 +1,6 @@
 import React from "react";
 import {Button} from "@material-ui/core";
 
-const JsBarcode = require('jsbarcode');
-
 const Barcode = require('react-barcode');
 
 const barcodes = [
@@ -26,7 +24,6 @@ export const Barcodes = () => {
       width={1}
       height={50}
     />)}
-
 
     <Button
       variant="contained"

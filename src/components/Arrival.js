@@ -1,8 +1,9 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import {connect} from "react-redux";
-import Typography from "@material-ui/core/Typography";
-import {enqueueSnackbar} from "../actions/actionCreator";
+import {closeSnackbar, enqueueSnackbar} from "../actions/actionCreator";
 import {bindActionCreators} from "redux";
+
+import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -15,224 +16,248 @@ import TextField from "@material-ui/core/TextField/TextField";
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import DeleteIcon from '@material-ui/icons/Delete';
-import TreeModal from "./TreeModal";
 import Button from "@material-ui/core/Button";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import request from "./Request";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 
+import TreeModal from "./TreeModal";
+import request from "./Request";
 
-class Arrival extends React.Component {
-
-  state = {
-    currentTr: false,
-    isNewConsignment: true,
-    isSending: false,
-    consignment: {
-      products: [{
-        categoryId: 0,
-        model: '',
-        quantity: 1,
-        cost: 0,
-        sum: 0,
-      }],
-      providerId: 0,
-      consignmentNumber: '',
-      actuallyPaid: 0,
-      delivery: 0,
-    }
-  }
-
-  addConsignment() {
-
-    let consignment = this.state.consignment;
-    let error;
-    if (this.state.consignment.providerId === 0) error = 'Выберите поставщика';
-    if (this.state.consignment.consignmentNumber === '') error = 'Введите номер накладной';
-    this.state.consignment.products.map(product => {
-      if (product.categoryId === 0) error = 'Выберите категорию';
-      if (product.model === '') error = 'Введите наименование';
-      if (product.quantity === 0) error = 'Количество должно быть больше 0';
-    })
-    if (error !== undefined) {
-      this.props.enqueueSnackbar({
-        message: error,
-        options: {
-          variant: 'error',
-        },
-      });
-      return;
-    }
-
-    this.setState({isSending: true});
-
-    // restRequest('/goods', 'POST', {
-    //     stock_id: this.props.app.stock_id,
-    //     consignment,
-    // })
-    request({
-      action: 'addConsignment',
-      stock_id: this.props.app.stock_id,
-      consignment
-    }, '/arrival', this.props.auth.jwt)
-      .then(data => {
-
-        this.setState({isSending: false});
-
-        if (data.result) {
-
-          this.props.enqueueSnackbar({
-            message: 'Внесено ' + data.counter + ' товаров',
-            options: {
-              variant: 'success',
-            },
-          });
-          this.setState({
-            currentTr: false,
-            isNewConsignment: true,
-            isSending: false,
-            consignment: {
-              products: [{
-                categoryId: 0,
-                model: '',
-                quantity: 1,
-                cost: 0,
-                sum: 0,
-              }],
-              providerId: 0,
-              consignmentNumber: '',
-              actuallyPaid: 0,
-              delivery: 0,
-            }
-          });
-
-        } else {
-
-          let message = 'Ошибка';
-          if (data === 'wrong stock') message = 'Выберите точку';
-          if (data === 'consignment exist') message = 'Такая накладная уже существует';
-          this.props.enqueueSnackbar({
-            message,
-            options: {
-              variant: 'error',
-            },
-          });
-
-        }
-
-      })
-
-  }
-
-  handleAdd() {
-    let newState = this.state;
-    newState.consignment.products.push({
+const initialState = () => ({
+  currentTr: false,
+  consignment: {
+    products: [{
       categoryId: 0,
       model: '',
       quantity: 1,
       cost: 0,
       sum: 0,
-    });
-    this.setState({newState})
+    }],
+    providerId: 0,
+    consignmentNumber: '',
+    actuallyPaid: 0,
+    delivery: 0,
   }
+})
 
-  handleDelete(i) {
-    let newState = this.state;
-    newState.consignment.products.splice(i, 1);
-    this.setState({newState})
-  }
+const Arrival = props => {
 
-  handleCategories = id => {
+  const [state, setState] = useState(initialState)
+  const [isSending, setIsSending] = useState(false)
 
-    let newState = this.state;
-    if (id) newState.consignment.products[this.state.currentTr].categoryId = +id;
-    newState.currentTr = false;
-    this.setState({newState})
+  useEffect(() => {
+    console.log('props', props)
+    console.log('state', state)
+  });
 
-  }
+  const providerOptions = props.app.providers.map(v => ({id: v.id, name: v.name}))
+  providerOptions.unshift({id: 0, name: ''})
 
-  handleTr(i, index, val) {
-    let newState = this.state;
-    newState.consignment.products[i][index] = index === 'model' ?
-      val : +val;
-    if (index === 'cost') newState.consignment.products[i].sum = +val * 2;
-    newState.currentTr = false;
-    newState.consignment.actuallyPaid = this.getConsignmentTotal();
-    this.setState({newState})
-  }
+  const addConsignment = () => {
 
-  handleProvider(v) {
-    let id = 0;
-    try {
-      id = v.id;
-    } catch (e) {
+    let error;
+    if (state.consignment.providerId === 0) error = 'Выберите поставщика';
+    if (state.consignment.consignmentNumber === '') error = 'Введите номер накладной';
+    state.consignment.products.map(product => {
+      if (product.categoryId === 0) error = 'Выберите категорию';
+      if (product.model === '') error = 'Введите наименование';
+      if (product.quantity === 0) error = 'Количество должно быть больше 0';
+      return product;
+    })
+    if (error !== undefined) {
+
+      console.log('error', error)
+      console.log(props.enqueueSnackbar({
+        message: error,
+        options: {
+          variant: 'error',
+        },
+      }))
+
+      props.enqueueSnackbar({
+        message: error,
+        options: {
+          variant: 'error',
+        },
+      })
+      return;
     }
-    let newState = this.state;
-    newState.consignment.providerId = id;
-    this.setState({newState})
+
+    // setIsSending(true)
+
+    // request({
+    //   action: 'addConsignment',
+    //   stock_id: props.app.stock_id,
+    //   consignment: state.consignment
+    // }, '/arrival', props.auth.jwt)
+    //   .then(data => {
+
+    // setIsSending(false)
+
+    // if (data.result) {
+
+    // props.enqueueSnackbar({
+    //   message: 'Внесено ' + data.counter + ' товаров',
+    //   options: {
+    //     variant: 'success',
+    //   },
+    // });
+    setState(initialState);
+
+    // } else {
+    //
+    //   let message = 'Ошибка';
+    //   if (data === 'wrong stock') message = 'Выберите точку';
+    //   if (data === 'consignment exist') message = 'Такая накладная уже существует';
+    //   props.enqueueSnackbar({
+    //     message,
+    //     options: {
+    //       variant: 'error',
+    //     },
+    //   });
+
+    // }
+
+    // })
+
   }
 
-  handleTotals(index, val) {
+  const handleAdd = () => {
+    setState(prev => {
+
+      let newState = {...prev};
+      newState.consignment.products.push({
+        categoryId: 0,
+        model: '',
+        quantity: 1,
+        cost: 0,
+        sum: 0,
+      });
+      return newState
+
+    })
+  }
+
+  const handleDelete = i => {
+    setState(prev => {
+
+      let newState = {...prev}
+      newState.consignment.products.splice(i, 1);
+      return newState
+
+    })
+  }
+
+  const handleCategories = id => {
+    setState(prev => {
+
+      let newState = {...prev};
+      if (id) newState.consignment.products[prev.currentTr].categoryId = +id;
+      newState.currentTr = false;
+
+      return newState
+    })
+  }
+
+  const handleTr = (i, index, val) => {
+    setState(prev => {
+
+      let newState = {...prev};
+      newState.consignment.products[i][index] = index === 'model'
+        ? val
+        : +val
+      if (index === 'cost') newState.consignment.products[i].sum = +val * 2;
+
+      newState.currentTr = false;
+      newState.consignment.actuallyPaid = getConsignmentTotal();
+
+      return newState
+    })
+  }
+
+  const handleProvider = v => {
+
+    console.log('handleProvider', v)
+
+    setState(prev => {
+      let id = 0;
+      try {
+        id = v.id;
+      } catch (e) {
+      }
+      let newState = {...prev};
+      newState.consignment.providerId = id;
+      return newState
+    })
+
+  }
+
+  const handleTotals = (index, val) => {
 
     if (val < 0) return;
-    let newState = this.state;
-    newState.consignment[index] = val;
-    this.setState({newState})
+
+    setState(prev => {
+      let newState = {...prev};
+      newState.consignment[index] = val;
+      return newState
+    })
 
   }
 
-  getConsignmentTotal() {
+  const getConsignmentTotal = () => {
     let consignmentTotal = 0;
-    this.state.consignment.products.map(product => {
+    state.consignment.products.map(product => {
       consignmentTotal += product.quantity * product.cost;
+      return product;
     })
     return consignmentTotal;
   }
 
-  getTotal() {
-    return this.state.consignment.delivery + this.getConsignmentTotal();
+  const getTotal = () => {
+    return state.consignment.delivery + getConsignmentTotal();
   }
 
-  renderTr(i, product) {
+  const renderTr = (i, product) => {
 
     return <TableRow key={'gberbrv' + i}>
       <TableCell component="th" scope="row" className={"p-1"}>
         <Button size="small" className="w-100" variant="outlined"
-                onClick={() => this.setState({currentTr: i})}>
-          {product.categoryId > 0 ?
-            this.props.app.categories.find(v => v.id === product.categoryId).name : "выбрать..."}
+                onClick={() => setState(prev => ({...prev, currentTr: i}))}>
+          {product.categoryId > 0
+            ? props.app.categories.find(v => v.id === product.categoryId).name
+            : "выбрать..."}
         </Button>
       </TableCell>
       <TableCell className={"p-1"}>
         <TextField className={"w-100"}
-                   onChange={e => this.handleTr(i, 'model', e.target.value)}
+                   onChange={e => handleTr(i, 'model', e.target.value)}
                    value={product.model}
         />
       </TableCell>
       <TableCell align="center" className={"p-1"}>
         <TextField
-          onChange={e => this.handleTr(i, 'quantity', e.target.value)}
+          onChange={e => handleTr(i, 'quantity', e.target.value)}
           type="number"
           value={product.quantity}
         />
       </TableCell>
       <TableCell align="center" className={"p-1"}>
         <TextField
-          onChange={e => this.handleTr(i, 'cost', e.target.value)}
+          onChange={e => handleTr(i, 'cost', e.target.value)}
           type="number"
           value={product.cost}
         />
       </TableCell>
       <TableCell align="center" className={"p-1"}>
         <TextField
-          onChange={e => this.handleTr(i, 'sum', e.target.value)}
+          onChange={e => handleTr(i, 'sum', e.target.value)}
           type="number"
           value={product.sum}
         />
       </TableCell>
       <TableCell align="center" className={"p-1"}>
         <Tooltip title="Удалить строку">
-          <IconButton className="p-2 m-2" onClick={() => this.handleDelete(i)}>
+          <IconButton className="p-2 m-2" onClick={() => handleDelete(i)}>
             <DeleteIcon/>
           </IconButton>
         </Tooltip>
@@ -240,14 +265,17 @@ class Arrival extends React.Component {
     </TableRow>
   }
 
-  render() {
-    if (+this.props.app.stock_id <= 0) return <Typography variant="h5" align="center">Выберите точку</Typography>
-    return <>
+  return (+props.app.stock_id <= 0)
+    ? <Typography variant="h5" align="center">Выберите точку</Typography>
+    : <>
 
-      <TreeModal isOpen={this.state.currentTr !== false} onClose={this.handleCategories}/>
+      <TreeModal isOpen={state.currentTr !== false} onClose={handleCategories}/>
 
       <Grid container
-            spacing={3} direction="column" justify="space-between" alignContent="center">
+        // spacing={3}
+            direction="column"
+            justify="space-between"
+            alignContent="center">
         <Grid item>
           <Typography variant="h5" align="center">Новая накладная</Typography>
         </Grid>
@@ -259,11 +287,10 @@ class Arrival extends React.Component {
                   <TableCell colSpan={2} className="pt-3">
 
                     <Autocomplete
-                      options={
-                        this.props.app.providers.map(v => ({id: v.id, name: v.name}))
-                      }
+                      value={providerOptions.find(v => v.id === state.consignment.providerId)}
+                      options={providerOptions}
                       onChange={
-                        (e, newValue) => this.handleProvider(newValue)
+                        (_, newValue) => handleProvider(newValue)
                       }
                       getOptionLabel={option => option.name}
                       getOptionSelected={option => option.id}
@@ -271,11 +298,12 @@ class Arrival extends React.Component {
                         params => <TextField {...params} label="Поставщик"/>
                       }
                     />
+
                   </TableCell>
                   <TableCell colSpan={4} className="pt-3">
                     <TextField label="Накладная"
-                               value={this.state.consignment.consignmentNumber}
-                               onChange={e => this.handleTotals('consignmentNumber', e.target.value)}
+                               value={state.consignment.consignmentNumber}
+                               onChange={e => handleTotals('consignmentNumber', e.target.value)}
                     />
                   </TableCell>
                 </TableRow>
@@ -287,7 +315,7 @@ class Arrival extends React.Component {
                   <TableCell align="center">Цена</TableCell>
                   <TableCell align="center" className={"p-1"}>
                     <Tooltip title="Добавить строку">
-                      <IconButton className="p-2 m-2" onClick={() => this.handleAdd()}>
+                      <IconButton className="p-2 m-2" onClick={() => handleAdd()}>
                         <AddCircleIcon/>
                       </IconButton>
                     </Tooltip>
@@ -295,30 +323,30 @@ class Arrival extends React.Component {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {this.state.consignment.products.map((product, i) => this.renderTr(i, product))}
+                {state.consignment.products.map((product, i) => renderTr(i, product))}
                 <TableRow>
                   <TableCell align="center" className="pt-3">
                     <TextField label="Итого по накладной"
-                               disabled value={this.getConsignmentTotal()}
+                               disabled value={getConsignmentTotal()}
                     />
                   </TableCell>
                   <TableCell align="center" className="pt-3">
                     <TextField label="Доставка"
                                type="number" min={0}
-                               value={this.state.consignment.delivery}
-                               onChange={e => this.handleTotals('delivery', +e.target.value)}
+                               value={state.consignment.delivery}
+                               onChange={e => handleTotals('delivery', +e.target.value)}
                     />
                   </TableCell>
                   <TableCell colSpan="2" align="center" className="pt-3">
                     <TextField label="Итого с доставкой"
-                               disabled value={this.getTotal()}
+                               disabled value={getTotal()}
                     />
                   </TableCell>
                   <TableCell colSpan="2" align="center" className="pt-3">
                     <TextField label="Оплатили"
                                type="number"
-                               value={this.state.consignment.actuallyPaid}
-                               onChange={e => this.handleTotals('actuallyPaid', +e.target.value)}
+                               value={state.consignment.actuallyPaid}
+                               onChange={e => handleTotals('actuallyPaid', +e.target.value)}
                     />
                   </TableCell>
                 </TableRow>
@@ -327,24 +355,29 @@ class Arrival extends React.Component {
           </TableContainer>
         </Grid>
         <Grid item>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            disabled={this.state.isSending}
-            onClick={() => this.addConsignment()}
-          >
-            Внести
-          </Button>
+          <Grid container justify='center'>
+            <Button
+              style={{
+                margin: '1rem',
+              }}
+              variant="contained"
+              color="primary"
+              size="small"
+              disabled={isSending}
+              onClick={() => addConsignment()}
+            >
+              Внести
+            </Button>
+          </Grid>
         </Grid>
       </Grid>
     </>
-  }
 
 }
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   enqueueSnackbar,
+  closeSnackbar,
 }, dispatch);
 
 export default connect(state => (state), mapDispatchToProps)(Arrival);

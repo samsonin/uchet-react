@@ -20,7 +20,7 @@ import rest from "./components/Rest";
 import GoodModal from "./components/GoodModal";
 import {Barcodes} from "./components/Barcodes";
 import Config from "./components/Settings/Config";
-import {Organization} from "./components/Settings/Organization";
+import Organization from "./components/Settings/Organization";
 import Employees from "./components/Settings/Employees";
 import Stocks from "./components/Settings/Stocks";
 import Docs from "./components/Settings/Docs";
@@ -40,6 +40,12 @@ class App extends Component {
   componentDidMount() {
 
     document.addEventListener('keydown', this.handleKeyPress);
+
+  }
+
+  componentWillUnmount() {
+
+    document.removeEventListener('keydown', this.handleKeyPress)
 
   }
 

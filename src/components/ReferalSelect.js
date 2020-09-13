@@ -1,14 +1,13 @@
 import React from 'react';
-import {FormControl, Select, MenuItem} from "@material-ui/core";
 import {connect} from "react-redux";
+
+import {FormControl, Select, MenuItem} from "@material-ui/core";
 import InputLabel from "@material-ui/core/InputLabel/InputLabel";
 
 
 const ReferalSelect = props => {
 
-  let value = props.value || 1;
-
-  return typeof props.referals === 'object'
+  return typeof referals === 'object'
     ? <FormControl
       style={{
         width: '100%',

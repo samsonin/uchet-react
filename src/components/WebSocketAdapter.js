@@ -35,9 +35,9 @@ const WebSocketAdapter = props => {
     // want to be respectful there is no need to bother them any more.
   }
 
-  useEffect(() => {
+  const {jwt, upd_app, enqueueSnackbar} = props;
 
-    const {jwt, upd_app} = props;
+  useEffect(() => {
 
     rest('initial')
       .then(res => upd_app(res.body))
@@ -54,9 +54,7 @@ const WebSocketAdapter = props => {
         let data = decodeURIComponent(response.data);
         try {
           data = JSON.parse(data);
-          if (typeof (data) !== "object") throw('Error');
-
-          // console.log(data)
+          if (typeof (data) !== "object") throw( console.error());
 
           if (data.type === undefined) {
 
@@ -66,7 +64,7 @@ const WebSocketAdapter = props => {
 
             if (!notifyMe(data.text)) {
 
-              props.enqueueSnackbar({
+              enqueueSnackbar({
                 message: data.text,
                 options: {
                   variant: 'success',
@@ -100,7 +98,7 @@ const WebSocketAdapter = props => {
     }
 
 
-  }, [])
+  }, [jwt, upd_app, enqueueSnackbar])
 
   return null;
 

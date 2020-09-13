@@ -22,10 +22,9 @@ const app = (state = JSON.parse(window.localStorage.getItem('app')) || initialSt
 
         if (typeof (action.data) === 'object') {
 
-            // newState = {...action.data}
-
             Object.keys(action.data).map(k => {
                 newState[k] = action.data[k]
+                return k;
             });
 
         }

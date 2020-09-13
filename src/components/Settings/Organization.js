@@ -1,122 +1,139 @@
-import {Grid, InputLabel, TextField} from "@material-ui/core";
+import React, {useEffect, useState} from "react";
+
+import {Grid, InputLabel, Paper, TextField} from "@material-ui/core";
 import FormControl from "@material-ui/core/FormControl";
 import FilledInput from "@material-ui/core/FilledInput/FilledInput";
 import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
-import React from "react";
+import {connect} from "react-redux";
 
-export const Organization = () => {
+const Organization = props => {
 
-    const getSuggest = (e, inn) => {
+  const [inn, setInn] = useState(() => props.inn)
+  const [autocomplete, setAutocomplete] = useState([])
+  const [bankName, setBankName] = useState('Банк')
 
-        if (inn === '') return false;
-        this.setState({innValue: inn});
-        if (inn.length < 5) return true;
+  const handleOrganization = (id, index,) => {
 
-        this.requestSettings('getSuggest', '', 'inn', inn);
+    console.log('requestSettings')
 
-    };
-
-    const setInn = (e, value) => {
-
-        if (value === null) {
-            this.setState({innValue: ""});
-            return false;
-        }
-        this.setState({innValue: value.inn});
-
-        this.requestSettings('setByInn', '', 'inn', value.inn);
-
-    };
+  }
 
 
-    return <Grid container direction="row" className="m-2 p-3">
+  useEffect(() => {
 
-        <FormControl fullWidth variant="filled" className="w-75 m-1">
-            <InputLabel className="mt-2 font-weight-bold">Название:</InputLabel>
-            <FilledInput
-                id="organizationName"
-                defaultValue={this.props.app.organization.name}
-                onBlur={(e) => this.requestSettings('changeOrganization', '', 'name', e.target.value)}
-            />
-        </FormControl>
+    // if (inn.length > 5) {
+    //
+    //   fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/party', {
+    //     headers: {
+    //       Authorization: 'Token ' + process.env.REACT_APP_DADATA_TOKEN
+    //     }
+    //   })
+    //     .then(res => res.json())
+    //     .then(res => console.log(res))
+    //
+    // }
 
-        <Autocomplete
-            options={this.state.autocomplete}
-            inputValue={this.state.innValue}
-            onInputChange={(e, v) => this.getSuggest(e, v)}
-            onChange={(e, v) => this.setInn(e, v)}
-            getOptionLabel={option => (option.string)}
-            className="w-75 m-1"
-            renderInput={params => (
-                <TextField {...params}
-                           label="ИНН"
-                           variant="filled"
-                           fullWidth
-                />
-            )}
-        />
+    console.log('useEffect')
 
-        <FormControl fullWidth variant="filled" className="w-75 m-1">
-            <InputLabel className="mt-2 font-weight-bold">КПП:</InputLabel>
-            <FilledInput
-                id="organizationKpp"
-                defaultValue={this.props.app.organization.kpp}
-                onBlur={(e) => this.requestSettings('changeOrganization', '', 'kpp', e.target.value)}
-            />
-        </FormControl>
-        <FormControl fullWidth variant="filled" className="w-75 m-1">
-            <InputLabel className="mt-2 font-weight-bold">ОГРН:</InputLabel>
-            <FilledInput
-                id="organizationOgrn"
-                defaultValue={this.props.app.organization.ogrn}
-                onBlur={(e) => this.requestSettings('changeOrganization', '', 'ogrn', e.target.value)}
-            />
-        </FormControl>
-        <FormControl fullWidth variant="filled" className="w-75 m-1">
-            <InputLabel className="mt-2 font-weight-bold">Юридическое наименование:</InputLabel>
-            <FilledInput
-                id="organizationOrganization"
-                defaultValue={this.props.app.organization.organization}
-                onBlur={(e) => this.requestSettings('changeOrganization', '', 'organization', e.target.value)}
-            />
-        </FormControl>
-        <FormControl fullWidth variant="filled" className="w-75 m-1">
-            <InputLabel className="mt-2 font-weight-bold">Юридический адрес:</InputLabel>
-            <FilledInput
-                id="organizationLegalAddress"
-                defaultValue={this.props.app.organization.legal_address}
-                onBlur={(e) => this.requestSettings('changeOrganization', '', 'legal_address', e.target.value)}
-            />
-        </FormControl>
-        <FormControl fullWidth variant="filled" className="w-75 m-1">
-            <InputLabel className="mt-2 font-weight-bold">ОКВЕД:</InputLabel>
-            <FilledInput
-                id="organizationOkved"
-                defaultValue={this.props.app.organization.okved}
-                onBlur={(e) => this.requestSettings('changeOrganization', '', 'okved', e.target.value)}
-            />
-        </FormControl>
-        <FormControl fullWidth variant="filled" className="w-75 m-1">
-            <InputLabel className="mt-2 font-weight-bold">БИК:</InputLabel>
-            <FilledInput
-                defaultValue={this.props.app.organization.bank_code}
-                onBlur={(e) => this.requestSettings('changeOrganization', '', 'bank_code', e.target.value)}
-            />
-        </FormControl>
+  }, [inn])
 
-        <FormControl fullWidth variant="filled" className="w-75 m-1">
-            <FilledInput
-                readOnly
-                value={this.state.bankName ? this.state.bankName : "Банк"}
-            />
-        </FormControl>
-        <FormControl fullWidth variant="filled" className="w-75 m-1">
-            <InputLabel className="mt-2 font-weight-bold">Расчетный счет:</InputLabel>
-            <FilledInput
-                defaultValue={this.props.app.organization.settlement_number}
-                onBlur={(e) => this.requestSettings('changeOrganization', '', 'settlement_number', e.target.value)}
-            />
-        </FormControl>
+  return <Grid container
+               component={Paper}
+               direction="row"
+               className="m-2 p-3"
+  >
 
-    </Grid>
+    <FormControl fullWidth variant="filled" className="w-75 m-1">
+      <InputLabel className="mt-2 font-weight-bold">
+        Название:
+      </InputLabel>
+      <FilledInput
+        id="organizationName"
+        defaultValue={props.name}
+        onBlur={e => handleOrganization('name', e.target.value)}
+      />
+    </FormControl>
+
+    <Autocomplete
+      options={autocomplete}
+      value={inn}
+      // onInputChange={(e, v) => innHandler(v)}
+      onChange={(e, newInn) => {
+        setInn(newInn);
+      }}
+      getOptionLabel={option => (option.string)}
+      className="w-75 m-1"
+      renderInput={params => <TextField {...params}
+                                        label="ИНН"
+                                        variant="filled"
+                                        fullWidth
+      />}
+    />
+
+    <FormControl fullWidth variant="filled" className="w-75 m-1">
+      <InputLabel className="mt-2 font-weight-bold">КПП:</InputLabel>
+      <FilledInput
+        id="organizationKpp"
+        defaultValue={props.kpp}
+        onBlur={e => handleOrganization('kpp', e.target.value)}
+      />
+    </FormControl>
+    <FormControl fullWidth variant="filled" className="w-75 m-1">
+      <InputLabel className="mt-2 font-weight-bold">ОГРН:</InputLabel>
+      <FilledInput
+        id="organizationOgrn"
+        defaultValue={props.ogrn}
+        onBlur={e => handleOrganization('ogrn', e.target.value)}
+      />
+    </FormControl>
+    <FormControl fullWidth variant="filled" className="w-75 m-1">
+      <InputLabel className="mt-2 font-weight-bold">Юридическое наименование:</InputLabel>
+      <FilledInput
+        id="organizationOrganization"
+        defaultValue={props.organization}
+        onBlur={e => handleOrganization('organization', e.target.value)}
+      />
+    </FormControl>
+    <FormControl fullWidth variant="filled" className="w-75 m-1">
+      <InputLabel className="mt-2 font-weight-bold">Юридический адрес:</InputLabel>
+      <FilledInput
+        id="organizationLegalAddress"
+        defaultValue={props.legal_address}
+        onBlur={e => handleOrganization('legal_address', e.target.value)}
+      />
+    </FormControl>
+    <FormControl fullWidth variant="filled" className="w-75 m-1">
+      <InputLabel className="mt-2 font-weight-bold">ОКВЕД:</InputLabel>
+      <FilledInput
+        id="organizationOkved"
+        defaultValue={props.okved}
+        onBlur={e => handleOrganization('okved', e.target.value)}
+      />
+    </FormControl>
+    <FormControl fullWidth variant="filled" className="w-75 m-1">
+      <InputLabel className="mt-2 font-weight-bold">БИК:</InputLabel>
+      <FilledInput
+        defaultValue={props.bank_code}
+        onBlur={e => handleOrganization('bank_code', e.target.value)}
+      />
+    </FormControl>
+
+    <FormControl fullWidth variant="filled" className="w-75 m-1">
+      <FilledInput
+        readOnly
+        value={bankName}
+      />
+    </FormControl>
+    <FormControl fullWidth variant="filled" className="w-75 m-1">
+      <InputLabel className="mt-2 font-weight-bold">Расчетный счет:</InputLabel>
+      <FilledInput
+        defaultValue={props.settlement_number}
+        onBlur={e => handleOrganization('settlement_number', e.target.value)}
+      />
+    </FormControl>
+
+  </Grid>
+
 }
+
+export default connect(state => state.app.organization)(Organization);

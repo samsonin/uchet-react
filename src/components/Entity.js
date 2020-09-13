@@ -23,29 +23,27 @@ const Entity = (props) => {
   const [entity, setEntity] = useState(null)
   const [disabled, setDisabled] = useState(true)
 
-  useEffect(() => {
-
-    serverEntity = id > 0
-      ? props.providers.find(p => p.id === id)
-      : null
-
-    setEntity({...serverEntity})
-
-  }, [])
+  const providers = props.providers;
 
   let id = +props.match.params.id;
 
   useEffect(() => {
 
+    serverEntity = id > 0
+      ? providers.find(p => p.id === id)
+      : null
+
+    setEntity({...serverEntity})
+
+  }, [id, providers])
+
+  useEffect(() => {
+
     setDisabled(JSON.stringify(serverEntity) === JSON.stringify(entity))
 
-  }, [entity])
+  }, [serverEntity, entity])
 
-  const fieldHandler = (name, value) => {
-
-    setEntity(prev => ({...prev, [name]: value}))
-
-  }
+  const fieldHandler = (name, value) => setEntity(prev => ({...prev, [name]: value}))
 
   const cancel = () => setEntity({...serverEntity})
 

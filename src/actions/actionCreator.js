@@ -1,12 +1,8 @@
 import {
-    INIT_USER,
-    UPD_APP,
-    EXIT_APP,
+    INIT_USER, UPD_APP, EXIT_APP,
+    ENQUEUE_SNACKBAR, CLOSE_SNACKBAR, REMOVE_SNACKBAR,
 } from "../constants";
 
-export const ENQUEUE_SNACKBAR = 'ENQUEUE_SNACKBAR',
-    CLOSE_SNACKBAR = 'CLOSE_SNACKBAR',
-    REMOVE_SNACKBAR = 'REMOVE_SNACKBAR';
 
 export const init_user = (jwt, user_id, organization_id, admin, expiration_time) => ({
     type: INIT_USER,
