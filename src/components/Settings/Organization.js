@@ -1,138 +1,207 @@
 import React, {useEffect, useState} from "react";
+import {connect} from "react-redux";
 
 import {Grid, InputLabel, Paper, TextField} from "@material-ui/core";
 import FormControl from "@material-ui/core/FormControl";
 import FilledInput from "@material-ui/core/FilledInput/FilledInput";
 import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
-import {connect} from "react-redux";
+import Button from "@material-ui/core/Button";
+
+const dadataInit = {
+    method: "POST",
+    mode: "cors",
+    headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": "Token " + process.env.REACT_APP_DADATA_TOKEN
+    }
+}
 
 const Organization = props => {
 
-  const [inn, setInn] = useState(() => props.inn)
-  const [autocomplete, setAutocomplete] = useState([])
-  const [bankName, setBankName] = useState('Банк')
+    // const [inn, setInn] = useState(() => props.inn)
+    // const [bankName, setBankName] = useState('Банк')
 
-  const handleOrganization = (id, index,) => {
+    const [state, setState] = useState(() => {
+        return {...props}
+    })
+    const [disabled, setDisabled] = useState(true)
 
-    console.log('requestSettings')
+    const [open, setOpen] = useState(false);
+    const [options, setOptions] = useState([]);
+    const loading = open && state.inn.length > 5;
 
-  }
+    const handleOrganization = (fieldName, newValue) => {
 
+        console.log('requestSettings')
 
-  useEffect(() => {
+    }
 
-    // if (inn.length > 5) {
-    //
-    //   fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/party', {
-    //     headers: {
-    //       Authorization: 'Token ' + process.env.REACT_APP_DADATA_TOKEN
-    //     }
-    //   })
-    //     .then(res => res.json())
-    //     .then(res => console.log(res))
-    //
-    // }
+    useEffect(() => {
+        setDisabled(JSON.stringify(state) === JSON.stringify(props))
+    }, [state])
 
-    console.log('useEffect')
+    useEffect(() => {
 
-  }, [inn])
+        if (state.inn.length < 5) {
+            setOptions([])
+            return undefined;
+        }
 
-  return <Grid container
-               component={Paper}
-               direction="row"
-               className="m-2 p-3"
-  >
+        fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/party',
+            {
+                ...dadataInit,
+                body: JSON.stringify({
+                    query: state.inn,
+                    count: 20,
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
 
-    <FormControl fullWidth variant="filled" className="w-75 m-1">
-      <InputLabel className="mt-2 font-weight-bold">
-        Название:
-      </InputLabel>
-      <FilledInput
-        id="organizationName"
-        defaultValue={props.name}
-        onBlur={e => handleOrganization('name', e.target.value)}
-      />
-    </FormControl>
+                setOptions(result.suggestions.map(v => ({
+                    inn: v.data.inn,
+                    ogrn: v.data.ogrn,
+                    kpp: v.data.kpp || '0',
+                    organization: v.value,
+                    legal_address: v.data.address.unrestricted_value,
+                    okved: v.data.okved,
+                })));
 
-    <Autocomplete
-      options={autocomplete}
-      value={inn}
-      // onInputChange={(e, v) => innHandler(v)}
-      onChange={(e, newInn) => {
-        setInn(newInn);
-      }}
-      getOptionLabel={option => (option.string)}
-      className="w-75 m-1"
-      renderInput={params => <TextField {...params}
-                                        label="ИНН"
-                                        variant="filled"
-                                        fullWidth
-      />}
-    />
+            })
+            .catch(error => console.log("error", error));
 
-    <FormControl fullWidth variant="filled" className="w-75 m-1">
-      <InputLabel className="mt-2 font-weight-bold">КПП:</InputLabel>
-      <FilledInput
-        id="organizationKpp"
-        defaultValue={props.kpp}
-        onBlur={e => handleOrganization('kpp', e.target.value)}
-      />
-    </FormControl>
-    <FormControl fullWidth variant="filled" className="w-75 m-1">
-      <InputLabel className="mt-2 font-weight-bold">ОГРН:</InputLabel>
-      <FilledInput
-        id="organizationOgrn"
-        defaultValue={props.ogrn}
-        onBlur={e => handleOrganization('ogrn', e.target.value)}
-      />
-    </FormControl>
-    <FormControl fullWidth variant="filled" className="w-75 m-1">
-      <InputLabel className="mt-2 font-weight-bold">Юридическое наименование:</InputLabel>
-      <FilledInput
-        id="organizationOrganization"
-        defaultValue={props.organization}
-        onBlur={e => handleOrganization('organization', e.target.value)}
-      />
-    </FormControl>
-    <FormControl fullWidth variant="filled" className="w-75 m-1">
-      <InputLabel className="mt-2 font-weight-bold">Юридический адрес:</InputLabel>
-      <FilledInput
-        id="organizationLegalAddress"
-        defaultValue={props.legal_address}
-        onBlur={e => handleOrganization('legal_address', e.target.value)}
-      />
-    </FormControl>
-    <FormControl fullWidth variant="filled" className="w-75 m-1">
-      <InputLabel className="mt-2 font-weight-bold">ОКВЕД:</InputLabel>
-      <FilledInput
-        id="organizationOkved"
-        defaultValue={props.okved}
-        onBlur={e => handleOrganization('okved', e.target.value)}
-      />
-    </FormControl>
-    <FormControl fullWidth variant="filled" className="w-75 m-1">
-      <InputLabel className="mt-2 font-weight-bold">БИК:</InputLabel>
-      <FilledInput
-        defaultValue={props.bank_code}
-        onBlur={e => handleOrganization('bank_code', e.target.value)}
-      />
-    </FormControl>
+    }, [state.inn])
 
-    <FormControl fullWidth variant="filled" className="w-75 m-1">
-      <FilledInput
-        readOnly
-        value={bankName}
-      />
-    </FormControl>
-    <FormControl fullWidth variant="filled" className="w-75 m-1">
-      <InputLabel className="mt-2 font-weight-bold">Расчетный счет:</InputLabel>
-      <FilledInput
-        defaultValue={props.settlement_number}
-        onBlur={e => handleOrganization('settlement_number', e.target.value)}
-      />
-    </FormControl>
+    useEffect(() => {
 
-  </Grid>
+        fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/bank',
+            {
+                ...dadataInit,
+                body: JSON.stringify({
+                    query: state.bank_code,
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+
+                setState(prev => {
+                    return {...prev, bank_name: result.suggestions[0].unrestricted_value}
+                })
+
+            })
+            .catch(error => console.log("error", error));
+
+    }, [state.bank_code])
+
+    useEffect(() => {
+        if (!open) {
+            setOptions([]);
+        }
+    }, [open])
+
+    const updateFields = v => {
+        console.log('обновить информацию об организации', v)
+    }
+
+    const renderField = v => {
+        return <FormControl
+            key={'formcnrtolrenfderfildinorg' + v.fieldName}
+            fullWidth
+            variant="filled"
+            className="w-100 m-1"
+        >
+            <InputLabel className="mt-2 font-weight-bold">
+                {v.label}
+            </InputLabel>
+            <FilledInput
+                value={state[v.fieldName] || ''}
+                onChange={e => handleOrganization(v.fieldName, e.target.value)}
+            />
+        </FormControl>
+    }
+
+    return <Grid container
+                 component={Paper}
+                 direction="row"
+                 className="m-2 p-3"
+    >
+
+        {renderField({label: 'Название', fieldName: 'name'})}
+
+        <Autocomplete
+            className="w-100 m-1"
+            value={{inn: state.inn}}
+            open={open}
+            onOpen={() => {
+                setOpen(true);
+            }}
+            onClose={() => {
+                setOpen(false);
+            }}
+            onChange={(e, v, r) => {
+                if (r === 'select-option') {
+                    updateFields(v)
+                }
+            }}
+            getOptionSelected={(option, value) => {
+                return true;
+            }}
+            getOptionLabel={option => option.inn}
+            renderOption={option => option.inn + ' ' + option.organization}
+            options={options}
+            loading={loading}
+            onInputChange={(_, v) => {
+                // setInn(v)
+            }}
+            renderInput={params => (<TextField
+                {...params}
+                label="ИНН"
+                variant="filled"
+                fullWidth
+            />)
+            }
+        />
+
+        {[
+            {label: 'ОГРН', fieldName: 'ogrn'},
+            {label: 'КПП', fieldName: 'kpp'},
+            {label: 'Юридическое наименование', fieldName: 'organization'},
+            {label: 'Юридический адрес', fieldName: 'legal_address'},
+            {label: 'ОКВЕД', fieldName: 'okved'},
+            {label: 'БИК', fieldName: 'bank_code'},
+            {label: 'Банк', fieldName: 'bank_name'},
+            {label: 'Расчетный счет', fieldName: 'settlement_number'},
+        ].map(v => renderField(v))}
+
+        <Grid container
+              direction="row"
+              justify="space-evenly"
+              style={{
+                  paddingTop: '1rem',
+              }}
+        >
+            <Button
+                variant="contained"
+                size="small"
+                color="secondary"
+                // onClick={() => cancel()}
+                disabled={disabled}
+            >
+                Отмена
+            </Button>
+            <Button
+                variant="contained"
+                size="small"
+                color="primary"
+                // onClick={() => save()}
+                disabled={disabled}
+            >
+                Сохранить
+            </Button>
+        </Grid>
+
+    </Grid>
 
 }
 
