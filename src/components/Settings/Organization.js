@@ -6,6 +6,8 @@ import FormControl from "@material-ui/core/FormControl";
 import FilledInput from "@material-ui/core/FilledInput/FilledInput";
 import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
 import Button from "@material-ui/core/Button";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import rest from "../Rest";
 
 const dadataInit = {
     method: "POST",
@@ -17,44 +19,61 @@ const dadataInit = {
     }
 }
 
+const orgFields = [
+    'name',
+    'inn',
+    'ogrn',
+    'kpp',
+    'organization',
+    'legal_address',
+    'okved',
+    'bank_code',
+    'settlement_number',
+]
+
+const initialState = props => {
+
+    let newState = {}
+
+    orgFields.map(f => {
+        newState[f] = props[f].toString()
+    })
+
+    return newState
+
+}
+
 const Organization = props => {
 
-    // const [inn, setInn] = useState(() => props.inn)
-    // const [bankName, setBankName] = useState('Банк')
-
-    const [state, setState] = useState(() => {
-        return {...props}
-    })
+    const [state, setState] = useState(() => initialState(props))
     const [disabled, setDisabled] = useState(true)
 
-    const [open, setOpen] = useState(false);
+    const [innOpen, setInnOpen] = useState(false)
+    const [ogrnOpen, setOgrnOpen] = useState(false)
+
+    const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState([]);
-    const loading = open && state.inn.length > 5;
-
-    const handleOrganization = (fieldName, newValue) => {
-
-        console.log('requestSettings')
-
-    }
 
     useEffect(() => {
-        setDisabled(JSON.stringify(state) === JSON.stringify(props))
+
+        let isEqual = true;
+
+        orgFields.map(f => {
+            if (state[f] !== props[f]) isEqual = false;
+        })
+
+        setDisabled(isEqual)
+
     }, [state])
 
-    useEffect(() => {
+    const dadataRequest = query => {
 
-        if (state.inn.length < 5) {
-            setOptions([])
-            return undefined;
-        }
+        setLoading(true)
 
         fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/party',
             {
                 ...dadataInit,
-                body: JSON.stringify({
-                    query: state.inn,
-                    count: 20,
-                })
+                body: JSON.stringify({query})
             })
             .then(response => response.json())
             .then(result => {
@@ -69,9 +88,32 @@ const Organization = props => {
                 })));
 
             })
-            .catch(error => console.log("error", error));
+            .catch(error => console.log("error", error))
+            .finally(() => setLoading(false))
 
-    }, [state.inn])
+    }
+
+    useEffect(() => {
+
+        if (!innOpen || state.inn.length < 5) {
+            setOptions([])
+            return undefined;
+        }
+
+        dadataRequest(state.inn)
+
+    }, [innOpen, state.inn])
+
+    useEffect(() => {
+
+        if (!ogrnOpen || state.ogrn.length < 5) {
+            setOptions([])
+            return undefined;
+        }
+
+        dadataRequest(state.ogrn)
+
+    }, [ogrnOpen, state.ogrn])
 
     useEffect(() => {
 
@@ -86,7 +128,13 @@ const Organization = props => {
             .then(result => {
 
                 setState(prev => {
-                    return {...prev, bank_name: result.suggestions[0].unrestricted_value}
+
+                    let bank_name = typeof result.suggestions[0] === 'undefined'
+                        ? 'Банк'
+                        : result.suggestions[0].unrestricted_value
+
+                    return {...prev, bank_name}
+
                 })
 
             })
@@ -94,14 +142,25 @@ const Organization = props => {
 
     }, [state.bank_code])
 
-    useEffect(() => {
-        if (!open) {
-            setOptions([]);
-        }
-    }, [open])
+    const cancel = () => {
 
-    const updateFields = v => {
-        console.log('обновить информацию об организации', v)
+        setState(initialState(props))
+
+    }
+
+    const save = () => {
+
+        rest('organization',
+            'PATCH',
+            state
+        ).then(res => console.log('res', res))
+
+    }
+
+    const updateFields = newObject => {
+
+        setState(prev => ({...prev, ...newObject}))
+
     }
 
     const renderField = v => {
@@ -116,7 +175,7 @@ const Organization = props => {
             </InputLabel>
             <FilledInput
                 value={state[v.fieldName] || ''}
-                onChange={e => handleOrganization(v.fieldName, e.target.value)}
+                onChange={e => updateFields({[v.fieldName]: e.target.value})}
             />
         </FormControl>
     }
@@ -132,12 +191,12 @@ const Organization = props => {
         <Autocomplete
             className="w-100 m-1"
             value={{inn: state.inn}}
-            open={open}
+            // open={innOpen}
             onOpen={() => {
-                setOpen(true);
+                setInnOpen(true);
             }}
             onClose={() => {
-                setOpen(false);
+                setInnOpen(false);
             }}
             onChange={(e, v, r) => {
                 if (r === 'select-option') {
@@ -152,19 +211,69 @@ const Organization = props => {
             options={options}
             loading={loading}
             onInputChange={(_, v) => {
-                // setInn(v)
+                updateFields({inn: v})
             }}
             renderInput={params => (<TextField
                 {...params}
                 label="ИНН"
                 variant="filled"
                 fullWidth
-            />)
-            }
+                InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                        <React.Fragment>
+                            {loading ? <CircularProgress color="inherit" size={20}/> : null}
+                            {params.InputProps.endAdornment}
+                        </React.Fragment>
+                    )
+                }}
+            />)}
+        />
+
+        <Autocomplete
+            className="w-100 m-1"
+            value={{ogrn: state.ogrn}}
+            // open={innOpen}
+            onOpen={() => {
+                setOgrnOpen(true);
+            }}
+            onClose={() => {
+                setOgrnOpen(false);
+            }}
+            onChange={(e, v, r) => {
+                if (r === 'select-option') {
+                    updateFields(v)
+                }
+            }}
+            getOptionSelected={(option, value) => {
+                return true;
+            }}
+            getOptionLabel={option => option.ogrn}
+            renderOption={option => option.ogrn + ' ' + option.organization}
+            options={options}
+            loading={loading}
+            onInputChange={(_, v) => {
+                updateFields({ogrn: v})
+            }}
+            renderInput={params => (<TextField
+                {...params}
+                label="ОГРН"
+                variant="filled"
+                fullWidth
+                InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                        <React.Fragment>
+                            {loading ? <CircularProgress color="inherit" size={20}/> : null}
+                            {params.InputProps.endAdornment}
+                        </React.Fragment>
+                    )
+                }}
+            />)}
         />
 
         {[
-            {label: 'ОГРН', fieldName: 'ogrn'},
+            // {label: 'ОГРН', fieldName: 'ogrn'},
             {label: 'КПП', fieldName: 'kpp'},
             {label: 'Юридическое наименование', fieldName: 'organization'},
             {label: 'Юридический адрес', fieldName: 'legal_address'},
@@ -177,15 +286,13 @@ const Organization = props => {
         <Grid container
               direction="row"
               justify="space-evenly"
-              style={{
-                  paddingTop: '1rem',
-              }}
+              style={{paddingTop: '1rem'}}
         >
             <Button
                 variant="contained"
                 size="small"
                 color="secondary"
-                // onClick={() => cancel()}
+                onClick={() => cancel()}
                 disabled={disabled}
             >
                 Отмена
@@ -194,7 +301,7 @@ const Organization = props => {
                 variant="contained"
                 size="small"
                 color="primary"
-                // onClick={() => save()}
+                onClick={() => save()}
                 disabled={disabled}
             >
                 Сохранить
