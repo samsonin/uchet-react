@@ -31,8 +31,7 @@ function currencyConverter(rub) {
 class NavbarPage extends Component {
 
     state = {
-        balanceModalCounter: 0,
-        balanceModal: false
+        balanceModalOpen: false,
     };
 
     toggleClick() {
@@ -86,8 +85,6 @@ class NavbarPage extends Component {
                 </MDBDropdown>
     }
 
-    ballanceModal = () => this.setState({balanceModalCounter: this.state.balanceModalCounter + 1});
-
     exit = () => {
         const {init_user, exit_app} = this.props;
         init_user('', 0, '', '', '');
@@ -128,7 +125,7 @@ class NavbarPage extends Component {
                     </MDBNavLink>
                 </MDBDropdownItem>
                 {this.props.app
-                    ? <MDBDropdownItem onClick={this.ballanceModal}>
+                    ? <MDBDropdownItem onClick={() => this.setState({balanceModalOpen: true})}>
                         Баланс: {currencyConverter(this.props.app.balance)}
                     </MDBDropdownItem>
                     : ''}
@@ -178,7 +175,10 @@ class NavbarPage extends Component {
                     </MDBNavItem>
                 </MDBNavbarNav>
             </MDBCollapse>
-            <BalanceModal counter={this.state.balanceModalCounter}/>
+            <BalanceModal
+              isOpen={this.state.balanceModalOpen}
+              close={() => this.setState({balanceModalOpen: false})}
+            />
         </MDBNavbar>
     }
 }

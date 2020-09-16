@@ -1,13 +1,11 @@
-import React, {Component} from "react";
+import React, {useState} from "react";
 import {
-    MDBBtn,
-    MDBModal,
-    MDBModalBody,
-    MDBModalFooter,
-    MDBModalHeader,
+  MDBBtn,
+  MDBModal,
+  MDBModalBody,
+  MDBModalFooter,
+  MDBModalHeader,
 } from "mdbreact";
-import {bindActionCreators} from "redux";
-import {init_user} from "../actions/actionCreator";
 import {connect} from "react-redux";
 
 import RadioGroup from "@material-ui/core/RadioGroup";
@@ -16,112 +14,93 @@ import Radio from "@material-ui/core/Radio";
 import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
 
-class balanceModal extends Component {
+import {BottomButtons} from "./common/BottomButtons";
 
-    state = {
-        counter: 0,
-        isOpen: false,
-        sum: 300,
-        paymentType: 'AC',   //PC, AC, MC
-    };
+const BalanceModal = props => {
 
-    componentDidUpdate = () => {
-        if (this.state.counter !== this.props.counter) this.setState({
-            counter: this.state.counter + 1,
-            isOpen: true
-        })
-    };
+  const [paymentType, setPaymentType] = useState('AC')
+  const [sum, setSum] = useState(300)
 
-    toggle = () => this.setState({isOpen: false});
+  const toggle = () => props.close()
 
-    sumChange = () => {
-        const paymentSum = document.querySelector('#paymentSum')
-        let sum = +paymentSum.value;
-        if (sum < 10 ) sum = 10;
-        this.setState({sum});
-    };
+  const sumChange = value => {
+    let sum = +value;
+    if (sum < 10) sum = 10;
+    setSum(sum);
+  };
 
-    radioChange = event => this.setState({paymentType: event.target.value});
+  const paymentFormSubmitter = event => {
 
-    paymentFormSubmitter = event => {
-        event.preventDefault()
-        document.querySelector('#paymentForm')
-            .submit()
-    }
+    let f = document.createElement("form");
+    f.setAttribute('method', "post");
+    f.setAttribute('action', "https://money.yandex.ru/quickpay/confirm.xml");
 
-    render() {
-        return (
-            <MDBModal isOpen={this.state.isOpen} toggle={this.toggle}>
-                <MDBModalHeader toggle={this.toggle} className="font-weight-bold">
-                    Пополнение счета
-                </MDBModalHeader>
+    [
+      {name: 'receiver', value: '410012390556672'},
+      {name: 'quickpay-form', value: 'shop'},
+      {name: 'successURL', value: 'https://uchet.store'},
+      {name: 'targets', value: 'Пополнение счета в Uchet.store'},
+      {name: 'label', value: props.organization_id},
+      {name: 'paymentType', value: paymentType},
+      {name: 'sum', value: sum},
+    ].map(v => {
+      let i = document.createElement("input");
+      i.type = 'hidden'
+      i.name = v.name;
+      i.value = v.value;
+      f.appendChild(i)
+    })
 
-                <MDBModalBody>
+    let body = document.getElementsByTagName('body')[0]
 
-                    <form id="paymentForm" onSubmit={this.sumChange} method="POST"
-                          action="https://money.yandex.ru/quickpay/confirm.xml">
-                        <input type="hidden" name="receiver" value="410012390556672"/>
-                        <input type="hidden" name="quickpay-form" value="shop"/>
-                        <input type="hidden" name="successURL" value="https://uchet.store"/>
-                        <input type="hidden" name="targets" value="Пополнение счета в Uchet.store"/>
-                        <input type="hidden" name="label" value={this.props.organization_id}/>
+    // console.log(body)
 
-                        <Grid container direction="row" justify="center" alignItems="center">
-                            <TextField
-                                id="paymentSum"
-                                name="sum"
-                                label="Сумма платежа, руб."
-                                value={this.state.sum}
-                                onChange={this.sumChange}
-                                type="number"
-                                margin="normal"
-                            />
-                        </Grid>
+    body.append(f)
+    f.submit()
 
-                        <Grid container direction="row" justify="center" alignItems="center">
-                            <RadioGroup name="paymentType" value={this.state.paymentType} onChange={this.radioChange}>
-                                <FormControlLabel
-                                    checked={"PC" === this.state.paymentType}
-                                    value="PC"
-                                    control={<Radio color="primary"/>}
-                                    label="Яндекс Деньги"
-                                />
-                                <FormControlLabel
-                                    checked={"AC" === this.state.paymentType}
-                                    value="AC"
-                                    control={<Radio color="primary"/>}
-                                    label="Банковская карта"
-                                />
-                                <FormControlLabel
-                                    checked={"MC" === this.state.paymentType}
-                                    value="MC"
-                                    control={<Radio color="primary"/>}
-                                    label="Баланс телефона"
-                                />
-                            </RadioGroup>
-                        </Grid>
+  }
 
-                    </form>
+  return <MDBModal isOpen={props.isOpen} toggle={toggle}>
+    <MDBModalHeader toggle={toggle} className="font-weight-bold">
+      Пополнение счета
+    </MDBModalHeader>
 
-                </MDBModalBody>
+    <MDBModalBody>
 
-                <MDBModalFooter>
-                    <MDBBtn color="secondary" onClick={this.toggle}>
-                        Отмена
-                    </MDBBtn>
-                    <MDBBtn color="primary" onClick={this.paymentFormSubmitter}>
-                        Пополнить
-                    </MDBBtn>
-                </MDBModalFooter>
+      <Grid container direction="row" justify="center" alignItems="center">
+        <TextField
+          label="Сумма платежа, руб."
+          value={sum}
+          onChange={e => sumChange(e.target.value)}
+          type="number"
+          // margin="normal"
+        />
+      </Grid>
 
-            </MDBModal>
-        )
-    }
+      <Grid container direction="row" justify="center" alignItems="center">
+        <RadioGroup value={paymentType}
+                    onChange={e => setPaymentType(e.target.value)}
+        >
+          {[
+            {value: 'PC', label: 'Яндекс Деньги'},
+            {value: 'AC', label: 'Банковская карта'},
+            {value: 'MC', label: 'Баланс телефона'},
+          ].map(v => <FormControlLabel
+            key={'frmkeybalnsmdal' + v.value}
+            checked={v.value === paymentType}
+            value={v.value}
+            control={<Radio color="primary"/>}
+            label={v.label}
+          />)}
+        </RadioGroup>
+      </Grid>
+
+    </MDBModalBody>
+
+    {BottomButtons(() => paymentFormSubmitter(), () => toggle(), false)}
+
+  </MDBModal>
 
 }
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-    init_user
-}, dispatch);
-
-export default connect(state => (state.auth), mapDispatchToProps)(balanceModal);
+export default connect(state => state.auth)(BalanceModal);
