@@ -1,7 +1,9 @@
 import React from "react";
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
-import {closeSnackbar, enqueueSnackbar, upd_app} from "../../actions/actionCreator";
+import {upd_app} from "../../actions/actionCreator";
+
+import {useSnackbar} from 'notistack';
 
 import {Fab, FormControlLabel, Grid, InputLabel, Switch, TextField, Typography} from "@material-ui/core";
 import AddIcon from '@material-ui/icons/Add';
@@ -12,26 +14,20 @@ import rest from '../../components/Rest';
 // сократить и оптимизировать код
 // пожалуйста, работайте в отдельной ветке гита
 
-
-const mapDispatchToProps = dispatch => bindActionCreators({
-    enqueueSnackbar,
-    closeSnackbar,
-    upd_app
-}, dispatch);
+const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
 function Stocks(props) {
 
     const [isRequest, setIsRequest] = React.useState(false);
 
+    const {enqueueSnackbar} = useSnackbar();
+
     const add = () => {
 
         if (props.app.stocks.find(point => point.name === '')) {
-            props.enqueueSnackbar({
-                message: 'Существует точка без названия, создать новую невозможно!',
-                options: {
-                    variant: 'warning',
-                }
-            });
+            enqueueSnackbar('Существует точка без названия, создать новую невозможно!', {
+                variant: 'warning'
+            })
         } else {
 
             if (!isRequest) {
@@ -76,13 +72,10 @@ function Stocks(props) {
                     } else {
                         let message = 'ошибка';
                         if (data.error === 'already_used') message = 'Такой пользователь уже зарегистрирован!';
-                        if (data.error === 'wrong_format') message = 'Неправильный формат контакта!';
-                        props.enqueueSnackbar({
-                            message,
-                            options: {
-                                variant: 'warning',
-                            }
-                        });
+                        else if (data.error === 'wrong_format') message = 'Неправильный формат контакта!';
+                        enqueueSnackbar(message, {
+                            variant: 'warning'
+                        })
                     }
                 })
         }

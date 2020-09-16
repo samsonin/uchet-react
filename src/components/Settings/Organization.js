@@ -37,6 +37,7 @@ const initialState = props => {
 
     orgFields.map(f => {
         newState[f] = props[f].toString()
+        return f;
     })
 
     return newState
@@ -56,15 +57,21 @@ const Organization = props => {
 
     useEffect(() => {
 
+        // console.log('useEffect')
+
         let isEqual = true;
 
         orgFields.map(f => {
-            if (state[f] !== props[f]) isEqual = false;
+            if (state[f] !== props[f].toString()) {
+                isEqual = false;
+                // console.log(f, state[f], props[f])
+            }
+            return f
         })
 
         setDisabled(isEqual)
 
-    }, [state])
+    }, [state, props])
 
     const dadataRequest = query => {
 
@@ -153,7 +160,15 @@ const Organization = props => {
         rest('organization',
             'PATCH',
             state
-        ).then(res => console.log('res', res))
+        ).then(res => {
+
+            let newState = initialState(res.body.organization);
+
+            newState.bank_name = state.bank_name;
+
+            setState(newState)
+
+        })
 
     }
 
@@ -273,7 +288,6 @@ const Organization = props => {
         />
 
         {[
-            // {label: 'ОГРН', fieldName: 'ogrn'},
             {label: 'КПП', fieldName: 'kpp'},
             {label: 'Юридическое наименование', fieldName: 'organization'},
             {label: 'Юридический адрес', fieldName: 'legal_address'},

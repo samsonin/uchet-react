@@ -1,6 +1,6 @@
 import React from 'react'
 import {connect} from "react-redux";
-import restRequest from "./Rest";
+import rest from "./Rest";
 
 import {styled} from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
@@ -44,7 +44,7 @@ class Queue extends React.Component {
 
     pointChange = (user_id, stock_id, permission) => {
 
-        restRequest('queue', 'PATCH',
+        rest('queue', 'PATCH',
             {user_id, stock_id, permission})
             .then(res => {
 

@@ -23,7 +23,7 @@ import Config from "./components/Settings/Config";
 import Organization from "./components/Settings/Organization";
 import Employees from "./components/Settings/Employees";
 import Stocks from "./components/Settings/Stocks";
-import Docs from "./components/Settings/Docs";
+// import Docs from "./components/Settings/Docs";
 import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
@@ -137,7 +137,7 @@ class App extends Component {
               <Route path="/settings/config" component={Config}/>
               <Route path="/settings/config" component={Config}/>
               <Route path="/settings/fields" component={Fields}/>
-              <Route path="/settings/docs" component={Docs}/>
+              {/*<Route path="/settings/docs" component={Docs}/>*/}
               <Route path="/integration/mango"
                      component={() => <IntegrationMango
                        org_id={this.props.auth.organization_id}

@@ -1,11 +1,9 @@
 import React, {useState} from "react";
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
-import {
-    closeSnackbar,
-    enqueueSnackbar,
-    upd_app,
-} from "../../actions/actionCreator";
+import {upd_app,} from "../../actions/actionCreator";
+
+import {useSnackbar} from 'notistack';
 
 import {
     Fab,
@@ -54,11 +52,7 @@ const useStyles = makeStyles({
 });
 const mapDispatchToProps = dispatch =>
     bindActionCreators(
-        {
-            enqueueSnackbar,
-            closeSnackbar,
-            upd_app,
-        },
+        {upd_app},
         dispatch
     );
 
@@ -67,6 +61,8 @@ const Employees = props => {
     const [isRequest, setRequest] = useState(false);
     const [status, setStatus] = useState(0)
     const [isEndAdornment, setEndAdornment] = useState(false)
+
+    const {enqueueSnackbar} = useSnackbar();
 
     const requestSettings = (action, value, id, index,) => {
 
@@ -97,12 +93,9 @@ const Employees = props => {
                     let message = 'ошибка';
                     if (data.error === 'already_used') message = 'Такой пользователь уже зарегистрирован!';
                     if (data.error === 'wrong_format') message = 'Неправильный формат контакта!';
-                    props.enqueueSnackbar({
-                        message,
-                        options: {
+                    enqueueSnackbar(message, {
                             variant: 'warning',
-                        }
-                    });
+                    })
 
                 }
             })

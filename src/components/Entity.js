@@ -41,7 +41,7 @@ const Entity = (props) => {
 
     setDisabled(JSON.stringify(serverEntity) === JSON.stringify(entity))
 
-  }, [serverEntity, entity])
+  }, [entity])
 
   const fieldHandler = (name, value) => setEntity(prev => ({...prev, [name]: value}))
 
