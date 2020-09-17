@@ -97,7 +97,7 @@ const BalanceModal = props => {
 
     </MDBModalBody>
 
-    {BottomButtons(() => paymentFormSubmitter(), () => toggle(), false)}
+    {BottomButtons(paymentFormSubmitter, toggle)}
 
   </MDBModal>
 

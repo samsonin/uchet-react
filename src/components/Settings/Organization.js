@@ -8,6 +8,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import rest from "../Rest";
+import {BottomButtons} from "../common/BottomButtons";
 
 const dadataInit = {
     method: "POST",
@@ -297,30 +298,7 @@ const Organization = props => {
             {label: 'Расчетный счет', fieldName: 'settlement_number'},
         ].map(v => renderField(v))}
 
-        <Grid container
-              direction="row"
-              justify="space-evenly"
-              style={{paddingTop: '1rem'}}
-        >
-            <Button
-                variant="contained"
-                size="small"
-                color="secondary"
-                onClick={() => cancel()}
-                disabled={disabled}
-            >
-                Отмена
-            </Button>
-            <Button
-                variant="contained"
-                size="small"
-                color="primary"
-                onClick={() => save()}
-                disabled={disabled}
-            >
-                Сохранить
-            </Button>
-        </Grid>
+        {BottomButtons(save, cancel, disabled)}
 
     </Grid>
 

@@ -8,143 +8,131 @@ import IconButton from "@material-ui/core/IconButton";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import DeleteIcon from '@material-ui/icons/Delete';
 import TextField from "@material-ui/core/TextField/TextField";
 import {Paper} from "@material-ui/core";
-import Button from "@material-ui/core/Button";
 
 import rest from "./Rest";
+import {BottomButtons} from "./common/BottomButtons";
 
 
-let serverEntity;
+let serverEntity = {};
 
-const Entity = (props) => {
+const Entity = props => {
 
-  const [isDetails, setDetails] = useState(false)
-  const [entity, setEntity] = useState(null)
-  const [disabled, setDisabled] = useState(true)
+    const [isDetails, setDetails] = useState(false)
+    const [entity, setEntity] = useState(null)
+    const [disabled, setDisabled] = useState(true)
 
-  const providers = props.providers;
+    const providers = props.providers;
 
-  let id = +props.match.params.id;
+    let id = +props.match.params.id;
 
-  useEffect(() => {
+    useEffect(() => {
 
-    serverEntity = id > 0
-      ? providers.find(p => p.id === id)
-      : null
+        serverEntity = id > 0
+            ? providers.find(p => p.id === id)
+            : {}
 
-    setEntity({...serverEntity})
+        setEntity({...serverEntity})
 
-  }, [id, providers])
+    }, [id, providers])
 
-  useEffect(() => {
+    useEffect(() => {
 
-    setDisabled(JSON.stringify(serverEntity) === JSON.stringify(entity))
+        setDisabled(JSON.stringify(serverEntity) === JSON.stringify(entity))
 
-  }, [entity])
+    }, [entity])
 
-  const fieldHandler = (name, value) => setEntity(prev => ({...prev, [name]: value}))
+    const fieldHandler = (name, value) => {
+        setEntity(prev => ({...prev, [name]: value}))
+    }
 
-  const cancel = () => setEntity({...serverEntity})
+    const cancel = () => setEntity({...serverEntity})
 
-  const save = () => {
+    const save = () => {
 
-    rest('entities/' + entity.id,
-      'PUT',
-      entity
-    ).then(res => console.log('res', res)
+        rest('entities/' + (entity.id || ''),
+            entity.id
+                ? 'PUT'
+                : 'POST',
+            entity
+        ).then(res => console.log('res', res))
 
-  )
+    }
 
-  }
+    const remove = () => {
 
-  return props.fields.allElements
-    ? <Grid container
-            component={Paper}
-            direction="row"
-            justify="space-between"
-            style={{
-              padding: '1rem'
-            }}
-    >
-      <Grid item>
-        <Tooltip title={'Все юр. лица'}>
-          <Link to="/entities">
-            <IconButton>
-              <ArrowBackIcon/>
-            </IconButton>
-          </Link>
-        </Tooltip>
-      </Grid>
-      <Grid item>
-        <Tooltip title={
-          isDetails
-            ? 'Кратко'
-            : 'Подробно'
-        }>
-          <IconButton
-            onClick={() => setDetails(!isDetails)}
-          >
-            {isDetails
-              ? <ExpandLessIcon/>
-              : <ExpandMoreIcon/>
-            }
-          </IconButton>
-        </Tooltip>
-      </Grid>
+        rest('entities/' + entity.id, 'DELETE')
+            .then(res => console.log('res', res))
 
-      {entity
-        ? props.fields.allElements
-          .filter(elem => elem.index === 'entity' && elem.is_valid)
-          .map(elem => {
+    }
 
-              return <TextField
+    return props.fields.allElements
+        ? <Grid container
+                component={Paper}
+                direction="row"
+                justify="space-between"
                 style={{
-                  width: '100%',
-                  margin: '1rem',
-                  padding: '1rem',
+                    padding: '1rem'
                 }}
-                key={'entityfieldskey' + elem.id}
-                label={elem.value}
-                value={id > 0
-                  ? entity[elem.name]
-                  : ''}
-                disabled={elem.name === 'saldo'}
-                onChange={e => fieldHandler(elem.name, e.target.value)}
-              />
-            }
-          )
-        : null}
-
-      <Grid container
-            direction="row"
-            justify="space-evenly"
-      >
-        <Button
-          variant="contained"
-          size="small"
-          color="secondary"
-          onClick={() => cancel()}
-          disabled={disabled}
         >
-          Отмена
-        </Button>
-        <Button
-          variant="contained"
-          size="small"
-          color="primary"
-          onClick={() => save()}
-          disabled={disabled}
-        >
-          {id > 0
-            ? 'Сохранить'
-            : 'Создать'}
-        </Button>
-      </Grid>
+            <Grid item>
+                <Tooltip title={'Все юр. лица'}>
+                    <Link to="/entities">
+                        <IconButton>
+                            <ArrowBackIcon/>
+                        </IconButton>
+                    </Link>
+                </Tooltip>
+            </Grid>
+            <Grid item>
+                <Tooltip title="Удалить">
+                    <IconButton
+                        onClick={() => remove()}
+                    >
+                        <DeleteIcon/>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title={
+                    isDetails
+                        ? 'Кратко'
+                        : 'Подробно'
+                }>
+                    <IconButton
+                        onClick={() => setDetails(!isDetails)}
+                    >
+                        {isDetails
+                            ? <ExpandLessIcon/>
+                            : <ExpandMoreIcon/>
+                        }
+                    </IconButton>
+                </Tooltip>
+            </Grid>
 
-    </Grid>
+            {entity
+                ? props.fields.allElements
+                    .filter(elem => elem.index === 'entity' && elem.is_valid)
+                    .filter(field => isDetails || ['name', 'inn'].includes(field.name))
+                    .map(elem => <TextField
+                            style={{
+                                width: '100%',
+                                margin: '1rem',
+                                padding: '1rem',
+                            }}
+                            key={'entityfieldskey' + elem.id}
+                            label={elem.value}
+                            value={entity[elem.name]}
+                            disabled={elem.name === 'saldo'}
+                            onChange={e => fieldHandler(elem.name, e.target.value)}
+                        />
+                    )
+                : null}
 
-    : null
+            {BottomButtons(save, cancel, disabled, id < 1)}
+
+        </Grid>
+        : null
 }
 
 export default connect(state => state.app)(Entity);

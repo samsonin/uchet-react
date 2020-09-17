@@ -12,116 +12,90 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
 import ReferalSelect from "../ReferalSelect";
 import Field from "../Field";
+import {BottomButtons} from "../common/BottomButtons";
 
 const types = {
-  birthday: 'date',
-  doc_date: 'date',
+    birthday: 'date',
+    doc_date: 'date',
 }
 
 const useStyles = makeStyles(theme => ({
-  button: {
-    borderRadius: 3,
-    margin: '1rem'
-  }
+    button: {
+        borderRadius: 3,
+        margin: '1rem'
+    }
 }));
 
 const View = props => {
 
-  const [isDetails, setDetails] = useState(false)
+    const [isDetails, setDetails] = useState(false)
 
-  const classes = useStyles();
+    const classes = useStyles();
 
-  return <Grid container component={Paper} spacing={1} justify="space-around">
+    return <Grid container component={Paper} spacing={1} justify="space-around">
 
-    <Grid container
-          style={{margin: '1rem'}}
-          direction="row"
-          justify="space-between"
-    >
-      <Grid item>
-        <Tooltip title={'Все физ. лица'}>
-          <Link to="/customers">
-            <IconButton>
-              <ArrowBackIcon/>
-            </IconButton>
-          </Link>
-        </Tooltip>
-      </Grid>
-      <Grid item>
-        <Tooltip title={
-          isDetails
-            ? ''
-            : 'Подробнее'
-        }>
-          <IconButton
-            onClick={() => setDetails(!isDetails)}
-          >
-            {isDetails
-              ? <ExpandLessIcon/>
-              : <ExpandMoreIcon/>
+        <Grid container
+              style={{margin: '1rem'}}
+              direction="row"
+              justify="space-between"
+        >
+            <Grid item>
+                <Tooltip title={'Все физ. лица'}>
+                    <Link to="/customers">
+                        <IconButton>
+                            <ArrowBackIcon/>
+                        </IconButton>
+                    </Link>
+                </Tooltip>
+            </Grid>
+            <Grid item>
+                <Tooltip title={
+                    isDetails
+                        ? ''
+                        : 'Подробнее'
+                }>
+                    <IconButton
+                        onClick={() => setDetails(!isDetails)}
+                    >
+                        {isDetails
+                            ? <ExpandLessIcon/>
+                            : <ExpandMoreIcon/>
+                        }
+                    </IconButton>
+                </Tooltip>
+            </Grid>
+        </Grid>
+
+        <Grid item xs={12}>
+            {
+                props.allElements
+                    .filter(field => field.index === 'customer' && field.is_valid)
+                    .filter(field => isDetails || ['fio', 'phone_number'].includes(field.name))
+                    .map(field => field.name === 'referal_id'
+                        ? <ReferalSelect
+                            key={'customerfieldskey' + field.name}
+                            value={props.customer[field.name]}
+                            onChange={e => props.handleChange(field.name, e.target.value)}
+                        />
+                        : <Field
+                            key={'customerfieldskey' + field.name + field.index + field.value}
+                            type={types[field.name] || 'text'}
+                            label={field.value}
+                            value={props.customer[field.name]}
+                            onChange={e => props.handleChange(field.name, e.target.value)}
+                        />)
             }
-          </IconButton>
-        </Tooltip>
-      </Grid>
-    </Grid>
+        </Grid>
 
-    <Grid item xs={12}>
-      {
-        props.allElements
-          .filter(field => field.index === 'customer' && field.is_valid)
-          .filter(field => isDetails || ['fio', 'phone_number'].includes(field.name))
-          .map(field => field.name === 'referal_id'
-            ? <ReferalSelect
-              key={'customerfieldskey' + field.name}
-              value={props.customer[field.name]}
-              onChange={e => props.handleChange(field.name, e.target.value)}
-            />
-            : <Field
-              key={'customerfieldskey' + field.name + field.index + field.value}
-              type={types[field.name] || 'text'}
-              label={field.value}
-              value={props.customer[field.name]}
-              onChange={e => props.handleChange(field.name, e.target.value)}
-            />)
-      }
-    </Grid>
+        {BottomButtons(props.customer.id === undefined
+            ? props.create
+            : props.update,
+            props.reset,
+            props.disabled,
+            props.customer.id === undefined
+        )}
 
-    <Grid item>
-      <Button
-        className={classes.button}
-        variant="contained"
-        size="small"
-        color="secondary"
-        onClick={() => props.reset()}
-        disabled={props.disabled}
-      >
-        Отмена
-      </Button>
-      {props.customer.id === undefined
-        ? <Button
-          className={classes.button}
-          variant="contained"
-          size="small"
-          color="primary"
-          onClick={() => props.create()}
-          disabled={props.disabled}
-        >
-          Создать
-        </Button>
-        : <Button
-          className={classes.button}
-          variant="contained"
-          size="small"
-          color="primary"
-          onClick={() => props.update()}
-          disabled={props.disabled}
-        >
-          Сохранить
-        </Button>
-      }
     </Grid>
-
-  </Grid>
 
 }
 
