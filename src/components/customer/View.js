@@ -2,13 +2,14 @@ import React, {useState} from "react";
 import {connect} from "react-redux";
 import {Link} from "react-router-dom";
 
-import {makeStyles} from "@material-ui/core/styles";
-import {Button, Grid, Paper} from "@material-ui/core";
+import {Grid, Paper} from "@material-ui/core";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
+
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import DeleteIcon from "@material-ui/icons/Delete";
 
 import ReferalSelect from "../ReferalSelect";
 import Field from "../Field";
@@ -19,18 +20,9 @@ const types = {
     doc_date: 'date',
 }
 
-const useStyles = makeStyles(theme => ({
-    button: {
-        borderRadius: 3,
-        margin: '1rem'
-    }
-}));
-
 const View = props => {
 
     const [isDetails, setDetails] = useState(false)
-
-    const classes = useStyles();
 
     return <Grid container component={Paper} spacing={1} justify="space-around">
 
@@ -49,6 +41,13 @@ const View = props => {
                 </Tooltip>
             </Grid>
             <Grid item>
+                <Tooltip title="Удалить">
+                    <IconButton
+                        onClick={() => props.remove()}
+                    >
+                        <DeleteIcon/>
+                    </IconButton>
+                </Tooltip>
                 <Tooltip title={
                     isDetails
                         ? ''

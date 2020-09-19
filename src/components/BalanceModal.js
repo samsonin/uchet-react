@@ -1,9 +1,7 @@
 import React, {useState} from "react";
 import {
-  MDBBtn,
   MDBModal,
   MDBModalBody,
-  MDBModalFooter,
   MDBModalHeader,
 } from "mdbreact";
 import {connect} from "react-redux";
@@ -49,11 +47,10 @@ const BalanceModal = props => {
       i.name = v.name;
       i.value = v.value;
       f.appendChild(i)
+      return v;
     })
 
     let body = document.getElementsByTagName('body')[0]
-
-    // console.log(body)
 
     body.append(f)
     f.submit()

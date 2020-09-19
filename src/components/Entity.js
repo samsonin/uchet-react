@@ -12,6 +12,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import TextField from "@material-ui/core/TextField/TextField";
 import {Paper} from "@material-ui/core";
 
+import {useSnackbar} from 'notistack';
+
 import rest from "./Rest";
 import {BottomButtons} from "./common/BottomButtons";
 
@@ -20,9 +22,12 @@ let serverEntity = {};
 
 const Entity = props => {
 
+    const [isRequesting, setRequesting] = useState(false)
     const [isDetails, setDetails] = useState(false)
     const [entity, setEntity] = useState(null)
     const [disabled, setDisabled] = useState(true)
+
+    const {enqueueSnackbar} = useSnackbar();
 
     const providers = props.providers;
 
@@ -40,9 +45,11 @@ const Entity = props => {
 
     useEffect(() => {
 
-        setDisabled(JSON.stringify(serverEntity) === JSON.stringify(entity))
+        setDisabled(isRequesting
+            ? true
+            : JSON.stringify(serverEntity) === JSON.stringify(entity))
 
-    }, [entity])
+    }, [entity, isRequesting])
 
     const fieldHandler = (name, value) => {
         setEntity(prev => ({...prev, [name]: value}))
@@ -52,19 +59,52 @@ const Entity = props => {
 
     const save = () => {
 
+        if (isRequesting) return;
+
+        setRequesting(true)
+
         rest('entities/' + (entity.id || ''),
             entity.id
                 ? 'PUT'
                 : 'POST',
             entity
-        ).then(res => console.log('res', res))
+        ).then(res => {
+
+            setRequesting(false)
+
+            if (res.ok) enqueueSnackbar('Сохранено', {
+                variant: 'success',
+            });
+
+        })
 
     }
 
     const remove = () => {
 
+        if (isRequesting) return;
+
+        setRequesting(true)
+
         rest('entities/' + entity.id, 'DELETE')
-            .then(res => console.log('res', res))
+            .then(res => {
+
+                setRequesting(false)
+
+                if (res.ok) {
+                    setEntity(null)
+                    enqueueSnackbar('Удалено', {
+                        variant: 'success',
+                    });
+                    this.props.history.push('/entities')
+                } else {
+                    enqueueSnackbar('Невозможно удалить', {
+                        variant: 'error',
+                    });
+                }
+
+
+            })
 
     }
 
@@ -89,6 +129,7 @@ const Entity = props => {
             <Grid item>
                 <Tooltip title="Удалить">
                     <IconButton
+                        disabled={isRequesting}
                         onClick={() => remove()}
                     >
                         <DeleteIcon/>
