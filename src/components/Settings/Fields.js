@@ -45,6 +45,8 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
   initial(newFields) {
 
+    if (typeof this.props.app.fields.allElements === "undefined") return
+
     let fields = [];
     (newFields || this.props.app.fields.allElements).map(v => {
       if (v.index === this.state.index) {
