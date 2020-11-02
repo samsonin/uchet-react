@@ -44,9 +44,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const subscribes = [
-    {month: 1, monthText: "1 месяц", cost: 5, profit: 0},
-    {month: 6, monthText: "6 месяцев", cost: 4, profit: 6},
-    {month: 12, monthText: "12 месяцев", cost: 3, profit: 24}
+    {month: 1, monthText: "1 месяц", cost: 3, profit: 0},
+    {month: 6, monthText: "6 месяцев", cost: 2, profit: 12},
+    {month: 12, monthText: "12 месяцев", cost: 1.5, profit: 18}
 ];
 
 let dollar = 0;
