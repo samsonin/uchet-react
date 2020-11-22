@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {connect} from "react-redux";
 
 import TableContainer from "@material-ui/core/TableContainer";
@@ -22,79 +22,82 @@ import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 const Entities = ({providers}) => {
 
+    const [search, setSearch] = useState('');
 
-  return <Grid>
-    <TableContainer component={Paper}>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>
-              <Typography variant="h5">
-                Юр. лица
-              </Typography>
-            </TableCell>
-            <TableCell colSpan={3}>
-              <Input
-                // onChange={e => handleSearch({phone: e.target.value})}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <SearchIcon/>
-                  </InputAdornment>
-                }/>
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          <TableRow>
-            <TableCell>Наименование</TableCell>
-            <TableCell>ИНН</TableCell>
-            <TableCell/>
-            <TableCell>
-              <Tooltip title="Добавить">
-                <Link to="/entities/0">
-                  <IconButton>
-                    <AddCircleIcon/>
-                  </IconButton>
-                </Link>
-              </Tooltip>
-            </TableCell>
-          </TableRow>
+    return <Grid>
+        <TableContainer component={Paper}>
+            <Table size="small">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>
+                            <Typography variant="h5">
+                                Юр. лица
+                            </Typography>
+                        </TableCell>
+                        <TableCell colSpan={3}>
+                            <Input
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                endAdornment={
+                                    <InputAdornment position="end">
+                                        <SearchIcon/>
+                                    </InputAdornment>
+                                }/>
+                        </TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    <TableRow>
+                        <TableCell>Наименование</TableCell>
+                        <TableCell>ИНН</TableCell>
+                        <TableCell/>
+                        <TableCell>
+                            <Tooltip title="Добавить">
+                                <Link to="/entities/0">
+                                    <IconButton>
+                                        <AddCircleIcon/>
+                                    </IconButton>
+                                </Link>
+                            </Tooltip>
+                        </TableCell>
+                    </TableRow>
 
-          {providers.map(p => p.is_valid
-            ? <TableRow
-              key={'entitiesrowkey' + p.id}
-            >
-              <TableCell>
-                {p.name}
-              </TableCell>
-              <TableCell>
-                {p.inn}
-              </TableCell>
-              <TableCell>
-                <Tooltip title="Редактировать">
-                  <Link to={"/entities/" + p.id}>
-                    <IconButton>
-                      <EditIcon/>
-                    </IconButton>
-                  </Link>
-                </Tooltip>
-              </TableCell>
-              <TableCell>
-                <Tooltip title="Взаиморасчеты">
-                  {/*<Link to={"/entities/" + p.id}>*/}
-                    <IconButton>
-                      <ReceiptIcon/>
-                    </IconButton>
-                  {/*</Link>*/}
-                </Tooltip>
-              </TableCell>
-            </TableRow>
-            : null
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Grid>
+                    {providers.filter(p => p.name.toLowerCase().indexOf(search.toLowerCase()) >= 0)
+                        .map(p => p.is_valid
+                        ? <TableRow
+                            key={'entitiesrowkey' + p.id}
+                        >
+                            <TableCell>
+                                {p.name}
+                            </TableCell>
+                            <TableCell>
+                                {p.inn}
+                            </TableCell>
+                            <TableCell>
+                                <Tooltip title="Редактировать">
+                                    <Link to={"/entities/" + p.id}>
+                                        <IconButton>
+                                            <EditIcon/>
+                                        </IconButton>
+                                    </Link>
+                                </Tooltip>
+                            </TableCell>
+                            <TableCell>
+                                <Tooltip title="Взаиморасчеты">
+                                    {/*<Link to={"/entities/" + p.id}>*/}
+                                    <IconButton>
+                                        <ReceiptIcon/>
+                                    </IconButton>
+                                    {/*</Link>*/}
+                                </Tooltip>
+                            </TableCell>
+                        </TableRow>
+                        : null
+                    )}
+                </TableBody>
+            </Table>
+        </TableContainer>
+    </Grid>
 
 }
 

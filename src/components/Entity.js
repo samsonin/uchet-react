@@ -16,15 +16,19 @@ import {useSnackbar} from 'notistack';
 
 import rest from "./Rest";
 import {BottomButtons} from "./common/BottomButtons";
+import {bindActionCreators} from "redux";
+import {closeSnackbar, enqueueSnackbar, upd_app} from "../actions/actionCreator";
 
 
-let serverEntity = {};
+const mapDispatchToProps = dispatch => bindActionCreators({
+    upd_app
+}, dispatch);
 
 const Entity = props => {
 
     const [isRequesting, setRequesting] = useState(false)
     const [isDetails, setDetails] = useState(false)
-    const [entity, setEntity] = useState(null)
+    const [entity, setEntity] = useState({})
     const [disabled, setDisabled] = useState(true)
 
     const {enqueueSnackbar} = useSnackbar();
@@ -35,11 +39,11 @@ const Entity = props => {
 
     useEffect(() => {
 
-        serverEntity = id > 0
-            ? providers.find(p => p.id === id)
-            : {}
+        if (id > 0) {
 
-        setEntity({...serverEntity})
+            setEntity({...providers.find(p => p.id === id)})
+
+        }
 
     }, [id, providers])
 
@@ -47,7 +51,7 @@ const Entity = props => {
 
         setDisabled(isRequesting
             ? true
-            : JSON.stringify(serverEntity) === JSON.stringify(entity))
+            : JSON.stringify(providers.find(p => p.id === id)) === JSON.stringify(entity))
 
     }, [entity, isRequesting])
 
@@ -55,7 +59,7 @@ const Entity = props => {
         setEntity(prev => ({...prev, [name]: value}))
     }
 
-    const cancel = () => setEntity({...serverEntity})
+    const cancel = () => setEntity({...providers.find(p => p.id === id)})
 
     const save = () => {
 
@@ -72,9 +76,27 @@ const Entity = props => {
 
             setRequesting(false)
 
-            if (res.ok) enqueueSnackbar('Сохранено', {
-                variant: 'success',
-            });
+            if (res.ok) {
+
+                const {upd_app} = props;
+                upd_app(res.body);
+
+                if (entity.id) {
+
+                    enqueueSnackbar('Сохранено', {
+                        variant: 'success',
+                    });
+
+                } else {
+
+                    setEntity(null)
+                    enqueueSnackbar('Создан', {
+                        variant: 'success',
+                    });
+                    props.history.push('/entities')
+
+                }
+            }
 
         })
 
@@ -96,7 +118,7 @@ const Entity = props => {
                     enqueueSnackbar('Удалено', {
                         variant: 'success',
                     });
-                    this.props.history.push('/entities')
+                    props.history.push('/entities')
                 } else {
                     enqueueSnackbar('Невозможно удалить', {
                         variant: 'error',
@@ -155,18 +177,21 @@ const Entity = props => {
                 ? props.fields.allElements
                     .filter(elem => elem.index === 'entity' && elem.is_valid)
                     .filter(field => isDetails || ['name', 'inn'].includes(field.name))
-                    .map(elem => <TextField
-                            style={{
-                                width: '100%',
-                                margin: '1rem',
-                                padding: '1rem',
-                            }}
-                            key={'entityfieldskey' + elem.id}
-                            label={elem.value}
-                            value={entity[elem.name]}
-                            disabled={elem.name === 'saldo'}
-                            onChange={e => fieldHandler(elem.name, e.target.value)}
-                        />
+                    .map(elem => {
+
+                        return <TextField
+                                style={{
+                                    width: '100%',
+                                    margin: '1rem',
+                                    padding: '1rem',
+                                }}
+                                key={'entityfieldskey' + elem.id}
+                                label={elem.value}
+                                value={entity[elem.name]}
+                                disabled={elem.name === 'saldo'}
+                                onChange={e => fieldHandler(elem.name, e.target.value)}
+                            />
+                        }
                     )
                 : null}
 
@@ -176,4 +201,4 @@ const Entity = props => {
         : null
 }
 
-export default connect(state => state.app)(Entity);
+export default connect(state => state.app, mapDispatchToProps)(Entity);

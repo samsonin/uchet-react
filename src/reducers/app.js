@@ -23,7 +23,24 @@ const app = (state = JSON.parse(window.localStorage.getItem('app')) || initialSt
         if (typeof (action.data) === 'object') {
 
             Object.keys(action.data).map(k => {
-                newState[k] = action.data[k]
+
+                if (k === 'entities') {
+
+                    newState.providers = action.data[k]
+
+                //     newState.providers = newState.providers.map(p => {
+                //
+                //         return p.id === action.data[k][0].id
+                //             ? action.data[k][0]
+                //             : p
+                //     })
+
+                } else {
+
+                    newState[k] = action.data[k]
+
+                }
+
                 return k;
             });
 
