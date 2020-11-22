@@ -12,8 +12,8 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import DeleteIcon from "@material-ui/icons/Delete";
 
 import ReferalSelect from "../ReferalSelect";
-import Field from "../Field";
 import {BottomButtons} from "../common/BottomButtons";
+import TextField from "@material-ui/core/TextField/TextField";
 
 const types = {
     birthday: 'date',
@@ -70,19 +70,29 @@ const View = props => {
                 props.allElements
                     .filter(field => field.index === 'customer' && field.is_valid)
                     .filter(field => isDetails || ['fio', 'phone_number'].includes(field.name))
-                    .map(field => field.name === 'referal_id'
-                        ? <ReferalSelect
-                            key={'customerfieldskey' + field.name}
-                            value={props.customer[field.name]}
-                            onChange={e => props.handleChange(field.name, e.target.value)}
-                        />
-                        : <Field
-                            key={'customerfieldskey' + field.name + field.index + field.value}
-                            type={types[field.name] || 'text'}
-                            label={field.value}
-                            value={props.customer[field.name]}
-                            onChange={e => props.handleChange(field.name, e.target.value)}
-                        />)
+                    .map(field => {
+
+                        console.log(props.customer[field.name])
+
+                        return field.name === 'referal_id'
+                                ? <ReferalSelect
+                                    key={'customerfieldskey' + field.name}
+                                    value={props.customer[field.name]}
+                                    onChange={e => props.handleChange(field.name, e.target.value)}
+                                />
+                                : <TextField
+                                    style={{
+                                        width: '100%',
+                                        padding: '1rem',
+                                    }}
+                                    key={'customerfieldskey' + field.name + field.index + field.value}
+                                    type={types[field.name] || 'text'}
+                                    label={field.value}
+                                    value={props.customer[field.name]|| ''}
+                                    onChange={e => props.handleChange(field.name, e.target.value)}
+                                />
+                        }
+                    )
             }
         </Grid>
 

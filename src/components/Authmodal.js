@@ -1,13 +1,12 @@
 import React, {Component} from 'react';
 import {MDBBtn, MDBModal, MDBRow, MDBCol} from 'mdbreact';
 import request from "./Request";
-import restRequest from "./Rest";
 import {connect} from "react-redux";
 import {init_user, upd_app, enqueueSnackbar, closeSnackbar} from "../actions/actionCreator";
 import Notifier from "./Notifier";
 import {bindActionCreators} from 'redux';
 import AuthControl from './AuthControl';
-import {inputToA} from "./EditorFunctions";
+// import {inputToA} from "./EditorFunctions";
 
 let authControl = new AuthControl();
 
@@ -46,7 +45,7 @@ class authModal extends Component {
 
         let payload = parseJwt(data.JWT);
         if (typeof payload !== 'object') return false;
-        const {init_user, upd_app} = this.props;
+        const {init_user} = this.props;
         init_user(data.JWT, +payload.user_id, +payload.organization_id, payload.admin, payload.exp);
 
         // data.docs.docs.map(v => {
@@ -56,8 +55,8 @@ class authModal extends Component {
         //     return v;
         // });
 
-        restRequest('initial')
-            .then(res => upd_app(res.body))
+        // restRequest('initial')
+        //     .then(res => upd_app(res.body))
 
         return true;
     }

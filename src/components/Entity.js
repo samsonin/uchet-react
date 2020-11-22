@@ -17,7 +17,7 @@ import {useSnackbar} from 'notistack';
 import rest from "./Rest";
 import {BottomButtons} from "./common/BottomButtons";
 import {bindActionCreators} from "redux";
-import {closeSnackbar, enqueueSnackbar, upd_app} from "../actions/actionCreator";
+import {upd_app} from "../actions/actionCreator";
 
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -45,15 +45,11 @@ const Entity = props => {
 
         }
 
-    }, [id, providers])
-
-    useEffect(() => {
-
         setDisabled(isRequesting
             ? true
             : JSON.stringify(providers.find(p => p.id === id)) === JSON.stringify(entity))
 
-    }, [entity, isRequesting])
+    }, [id, providers, entity, isRequesting])
 
     const fieldHandler = (name, value) => {
         setEntity(prev => ({...prev, [name]: value}))
