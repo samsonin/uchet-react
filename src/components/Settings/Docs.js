@@ -1,11 +1,11 @@
-import React, {Component, useState} from 'react';
+import React, {Component, useEffect, useState} from 'react';
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import request from "./../Request";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-import {closeSnackbar, enqueueSnackbar, upd_app} from "../../actions/actionCreator";
+import {upd_app} from "../../actions/actionCreator";
 
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -22,6 +22,8 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddIcon from '@material-ui/icons/Add';
 
+import rest from './../Rest'
+
 const mapDispatchToProps = dispatch => bindActionCreators({
     upd_app
 }, dispatch);
@@ -32,41 +34,48 @@ const monthes = ['Января', 'Февраля', 'Марта', 'Апреля',
 
 const Docs = props => {
 
-    const [state, setState] = useState({
-        docs: {
-            docs: []
-        },
-        // orderIds: 0,
-        // customerIds: 0,
-        // goodIds: 0,
-        currentDocument: 6,
-        editor: {},
-        buttonListIsOpen: {
-            remont: true,
-            customer: true,
-            providers: true,
-            good: true,
-            common: true
-        }
+    const [buttonListIsOpen, setButtonListIsOpen] = useState({})
+    const [currentDocument, setCurrentDocument] = useState(6)
+    // const [docs, setDocs] = useState([])
+    const [editor, setEditor] = useState({})
+
+    const [providerId, setProviderId] = useState(() => {
+        return props.app.providers[0].id
     })
+    const [orderId, setOrderId] = useState()
+    const [customerId, setCustomerId] = useState()
+    const [goodId, setGoodId] = useState()
 
-    const handleChange = currentDocument => setState({...currentDocument})
+    // const [providerIds, setProviderIds] = useState([])
+    const [orderIds, setOrderIds] = useState([])
+    const [customerIds, setCustomerIds] = useState([])
+    const [goodIds, setGoodIds] = useState([])
 
-    const handleOrderChange = (e) => {
 
-        request({
-            action: 'getOrder',
-            stockId: props.app.stock_id,
-            orderId: e.target.value,
-        }, '/settings', props.auth.jwt)
+    useEffect(() => {
+
+        console.log('useEffect')
+
+        if (props.app.stock_id) {
+
+            rest('docs/' + props.app.stock_id)
+                .then(data => {
+
+                    console.log(data)
+
+                })
+
+        }
+
+    }, [props.app.stock_id])
+
+    const handleOrderChange = orderId => {
+
+        rest('orders/' + props.app.stock_id + '/' + orderId)
             .then(data => {
+
                 console.log(data)
 
-                if (data.result) {
-                    let newDocs = props.app.docs;
-                    newDocs.currentOrder = data.currentOrder;
-                    updPropsDocs(newDocs);
-                }
             })
     }
 
@@ -88,8 +97,7 @@ const Docs = props => {
 
     }
 
-    const handleProviderChange = (e) => {
-
+    const handleProviderChange = e => {
 
         request({
             action: 'getProvider',
@@ -104,7 +112,6 @@ const Docs = props => {
                     updPropsDocs(newDocs);
                 }
             })
-
     }
 
     const handleGoodChange = (e) => {
@@ -264,9 +271,9 @@ const Docs = props => {
                     case 'equipment' :
                         value = 'equipment';
                         break;
-                    case 'master_id' :
-                        value = props.app.users.find(v => +v.id === +state.currentOrder.master_id).name;
-                        break;
+                    // case 'master_id' :
+                    //     value = props.app.users.find(v => +v.id === +currentOrder.master_id).name;
+                    //     break;
 
                     case 'remark' :
                         try {
@@ -344,7 +351,7 @@ const Docs = props => {
 
         let newDocs = props.app.docs;
         newDocs.isNeedUpdate = isNeedUpdate;
-        if (newText !== false) newDocs.docs[state.currentDocument].doc_text = newText;
+        if (newText !== false) newDocs.docs[currentDocument].doc_text = newText;
         updPropsDocs(newDocs);
 
     }
@@ -356,8 +363,8 @@ const Docs = props => {
 
     const saveDoc = () => {
 
-        let name = props.app.docs.docs[state.currentDocument].doc_name;
-        let textA = state.editor.getData();
+        let name = props.app.docs.docs[currentDocument].doc_name;
+        let textA = editor.getData();
         let text = aToInput(textA);
 
         if (!text) {
@@ -375,7 +382,7 @@ const Docs = props => {
 
                 if (data.result) {
 
-                    serverDocs[state.currentDocument] = textA;
+                    serverDocs[currentDocument] = textA;
                     updProps(false, textA);
 
                 }
@@ -399,7 +406,7 @@ const Docs = props => {
         console.log(name, value, index)
 
         // let strA = createA(value, true);
-        // let editor = state.editor;
+        // let editor = editor;
         // let position = editor.model.document.selection.anchor;
         // editor.model.change(writer => writer.insert(strA, position))
 
@@ -407,11 +414,11 @@ const Docs = props => {
 
     const buttonListToggle = index => {
 
-        setState(prev => {
+        setButtonListIsOpen(prev => {
 
             let newState = {...prev}
 
-            newState.buttonListIsOpen[index] = !newState.buttonListIsOpen[index]
+            newState[index] = !newState[index]
 
             return newState
         });
@@ -427,12 +434,12 @@ const Docs = props => {
                       key={'listdocsnavliehrv' + index}>
                     <ListItem button onClick={() => buttonListToggle(index)}>
                         <ListItemText primary={name}/>
-                        {state.buttonListIsOpen[index]
+                        {buttonListIsOpen[index]
                             ? <ExpandMore/>
                             : <ExpandLess/>}
                     </ListItem>
 
-                    <Collapse in={state.buttonListIsOpen[index]} timeout="auto" unmountOnExit>
+                    <Collapse in={buttonListIsOpen[index]} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
                             {Object.values(props.app.fields.allElements)
                                 .filter(el => el.index === index)
@@ -455,56 +462,18 @@ const Docs = props => {
                 </List>
             )
 
-
-        // let variables = props.app.fields.allElements;
-        // if (typeof variables !== "object") return '';
-        //
-        // let arr = [];
-        // for (let i in variables) {
-        //
-        //     console.log(variables)
-        //     console.log(i)
-        //
-        //     arr.push(<List component="nav" key={'listdocsnavliehrv' + props.app.fields.alliases[i]}>
-        //         <ListItem button onClick={() => buttonListToggle(i)}
-        //                   key={'listdocswetwrbv' + props.app.fields.alliases[i]}>
-        //             <ListItemText primary={props.app.fields.alliases[i]}/>
-        //             {state.buttonListIsOpen[i] ? <ExpandMore/> : <ExpandLess/>}
-        //         </ListItem>
-        //         <Collapse in={state.buttonListIsOpen[i]} timeout="auto" unmountOnExit>
-        //             <List component="div" disablePadding>
-        //                 {variables[i].map(v => {
-        //                     if (v.is_valid) {
-        //                         return <ListItem button className=""
-        //                                          key={'listkeydocskjhrv' + v.value}
-        //                                          onClick={(e) => insertVariable(v.name, v.value)}
-        //                         >
-        //                             <ListItemIcon>
-        //                                 <AddIcon/>
-        //                             </ListItemIcon>
-        //                             <ListItemText primary={v.value}/>
-        //                         </ListItem>
-        //                     }
-        //                 })}
-        //             </List>
-        //         </Collapse>
-        //     </List>)
-        //
-        // }
-        // return arr
-
     }
 
-    if (props.app.stock_id === undefined) return <h3>Выберите точку</h3>;
-    if (props.app.docs.docs === undefined) return <h3>Получаем данные...</h3>;
+    if (+props.app.stock_id === 0) return <h3>Выберите точку</h3>;
+    if (!props.app.docs.docs) return <h3>Получаем данные...</h3>;
 
     return (
         <div className="App">
 
             <FormControl variant="outlined">
                 <Select
-                    value={state.currentDocument}
-                    onChange={e => handleChange(e.target.value)}
+                    value={currentDocument}
+                    onChange={e => setCurrentDocument(e.target.value)}
                     className="m-2 w-100"
                     autoWidth
                 >
@@ -525,11 +494,11 @@ const Docs = props => {
                         config={
                             {language: 'ru'}
                         }
-                        data={props.app.docs.docs[state.currentDocument].doc_text}
+                        data={props.app.docs.docs[currentDocument].doc_text}
                         onChange={(event, editor) => {
 
                             let data = editor.getData();
-                            if (!serverDocs[state.currentDocument]) serverDocs[state.currentDocument] = data;
+                            if (!serverDocs[currentDocument]) serverDocs[currentDocument] = data;
                             let needUpdate = false;
 
                             let offset0 = data.indexOf('&nbsp;</a>');
@@ -555,12 +524,12 @@ const Docs = props => {
                                 needUpdate = true;
                             }
 
-                            // updProps(serverDocs[state.currentDocument] !== state.editor.getData())
-                            updProps((serverDocs[state.currentDocument] !== state.editor.getData()) || needUpdate, data)
+                            // updProps(serverDocs[currentDocument] !== editor.getData())
+                            updProps((serverDocs[currentDocument] !== editor.getData()) || needUpdate, data)
 
                         }}
                         onInit={editor => {
-                            // setState({editor})
+                            setEditor(editor)
                         }}
                         onBlur={(event, editor) => {
 
@@ -583,12 +552,12 @@ const Docs = props => {
                             {props.app.fields.alliases.remont}
                         </InputLabel>
                         <Select
-                            value={props.app.docs.currentOrder.id}
-                            onChange={handleOrderChange}
+                            value={orderId}
+                            onChange={e => setOrderId(e.target.value)}
                             className="m-2 w-100"
                             autoWidth
                         >
-                            {props.app.docs.orderIds.map(v =>
+                            {orderIds.map(v =>
                                 <MenuItem value={v} key={"sdocsSelectOrder" + v}>
                                     {v}
                                 </MenuItem>)}
@@ -657,9 +626,9 @@ const Docs = props => {
                             }
                         }
                         data={
-                            Object.keys(state.editor).length === 0
+                            Object.keys(editor).length === 0
                                 ? ''
-                                : aToInput(state.editor.getData(), true)
+                                : aToInput(editor.getData(), true)
                         }
                     />
 
