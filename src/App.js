@@ -60,8 +60,10 @@ class App extends Component {
                 e.preventDefault();
 
                 rest("goods/" + barcode).then(data => {
-                    if (data.ok) {
 
+                    if (data.ok) {
+                        
+                        // TODO отследить если IMEI
                         data.body.barcode = barcode;
                         this.setState({
                             good: data.body,

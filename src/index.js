@@ -21,7 +21,9 @@ require('dotenv').config();
 ReactDOM.render((
     <Provider store={store}>
         <BrowserRouter>
-            <div id="circularln" style={{display: 'none'}}>
+            <div id="circularln"
+                 style={{display: 'none'}}
+            >
                 <Circularln/>
             </div>
             <SnackbarProvider>

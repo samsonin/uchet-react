@@ -119,7 +119,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
     if (good.wo.substr(0, 4) === 'sale') {
       wo = {
         action: 'Продан',
-        stockId: wo.substr(4, 1),
+        stockId: good.wo.substr(4, 1),
       }
     } else {
       try {
