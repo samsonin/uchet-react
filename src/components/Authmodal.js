@@ -61,7 +61,7 @@ class authModal extends Component {
         return true;
     }
 
-    key_press = (e) => {
+    keyPress = (e) => {
         if (typeof e === 'undefined') return false;
         if (e.key === 'Enter') { // eslint-disable-next-line
             switch (this.state.status) {
@@ -368,9 +368,9 @@ class authModal extends Component {
 
     render() {
         let isConfirm = this.state.status.substr(-7) === 'confirm';
-        return <div onKeyPress={this.key_press}>
+        return <div onKeyPress={this.keyPress}>
             <Notifier/>
-            <MDBModal id="authModal" isOpen={+this.props.auth.user_id < 1} toggle={this.key_press}>
+            <MDBModal id="authModal" isOpen={+this.props.auth.user_id < 1} toggle={this.keyPress}>
 
                 <div className="modal-header text-center">
                     <MDBRow>

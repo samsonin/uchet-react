@@ -41,7 +41,7 @@ const Sidebar = props => {
     };
 
     return <div id="sidebar-wrapper"
-                className="bg-light border-right d-print-none">
+                className="bg-light border-right">
         <div className={classes.list}>
 
             {[

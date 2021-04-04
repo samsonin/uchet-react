@@ -36,6 +36,7 @@ class App extends Component {
 
     state = {
         good: {},
+        barcodes: []
     }
 
     componentDidMount() {
@@ -59,15 +60,23 @@ class App extends Component {
 
                 e.preventDefault();
 
-                rest("goods/" + barcode).then(data => {
+                this.setState({barcodes: [barcode]})
+
+                rest("goods/" + barcode)
+                    .then(data => {
+
+                        console.log(data)
 
                     if (data.ok) {
-                        
-                        // TODO отследить если IMEI
-                        data.body.barcode = barcode;
-                        this.setState({
-                            good: data.body,
-                        });
+
+                        if (data.status === 200) {
+
+                            // TODO отследить если IMEI
+                            this.setState({
+                                good: data.body,
+                            });
+
+                        }
 
                     }
                 });
@@ -109,11 +118,18 @@ class App extends Component {
     }
 
     render() {
+
         return <>
-            <Header/>
-            <div className="d-flex" id="wrapper">
+            {this.state.barcodes
+                ? <Barcodes
+                    barcodes={this.state.barcodes}
+                />
+                : null}
+
+            <Header className={'d-print-none'} />
+            <div className="d-flex d-print-none" id="wrapper">
                 <Sidebar/>
-                <div className="d-print-none" id="sidebaredivider"/>
+                <div id="sidebaredivider"/>
                 {
                     +this.props.auth.user_id > 0
                         ? <div className="m-2 p-2">
@@ -121,7 +137,7 @@ class App extends Component {
                                 this.props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0) ?
                                     Main : Subscribe
                             }/>
-                            <Route path="/barcodes" component={Barcodes}/>
+                            <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
                             <Route exact path="/settings" component={Settings}/>
                             <Route path="/subscribe" component={Subscribe}/>
                             <Route exact path="/customers" component={Customers}/>
@@ -163,9 +179,10 @@ class App extends Component {
                         : <Authmodal/>
                 }
             </div>
-
         </>
+
     }
+
 }
 
 export default connect((state) => state)(App);
