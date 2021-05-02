@@ -16,6 +16,7 @@ import Subscribe from "./components/Subscribe";
 import Queue from "./components/Queue";
 import WebSocketAdapter from "./components/WebSocketAdapter";
 import Arrival from "./components/Arrival";
+import FundsFlow from "./components/FundsFlow";
 import rest from "./components/Rest";
 import GoodModal from "./components/GoodModal";
 import {Barcodes} from "./components/Barcodes";
@@ -149,6 +150,8 @@ class App extends Component {
                             {/*<Route path="/order" component={Order}/>*/}
                             <Route path="/queue" component={Queue}/>
                             <Route path="/arrival" component={Arrival}/>
+
+                            <Route path="/funds" component={FundsFlow}/>
 
                             <Route path="/settings/organization" component={Organization}/>
                             <Route path="/settings/employees" component={Employees}/>

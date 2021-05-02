@@ -259,7 +259,7 @@ const Arrival = props => {
                   justify="space-between"
                   alignContent="center">
                 <Grid item>
-                    <Typography variant="h5" align="center">Новая накладная</Typography>
+                    <Typography variant="h5">Новая накладная</Typography>
                 </Grid>
                 <Grid item>
                     <TableContainer component={Paper}>
