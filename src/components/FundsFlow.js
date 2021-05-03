@@ -13,6 +13,21 @@ import CachedIcon from '@material-ui/icons/Cached';
 import Button from "@material-ui/core/Button";
 
 import rest from "./Rest";
+import TableContainer from "@material-ui/core/TableContainer";
+import {Paper} from "@material-ui/core";
+import Table from "@material-ui/core/Table";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import TableCell from "@material-ui/core/TableCell";
+import Input from "@material-ui/core/Input";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import SearchIcon from "@material-ui/icons/Search";
+import Tooltip from "@material-ui/core/Tooltip/Tooltip";
+import {Link} from "react-router-dom";
+import IconButton from "@material-ui/core/IconButton";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
+import TableBody from "@material-ui/core/TableBody";
+import TableFooter from "@material-ui/core/TableFooter";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -27,17 +42,26 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const minDate = '2020-01-01'
-const today = '2021-05-02'
+const today = '2021-05-03'
 
 export default connect(state => state)(props => {
 
     const classes = useStyles();
 
-    const [stock, setStock] = useState(() => props.app.stock_id)
-    const [dateFrom, setDateFrom] = useState(() => today)
-    const [dateTo, setDateTo] = useState(() => today)
+    // const [stock, setStock] = useState(() => props.app.stock_id)
+    // const [dateFrom, setDateFrom] = useState(() => today)
+    // const [dateTo, setDateTo] = useState(() => today)
+
+    const [stock, setStock] = useState(0)
+    const [dateFrom, setDateFrom] = useState('2021-04-01')
+    const [dateTo, setDateTo] = useState('2021-04-03')
 
     const [requesting, setRequesting] = useState(false)
+
+    const [data, setData] = useState(null)
+    const [proceeds, setProceeds] = useState(0)
+    const [cashless, setCashless] = useState(0)
+    const [handed, setHanded] = useState(0)
 
     const [count, setCount] = useState(0)
 
@@ -52,8 +76,6 @@ export default connect(state => state)(props => {
     }
 
     useEffect(() => {
-
-        console.log(count, dateFrom, dateTo)
 
         if (count > 10) return
         setCount(count => count + 1)
@@ -72,6 +94,24 @@ export default connect(state => state)(props => {
 
     }, [stock, dateFrom, dateTo])
 
+    useEffect(() => {
+
+        let p = 0, c = 0, h = 0
+
+        if (!data) return
+
+        data.map(d => {
+            p += d.proceeds
+            c += d.cashless
+            h += d.handed
+        })
+
+        setProceeds(p)
+        setCashless(c)
+        setHanded(h)
+
+    }, [data])
+
     const getReport = () => {
 
         setRequesting(true)
@@ -81,9 +121,60 @@ export default connect(state => state)(props => {
 
                 setRequesting(false)
 
-                console.log(res)
+                if (res.ok) {
+
+                    if (stock) {
+                        return setData(res.body)
+                    }
+
+                    let totalData = []
+
+                    res.body.map(d => {
+
+                        if (totalData.find(t => t.date === d.date)) {
+
+                            let lastDay = totalData[totalData.length - 1];
+
+                            lastDay.morning += d.morning
+                            lastDay.proceeds += d.proceeds
+                            lastDay.cashless += d.cashless
+                            lastDay.handed += d.handed
+                            lastDay.evening += d.evening
+
+                        } else {
+
+                            totalData.push(d)
+
+                        }
+
+                    })
+
+                    return setData(totalData)
+
+                }
+
             })
 
+    }
+
+    const renderBody = () => {
+
+        return data
+            ? data.map(d => <TableRow
+                key={'tablerowkeyinfunds' + d.id}
+            >
+                <TableCell>{d.date}</TableCell>
+                <TableCell>{d.morning}</TableCell>
+                <TableCell>{d.proceeds}</TableCell>
+                <TableCell>{d.cashless}</TableCell>
+                <TableCell>{d.handed}</TableCell>
+                <TableCell>{d.evening}</TableCell>
+            </TableRow>)
+            : <TableRow>
+                <TableCell colSpan={6}>
+                    Нет данных
+                </TableCell>
+            </TableRow>
     }
 
     return props.auth.admin
@@ -163,7 +254,7 @@ export default connect(state => state)(props => {
                         variant="contained"
                         disabled={requesting}
                         className={classes.controls}
-                        startIcon={<CachedIcon />}
+                        startIcon={<CachedIcon/>}
                         onClick={() => getReport()}
                     >
                         Сформировать
@@ -172,6 +263,39 @@ export default connect(state => state)(props => {
                 </Grid>
 
             </Grid>
+
+            <TableContainer component={Paper}>
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>дата</TableCell>
+                            <TableCell>на утро</TableCell>
+                            <TableCell>выручка</TableCell>
+                            <TableCell>безнал</TableCell>
+                            <TableCell>сдали</TableCell>
+                            <TableCell>на вечер</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+
+                        {renderBody()}
+
+                    </TableBody>
+
+                    <TableHead>
+                        <TableRow>
+                            <TableCell></TableCell>
+                            <TableCell>Всего:</TableCell>
+                            <TableCell>{proceeds}</TableCell>
+                            <TableCell>{cashless}</TableCell>
+                            <TableCell>{handed}</TableCell>
+                            <TableCell></TableCell>
+                        </TableRow>
+                    </TableHead>
+
+                </Table>
+            </TableContainer>
+
         </>
         : <h1>Доступ запрещен!</h1>
 
