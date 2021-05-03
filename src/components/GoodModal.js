@@ -114,7 +114,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
         good = this.props.good;
 
-        console.log('good', good)
+        // console.log('good', good)
 
         if (good.id === undefined) return null;
 

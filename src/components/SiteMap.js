@@ -27,7 +27,7 @@ export const siteMap = [
   // {id: 1, onlyAdmin: false, path: "daily", text: "Ежедневный отчет"},
   // {id: 1, onlyAdmin: false, path: "allseach", text: "Поиск по наличию"},
   // {id: 1, onlyAdmin: false, path: "salary", text: "Зарплата"},
-  // {id: 1, onlyAdmin: true, path: "encashment", text: "Инкассация"},
+  {id: 32, onlyAdmin: true, path: "funds", text: "Движение денег"},
   // {id: 1, onlyAdmin: false, path: "saleseach", text: "Поиск по продажам"},
   // {id: 1, onlyAdmin: false, path: "inventory", text: "Акты инвенторизации"},
   // {id: 1, onlyAdmin: false, path: "barcodeinventory", text: "Инвенторизация по штрихкодам"},

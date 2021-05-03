@@ -19,15 +19,7 @@ import Table from "@material-ui/core/Table";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
-import Input from "@material-ui/core/Input";
-import InputAdornment from "@material-ui/core/InputAdornment";
-import SearchIcon from "@material-ui/icons/Search";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import {Link} from "react-router-dom";
-import IconButton from "@material-ui/core/IconButton";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
 import TableBody from "@material-ui/core/TableBody";
-import TableFooter from "@material-ui/core/TableFooter";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -42,19 +34,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const minDate = '2020-01-01'
-const today = '2021-05-03'
+const today = ( new Date() ).toISOString().slice(0, 10)
 
 export default connect(state => state)(props => {
 
     const classes = useStyles();
 
-    // const [stock, setStock] = useState(() => props.app.stock_id)
-    // const [dateFrom, setDateFrom] = useState(() => today)
-    // const [dateTo, setDateTo] = useState(() => today)
-
-    const [stock, setStock] = useState(0)
-    const [dateFrom, setDateFrom] = useState('2021-04-01')
-    const [dateTo, setDateTo] = useState('2021-04-03')
+    const [stock, setStock] = useState(() => props.app.stock_id)
+    const [dateFrom, setDateFrom] = useState(() => today)
+    const [dateTo, setDateTo] = useState(() => today)
 
     const [requesting, setRequesting] = useState(false)
 
@@ -63,22 +51,13 @@ export default connect(state => state)(props => {
     const [cashless, setCashless] = useState(0)
     const [handed, setHanded] = useState(0)
 
-    const [count, setCount] = useState(0)
-
-    const setInRange = date => {
-
-        return date > today
-            ? today
-            : date < minDate
-                ? minDate
-                : date
-
-    }
+    const setInRange = date => date > today
+        ? today
+        : date < minDate
+            ? minDate
+            : date
 
     useEffect(() => {
-
-        if (count > 10) return
-        setCount(count => count + 1)
 
         if (dateTo !== setInRange(dateTo)) {
             return setDateTo(date => setInRange(date))
@@ -131,9 +110,9 @@ export default connect(state => state)(props => {
 
                     res.body.map(d => {
 
-                        if (totalData.find(t => t.date === d.date)) {
+                        let lastDay = totalData.find(t => t.date === d.date)
 
-                            let lastDay = totalData[totalData.length - 1];
+                        if (lastDay) {
 
                             lastDay.morning += d.morning
                             lastDay.proceeds += d.proceeds
@@ -157,25 +136,24 @@ export default connect(state => state)(props => {
 
     }
 
-    const renderBody = () => {
+    useEffect(() => getReport(), [])
 
-        return data
-            ? data.map(d => <TableRow
-                key={'tablerowkeyinfunds' + d.id}
-            >
-                <TableCell>{d.date}</TableCell>
-                <TableCell>{d.morning}</TableCell>
-                <TableCell>{d.proceeds}</TableCell>
-                <TableCell>{d.cashless}</TableCell>
-                <TableCell>{d.handed}</TableCell>
-                <TableCell>{d.evening}</TableCell>
-            </TableRow>)
-            : <TableRow>
-                <TableCell colSpan={6}>
-                    Нет данных
-                </TableCell>
-            </TableRow>
-    }
+    const renderBody = () => data && data.length
+        ? data.map(d => <TableRow
+            key={'tablerowkeyinfunds' + d.id}
+        >
+            <TableCell>{d.date}</TableCell>
+            <TableCell>{d.morning}</TableCell>
+            <TableCell>{d.proceeds}</TableCell>
+            <TableCell>{d.cashless}</TableCell>
+            <TableCell>{d.handed}</TableCell>
+            <TableCell>{d.evening}</TableCell>
+        </TableRow>)
+        : <TableRow>
+            <TableCell colSpan={6}>
+                Нет данных
+            </TableCell>
+        </TableRow>
 
     return props.auth.admin
         ? <>
