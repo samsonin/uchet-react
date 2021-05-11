@@ -15,6 +15,8 @@ import FormControl from "@material-ui/core/FormControl";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import {useSnackbar} from "notistack";
+import {bindActionCreators} from "redux";
+import {upd_app} from "../actions/actionCreator";
 
 const MyPaper = styled(Paper)({
     marginTop: 20,
@@ -28,75 +30,76 @@ const MyFormControl = styled(FormControl)({
     minWidth: 150,
 });
 
-const AvailableStock = (props) => {
+const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
+
+const Queue = (props) => {
 
     const {enqueueSnackbar} = useSnackbar();
 
-    const pointChange = (user_id, stock_id, permission) => {
+    const [request, setRequest] = useState(false)
 
-        console.log(user_id, stock_id, permission)
+    const pointChange = (user_id, stock_id) => {
 
-        rest('queue', 'PATCH',
-            {user_id, stock_id, permission})
+        setRequest(true)
+
+        rest('queue', 'PATCH', {user_id, stock_id})
             .then(res => {
 
                 if (res.ok) {
-                    // const {upd_app} = props;
-                    // upd_app(res.body);
+                    const {upd_app} = props
+                    upd_app({queue: res.body.queue})
                 }
+
+                setRequest(false)
 
                 enqueueSnackbar(res.ok ? 'ok' : res.error,
                     {variant: res.ok ? 'success' : 'warning'}
-                    );
+                );
 
             })
 
     };
 
-    const renderTable = (o, permission) => {
+    const renderTable = queue => <TableBody>
 
-        let arr = [];
-        for (const user_id in o) {
-            arr.push(
-                <TableRow key={'rowkey' + user_id + o[user_id]}>
-                    <TableCell>
-                        {props.app.users.find(v => +v.id === +user_id).name}
-                    </TableCell>
-                    <TableCell>
-                        <MyFormControl variant="outlined">
-                            <Select onChange={e => pointChange(+user_id, +e.target.value, permission)}
-                                    value={o[user_id]}
-                            >
-                                <MenuItem key={'mik0'} value={0}>
-                                    <br/>
-                                </MenuItem>
+        {queue.map(q => <TableRow key={'rowinqueuetablekey' + q.user_id}>
+            <TableCell>
+                {props.app.users.find(v => +v.id === q.user_id).name}
+            </TableCell>
+            <TableCell>
+                <MyFormControl variant="outlined">
+                    <Select onChange={e => pointChange(q.user_id, +e.target.value)}
+                            value={q.stock_id}
+                            disabled={request}
+                    >
+                        <MenuItem key={'queueselectstockskey' + q.user_id + '0'}
+                                  value={0}
+                        >
+                            <br/>
+                        </MenuItem>
 
-                                {props.app.stocks.map(value => value.is_valid ?
-                                    <MenuItem
-                                        key={'mik' + value.id}
-                                        value={value.id}
-                                    >
-                                        {value.name}
-                                    </MenuItem> :
-                                    '')}
+                        {q.allowed_stocks.map(as => <MenuItem
+                            key={'queueselectstockskeytest' + q.user_id + as}
+                            value={as}
+                        >
+                            {props.app.stocks.find(s => s.id === as).name}
+                        </MenuItem>)}
 
-                            </Select>
-                        </MyFormControl>
-                    </TableCell>
-                </TableRow>
-            )
+                    </Select>
+                </MyFormControl>
+            </TableCell>
+        </TableRow>)}
 
-        }
-        return arr;
-
-    }
+    </TableBody>
 
     return props.app.queue
 
         ? <Grid container spacing={3} alignContent="center">
 
             <Grid item>
-                <Typography variant="h5">Расстановка мастеров</Typography>
+                <Typography variant="h5" align={'center'}>
+                    Смены мастеров
+                </Typography>
                 <MyPaper>
                     <Table>
                         <TableHead>
@@ -105,36 +108,14 @@ const AvailableStock = (props) => {
                                 <TableCell>Куда вышел на смену</TableCell>
                             </TableRow>
                         </TableHead>
-                        <TableBody>
-                            {renderTable(props.app.queue, 'masters')}
-                        </TableBody>
+                        {renderTable(props.app.queue)}
                     </Table>
                 </MyPaper>
             </Grid>
-
-            {props.auth.admin && props.app.salersQueue ?
-                <Grid item>
-                    <Typography variant="h5">Расстановка администраторов</Typography>
-                    <MyPaper>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Администратор</TableCell>
-                                    <TableCell>Куда вышел на смену</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {renderTable(props.app.salersQueue, 'sellers')}
-                            </TableBody>
-                        </Table>
-                    </MyPaper>
-                </Grid>
-                : null
-            }
 
         </Grid>
         : 'Загружаем данные...'
 
 }
 
-export default connect(state => state)(AvailableStock);
+export default connect(state => (state), mapDispatchToProps)(Queue);
