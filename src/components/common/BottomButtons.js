@@ -6,7 +6,6 @@ import Button from "@material-ui/core/Button";
 export const BottomButtons =
     (save, cancel, disabled = false, isNew = false) => <Grid
         container
-        direction="row"
         justify="space-evenly"
         style={{
             margin: '1rem',

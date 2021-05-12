@@ -24,6 +24,7 @@ import Config from "./components/Settings/Config";
 import Organization from "./components/Settings/Organization";
 import Employees from "./components/Settings/Employees";
 import Stocks from "./components/Settings/Stocks";
+import Stock from "./components/Settings/Stock"
 // import Docs from "./components/Settings/Docs";
 import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
@@ -155,7 +156,8 @@ class App extends Component {
 
                             <Route path="/settings/organization" component={Organization}/>
                             <Route path="/settings/employees" component={Employees}/>
-                            <Route path="/settings/stocks" component={Stocks}/>
+                            <Route exact path="/settings/stocks" component={Stocks}/>
+                            <Route exact path="/settings/stocks/:id" component={Stock}/>
                             <Route path="/settings/config" component={Config}/>
                             <Route path="/settings/config" component={Config}/>
                             <Route path="/settings/fields" component={Fields}/>
