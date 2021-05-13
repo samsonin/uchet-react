@@ -9,6 +9,11 @@ import {Fab, FormControlLabel, Grid, InputLabel, Switch, TextField, Typography} 
 import AddIcon from '@material-ui/icons/Add';
 
 import rest from '../../components/Rest';
+import Tooltip from "@material-ui/core/Tooltip/Tooltip";
+import {Link} from "react-router-dom";
+import IconButton from "@material-ui/core/IconButton";
+import EditIcon from "@material-ui/icons/Edit";
+import TableCell from "@material-ui/core/TableCell";
 
 // TODO избавиться от classname и переписать используя @material-ui
 // сократить и оптимизировать код
@@ -81,12 +86,21 @@ const Stocks = props => {
     return <>
         {props.app.stocks.map(stock => <div key={"grKeydiv" + stock.id}>
                 <Grid container direction="row" className="hoverable m-2 p-3" key={"grKey" + stock.id}>
-                    <Grid item xs={9}>
+                    <Grid item xs={8}>
                         <Typography variant="h3">
                             <i className="fas fa-store"/>
                         </Typography>
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={2}>
+                        <Tooltip title="Редактировать">
+                            <Link to={"/settings/stocks/" + v.id}>
+                                <IconButton>
+                                    <EditIcon/>
+                                </IconButton>
+                            </Link>
+                        </Tooltip>
+                    </Grid>
+                    <Grid item xs={2}>
                         <FormControlLabel
                             label={stock.is_valid ? 'Активна' : 'Не активна'}
                             control={
