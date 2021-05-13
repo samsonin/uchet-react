@@ -16,27 +16,27 @@ import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import Checkbox from "@material-ui/core/Checkbox";
 
 import rest from "../Rest";
+import TextField from "@material-ui/core/TextField/TextField";
 
 const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
 const Stock = props => {
 
-    const [stock, setStock] = useState(() => props.app.stocks.find(s => s.id === +props.match.params.id))
+    const initialStock = props.app.stocks.find(s => s.id === +props.match.params.id) || {}
+
+    const [stock, setStock] = useState(() => initialStock)
 
     const [allowedUserIds, setAllowedUserIds] = useState(() => props.app.stockusers
         .filter(su => su.stock_id === +props.match.params.id)
         .map(su => su.user_id))
 
-    const isNew = +props.match.params.id > 0
-    const disabled = stock === props.app.stocks.find(s => s.id === +props.match.params.id)
+    const fieldHandler = (name, value) => setStock(prev => ({...prev, [name]: value}))
 
     const save = () => {
         console.log('save')
     }
 
-    const reset = () => {
-        console.log('reset')
-    }
+    const reset = () => setStock(initialStock)
 
     const remove = () => {
         console.log('remove')
@@ -44,13 +44,13 @@ const Stock = props => {
 
     useEffect(() => {
 
-        console.log(allowedUserIds)
+
 
     }, [allowedUserIds])
 
     const checkHandler = (user_id, isAllowed) => setAllowedUserIds(prev => {
 
-        const state = {...prev}
+            const state = {...prev}
 
             rest('stockusers/' + stock.id + '/' + user_id,
                 isAllowed
@@ -75,14 +75,7 @@ const Stock = props => {
         }
     )
 
-    return <Grid container
-                 component={Paper}
-                 spacing={1}
-                 direction="column"
-                 alignItems="center"
-                 justify="space-around"
-                 style={{width: '100%'}}
-    >
+    return <Grid container component={Paper} spacing={1} justify="space-around">
 
         <Grid container
               style={{margin: '1rem'}}
@@ -108,21 +101,24 @@ const Stock = props => {
             </Grid>
         </Grid>
 
-        <Grid item>
-            {stock.name}
-        </Grid>
+        {[
+            {name: 'name', value: 'Название'},
+            {name: 'address', value: 'Адрес'},
+            {name: 'phone_number', value: 'Номер телефона'}]
+            .map(field => <TextField
+                key={'maptextfieldinstock' + field.name}
+                style={{
+                    width: '100%',
+                    padding: '1rem',
+                }}
+                label={field.value}
+                value={stock[field.name] || ''}
+                onChange={e => fieldHandler(field.name, e.target.value)}
+            />)}
 
         <Grid item>
-            {stock.address}
-        </Grid>
-
-        <Grid item>
-            {stock.phone_number}
-        </Grid>
-
-        <Grid item>
-            <Typography variant="h5">
-                Сотрудники:
+            <Typography variant="h6">
+                Допуск сотрудников:
             </Typography>
             <List dense>
 
@@ -150,8 +146,8 @@ const Stock = props => {
 
         {BottomButtons(save,
             reset,
-            disabled,
-            isNew
+            JSON.stringify(stock) === JSON.stringify(initialStock),
+            !+props.match.params.id
         )}
 
     </Grid>

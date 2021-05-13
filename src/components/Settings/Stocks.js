@@ -85,22 +85,29 @@ const Stocks = props => {
 
     return <>
         {props.app.stocks.map(stock => <div key={"grKeydiv" + stock.id}>
-                <Grid container direction="row" className="hoverable m-2 p-3" key={"grKey" + stock.id}>
-                    <Grid item xs={8}>
-                        <Typography variant="h3">
+                <Grid container
+                      className="hoverable"
+                      slyle={{
+                          margin: '1rem',
+                          padding: '1rem',
+                          weight: '100%'
+                      }}
+                      justify="space-evenly"
+                      alignContent="stretch"
+                      alignItems="stretch"
+                      key={"grKey" + stock.id}
+                >
+                    <Grid item >
+                        <Typography variant="h6">
                             <i className="fas fa-store"/>
                         </Typography>
                     </Grid>
-                    <Grid item xs={2}>
-                        <Tooltip title="Редактировать">
-                            <Link to={"/settings/stocks/" + stock.id}>
-                                <IconButton>
-                                    <EditIcon/>
-                                </IconButton>
-                            </Link>
-                        </Tooltip>
+                    <Grid item >
+                        <Typography variant="subtitle2">
+                            {stock.name}
+                        </Typography>
                     </Grid>
-                    <Grid item xs={2}>
+                    <Grid item >
                         <FormControlLabel
                             label={stock.is_valid ? 'Активна' : 'Не активна'}
                             control={
@@ -115,27 +122,38 @@ const Stocks = props => {
                         {/*    </IconButton>*/}
                         {/*: ''}*/}
                     </Grid>
-                    <Grid item xs={12}>
-                        <InputLabel className="mt-2 font-weight-bold">Название:</InputLabel>
-                        <TextField
-                            defaultValue={stock.name} className="w-75"
-                            onBlur={e => requestSettings(stock.id, 'name', e.target.value)}
-                        />
+
+                    <Grid item >
+                        <Tooltip title="Редактировать">
+                            <Link to={"/settings/stocks/" + stock.id}>
+                                <IconButton>
+                                    <EditIcon/>
+                                </IconButton>
+                            </Link>
+                        </Tooltip>
                     </Grid>
-                    <Grid item xs={12}>
-                        <InputLabel className="mt-2 font-weight-bold">Адрес:</InputLabel>
-                        <TextField
-                            defaultValue={stock.address} className="w-75"
-                            onBlur={(e) => requestSettings(stock.id, 'address', e.target.value)}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <InputLabel className="mt-2 font-weight-bold">Телефон:</InputLabel>
-                        <TextField
-                            defaultValue={stock.phone_number} className="w-75"
-                            onBlur={e => requestSettings(stock.id, 'phone_number', e.target.value)}
-                        />
-                    </Grid>
+
+                    {/*<Grid item xs={12}>*/}
+                    {/*    <InputLabel className="mt-2 font-weight-bold">Название:</InputLabel>*/}
+                    {/*    <TextField*/}
+                    {/*        defaultValue={stock.name} className="w-75"*/}
+                    {/*        onBlur={e => requestSettings(stock.id, 'name', e.target.value)}*/}
+                    {/*    />*/}
+                    {/*</Grid>*/}
+                    {/*<Grid item xs={12}>*/}
+                    {/*    <InputLabel className="mt-2 font-weight-bold">Адрес:</InputLabel>*/}
+                    {/*    <TextField*/}
+                    {/*        defaultValue={stock.address} className="w-75"*/}
+                    {/*        onBlur={(e) => requestSettings(stock.id, 'address', e.target.value)}*/}
+                    {/*    />*/}
+                    {/*</Grid>*/}
+                    {/*<Grid item xs={12}>*/}
+                    {/*    <InputLabel className="mt-2 font-weight-bold">Телефон:</InputLabel>*/}
+                    {/*    <TextField*/}
+                    {/*        defaultValue={stock.phone_number} className="w-75"*/}
+                    {/*        onBlur={e => requestSettings(stock.id, 'phone_number', e.target.value)}*/}
+                    {/*    />*/}
+                    {/*</Grid>*/}
                 </Grid>
             </div>
         )}

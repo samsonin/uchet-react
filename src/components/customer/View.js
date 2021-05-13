@@ -28,7 +28,6 @@ const View = props => {
 
         <Grid container
               style={{margin: '1rem'}}
-              direction="row"
               justify="space-between"
         >
             <Grid item>
