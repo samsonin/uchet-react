@@ -93,7 +93,7 @@ const Stocks = props => {
                     </Grid>
                     <Grid item xs={2}>
                         <Tooltip title="Редактировать">
-                            <Link to={"/settings/stocks/" + v.id}>
+                            <Link to={"/settings/stocks/" + stock.id}>
                                 <IconButton>
                                     <EditIcon/>
                                 </IconButton>

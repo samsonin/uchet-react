@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, {Component, useState} from "react";
 import {connect} from 'react-redux';
 import {
     MDBNavbar, MDBNavbarBrand, MDBNavbarNav, MDBNavItem, MDBNavLink, MDBNavbarToggler, MDBCollapse, MDBDropdown,
@@ -16,28 +16,25 @@ import {bindActionCreators} from "redux";
 // ]
 
 
-function unixConverter(unix) {
-    let date = new Date(unix * 1000);
-    let day = (date.getDate() < 10 ? '0' : '') + date.getDate();
-    let month = (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1);
-    let year = date.getFullYear(); //full year in yyyy format
+const unixConverter = unix => {
+
+    const date = new Date(unix * 1000);
+    const day = (date.getDate() < 10 ? '0' : '') + date.getDate();
+    const month = (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1);
+    const year = date.getFullYear(); //full year in yyyy format
     return (day + '-' + month + '-' + year);
+
 }
 
-function currencyConverter(rub) {
-    return rub;
-}
+const NavbarPage = props => {
 
-class NavbarPage extends Component {
+    const [balanceModalOpen, setBalanceModalOpen] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
 
-    state = {
-        balanceModalOpen: false,
-    };
+    const toggleClick = () => {
 
-    toggleClick() {
-
-        let wrapper = document.querySelector('#wrapper');
-        let toggle_icon = document.querySelector('#toggle_icon');
+        const wrapper = document.querySelector('#wrapper');
+        const toggle_icon = document.querySelector('#toggle_icon');
 
         wrapper.classList.toggle('toggled');
 
@@ -47,25 +44,38 @@ class NavbarPage extends Component {
 
     }
 
-    toggleCollapse = () => this.setState({isOpen: !this.state.isOpen});
+    const toggleCollapse = () => setIsOpen(!isOpen)
 
-    pointChange = (e) => {
-        const {upd_app} = this.props;
+    const pointChange = e => {
+        const {upd_app} = props;
         upd_app({stock_id: +e.target.value})
-    };
+    }
 
-    acess_point() {
+    const acess_point = () => {
 
-        if (!this.props.app) return '';
+        if (!props.app) return '';
 
-        let validStocks = this.props.app.stocks.filter(v => v.is_valid);
+        let allowedStocks = []
+
+        if (props.app.stockusers) {
+            props.app.stockusers.map(su => {
+                if (su.user_id === props.auth.user_id) {
+                    allowedStocks.push(su.stock_id)
+                }
+                return su
+            })
+        }
+
+        let validStocks = props.app.stocks
+            .filter(stock => stock.is_valid)
+            .filter(stock => allowedStocks.includes(stock.id))
 
         return (!validStocks || validStocks.length < 2)
             ? ''
-            : this.props.app.stock_id
+            : props.app.stock_id
                 ? <MDBDropdown>
                     <strong className="white-text">
-                        {this.props.app.stocks.find(v => +v.id === this.props.app.stock_id).name}
+                        {validStocks.find(stock => +stock.id === props.app.stock_id).name}
                     </strong>
                 </MDBDropdown>
                 : <MDBDropdown>
@@ -73,9 +83,9 @@ class NavbarPage extends Component {
                         <div className="d-none d-md-inline">Выбрать точку</div>
                     </MDBDropdownToggle>
                     <MDBDropdownMenu className="text-center">
-                        {this.props.app.stocks.map(v => {
+                        {validStocks.map(v => {
                             return v.is_valid ?
-                                <MDBDropdownItem onClick={this.pointChange}
+                                <MDBDropdownItem onClick={pointChange}
                                                  value={v.id}
                                                  key={"mdbdkey" + v.id}>
                                     {v.name}
@@ -85,27 +95,27 @@ class NavbarPage extends Component {
                 </MDBDropdown>
     }
 
-    exit = () => {
-        const {init_user, exit_app} = this.props;
-        init_user('', 0, '', '', '');
-        exit_app();
-        this.setState({isOpen: false});
+    const exit = () => {
+        const {init_user, exit_app} = props
+        init_user('', 0, '', '', '')
+        exit_app()
+        setIsOpen(false)
     };
 
-    getUserName() {
+    const getUserName = () => {
 
-        if (!this.props.app) return '';
-        let user = this.props.app.users.find(v => +v.id === +this.props.auth.user_id);
-        return user === undefined ? '' : user.name;
+        if (!props.app) return ''
+        let user = props.app.users.find(v => +v.id === +props.auth.user_id)
+        return user === undefined ? '' : user.name
 
-    };
+    }
 
-    auth_menu() {
+    const auth_menu = () => {
 
-        return this.props.auth.user_id > 0 ?
+        return props.auth.user_id > 0 ?
             <MDBDropdownMenu className="text-center" right>
                 <MDBCardHeader className={"font-weight-bold"}>
-                    {this.getUserName()}
+                    {getUserName()}
                 </MDBCardHeader>
 
                 {/*{authMenuContent.map(i => <MDBDropdownItem onClick={i.onClick}>*/}
@@ -121,15 +131,15 @@ class NavbarPage extends Component {
                 </MDBDropdownItem>
                 <MDBDropdownItem>
                     <MDBNavLink to="/subscribe" className="text-dark">
-                        Подписка до: {unixConverter(this.props.auth.expiration_time)}
+                        Подписка до: {unixConverter(props.auth.expiration_time)}
                     </MDBNavLink>
                 </MDBDropdownItem>
-                {this.props.app
-                    ? <MDBDropdownItem onClick={() => this.setState({balanceModalOpen: true})}>
-                        Баланс: {currencyConverter(this.props.app.balance)}
+                {props.app
+                    ? <MDBDropdownItem onClick={() => setBalanceModalOpen(true)}>
+                        Баланс: {props.app.balance}
                     </MDBDropdownItem>
                     : ''}
-                <MDBBtn className="btn btn-sm mx-4" color="danger" onClick={this.exit}>
+                <MDBBtn className="btn btn-sm mx-4" color="danger" onClick={exit}>
                     Выйти
                 </MDBBtn>
             </MDBDropdownMenu> :
@@ -137,50 +147,49 @@ class NavbarPage extends Component {
 
     }
 
-    render() {
-        return <MDBNavbar color="default-color" dark expand="md">
-            <MDBNavbarBrand>
-                <MDBNavLink to="/">
-                    <strong className="white-text">Uchet.store</strong>
-                </MDBNavLink>
-            </MDBNavbarBrand>
-            <button id="menu-toggle" onClick={this.toggleClick} className="btn btn-sm mx-2">
-                <i id="toggle_icon" className="fas fa-angle-double-left"/>
-            </button>
-            <MDBNavbarNav left>
-                <MDBNavItem className={"mx-3"}>
-                    {this.acess_point()}
+    return <MDBNavbar color="default-color" dark expand="md">
+        <MDBNavbarBrand>
+            <MDBNavLink to="/">
+                <strong className="white-text">Uchet.store</strong>
+            </MDBNavLink>
+        </MDBNavbarBrand>
+        <button id="menu-toggle" onClick={toggleClick} className="btn btn-sm mx-2">
+            <i id="toggle_icon" className="fas fa-angle-double-left"/>
+        </button>
+        <MDBNavbarNav left>
+            <MDBNavItem className={"mx-3"}>
+                {acess_point()}
+            </MDBNavItem>
+        </MDBNavbarNav>
+        <MDBNavbarToggler onClick={toggleCollapse}/>
+        <MDBCollapse id="navbarCollapse3" isOpen={isOpen} navbar className="text-right">
+            <MDBNavbarNav right>
+                <MDBNavItem>
+                    <MDBNavLink className="waves-effect waves-light" to="#!">
+                        <i className="fas fa-coins"/>
+                    </MDBNavLink>
+                </MDBNavItem>
+                <MDBNavItem>
+                    <MDBNavLink className="waves-effect waves-light" to="#!">
+                        <i className="far fa-envelope"/>
+                    </MDBNavLink>
+                </MDBNavItem>
+                <MDBNavItem>
+                    <MDBDropdown>
+                        <MDBDropdownToggle nav caret>
+                            <MDBIcon icon="user"/>
+                        </MDBDropdownToggle>
+                        {auth_menu()}
+                    </MDBDropdown>
                 </MDBNavItem>
             </MDBNavbarNav>
-            <MDBNavbarToggler onClick={this.toggleCollapse}/>
-            <MDBCollapse id="navbarCollapse3" isOpen={this.state.isOpen} navbar className="text-right">
-                <MDBNavbarNav right>
-                    <MDBNavItem>
-                        <MDBNavLink className="waves-effect waves-light" to="#!">
-                            <i className="fas fa-coins"/>
-                        </MDBNavLink>
-                    </MDBNavItem>
-                    <MDBNavItem>
-                        <MDBNavLink className="waves-effect waves-light" to="#!">
-                            <i className="far fa-envelope"/>
-                        </MDBNavLink>
-                    </MDBNavItem>
-                    <MDBNavItem>
-                        <MDBDropdown>
-                            <MDBDropdownToggle nav caret>
-                                <MDBIcon icon="user"/>
-                            </MDBDropdownToggle>
-                            {this.auth_menu()}
-                        </MDBDropdown>
-                    </MDBNavItem>
-                </MDBNavbarNav>
-            </MDBCollapse>
-            <BalanceModal
-              isOpen={this.state.balanceModalOpen}
-              close={() => this.setState({balanceModalOpen: false})}
-            />
-        </MDBNavbar>
-    }
+        </MDBCollapse>
+        <BalanceModal
+            isOpen={balanceModalOpen}
+            close={() => setBalanceModalOpen(false)}
+        />
+    </MDBNavbar>
+
 }
 
 const mapDispatchToProps = dispatch => bindActionCreators({
