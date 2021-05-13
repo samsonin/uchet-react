@@ -16,7 +16,7 @@ import rest from '../../components/Rest';
 
 const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
-function Stocks(props) {
+const Stocks = props => {
 
     const [isRequest, setIsRequest] = React.useState(false);
 
@@ -32,13 +32,13 @@ function Stocks(props) {
 
             if (!isRequest) {
                 setIsRequest(true);
-                rest('stocks', 'POST', {})
-                    .then(data => {
+                rest('stocks', 'POST')
+                    .then(res => {
 
                         setIsRequest(false);
-                        if (data.result) {
+                        if (res.result) {
                             const {upd_app} = props;
-                            upd_app({stocks: data.stocks})
+                            upd_app(res.body)
                         }
                     });
             }
@@ -47,7 +47,7 @@ function Stocks(props) {
 
     const requestSettings = (id, index, value) => {
 
-        if (value === '') return false;
+        if (!value) return false;
 
         if (!isRequest) {
             setIsRequest(true);
@@ -79,8 +79,8 @@ function Stocks(props) {
     };
 
     return <>
-        {props.app.stocks.map(v => <div key={"grKeydiv" + v.id}>
-                <Grid container direction="row" className="hoverable m-2 p-3" key={"grKey" + v.id}>
+        {props.app.stocks.map(stock => <div key={"grKeydiv" + stock.id}>
+                <Grid container direction="row" className="hoverable m-2 p-3" key={"grKey" + stock.id}>
                     <Grid item xs={9}>
                         <Typography variant="h3">
                             <i className="fas fa-store"/>
@@ -88,10 +88,10 @@ function Stocks(props) {
                     </Grid>
                     <Grid item xs={3}>
                         <FormControlLabel
-                            label={v.is_valid ? 'Активна' : 'Не активна'}
+                            label={stock.is_valid ? 'Активна' : 'Не активна'}
                             control={
-                                <Switch checked={!!v.is_valid}
-                                        onChange={e => requestSettings(v.id, 'is_valid', e.target.checked)}
+                                <Switch checked={!!stock.is_valid}
+                                        onChange={e => requestSettings(stock.id, 'is_valid', e.target.checked)}
                                         color="primary"/>
                             }
                         />
@@ -104,22 +104,22 @@ function Stocks(props) {
                     <Grid item xs={12}>
                         <InputLabel className="mt-2 font-weight-bold">Название:</InputLabel>
                         <TextField
-                            defaultValue={v.name} className="w-75"
-                            onBlur={e => requestSettings(v.id, 'name', e.target.value)}
+                            defaultValue={stock.name} className="w-75"
+                            onBlur={e => requestSettings(stock.id, 'name', e.target.value)}
                         />
                     </Grid>
                     <Grid item xs={12}>
                         <InputLabel className="mt-2 font-weight-bold">Адрес:</InputLabel>
                         <TextField
-                            defaultValue={v.address} className="w-75"
-                            onBlur={(e) => requestSettings(v.id, 'address', e.target.value)}
+                            defaultValue={stock.address} className="w-75"
+                            onBlur={(e) => requestSettings(stock.id, 'address', e.target.value)}
                         />
                     </Grid>
                     <Grid item xs={12}>
                         <InputLabel className="mt-2 font-weight-bold">Телефон:</InputLabel>
                         <TextField
-                            defaultValue={v.phone_number} className="w-75"
-                            onBlur={e => requestSettings(v.id, 'phone_number', e.target.value)}
+                            defaultValue={stock.phone_number} className="w-75"
+                            onBlur={e => requestSettings(stock.id, 'phone_number', e.target.value)}
                         />
                     </Grid>
                 </Grid>

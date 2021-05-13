@@ -163,12 +163,12 @@ const Employees = props => {
     </Fab>
 
     return <>
-        {props.app.users.map(v => <Grid
+        {props.app.users.map(user => <Grid
             container
             direction="row"
             className={classes.hoverGrid}
-            key={"grusKey" + v.id + v.verified_contact}
-        > {typeof v.verified_contact === "string"
+            key={"grusKey" + user.id + user.verified_contact}
+        > {typeof user.verified_contact === "string"
             ? <>
                 <Grid item xs={9}>
                     <Typography variant="subtitle1" style={{color: "gray"}}>
@@ -179,7 +179,7 @@ const Employees = props => {
                     <IconButton
                         color="secondary"
                         onClick={() =>
-                            requestSettings("deleteWait", v.verified_contact)
+                            requestSettings("deleteWait", user.verified_contact)
                         }
                     >
                         <DeleteIcon />
@@ -187,7 +187,7 @@ const Employees = props => {
                 </Grid>
                 <Grid item xs={12}>
                     <TextField
-                        defaultValue={v.verified_contact}
+                        defaultValue={user.verified_contact}
                         InputProps={{
                             readOnly: true,
                         }}
@@ -200,15 +200,15 @@ const Employees = props => {
                 </Grid>
                 <Grid item xs={6}>
                     <FormControlLabel
-                        label={v.is_valid ? "Работает" : "Уволен"}
+                        label={user.is_valid ? "Работает" : "Уволен"}
                         control={
                             <Switch
-                                checked={!!v.is_valid}
+                                checked={!!user.is_valid}
                                 onChange={(e) =>
                                     requestSettings(
                                         "changeEmployee",
                                         e.target.checked,
-                                        v.id,
+                                        user.id,
                                         "is_valid",
                                     )
                                 }
@@ -222,10 +222,10 @@ const Employees = props => {
                         Имя:
                     </Typography>
                     <TextField
-                        defaultValue={v.name}
+                        defaultValue={user.name}
                         fullWidth={true}
-                        onBlur={(e) =>
-                            requestSettings("changeEmployee", e.target.value, v.id, "user")
+                        onBlur={e =>
+                            requestSettings("changeEmployee", e.target.value, user.id, "user")
                         }
                     />
                 </Grid>
