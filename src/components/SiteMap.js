@@ -32,15 +32,15 @@ export const siteMap = [
   // {id: 1, onlyAdmin: false, path: "inventory", text: "Акты инвенторизации"},
   // {id: 1, onlyAdmin: false, path: "barcodeinventory", text: "Инвенторизация по штрихкодам"},
 
-  {id: 41, onlyAdmin: false, path: "settings/organization", text: "Организация"},
-  {id: 42, onlyAdmin: false, path: "settings/employees", text: "Сотрудники"},
-  {id: 43, onlyAdmin: false, path: "settings/stocks", text: "Точки"},
-  {id: 46, onlyAdmin: false, path: "settings/config", text: "Условия"},
-  {id: 47, onlyAdmin: false, path: "settings/fields", text: "Поля"},
-  {id: 48, onlyAdmin: false, path: "settings/docs", text: "Документы"},
+  {id: 41, onlyAdmin: true, path: "settings/organization", text: "Организация"},
+  {id: 42, onlyAdmin: true, path: "settings/employees", text: "Сотрудники"},
+  {id: 43, onlyAdmin: true, path: "settings/stocks", text: "Точки"},
+  {id: 46, onlyAdmin: true, path: "settings/config", text: "Условия"},
+  {id: 47, onlyAdmin: true, path: "settings/fields", text: "Поля"},
+  {id: 48, onlyAdmin: true, path: "settings/docs", text: "Документы"},
 
-  {id: 51, onlyAdmin: false, path: "integration/mango", text: "mango-office.ru"},
-  {id: 52, onlyAdmin: false, path: "integration/sms_ru", text: "sms.ru"},
+  {id: 51, onlyAdmin: true, path: "integration/mango", text: "mango-office.ru"},
+  {id: 52, onlyAdmin: true, path: "integration/sms_ru", text: "sms.ru"},
 ];
 
 export const permission = (id, auth) => {

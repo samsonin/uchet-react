@@ -1,4 +1,4 @@
-import React, {Component, useState} from "react";
+import React, {useState} from "react";
 import {connect} from 'react-redux';
 import {
     MDBNavbar, MDBNavbarBrand, MDBNavbarNav, MDBNavItem, MDBNavLink, MDBNavbarToggler, MDBCollapse, MDBDropdown,
@@ -7,13 +7,6 @@ import {
 import {init_user, upd_app, exit_app, enqueueSnackbar, closeSnackbar} from "../actions/actionCreator";
 import BalanceModal from "./BalanceModal";
 import {bindActionCreators} from "redux";
-
-
-// const authMenuContent = [
-//     {to: '/settings' , className: '', text: 'Настройки'},
-//     {to: '/subscribe' , className: 'text-dark', text: 'Подписка до: ' + unixConverter(this.props.auth.expiration_time)},
-//     {onclick: this.ballanceModal, text: 'Баланс: ' + currencyConverter(this.props.app.balance)}
-// ]
 
 
 const unixConverter = unix => {
@@ -38,9 +31,9 @@ const NavbarPage = props => {
 
         wrapper.classList.toggle('toggled');
 
-        toggle_icon.classList.value = wrapper.classList.value === 'd-flex toggled' ?
-            'fas fa-angle-double-right' :
-            'fas fa-angle-double-left'
+        toggle_icon.classList.value = wrapper.classList.value === 'd-flex toggled'
+            ? 'fas fa-angle-double-right'
+            : 'fas fa-angle-double-left'
 
     }
 
@@ -70,9 +63,8 @@ const NavbarPage = props => {
             .filter(stock => stock.is_valid)
             .filter(stock => allowedStocks.includes(stock.id))
 
-        return (!validStocks || validStocks.length < 2)
-            ? ''
-            : props.app.stock_id
+        return (validStocks)
+            ? props.app.stock_id
                 ? <MDBDropdown>
                     <strong className="white-text">
                         {validStocks.find(stock => +stock.id === props.app.stock_id).name}
@@ -84,45 +76,45 @@ const NavbarPage = props => {
                     </MDBDropdownToggle>
                     <MDBDropdownMenu className="text-center">
                         {validStocks.map(v => {
-                            return v.is_valid ?
-                                <MDBDropdownItem onClick={pointChange}
-                                                 value={v.id}
-                                                 key={"mdbdkey" + v.id}>
+                            return v.is_valid
+                                ? <MDBDropdownItem onClick={pointChange}
+                                                   value={v.id}
+                                                   key={"mdbdkey" + v.id}
+                                >
                                     {v.name}
-                                </MDBDropdownItem> : '';
+                                </MDBDropdownItem>
+                                : ''
                         })}
                     </MDBDropdownMenu>
                 </MDBDropdown>
+            : ''
     }
 
     const exit = () => {
+
         const {init_user, exit_app} = props
         init_user('', 0, '', '', '')
         exit_app()
         setIsOpen(false)
-    };
+
+    }
 
     const getUserName = () => {
 
         if (!props.app) return ''
-        let user = props.app.users.find(v => +v.id === +props.auth.user_id)
-        return user === undefined ? '' : user.name
+        const user = props.app.users.find(v => +v.id === +props.auth.user_id)
+        return user === undefined
+            ? ''
+            : user.name
 
     }
 
-    const auth_menu = () => {
+    const auth_menu = () => props.auth.user_id > 0
+            ? <MDBDropdownMenu className="text-center" right>
 
-        return props.auth.user_id > 0 ?
-            <MDBDropdownMenu className="text-center" right>
                 <MDBCardHeader className={"font-weight-bold"}>
                     {getUserName()}
                 </MDBCardHeader>
-
-                {/*{authMenuContent.map(i => <MDBDropdownItem onClick={i.onClick}>*/}
-                {/*    <MDBNavLink to={i.to} className={i.className}>*/}
-                {/*        {i.text}*/}
-                {/*    </MDBNavLink>*/}
-                {/*</MDBDropdownItem>)}*/}
 
                 <MDBDropdownItem>
                     <MDBNavLink to="/settings" className="text-dark">
@@ -142,10 +134,8 @@ const NavbarPage = props => {
                 <MDBBtn className="btn btn-sm mx-4" color="danger" onClick={exit}>
                     Выйти
                 </MDBBtn>
-            </MDBDropdownMenu> :
-            '';
-
-    }
+            </MDBDropdownMenu>
+            : ''
 
     return <MDBNavbar color="default-color" dark expand="md">
         <MDBNavbarBrand>

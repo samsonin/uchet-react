@@ -38,7 +38,7 @@ const Sidebar = props => {
             }
         }
 
-    };
+    }
 
     return <div id="sidebar-wrapper"
                 className="bg-light border-right">
@@ -54,6 +54,7 @@ const Sidebar = props => {
             ].map(v => <div key={'sidebararrkey' + v.name}>
                     <Button
                         className={classes.button}
+                        hidden={!v.arr.find(id => permission(id, props))}
                         size="large"
                         onClick={e => nextDivToggle(e.currentTarget.nextSibling)}>
                         {v.name}

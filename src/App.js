@@ -9,7 +9,7 @@ import {Customer} from "./components/common/Customer";
 import Entities from "./components/Entities";
 import Entity from "./components/Entity";
 import Sidebar from "./components/Sidebar";
-import Main from "./components/Main";
+import {Main} from "./components/Main";
 import Authmodal from "./components/Authmodal";
 import Settings from "./components/Settings";
 import Subscribe from "./components/Subscribe";
@@ -69,19 +69,19 @@ class App extends Component {
 
                         console.log(data)
 
-                    if (data.ok) {
+                        if (data.ok) {
 
-                        if (data.status === 200) {
+                            if (data.status === 200) {
 
-                            // TODO отследить если IMEI
-                            this.setState({
-                                good: data.body,
-                            });
+                                // TODO отследить если IMEI
+                                this.setState({
+                                    good: data.body,
+                                });
+
+                            }
 
                         }
-
-                    }
-                });
+                    });
 
             } else if (barcode.substr(0, 1) === "R" &&
                 barcode.length === 13) {
@@ -128,7 +128,7 @@ class App extends Component {
                 />
                 : null}
 
-            <Header className={'d-print-none'} />
+            <Header className={'d-print-none'}/>
             <div className="d-flex d-print-none" id="wrapper">
                 <Sidebar/>
                 <div id="sidebaredivider"/>
@@ -136,8 +136,9 @@ class App extends Component {
                     +this.props.auth.user_id > 0
                         ? <div className="m-2 p-2">
                             <Route exact path="/" component={
-                                this.props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0) ?
-                                    Main : Subscribe
+                                this.props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0)
+                                    ? Main
+                                    : Subscribe
                             }/>
                             <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
                             <Route exact path="/settings" component={Settings}/>
@@ -152,26 +153,31 @@ class App extends Component {
                             <Route path="/queue" component={Queue}/>
                             <Route path="/arrival" component={Arrival}/>
 
-                            <Route path="/funds" component={FundsFlow}/>
 
-                            <Route path="/settings/organization" component={Organization}/>
-                            <Route path="/settings/employees" component={Employees}/>
-                            <Route exact path="/settings/stocks" component={Stocks}/>
-                            <Route exact path="/settings/stocks/:id" component={Stock}/>
-                            <Route path="/settings/config" component={Config}/>
-                            <Route path="/settings/config" component={Config}/>
-                            <Route path="/settings/fields" component={Fields}/>
-                            <Route path="/settings/docs" component={Docs}/>
-                            <Route path="/integration/mango"
-                                   component={() => <IntegrationMango
-                                       org_id={this.props.auth.organization_id}
-                                       vpbx_api_key={'секретный ключ'}
-                                       vpbx_api_salt={'секретная соль'}
-                                       keyHandle={this.keyHandle}
-                                       saltHandle={this.saltHandle}
-                                   />}
-                            />
-                            <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
+                            {this.props.auth.admin
+                                ? <>
+                                    <Route path="/funds" component={FundsFlow}/>
+
+                                    <Route path="/settings/organization" component={Organization}/>
+                                    <Route path="/settings/employees" component={Employees}/>
+                                    <Route exact path="/settings/stocks" component={Stocks}/>
+                                    <Route exact path="/settings/stocks/:id" component={Stock}/>
+                                    <Route path="/settings/config" component={Config}/>
+                                    <Route path="/settings/config" component={Config}/>
+                                    <Route path="/settings/fields" component={Fields}/>
+                                    <Route path="/settings/docs" component={Docs}/>
+                                    <Route path="/integration/mango"
+                                           component={() => <IntegrationMango
+                                               org_id={this.props.auth.organization_id}
+                                               vpbx_api_key={'секретный ключ'}
+                                               vpbx_api_salt={'секретная соль'}
+                                               keyHandle={this.keyHandle}
+                                               saltHandle={this.saltHandle}
+                                           />}
+                                    />
+                                    <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
+                                </>
+                                : ''}
 
                             <GoodModal
                                 good={this.state.good}
