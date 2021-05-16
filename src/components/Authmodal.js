@@ -61,7 +61,7 @@ class authModal extends Component {
         return true;
     }
 
-    keyPress = (e) => {
+    keyPress = e => {
         if (typeof e === 'undefined') return false;
         if (e.key === 'Enter') { // eslint-disable-next-line
             switch (this.state.status) {

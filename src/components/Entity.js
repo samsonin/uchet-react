@@ -28,34 +28,29 @@ const Entity = props => {
 
     const [isRequesting, setRequesting] = useState(false)
     const [isDetails, setDetails] = useState(false)
-    const [entity, setEntity] = useState({})
+
+    const id = +props.match.params.id;
+
+    const serverEntity = {...props.providers.find(p => p.id === id)}
+
+    const [entity, setEntity] = useState(() => serverEntity)
+
     const [disabled, setDisabled] = useState(true)
 
     const {enqueueSnackbar} = useSnackbar();
 
-    const providers = props.providers;
-
-    let id = +props.match.params.id;
-
     useEffect(() => {
 
-        if (id > 0) {
+        setDisabled(isRequesting ||
+            JSON.stringify(props.providers.find(p => p.id === id)) === JSON.stringify(entity))
 
-            setEntity({...providers.find(p => p.id === id)})
-
-        }
-
-        setDisabled(isRequesting
-            ? true
-            : JSON.stringify(providers.find(p => p.id === id)) === JSON.stringify(entity))
-
-    }, [id, providers, entity, isRequesting])
+    },[entity, isRequesting])
 
     const fieldHandler = (name, value) => {
         setEntity(prev => ({...prev, [name]: value}))
     }
 
-    const cancel = () => setEntity({...providers.find(p => p.id === id)})
+    const cancel = () => setEntity(serverEntity)
 
     const save = () => {
 
@@ -126,8 +121,9 @@ const Entity = props => {
 
     }
 
-    return props.fields.allElements
-        ? <Grid container
+    console.log(entity)
+
+    return <Grid container
                 component={Paper}
                 direction="row"
                 justify="space-between"
@@ -145,14 +141,17 @@ const Entity = props => {
                 </Tooltip>
             </Grid>
             <Grid item>
-                <Tooltip title="Удалить">
-                    <IconButton
-                        disabled={isRequesting}
-                        onClick={() => remove()}
-                    >
+                <IconButton
+                    disabled={isRequesting ||
+                    JSON.stringify(props.providers.find(p => p.id === id)) === JSON.stringify(entity)
+                    }
+                    onClick={() => remove()}
+                >
+                    <Tooltip title="Удалить">
                         <DeleteIcon/>
-                    </IconButton>
-                </Tooltip>
+                    </Tooltip>
+
+                </IconButton>
                 <Tooltip title={
                     isDetails
                         ? 'Кратко'
@@ -175,7 +174,7 @@ const Entity = props => {
                     .filter(field => isDetails || ['name', 'inn'].includes(field.name))
                     .map(elem => {
 
-                        return <TextField
+                            return <TextField
                                 style={{
                                     width: '100%',
                                     margin: '1rem',
@@ -191,10 +190,10 @@ const Entity = props => {
                     )
                 : null}
 
-            {BottomButtons(save, cancel, disabled, id < 1)}
+            {BottomButtons(save, cancel, disabled, !id)}
 
         </Grid>
-        : null
+
 }
 
 export default connect(state => state.app, mapDispatchToProps)(Entity);

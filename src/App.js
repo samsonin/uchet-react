@@ -9,7 +9,7 @@ import {Customer} from "./components/common/Customer";
 import Entities from "./components/Entities";
 import Entity from "./components/Entity";
 import Sidebar from "./components/Sidebar";
-import {Main} from "./components/Main";
+import Main from "./components/Main";
 import Authmodal from "./components/Authmodal";
 import Settings from "./components/Settings";
 import Subscribe from "./components/Subscribe";
@@ -146,7 +146,10 @@ class App extends Component {
                             <Route exact path="/customers" component={Customers}/>
                             <Route exact path="/customers/:id" component={Customer}/>
                             <Route exact path="/entities" component={Entities}/>
-                            <Route exact path="/entities/:id" component={Entity}/>
+                            {this.props.app.fields.allElements
+                                ? <Route exact path="/entities/:id" component={Entity}/>
+                                : ''
+                            }
                             <Route path="/call_records" component={Records}/>
                             {/*<Route path="/orders" component={Orders}/>*/}
                             {/*<Route path="/order" component={Order}/>*/}
@@ -161,7 +164,10 @@ class App extends Component {
                                     <Route path="/settings/organization" component={Organization}/>
                                     <Route path="/settings/employees" component={Employees}/>
                                     <Route exact path="/settings/stocks" component={Stocks}/>
-                                    <Route exact path="/settings/stocks/:id" component={Stock}/>
+                                    {this.props.app.users && this.props.app.stocks && this.props.app.stockusers
+                                        ? <Route exact path="/settings/stocks/:id" component={Stock}/>
+                                        : null
+                                    }
                                     <Route path="/settings/config" component={Config}/>
                                     <Route path="/settings/config" component={Config}/>
                                     <Route path="/settings/fields" component={Fields}/>

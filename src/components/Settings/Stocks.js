@@ -5,7 +5,7 @@ import {upd_app} from "../../actions/actionCreator";
 
 import {useSnackbar} from 'notistack';
 
-import {Fab, FormControlLabel, Grid, InputLabel, Switch, TextField, Typography} from "@material-ui/core";
+import {Fab, FormControlLabel, Grid, InputLabel, Paper, Switch, TextField, Typography} from "@material-ui/core";
 import AddIcon from '@material-ui/icons/Add';
 
 import rest from '../../components/Rest';
@@ -14,6 +14,8 @@ import {Link} from "react-router-dom";
 import IconButton from "@material-ui/core/IconButton";
 import EditIcon from "@material-ui/icons/Edit";
 import TableCell from "@material-ui/core/TableCell";
+import {makeStyles} from "@material-ui/core/styles";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 // TODO избавиться от classname и переписать используя @material-ui
 // сократить и оптимизировать код
@@ -21,61 +23,76 @@ import TableCell from "@material-ui/core/TableCell";
 
 const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
+const useStyles = makeStyles({
+    title: {
+        width: '80%',
+        marginTop: '0.4rem',
+    },
+    icon: {
+        width: '10%',
+        marginTop: '0.5rem',
+    },
+    name: {
+        width: '70%',
+        marginTop: '0.8rem',
+    },
+    switch: {
+        width: '10%',
+        marginTop: '0.3rem',
+    },
+    edit: {
+        width: '10%',
+    },
+})
+
 const Stocks = props => {
 
     const [isRequest, setIsRequest] = React.useState(false);
 
     const {enqueueSnackbar} = useSnackbar();
 
+    const classes = useStyles();
+
     const add = () => {
-
-        if (props.app.stocks.find(point => point.name === '')) {
-            enqueueSnackbar('Существует точка без названия, создать новую невозможно!', {
-                variant: 'warning'
-            })
-        } else {
-
-            if (!isRequest) {
-                setIsRequest(true);
-                rest('stocks', 'POST')
-                    .then(res => {
-
-                        setIsRequest(false);
-                        if (res.result) {
-                            const {upd_app} = props;
-                            upd_app(res.body)
-                        }
-                    });
-            }
-        }
-    }
-
-    const requestSettings = (id, index, value) => {
-
-        if (!value) return false;
 
         if (!isRequest) {
             setIsRequest(true);
+            rest('stocks', 'POST')
+                .then(res => {
+
+                    setIsRequest(false);
+                    if (res.status < 300) {
+                        const {upd_app} = props;
+                        upd_app(res.body)
+
+                        enqueueSnackbar('ok', {variant: 'success'})
+                    }
+                });
+        }
+    }
+
+    const isValidToggleHandler = (id, value) => {
+
+        if (!isRequest) {
+
+            setIsRequest(true);
             rest('stocks/' + id, 'PATCH', {
-                [index]: value
+                is_valid: value
             })
-                .then(data => {
+                .then(res => {
 
                     setIsRequest(false);
 
-                    if (data.result) {
+                    if (res.status < 300) {
 
                         const {upd_app} = props;
-                        upd_app({stocks: data.stocks})
+                        upd_app(res.body)
+
+                        enqueueSnackbar('ok', {variant: 'success'})
 
                     } else {
 
-                        // let message = 'ошибка';
-                        // if (data.error === 'already_used') message = 'Такой пользователь уже зарегистрирован!';
-                        // else if (data.error === 'wrong_format') message = 'Неправильный формат контакта!';
-                        // enqueueSnackbar(message, {
-                        //     variant: 'warning'
-                        // })
+                        enqueueSnackbar('error', {variant: 'error'})
 
                     }
 
@@ -83,84 +100,104 @@ const Stocks = props => {
         }
     };
 
-    return <>
-        {props.app.stocks.map(stock => <div key={"grKeydiv" + stock.id}>
-                <Grid container
-                      className="hoverable"
-                      slyle={{
-                          margin: '1rem',
-                          padding: '1rem',
-                          weight: '100%'
-                      }}
-                      justify="space-evenly"
-                      alignContent="stretch"
-                      alignItems="stretch"
-                      key={"grKey" + stock.id}
+    return <Grid container
+                 component={Paper}
+                 justify="space-around"
+    >
+        <Grid container
+              style={{padding: '1rem'}}
+              justify="flex-end"
+        >
+            <Grid item className={classes.title}>
+                <Typography variant="h5">
+                    Точки
+                </Typography>
+            </Grid>
+            <Grid item>
+                <Tooltip title="Добавить">
+                    <IconButton onClick={add}
+                                disabled={isRequest}
+                    >
+                        <AddCircleIcon/>
+                    </IconButton>
+                </Tooltip>
+            </Grid>
+
+        </Grid>
+
+        {props.app.stocks.map(stock => <Grid container
+                                             className={"hoverable"}
+                                             style={{padding: '1rem'}}
+                                             key={"conteinerinstockgrid" + stock.id}
+            >
+                <Grid item
+                      className={classes.icon}
                 >
-                    <Grid item >
-                        <Typography variant="h6">
-                            <i className="fas fa-store"/>
-                        </Typography>
-                    </Grid>
-                    <Grid item >
-                        <Typography variant="subtitle2">
-                            {stock.name}
-                        </Typography>
-                    </Grid>
-                    <Grid item >
+                    <Typography variant="h6">
+                        <i className="fas fa-store"/>
+                    </Typography>
+                </Grid>
+                <Grid item
+                      className={classes.name}
+                >
+                    <Typography variant="subtitle1">
+                        {stock.name}
+                    </Typography>
+                </Grid>
+                <Grid item
+                      className={classes.switch}
+                >
+                    <Tooltip title={stock.is_valid
+                        ? "Отключить"
+                        : "Включить"}
+                    >
                         <FormControlLabel
-                            label={stock.is_valid ? 'Активна' : 'Не активна'}
                             control={
                                 <Switch checked={!!stock.is_valid}
-                                        onChange={e => requestSettings(stock.id, 'is_valid', e.target.checked)}
+                                        disabled={isRequest}
+                                        onChange={e => isValidToggleHandler(stock.id, e.target.checked)}
                                         color="primary"/>
                             }
                         />
-                        {/*{!v.is_valid && v.canDelete ?*/}
-                        {/*    <IconButton color="secondary" onClick={() => this.deletePoint(v.id)}>*/}
-                        {/*        <DeleteIcon/>*/}
-                        {/*    </IconButton>*/}
-                        {/*: ''}*/}
-                    </Grid>
-
-                    <Grid item >
-                        <Tooltip title="Редактировать">
-                            <Link to={"/settings/stocks/" + stock.id}>
-                                <IconButton>
-                                    <EditIcon/>
-                                </IconButton>
-                            </Link>
-                        </Tooltip>
-                    </Grid>
-
-                    {/*<Grid item xs={12}>*/}
-                    {/*    <InputLabel className="mt-2 font-weight-bold">Название:</InputLabel>*/}
-                    {/*    <TextField*/}
-                    {/*        defaultValue={stock.name} className="w-75"*/}
-                    {/*        onBlur={e => requestSettings(stock.id, 'name', e.target.value)}*/}
-                    {/*    />*/}
-                    {/*</Grid>*/}
-                    {/*<Grid item xs={12}>*/}
-                    {/*    <InputLabel className="mt-2 font-weight-bold">Адрес:</InputLabel>*/}
-                    {/*    <TextField*/}
-                    {/*        defaultValue={stock.address} className="w-75"*/}
-                    {/*        onBlur={(e) => requestSettings(stock.id, 'address', e.target.value)}*/}
-                    {/*    />*/}
-                    {/*</Grid>*/}
-                    {/*<Grid item xs={12}>*/}
-                    {/*    <InputLabel className="mt-2 font-weight-bold">Телефон:</InputLabel>*/}
-                    {/*    <TextField*/}
-                    {/*        defaultValue={stock.phone_number} className="w-75"*/}
-                    {/*        onBlur={e => requestSettings(stock.id, 'phone_number', e.target.value)}*/}
-                    {/*    />*/}
-                    {/*</Grid>*/}
+                    </Tooltip>
                 </Grid>
-            </div>
+
+                <Grid item
+                      className={classes.edit}
+                >
+                    <Tooltip title="Редактировать">
+                        <Link to={"/settings/stocks/" + stock.id}>
+                            <IconButton>
+                                <EditIcon/>
+                            </IconButton>
+                        </Link>
+                    </Tooltip>
+                </Grid>
+
+                {/*<Grid item xs={12}>*/}
+                {/*    <InputLabel className="mt-2 font-weight-bold">Название:</InputLabel>*/}
+                {/*    <TextField*/}
+                {/*        defaultValue={stock.name} className="w-75"*/}
+                {/*        onBlur={e => requestSettings(stock.id, 'name', e.target.value)}*/}
+                {/*    />*/}
+                {/*</Grid>*/}
+                {/*<Grid item xs={12}>*/}
+                {/*    <InputLabel className="mt-2 font-weight-bold">Адрес:</InputLabel>*/}
+                {/*    <TextField*/}
+                {/*        defaultValue={stock.address} className="w-75"*/}
+                {/*        onBlur={(e) => requestSettings(stock.id, 'address', e.target.value)}*/}
+                {/*    />*/}
+                {/*</Grid>*/}
+                {/*<Grid item xs={12}>*/}
+                {/*    <InputLabel className="mt-2 font-weight-bold">Телефон:</InputLabel>*/}
+                {/*    <TextField*/}
+                {/*        defaultValue={stock.phone_number} className="w-75"*/}
+                {/*        onBlur={e => requestSettings(stock.id, 'phone_number', e.target.value)}*/}
+                {/*    />*/}
+                {/*</Grid>*/}
+            </Grid>
         )}
-        <Fab color="primary" aria-label="add" className="addfab" onClick={add}>
-            <AddIcon/>
-        </Fab>
-    </>
+    </Grid>
 
 }
 

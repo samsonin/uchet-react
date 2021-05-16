@@ -5,7 +5,7 @@ import {Link} from "react-router-dom";
 import {makeStyles} from '@material-ui/core/styles';
 import Button from "@material-ui/core/Button";
 
-import {siteMap, permission} from "./SiteMap";
+import {siteMap} from "./SiteMap";
 
 
 const useStyles = makeStyles({
@@ -51,32 +51,31 @@ const Sidebar = props => {
                 {name: 'Аналитика', arr: [32]},
                 {name: 'Настройки', arr: [41, 42, 43, 46, 47, 48]},
                 {name: 'Интеграции', arr: [51, 52]},
-            ].map(v => <div key={'sidebararrkey' + v.name}>
+            ].map(v => siteMap(props.admin).find(sm => v.arr.includes(sm.id))
+                ? <div key={'sidebararrkey' + v.name}>
                     <Button
                         className={classes.button}
-                        hidden={!v.arr.find(id => permission(id, props))}
                         size="large"
                         onClick={e => nextDivToggle(e.currentTarget.nextSibling)}>
                         {v.name}
                     </Button>
                     <div className="List-item hideBlock">
                         {v.arr.map(id => {
-                                let obj = siteMap.find(v => v.id === id);
+                                let obj = siteMap(props.admin).find(v => v.id === id)
                                 return obj
-                                    ? permission(id, props)
-                                        ? <div className="link_items"
-                                               key={"mdblnksdbkey" + id}
-                                        >
-                                            <Link to={'/' + obj.path}>
-                                                {obj.text}
-                                            </Link>
-                                        </div>
-                                        : null
+                                    ? <div className="link_items"
+                                           key={"mdblnksdbkey" + id}
+                                    >
+                                        <Link to={'/' + obj.path}>
+                                            {obj.text}
+                                        </Link>
+                                    </div>
                                     : null
                             }
                         )}
                     </div>
                 </div>
+                : ''
             )
             }
         </div>

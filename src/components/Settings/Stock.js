@@ -17,12 +17,15 @@ import Checkbox from "@material-ui/core/Checkbox";
 
 import rest from "../Rest";
 import TextField from "@material-ui/core/TextField/TextField";
+import {useSnackbar} from "notistack";
 
 const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
 const Stock = props => {
 
-    const initialStock = props.app.stocks.find(s => s.id === +props.match.params.id) || {}
+    const initialStock = props.app.stocks.find(s => s.id === +props.match.params.id)
+
+    const [isRequest, setIsRequest] = useState(false)
 
     const [stock, setStock] = useState(() => initialStock)
 
@@ -30,50 +33,82 @@ const Stock = props => {
         .filter(su => su.stock_id === +props.match.params.id)
         .map(su => su.user_id))
 
+    const {enqueueSnackbar} = useSnackbar();
+
     const fieldHandler = (name, value) => setStock(prev => ({...prev, [name]: value}))
 
     const save = () => {
-        console.log('save')
+
+        setIsRequest(true)
+
+        rest('stocks/' + stock.id, 'PATCH', {
+            name: stock.name,
+            address: stock.address,
+            phone_number: stock.phone_number,
+        })
+            .then(res => {
+
+                setIsRequest(false)
+
+                if (res.status < 300) {
+                    const {upd_app} = props;
+                    upd_app(res.body)
+
+                    enqueueSnackbar('ok', {variant: 'success'})
+                }
+
+            })
+
     }
 
     const reset = () => setStock(initialStock)
 
     const remove = () => {
-        console.log('remove')
+
+        setIsRequest(true)
+
+        rest('stocks/' + stock.id, 'DELETE')
+            .then(res => {
+
+                setIsRequest(false)
+
+                if (res.status < 300) {
+                    const {upd_app} = props;
+                    upd_app(res.body)
+
+                    enqueueSnackbar('ok', {variant: 'success'})
+
+                    props.history.push('/stocks')
+                }
+
+            })
     }
 
     useEffect(() => {
-
 
 
     }, [allowedUserIds])
 
     const checkHandler = (user_id, isAllowed) => setAllowedUserIds(prev => {
 
-            const state = {...prev}
+        const state = {...prev}
 
-            rest('stockusers/' + stock.id + '/' + user_id,
-                isAllowed
-                    ? 'POST'
-                    : 'DELETE'
+        rest('stockusers/' + stock.id + '/' + user_id, isAllowed
+            ? 'POST'
+            : 'DELETE'
+        )
+            .then(res => {
+
+                return res.status && res.status < 300
+                        ? true
+                        : setAllowedUserIds(state)
+                }
             )
-                .then(res => {
 
-                    console.log(res)
-
-                    if (!res.status || res.status > 299) {
-
-                        setAllowedUserIds(state)
-
-                    }
-
-                })
-
-            return isAllowed
-                ? prev.concat(user_id)
-                : prev.filter(v => v !== user_id)
-        }
-    )
+        return isAllowed
+            ? prev.concat(user_id)
+            : prev.filter(v => v !== user_id)
+    })
 
     return <Grid container component={Paper} spacing={1} justify="space-around">
 
@@ -94,6 +129,7 @@ const Stock = props => {
                 <Tooltip title="Удалить">
                     <IconButton
                         onClick={() => remove()}
+                        disabled={isRequest}
                     >
                         <DeleteIcon/>
                     </IconButton>
@@ -146,7 +182,7 @@ const Stock = props => {
 
         {BottomButtons(save,
             reset,
-            JSON.stringify(stock) === JSON.stringify(initialStock),
+            isRequest || (JSON.stringify(stock) === JSON.stringify(initialStock)),
             !+props.match.params.id
         )}
 
