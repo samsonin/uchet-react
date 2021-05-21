@@ -1,5 +1,5 @@
 import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
-import React from "react";
+import React, {useState} from "react";
 import Tree from "./Tree";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
@@ -9,25 +9,31 @@ const mapDispatchToProps = dispatch => bindActionCreators({
     enqueueSnackbar,
 }, dispatch);
 
-let val = 0;
 
 export default connect(state => (state), mapDispatchToProps)(function ControlledTreeModal(props) {
 
-    const getValue = (v) => {
-        val = v;
-        props.onClose(val)
-    }
+    const [currentId, setCurrentId] = useState(() => props.initialCategoryId)
+
 
     return <MDBContainer>
-        <MDBModal isOpen={props.isOpen} toggle={() => props.onClose(false)}>
-            <MDBModalHeader toggle={() => props.onClose(false)}>
+        <MDBModal isOpen={props.isOpen} toggle={() => props.onClose(0)}>
+            <MDBModalHeader toggle={() => props.onClose(0)}>
                 Выбор категории</MDBModalHeader>
             <MDBModalBody>
-                <Tree id={props.id} categories={props.app.categories} onSelected={getValue}/>
+                <Tree
+                    initialId={props.initialCategoryId}
+                    categories={props.app.categories}
+                    onSelected={id => setCurrentId(id)}
+                    finished={id => props.onClose(id)}
+                />
             </MDBModalBody>
             <MDBModalFooter>
-                <MDBBtn color="secondary" onClick={() => props.onClose(false)}>Отмена</MDBBtn>
-                <MDBBtn color="primary" onClick={() => props.onClose(val)}>Сохранить</MDBBtn>
+                <MDBBtn color="secondary" onClick={() => props.onClose(0)}>
+                    Отмена
+                </MDBBtn>
+                <MDBBtn color="primary" onClick={() => props.onClose(currentId)}>
+                    Сохранить
+                </MDBBtn>
             </MDBModalFooter>
         </MDBModal>
     </MDBContainer>

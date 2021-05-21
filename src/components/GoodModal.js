@@ -247,8 +247,10 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                         {this.state.treeOpen ?
                             <>
                                 <Grid item xs={10} className="pt-1 pr-1">
-                                    <Tree id={good.category_id} categories={this.props.app.categories}
-                                          onSelected={this.handleTree}
+                                    <Tree initialId={good.category_id}
+                                          categories={this.props.app.categories}
+                                          onSelected={id => good.category_id = +id}
+                                          finished={id => this.handleTree(id)}
                                     />
                                 </Grid>
                                 <Grid item xs={2}>
@@ -259,8 +261,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
                                     </Button>
                                 </Grid>
                             </>
-                            :
-                            <Grid item xs={12}>
+                            : <Grid item xs={12}>
                                 <Button size="small" className="w-100" onClick={() => this.setState({treeOpen: true})}>
                                     {categoryName}
                                 </Button>

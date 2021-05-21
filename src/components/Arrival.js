@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {connect} from "react-redux";
 
 import {useSnackbar} from 'notistack';
@@ -47,7 +47,7 @@ const Arrival = props => {
 
     const {enqueueSnackbar} = useSnackbar();
 
-    const providerOptions = props.app.providers.map(v => ({id: v.id, name: v.name}))
+    const providerOptions = props.app.providers.map(p => ({id: p.id, name: p.name}))
     providerOptions.unshift({id: 0, name: ''})
 
     const addConsignment = () => {
@@ -133,6 +133,7 @@ const Arrival = props => {
     }
 
     const handleCategories = id => {
+
         setState(prev => {
 
             let newState = {...prev};
@@ -247,11 +248,23 @@ const Arrival = props => {
         </TableRow>
     }
 
-    return (+props.app.stock_id <= 0)
-        ? <Typography variant="h5" align="center">Выберите точку</Typography>
-        : <>
+    useEffect(() => {
 
-            <TreeModal isOpen={state.currentTr !== false} onClose={handleCategories}/>
+        // console.log(state.currentTr)
+
+    }, [state.currentTr])
+
+    const currentTr = state.consignment.products[state.currentTr]
+
+    return props.app.stock_id
+        ? <>
+
+            <TreeModal isOpen={state.currentTr !== false}
+                       onClose={handleCategories}
+                       initialCategoryId={currentTr
+                           ? currentTr.categoryId
+                           : 0}
+            />
 
             <Grid container
                 // spacing={3}
@@ -353,8 +366,9 @@ const Arrival = props => {
                     </Grid>
                 </Grid>
             </Grid>
-        </>
 
+        </>
+        : <Typography variant="h5" align="center">Выберите точку</Typography>
 }
 
 export default connect(state => state)(Arrival);

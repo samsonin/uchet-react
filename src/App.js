@@ -16,6 +16,7 @@ import Subscribe from "./components/Subscribe";
 import Queue from "./components/Queue";
 import WebSocketAdapter from "./components/WebSocketAdapter";
 import Arrival from "./components/Arrival";
+import Transit from "./components/Transit";
 import FundsFlow from "./components/FundsFlow";
 import rest from "./components/Rest";
 import GoodModal from "./components/GoodModal";
@@ -31,6 +32,7 @@ import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
 import {Records} from "./components/Records";
 import Docs from "./components/Settings/Docs";
+import Typography from "@material-ui/core/Typography";
 
 let barcode = '';
 
@@ -155,7 +157,7 @@ class App extends Component {
                             {/*<Route path="/order" component={Order}/>*/}
                             <Route path="/queue" component={Queue}/>
                             <Route path="/arrival" component={Arrival}/>
-
+                            <Route path="/transit" component={Transit}/>
 
                             {this.props.auth.admin
                                 ? <>

@@ -7,6 +7,7 @@ export const Barcodes = ({barcodes}) => {
 
     return (barcodes && typeof (barcodes) === 'object')
         ? barcodes.map(b => <div
+            key={'divinbarcodes' + b.toString()}
                 className={'barcodes'}
             >
                 <Barcode
