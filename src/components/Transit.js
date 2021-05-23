@@ -7,15 +7,23 @@ import Table from "@material-ui/core/Table";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell/TableCell";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
 import TableBody from "@material-ui/core/TableBody";
 import {connect} from "react-redux";
 
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import IconButton from "@material-ui/core/IconButton";
+import CheckIcon from '@material-ui/icons/Check';
+import Tooltip from "@material-ui/core/Tooltip/Tooltip";
+import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
+import TextField from "@material-ui/core/TextField/TextField";
 
 const Transit = props => {
 
     const [state, setState] = useState()
+
+    const [infoOpen, setInfoOpen] = useState(false)
+
+    const [good, setGood] = useState({})
 
     useEffect(() => {
 
@@ -32,44 +40,146 @@ const Transit = props => {
 
     }, [])
 
-    return state
-        ? <TableContainer component={Paper}>
-            <Table size="small">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>
-                            Время
-                        </TableCell>
-                        <TableCell>
-                            Наименование
-                        </TableCell>
-                        <TableCell>
-                            Откуда
-                        </TableCell>
-                        <TableCell>
-                            Ответственный
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {state.map(good => <TableRow>
-                            <TableCell>
-                                {good.outtime}
-                            </TableCell>
-                            <TableCell>
-                                {good.model}
-                            </TableCell>
-                            <TableCell>
-                                {props.stocks.find(st => st.id === good.stock_id).name}
-                            </TableCell>
-                            <TableCell>
-                                {props.users.find(u => u.id === good.responsible_id).name}
-                            </TableCell>
-                        </TableRow>)}
-                </TableBody>
-            </Table>
-        </TableContainer>
+    const getInfo = good => {
 
+        setGood(good)
+        setInfoOpen(true)
+
+    }
+
+    const fromTransit = (e, good) => {
+
+        let tr = e.target.closest('tr')
+        if (tr) tr.classList.add('transition-hidden')
+
+        rest('transit/' + props.stock_id + '/' + good.barcode, 'DELETE')
+            .then(res => {
+
+                if (res.status === 200) {
+                    setState(res.body)
+                    setInfoOpen(false)
+                    return true
+                }
+
+                if (tr) tr.classList.remove('transition-hidden')
+
+                return false
+
+            })
+
+    }
+
+    return state
+        ? <>
+            <MDBContainer>
+                <MDBModal isOpen={infoOpen} toggle={() => setInfoOpen(false)}>
+                    <MDBModalHeader toggle={() => setInfoOpen(false)}>
+                        {'#' + good.id}
+                    </MDBModalHeader>
+                    <MDBModalBody>
+                        {[
+                            {label: 'Наименование', value: good.model},
+                            {label: 'Откуда', value: good.stock},
+                            {label: 'Время передачи в транзит', value: good.outtime},
+                            {label: 'Ответственный', value: good.user},
+                        ].map(f => f.value
+                            ? <TextField
+                                key={'keyinmapgoodmodaltransit' + f.label}
+                                style={{
+                                    width: '100%',
+                                    padding: '1rem',
+                                }}
+                                label={f.label}
+                                value={f.value}
+                            />
+                            : '')}
+                    </MDBModalBody>
+                    <MDBModalFooter>
+                        <MDBBtn color="secondary" onClick={() => setInfoOpen(false)}>
+                            Отмена
+                        </MDBBtn>
+                        {props.stock_id
+                            ? <MDBBtn color="primary" onClick={_ => fromTransit(_, good)}>
+                                Принять
+                            </MDBBtn>
+                            : ''}
+                    </MDBModalFooter>
+                </MDBModal>
+            </MDBContainer>
+            <TableContainer component={Paper}>
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>
+                                #
+                            </TableCell>
+                            <TableCell>
+                                Наименование
+                            </TableCell>
+                            <TableCell>
+                                откуда
+                            </TableCell>
+                            <TableCell>
+                                действия
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {state.map(good => {
+
+                            good.id = +good.barcode.toString().substr(6, 6)
+                            let stock = props.stocks.find(st => st.id === good.stock_id)
+                            let user = props.users.find(u => u.id === good.responsible_id)
+
+                            good.c = ''
+
+                            good.stock = stock
+                                ? stock.name
+                                : ''
+
+                            good.user = user
+                                ? user.name
+                                : ''
+
+                            return <TableRow
+                                key={'tablerowintransitkey' + good.barcode}
+                                className={good.c}
+                            >
+                                <TableCell>
+                                    {good.id}
+                                </TableCell>
+                                <TableCell>
+                                    {good.model}
+                                </TableCell>
+                                <TableCell>
+                                    {good.stock}
+                                </TableCell>
+                                <TableCell>
+                                    <Tooltip title="Информация">
+                                        <IconButton
+                                            style={{padding: '0.2rem'}}
+                                            onClick={() => getInfo(good)}
+                                        >
+                                            <InfoOutlinedIcon/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    {props.stock_id
+                                        ? <Tooltip title="Принять">
+                                            <IconButton
+                                                style={{padding: '0.2rem'}}
+                                                onClick={e => fromTransit(e, good)}
+                                            >
+                                                <CheckIcon/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        : ''}
+                                </TableCell>
+                            </TableRow>
+                        })}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </>
         : <h5>Загружаем данные...</h5>
 
 }

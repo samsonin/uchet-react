@@ -125,6 +125,11 @@
         display: none !important;
     }
 
+    .transition-hidden {
+        opacity: 0;
+        transition: 2s opacity;
+    }
+
 }
 
 @media (min-width: 768px) {

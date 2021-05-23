@@ -33,6 +33,7 @@ import IntegrationSmsRu from "./components/IntegrationSmsRu";
 import {Records} from "./components/Records";
 import Docs from "./components/Settings/Docs";
 import Typography from "@material-ui/core/Typography";
+import Daily from "./components/Daily";
 
 let barcode = '';
 
@@ -145,6 +146,13 @@ class App extends Component {
                             <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
                             <Route exact path="/settings" component={Settings}/>
                             <Route path="/subscribe" component={Subscribe}/>
+
+                            {this.props.app.stocks[0]
+                                ? <>
+                                    <Route path="/daily" component={Daily}/>
+                                </>
+                                : ''}
+
                             <Route exact path="/customers" component={Customers}/>
                             <Route exact path="/customers/:id" component={Customer}/>
                             <Route exact path="/entities" component={Entities}/>
@@ -158,6 +166,7 @@ class App extends Component {
                             <Route path="/queue" component={Queue}/>
                             <Route path="/arrival" component={Arrival}/>
                             <Route path="/transit" component={Transit}/>
+
 
                             {this.props.auth.admin
                                 ? <>
@@ -173,7 +182,7 @@ class App extends Component {
                                     <Route path="/settings/config" component={Config}/>
                                     <Route path="/settings/config" component={Config}/>
                                     <Route path="/settings/fields" component={Fields}/>
-                                    <Route path="/settings/docs" component={Docs}/>
+                                    {/*<Route path="/settings/docs" component={Docs}/>*/}
                                     <Route path="/integration/mango"
                                            component={() => <IntegrationMango
                                                org_id={this.props.auth.organization_id}

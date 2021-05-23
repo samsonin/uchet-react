@@ -10,7 +10,7 @@ export default function ControlledTreeView({categories, initialId, onSelected, f
 
     const [expanded, setExpanded] = useState(getExpanded(initialId || 0))
     const [selected, setSelected] = useState(initialId ? initialId.toString() : '0')
-    const [tree, _] = useState(() => makeTree(0))
+    const [tree] = useState(() => makeTree(0))
 
     const isNeedClose = useRef(false)
 

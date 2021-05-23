@@ -58,6 +58,8 @@ export const siteMap = isAdmin => {
         {id: 22, path: "entities", text: "Юридические лица"},
         {id: 24, path: "call_records", text: "Записи разговоров"},
 
+        {id: 31, path: "daily", text: "Ежедневный отчет"},
+
     ]
 
     return isAdmin

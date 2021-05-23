@@ -21,6 +21,7 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import TableBody from "@material-ui/core/TableBody";
 
+import StocksSelect from "./common/StocksSelect";
 
 const useStyles = makeStyles((theme) => ({
     typography: {
@@ -45,6 +46,7 @@ export default connect(state => state)(props => {
     const [dateTo, setDateTo] = useState(() => today)
 
     const [requesting, setRequesting] = useState(false)
+    const [actual, setActual] = useState(false)
 
     const [data, setData] = useState(null)
     const [proceeds, setProceeds] = useState(0)
@@ -70,6 +72,8 @@ export default connect(state => state)(props => {
         if (dateFrom > dateTo) {
             return setDateTo(dateFrom)
         }
+
+        setActual(false)
 
     }, [stock, dateFrom, dateTo])
 
@@ -101,6 +105,8 @@ export default connect(state => state)(props => {
                 setRequesting(false)
 
                 if (res.ok) {
+
+                    setActual(true)
 
                     if (stock) {
                         return setData(res.body)
@@ -168,27 +174,16 @@ export default connect(state => state)(props => {
                   justify={'center'}
                   alignItems={'center'}
             >
+
                 <Grid item>
 
-                    <FormControl variant="outlined" className={classes.controls}>
-                        <InputLabel id="funds-stocks-control-select-outlined-label">Точка</InputLabel>
-                        <Select
-                            labelId="funds-stocks-control-select-outlined-label"
-                            disabled={requesting}
-                            value={stock}
-                            onChange={e => setStock(e.target.value)}
-                            label="точка"
-                        >
-                            <MenuItem key={'menustockscontrolinfundskey0'}
-                                      value={0}>Все</MenuItem>
-                            {props.app.stocks.map(st => {
-                                return <MenuItem key={'menustockscontrolinfundskey' + st.id}
-                                                 value={st.id}>
-                                    {st.name}
-                                </MenuItem>
-                            })}
-                        </Select>
-                    </FormControl>
+                <StocksSelect
+                    stocks={props.app.stocks}
+                    stock={stock}
+                    setStock={setStock}
+                    disabled={requesting}
+                    classes={classes.controls}
+                />
 
                 </Grid>
 
@@ -230,7 +225,7 @@ export default connect(state => state)(props => {
 
                     <Button
                         variant="contained"
-                        disabled={requesting}
+                        disabled={requesting || actual}
                         className={classes.controls}
                         startIcon={<CachedIcon/>}
                         onClick={() => getReport()}
