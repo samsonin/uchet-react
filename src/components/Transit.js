@@ -80,6 +80,7 @@ const Transit = props => {
                         {[
                             {label: 'Наименование', value: good.model},
                             {label: 'Откуда', value: good.stock},
+                            {label: 'Идентификатор', value: good.imei},
                             {label: 'Время передачи в транзит', value: good.outtime},
                             {label: 'Ответственный', value: good.user},
                         ].map(f => f.value
