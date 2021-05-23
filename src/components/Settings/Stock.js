@@ -78,7 +78,7 @@ const Stock = props => {
 
                     enqueueSnackbar('ok', {variant: 'success'})
 
-                    props.history.push('/stocks')
+                    props.history.push('/settings/stocks')
                 }
 
             })

@@ -13,7 +13,6 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import TableBody from "@material-ui/core/TableBody";
-import Toolbar from "@material-ui/core/Toolbar";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
@@ -89,45 +88,27 @@ const Daily = props => {
         }).join()
         : ''
 
-    let prepaids = daily.sales
-        ? daily.sales.filter(s => prepaidArray.includes(s.action))
-        : []
+    const makeForTable = array => {
 
-    let prepaidsSum = 0
+        let answer = daily.sales
+            ? daily.sales.filter(s => array.includes(s.action))
+            : []
 
-    prepaids.map(s => {
-        prepaidsSum += s.sum
-    })
+        let sum = 0;
 
-    let sales = daily.sales
-        ? daily.sales.filter(s => salesArray.includes(s.action))
-        : []
+        answer.map(s => {
+            sum += s.sum
+        })
 
-    let salesSum = 0
+        return [answer, sum]
 
-    sales.map(s => {
-        salesSum += s.sum
-    })
+    }
 
-    let services = daily.sales
-        ? daily.sales.filter(s => serviceArray.includes(s.action))
-        : []
+    let [prepaids, prepaidsSum] = makeForTable(prepaidArray)
+    let [sales, salesSum] = makeForTable(salesArray)
+    let [services, serviceSum] = makeForTable(serviceArray)
+    let [costs, costSum] = makeForTable(costsArray)
 
-    let serviceSum = 0
-
-    services.map(s => {
-        serviceSum += s.sum
-    })
-
-    let costs = daily.sales
-        ? daily.sales.filter(s => costsArray.includes(s.action))
-        : []
-
-    let costSum = 0
-
-    costs.map(s => {
-        costSum += s.sum
-    })
 
     return <>
         <Grid container
@@ -165,136 +146,88 @@ const Daily = props => {
             {employeesText}
         </Typography>
 
-        <TableContainer component={Paper} className={classes.table}>
-            <Table size="small">
-                <TableHead>
-                    <TableRow>
-                        <TableCell colSpan={2}>
-                            <Typography variant="h6">
-                                Предоплаты
-                            </Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                            <Tooltip title="Внести предоплату">
-                                <IconButton className={classes.add}
-                                            onClick={() => console.log('addPrepaid')}
-                                >
-                                    <AddCircleIcon/>
-                                </IconButton>
-                            </Tooltip>
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>
-                            Наименование
-                        </TableCell>
-                        <TableCell>
-                            Сумма
-                        </TableCell>
-                        <TableCell>
-                            Примечание
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
+        {[
+            {title: 'Предоплаты', addText: 'Внести предоплату', addOnClick: console.log('addPrepaid'),
+                titles: ['Наименование', 'Сумма', 'Примечание'],
+                cells: prepaids,
+                cellsValues: ['item', 'sum', 'note'],
+                sum: prepaidsSum
+            },
+            {title: 'Товары', addText: 'Продать товар', addOnClick: console.log('addGood'),
+                titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
+                cells: sales,
+                cellsValues: ['action', 'item', 'sum', 'note'],
+                sum: salesSum
+            },
+            {title: 'Работы, услуги', addText: 'Продать услугу', addOnClick: console.log('addService'),
+                titles: ['#', 'Наименование', 'Что сделали', 'Сумма', 'Сотрудник'],
+                cells: services,
+                cellsValues: ['id', 'model', 'for_client', 'sum', 'user_name'],
+                sum: serviceSum
+            },
+            {title: 'Расходы', addText: 'Внести расход, зарплату', addOnClick: console.log('addCost'),
+                titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
+                cells: costs,
+                cellsValues: ['action', 'item', 'sum', 'note'],
+                sum: costSum
+            },
+            {title: 'Подотчеты', addText: 'Внести подотчет', addOnClick: console.log('addImprest'),
+                titles: ['Наименование', 'Сумма', 'Сотрудник', 'Примечание'],
+                cells: imprests,
+                cellsValues: ['action', 'item', 'sum', 'note'],
+                sum: imprestsSum
+            },
+        ]
+            .map(t => <TableContainer component={Paper} className={classes.table}>
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>
+                                <Typography variant="h6">
+                                    {t.title}
+                                </Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                                <Tooltip title={t.addText}>
+                                    <IconButton className={classes.add}
+                                                onClick={() => t.addOnClick}
+                                    >
+                                        <AddCircleIcon/>
+                                    </IconButton>
+                                </Tooltip>
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableHead>
+                        <TableRow>
+                            {t.titles.map(t => <TableCell>{t}</TableCell>)}
+                        </TableRow>
+                    </TableHead>
 
-                <TableBody>
-                    {prepaids.map(s => <TableRow
-                        key={'prepaidstablerowindaily' + s.id}
-                    >
-                        <TableCell>
-                            {s.item}
-                        </TableCell>
-                        <TableCell>
-                            {s.sum}
-                        </TableCell>
-                        <TableCell>
-                            {s.note}
-                        </TableCell>
-                    </TableRow>)}
-                </TableBody>
+                    <TableBody>
+                        {t.cells.map(row => <TableRow
+                            key={'prepaidstablerowindaily' + row.id}
+                        >
+                            {t.cellsValues.map(v => <TableCell>
+                                {row[v]}
+                            </TableCell>)}
+                        </TableRow>)}
+                    </TableBody>
 
-                <TableHead>
-                    <TableRow>
-                        <TableCell>
-                            Итого:
-                        </TableCell>
-                        <TableCell colSpan={2}>
-                            {prepaidsSum}
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>
+                                Итого:
+                            </TableCell>
+                            <TableCell>
+                                {t.sum}
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
 
-            </Table>
-        </TableContainer>
+                </Table>
+            </TableContainer>)}
 
-        <TableContainer component={Paper} className={classes.table}>
-            <Table size="small">
-                <TableHead>
-                    <TableRow>
-                        <TableCell colSpan={3}>
-                            <Typography variant="h6">
-                                Товары
-                            </Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                            <Tooltip title="Продать товар">
-                                <IconButton className={classes.add}
-                                            onClick={() => console.log('saleGood')}
-                                >
-                                    <AddCircleIcon/>
-                                </IconButton>
-                            </Tooltip>
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>
-                            Действие
-                        </TableCell>
-                        <TableCell>
-                            Наименование
-                        </TableCell>
-                        <TableCell>
-                            Сумма
-                        </TableCell>
-                        <TableCell>
-                            Примечание
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-
-                <TableBody>
-                    {sales.map(s => <TableRow
-                        key={'psalestablerowindaily' + s.id}
-                    >
-                        <TableCell>
-                            {s.item}
-                        </TableCell>
-                        <TableCell>
-                            {s.sum}
-                        </TableCell>
-                        <TableCell>
-                            {s.note}
-                        </TableCell>
-                    </TableRow>)}
-                </TableBody>
-
-                <TableHead>
-                    <TableRow>
-                        <TableCell colSpan={2}>
-                            Итого:
-                        </TableCell>
-                        <TableCell colSpan={2}>
-                            {salesSum}
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-
-            </Table>
-        </TableContainer>
 
         <TableContainer component={Paper} className={classes.table}>
             <Table size="small">
