@@ -28,6 +28,10 @@ const useStyles = makeStyles((theme) => ({
     },
     table: {
         margin: '1rem'
+    },
+    totals: {
+        margin: '1rem',
+        padding: '1rem'
     }
 }))
 
@@ -76,7 +80,7 @@ const Daily = props => {
         ? props.app.daily.find(d => d.stock_id === stock)
         : localDaily
 
-    let employeesText = daily.employees
+    let employeesText = daily && daily.employees
         ? daily.employees.map(e => {
 
             let user = props.app.users.find(u => u.id === e)
@@ -85,12 +89,12 @@ const Daily = props => {
                 ? user.name
                 : ''
 
-        }).join()
+        }).join(', ')
         : ''
 
     const makeForTable = array => {
 
-        let answer = daily.sales
+        let answer = daily && daily.sales
             ? daily.sales.filter(s => array.includes(s.action))
             : []
 
@@ -109,6 +113,15 @@ const Daily = props => {
     let [services, serviceSum] = makeForTable(serviceArray)
     let [costs, costSum] = makeForTable(costsArray)
 
+    let imprests = daily && daily.imprests
+        ? daily.imprests
+        : []
+
+    let imprestsSum = 0
+
+    imprests.map(i => {
+        imprestsSum += i.sum
+    })
 
     return <>
         <Grid container
@@ -147,76 +160,108 @@ const Daily = props => {
         </Typography>
 
         {[
-            {title: 'Предоплаты', addText: 'Внести предоплату', addOnClick: console.log('addPrepaid'),
+            {
+                title: 'Предоплаты', addText: 'Внести предоплату', addOnClick: () => console.log('addPrepaid'),
                 titles: ['Наименование', 'Сумма', 'Примечание'],
-                cells: prepaids,
-                cellsValues: ['item', 'sum', 'note'],
+                rows: prepaids,
+                rowsValues: ['item', 'sum', 'note'],
                 sum: prepaidsSum
             },
-            {title: 'Товары', addText: 'Продать товар', addOnClick: console.log('addGood'),
+            {
+                title: 'Товары', addText: 'Продать товар', addOnClick: () => console.log('addGood'),
                 titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
-                cells: sales,
-                cellsValues: ['action', 'item', 'sum', 'note'],
+                rows: sales,
+                rowsValues: ['action', 'item', 'sum', 'note'],
                 sum: salesSum
             },
-            {title: 'Работы, услуги', addText: 'Продать услугу', addOnClick: console.log('addService'),
-                titles: ['#', 'Наименование', 'Что сделали', 'Сумма', 'Сотрудник'],
-                cells: services,
-                cellsValues: ['id', 'model', 'for_client', 'sum', 'user_name'],
+            {
+                title: 'Работы, услуги', addText: 'Продать услугу', addOnClick: () => console.log('addService'),
+                titles: ['#', 'Что сделали', 'Сумма', 'Сотрудник'],
+                rows: services,
+                rowsValues: ['id', 'item', 'sum', 'user_id'],
                 sum: serviceSum
             },
-            {title: 'Расходы', addText: 'Внести расход, зарплату', addOnClick: console.log('addCost'),
+            {
+                title: 'Расходы', addText: 'Внести расход, зарплату', addOnClick: () => console.log('addCost'),
                 titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
-                cells: costs,
-                cellsValues: ['action', 'item', 'sum', 'note'],
+                rows: costs,
+                rowsValues: ['action', 'item', 'sum', 'note'],
                 sum: costSum
             },
-            {title: 'Подотчеты', addText: 'Внести подотчет', addOnClick: console.log('addImprest'),
+            {
+                title: 'Подотчеты', addText: 'Внести подотчет', addOnClick: () => console.log('addImprest'),
                 titles: ['Наименование', 'Сумма', 'Сотрудник', 'Примечание'],
-                cells: imprests,
-                cellsValues: ['action', 'item', 'sum', 'note'],
+                rows: imprests,
+                rowsValues: ['item', 'sum', 'user_id', 'note'],
                 sum: imprestsSum
             },
         ]
-            .map(t => <TableContainer component={Paper} className={classes.table}>
+            .map(t => date !== today && t.rows === imprests
+                ? ''
+                : <TableContainer
+                key={'tablecontindailykey' + t.title}
+                className={classes.table}
+                component={Paper}
+            >
                 <Table size="small">
                     <TableHead>
                         <TableRow>
-                            <TableCell>
+                            <TableCell colSpan={t.titles.length - 1}>
                                 <Typography variant="h6">
                                     {t.title}
                                 </Typography>
                             </TableCell>
                             <TableCell align="right">
-                                <Tooltip title={t.addText}>
+                                {date === today && props.app.stock_id === stock
+                                    ? <Tooltip title={t.addText}>
                                     <IconButton className={classes.add}
                                                 onClick={() => t.addOnClick}
                                     >
                                         <AddCircleIcon/>
                                     </IconButton>
                                 </Tooltip>
+                                : ''}
                             </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableHead>
                         <TableRow>
-                            {t.titles.map(t => <TableCell>{t}</TableCell>)}
+                            {t.titles.map(t => <TableCell
+                                key={'rowsintabledaily' + t}
+                            >{t}</TableCell>)}
                         </TableRow>
                     </TableHead>
 
                     <TableBody>
-                        {t.cells.map(row => <TableRow
-                            key={'prepaidstablerowindaily' + row.id}
+                        {t.rows.map(row => <TableRow
+                            key={'prepaidstablerowindaily' + t.title + JSON.stringify(row)}
                         >
-                            {t.cellsValues.map(v => <TableCell>
-                                {row[v]}
-                            </TableCell>)}
+                            {t.rowsValues.map(v => {
+
+                                let value = row[v]
+
+                                if (v === 'user_id') {
+
+                                    let user = props.app.users.find(u => u.id === row[v])
+
+                                    value = user
+                                        ? user.name
+                                        : ''
+
+                                }
+
+                                return <TableCell
+                                    key={'rowsintabledailysec' + v}
+                                >
+                                    {value}
+                                </TableCell>
+                            })}
                         </TableRow>)}
                     </TableBody>
 
                     <TableHead>
                         <TableRow>
-                            <TableCell>
+                            <TableCell colSpan={t.titles.length - 2}>
                                 Итого:
                             </TableCell>
                             <TableCell>
@@ -228,151 +273,38 @@ const Daily = props => {
                 </Table>
             </TableContainer>)}
 
-
-        <TableContainer component={Paper} className={classes.table}>
-            <Table size="small">
-                <TableHead>
-                    <TableRow>
-                        <TableCell colSpan={4}>
-                            <Typography variant="h6">
-                                Работы, услуги
-                            </Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                            <Tooltip title="Продать услугу">
-                                <IconButton className={classes.add}
-                                            onClick={() => console.log('addPrepaid')}
-                                >
-                                    <AddCircleIcon/>
-                                </IconButton>
-                            </Tooltip>
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>
-                            #
-                        </TableCell>
-                        <TableCell>
-                            Наименование
-                        </TableCell>
-                        <TableCell>
-                            Что сделали
-                        </TableCell>
-                        <TableCell>
-                            Сумма
-                        </TableCell>
-                        <TableCell>
-                            Сотрудник
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-
-                <TableBody>
-                    {prepaids.map(s => <TableRow
-                        key={'prepaidstablerowindaily' + s.id}
+        {daily
+            ? <Grid container
+                    direction={'column'}
+                    justify={'center'}
+                    component={Paper}
+                    className={classes.totals}
+                    spacing={1}
+            >
+                <Grid item>
+                    <Typography variant="h6">
+                        Наличные
+                    </Typography>
+                </Grid>
+                {[
+                    {text: 'Остаток на утро:', value: daily.morning},
+                    {text: 'Выручка:', value: daily.proceeds},
+                    {text: 'Подотчеты:', value: daily.imprests},
+                    {text: 'Безнал:', value: daily.cashless},
+                    {text: 'Сдали:', value: daily.handed},
+                    {text: 'Остаток:', value: daily.evening},
+                ].map(l => date !== today && l.text === 'Подотчеты:'
+                    ? ''
+                    : <Grid item
+                            key={'griditemkeyindailypertotals' + l.text}
                     >
-                        <TableCell>
-                            {s.id}
-                        </TableCell>
-                        <TableCell>
-                            {s.sum}
-                        </TableCell>
-                        <TableCell>
-                            {s.note}
-                        </TableCell>
-                        <TableCell>
-                            {s.sum}
-                        </TableCell>
-                        <TableCell>
-                            {s.note}
-                        </TableCell>
-                    </TableRow>)}
-                </TableBody>
-
-                <TableHead>
-                    <TableRow>
-                        <TableCell>
-                            Итого:
-                        </TableCell>
-                        <TableCell colSpan={2}>
-                            {prepaidsSum}
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-
-            </Table>
-        </TableContainer>
-
-        <TableContainer component={Paper} className={classes.table}>
-            <Table size="small">
-                <TableHead>
-                    <TableRow>
-                        <TableCell colSpan={3}>
-                            <Typography variant="h6">
-                                Товары
-                            </Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                            <Tooltip title="Продать товар">
-                                <IconButton className={classes.add}
-                                            onClick={() => console.log('saleGood')}
-                                >
-                                    <AddCircleIcon/>
-                                </IconButton>
-                            </Tooltip>
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>
-                            Действие
-                        </TableCell>
-                        <TableCell>
-                            Наименование
-                        </TableCell>
-                        <TableCell>
-                            Сумма
-                        </TableCell>
-                        <TableCell>
-                            Примечание
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-
-                <TableBody>
-                    {sales.map(s => <TableRow
-                        key={'psalestablerowindaily' + s.id}
-                    >
-                        <TableCell>
-                            {s.item}
-                        </TableCell>
-                        <TableCell>
-                            {s.sum}
-                        </TableCell>
-                        <TableCell>
-                            {s.note}
-                        </TableCell>
-                    </TableRow>)}
-                </TableBody>
-
-                <TableHead>
-                    <TableRow>
-                        <TableCell colSpan={2}>
-                            Итого:
-                        </TableCell>
-                        <TableCell colSpan={2}>
-                            {salesSum}
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-
-            </Table>
-        </TableContainer>
-
+                        <Typography variant={'subtitle2'}>
+                            {l.text + ' ' + l.value}
+                        </Typography>
+                    </Grid>)}
+            </Grid>
+            : ''}
     </>
-}
 
+}
 export default connect(state => state)(Daily);

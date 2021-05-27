@@ -121,7 +121,7 @@ const Entity = props => {
 
     }
 
-    console.log(entity)
+    // console.log(entity)
 
     return <Grid container
                 component={Paper}
