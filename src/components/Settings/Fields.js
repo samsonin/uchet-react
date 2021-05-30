@@ -1,7 +1,7 @@
 import {bindActionCreators} from "redux";
-import {closeSnackbar, enqueueSnackbar, upd_app} from "../../actions/actionCreator";
+import {upd_app} from "../../actions/actionCreator";
 import {connect} from "react-redux";
-import React, {Component} from "react";
+import React, {Component, useEffect, useState} from "react";
 import FormControl from "@material-ui/core/FormControl";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import IconButton from "@material-ui/core/IconButton";
@@ -20,98 +20,94 @@ import Paper from "@material-ui/core/Paper";
 import restRequest from "../Rest";
 
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-    enqueueSnackbar,
-    closeSnackbar,
-    upd_app
-}, dispatch);
+const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
-let request = false;
-
-export default connect(state => (state), mapDispatchToProps)(class extends Component {
+const Fields = props => {
 
     // в Redux-store храниться состояние с сервера
     // в componentDidMount это состояние переноситься в state
     // при добавлении, удалении и редактировании полей они меняются локально
     // при нажатии сохранить изменения отправляются на сервер и затем попадают в Redux-store
 
-    state = {
-        index: 'customer',
-    }
+    const [index, setIndex] = useState('customer')
+    const [fields, setFields] = useState(() => initial())
+    const [systemFieldsHandle, setSystemFieldsHandle] = useState(0)
+    const [request, setRequest] = useState(false)
 
-    componentDidMount() {
-        this.initial()
-    }
+    function initial(newFields) {
 
-    initial(newFields) {
-
-        if (typeof this.props.app.fields.allElements === "undefined") return
+        if (typeof props.app.fields.allElements === "undefined") return
 
         let fields = [];
-        (newFields || this.props.app.fields.allElements).map(v => {
-            if (v.index === this.state.index) {
+        (newFields || props.app.fields.allElements).map(v => {
+            if (v.index === index) {
                 fields.push({...v});
             }
 
             fields.sort((a, b) => a.id - b.id)
 
-            this.setState({
-                fields,
-                systemFieldsHandle: 0,
-            })
             return v;
         })
 
+        return fields
+
     }
 
-    indexHandle(index) {
-        this.setState({
-            index,
-            fields: this.props.app.fields.allElements
-                .filter(field => field.index === index)
-        })
+    useEffect(() => {
+
+        console.log(fields)
+
+    }, [fields])
+
+    const indexHandle = index => {
+
+        setIndex(index)
+        setFields(props.app.fields.allElements
+            .filter(field => field.index === index))
+
     }
 
-    addField() {
+    const addField = () => {
 
-        let fields = this.state.fields
-        if (this.state.systemFieldsHandle === 0) {
+        let fields = fields
+        if (systemFieldsHandle === 0) {
 
             fields.splice(0, 0, {
-                index: this.state.index,
+                index: index,
                 value: '',
                 is_system: false,
                 is_valid: true,
             })
-            this.setState({fields})
+            setFields(fields)
 
         } else {
 
-            let fields = this.state.fields.map(f => {
-                if (f.name === this.state.systemFieldsHandle) f.is_valid = true;
+            let fields = fields.map(f => {
+                if (f.name === systemFieldsHandle) f.is_valid = true;
                 return f;
             })
-            this.setState({
-                fields,
-                systemFieldsHandle: 0
-            })
-
+            setFields(fields)
+            setSystemFieldsHandle(0)
         }
     }
 
-    fieldHandle(name, value) {
+    const fieldHandle = (name, value) => {
 
-        let fields = this.state.fields
-        fields.find(field => field.name === name).value = value
-        this.setState({fields})
+        setFields(prev => [...prev].map(f => {
+
+            if (f.name === name) f.value = value
+
+            return f
+
+        }))
 
     }
 
-    moveField(name, direction) {
+    const moveField = (name, direction) => {
 
-        let field = this.state.fields.filter(f => f.name === name)[0]
-        let i = this.state.fields.indexOf(field)
-        let fields = this.state.fields.filter(f => f.name !== name)
+        let field = fields.filter(f => f.name === name)[0]
+        let i = fields.indexOf(field)
+        let fields = fields.filter(f => f.name !== name)
 
         if (direction === 'up') i--
         if (direction === 'down') i++
@@ -119,153 +115,151 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
 
         fields.splice(i, 0, field)
 
-        this.setState({fields})
+        setFields(fields)
 
     }
 
-    deleteField(field) {
+    const deleteField = field => {
 
         const fields = field.is_system ?
-            this.state.fields.map(el => el === field
+            fields.map(el => el === field
                 ? {...el, is_valid: false}
                 : el
             ) :
-            this.state.fields.filter(f => f.name !== field.name);
+            fields.filter(f => f.name !== field.name);
 
-        this.setState({fields})
+        setFields(fields)
 
     }
 
-    save() {
+    const save = () => {
 
-        request = true;
-        restRequest('fields', 'PATCH', this.state.fields)
+        setRequest(true)
+
+        restRequest('fields', 'PATCH', fields)
             .then(res => {
-                request = false;
-                const {upd_app} = this.props;
-                upd_app(res.body)
-                this.initial(res.body.fields.allElements)
+
+                setRequest(false)
+
+                props.upd_app(res.body)
+
+                initial(res.body.fields.allElements)
+
             })
     }
 
-    render() {
+    let disabled = !request && JSON.stringify(fields) === JSON.stringify(props.app.fields.allElements
+        .filter(field => field.index === index))
 
-        if (typeof this.state.fields === "object") {
+    return typeof fields === "object"
+        ? <Paper style={{padding: '1rem'}}>
+            <Grid container justify="space-evenly"
+                  style={{marginBottom: '1rem'}}
+            >
 
-            let index = this.state.index;
-
-            let disabled = !request && JSON.stringify(this.state.fields) === JSON.stringify(this.props.app.fields.allElements
-                .filter(field => field.index === index))
-
-            return <Paper style={{padding: '1rem'}}>
-                <Grid container direction="row" justify="space-evenly"
-                      style={{marginBottom: '1rem'}}
+                <Select
+                    style={{width: '75%'}}
+                    value={index}
+                    onChange={e => indexHandle(e.target.value)}
                 >
+                    {['order', 'customer', 'entity'].map(i => <MenuItem value={i} key={"fieldindexmenuuywgvf" + i}>
+                            <Typography variant="h5">
+                                {props.app.fields.alliases[i]}
+                            </Typography>
+                        </MenuItem>
+                    )}
+                </Select>
 
+            </Grid>
+
+            <Grid container justify="space-evenly"
+                  style={{marginBottom: '1rem'}}
+            >
+                <FormControl style={{width: '75%'}}>
                     <Select
-                        style={{width: '75%'}}
-                        value={index}
-                        onChange={e => this.indexHandle(e.target.value)}
+                        variant="outlined"
+                        value={systemFieldsHandle}
+                        onChange={e => setSystemFieldsHandle(e.target.value)}
                     >
-                        {['order', 'customer', 'entity'].map(i => <MenuItem value={i} key={"fieldindexmenuuywgvf" + i}>
-                                <Typography variant="h5">
-                                    {this.props.app.fields.alliases[i]}
-                                </Typography>
-                            </MenuItem>
+                        <MenuItem value="0" key={"addsysmfield"}>
+                            Новое поле
+                        </MenuItem>
+                        {fields.map(v => v.is_system && !v.is_valid ?
+                            <MenuItem value={v.name} key={"addsysmfield" + v.name}>
+                                {v.value}
+                            </MenuItem> : ''
                         )}
                     </Select>
+                </FormControl>
 
-                </Grid>
-
-                <Grid container direction="row" justify="space-evenly"
-                      style={{marginBottom: '1rem'}}
-                >
-                    <FormControl style={{width: '75%'}}>
-                        <Select
-                            variant="outlined"
-                            value={this.state.systemFieldsHandle}
-                            onChange={e => this.setState({systemFieldsHandle: e.target.value})}
-                        >
-                            <MenuItem value="0" key={"addsysmfield"}>
-                                Новое поле
-                            </MenuItem>
-                            {this.state.fields.map(v => v.is_system && !v.is_valid ?
-                                <MenuItem value={v.name} key={"addsysmfield" + v.name}>
-                                    {v.value}
-                                </MenuItem> : ''
-                            )}
-                        </Select>
-                    </FormControl>
-
-                    <Tooltip title="Добавить">
-                        <IconButton
-                            onClick={() => this.addField()}
-                        >
-                            <AddCircleIcon/>
-                        </IconButton>
-                    </Tooltip>
-
-                </Grid>
-
-                {this.state.fields.map((field, i) => field.is_valid
-                    ? <FormControl key={"elem" + index + i}
-                                   style={{
-                                       width: '100%',
-                                       padding: '1rem'
-                                   }}>
-                        <Input
-                            value={field.value}
-                            disabled={field.is_system}
-                            onChange={e => this.fieldHandle(field.name, e.target.value)}
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        onClick={() => this.moveField(field.name, 'down')}
-                                    >
-                                        <ArrowDownwardIcon/>
-                                    </IconButton>
-                                    <IconButton
-                                        onClick={() => this.moveField(field.name, 'up')}
-                                    >
-                                        <ArrowUpwardIcon/>
-                                    </IconButton>
-                                    <IconButton
-                                        onClick={() => this.deleteField(field)}
-                                    >
-                                        <DeleteIcon/>
-                                    </IconButton>
-                                </InputAdornment>
-                            }
-                        />
-                    </FormControl>
-                    : ''
-                )}
-
-                <Grid container
-                      justify="space-evenly"
-                >
-                    <Button
-                        disabled={disabled}
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => this.initial()}
+                <Tooltip title="Добавить">
+                    <IconButton
+                        onClick={() => addField()}
                     >
-                        Отмена
-                    </Button>
-                    <Button
-                        disabled={disabled}
-                        variant="contained"
-                        color="primary"
-                        onClick={() => this.save()}
-                    >
-                        Сохранить
-                    </Button>
-                </Grid>
+                        <AddCircleIcon/>
+                    </IconButton>
+                </Tooltip>
 
-            </Paper>
+            </Grid>
 
-        } else return '';
+            {fields.map((field, i) => field.is_valid
+                ? <FormControl key={"elem" + index + i}
+                               style={{
+                                   width: '100%',
+                                   padding: '1rem'
+                               }}>
+                    <Input
+                        value={field.value}
+                        disabled={field.is_system}
+                        onChange={e => fieldHandle(field.name, e.target.value)}
+                        endAdornment={
+                            <InputAdornment position="end">
+                                <IconButton
+                                    onClick={() => moveField(field.name, 'down')}
+                                >
+                                    <ArrowDownwardIcon/>
+                                </IconButton>
+                                <IconButton
+                                    onClick={() => moveField(field.name, 'up')}
+                                >
+                                    <ArrowUpwardIcon/>
+                                </IconButton>
+                                <IconButton
+                                    onClick={() => deleteField(field)}
+                                >
+                                    <DeleteIcon/>
+                                </IconButton>
+                            </InputAdornment>
+                        }
+                    />
+                </FormControl>
+                : ''
+            )}
 
-    }
+            <Grid container
+                  justify="space-evenly"
+            >
+                <Button
+                    disabled={disabled}
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => initial()}
+                >
+                    Отмена
+                </Button>
+                <Button
+                    disabled={disabled}
+                    variant="contained"
+                    color="primary"
+                    onClick={() => save()}
+                >
+                    Сохранить
+                </Button>
+            </Grid>
 
-})
+        </Paper>
+        : ''
+
+}
+
+export default connect(state => state, mapDispatchToProps)(Fields)
