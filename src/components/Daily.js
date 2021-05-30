@@ -36,7 +36,8 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const minDate = '2020-01-01'
-const today = (new Date()).toISOString().slice(0, 10)
+const full = d => d < 10 ? '0' + d : d
+const today = (new Date()).getFullYear() + '-' + full(1 + (new Date()).getMonth()) + '-' + full((new Date()).getDate())
 
 const prepaidArray = ['предоплата']
 const salesArray = ['продажа', 'возврат', 'из залога', 'выкупили', 'продали']
@@ -119,9 +120,7 @@ const Daily = props => {
 
     let imprestsSum = 0
 
-    imprests.map(i => {
-        imprestsSum += i.sum
-    })
+    imprests.map(i => imprestsSum += i.sum)
 
     return <>
         <Grid container
@@ -289,7 +288,7 @@ const Daily = props => {
                 {[
                     {text: 'Остаток на утро:', value: daily.morning},
                     {text: 'Выручка:', value: daily.proceeds},
-                    {text: 'Подотчеты:', value: daily.imprests},
+                    {text: 'Подотчеты:', value: imprestsSum},
                     {text: 'Безнал:', value: daily.cashless},
                     {text: 'Сдали:', value: daily.handed},
                     {text: 'Остаток:', value: daily.evening},
@@ -307,4 +306,5 @@ const Daily = props => {
     </>
 
 }
+
 export default connect(state => state)(Daily);

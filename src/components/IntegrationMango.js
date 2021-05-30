@@ -91,7 +91,7 @@ export default function (props) {
                         <TextField className="w-100"
                                    value={props.vpbx_api_key}
                                    type="password"
-                                   onChange={e => props.keyHandle(e.target.value)}
+                                   // onChange={e => props.keyHandle(e.target.value)}
                         />
                     </ListItem>
                     <ListItem>
@@ -103,7 +103,7 @@ export default function (props) {
                         <TextField className="w-100"
                                    value={props.vpbx_api_salt}
                                    type="password"
-                                   onChange={e => props.saltHandle(e.target.value)}
+                                   // onChange={e => props.saltHandle(e.target.value)}
                         />
                     </ListItem>
                     <ListItem>

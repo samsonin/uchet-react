@@ -1,12 +1,15 @@
 import React, {useState} from "react";
 import {connect} from 'react-redux';
+import {bindActionCreators} from "redux";
 import {
     MDBNavbar, MDBNavbarBrand, MDBNavbarNav, MDBNavItem, MDBNavLink, MDBNavbarToggler, MDBCollapse, MDBDropdown,
     MDBDropdownToggle, MDBDropdownMenu, MDBDropdownItem, MDBIcon, MDBBtn, MDBCardHeader
 } from "mdbreact";
 import {init_user, upd_app, exit_app, enqueueSnackbar, closeSnackbar} from "../actions/actionCreator";
+import {Button} from "@material-ui/core";
+
 import BalanceModal from "./BalanceModal";
-import {bindActionCreators} from "redux";
+import rest from './Rest'
 
 
 const unixConverter = unix => {
@@ -44,6 +47,21 @@ const NavbarPage = props => {
         upd_app({stock_id: +e.target.value})
     }
 
+    const newDay = () => {
+
+        rest('daily/' + props.app.stock_id, 'POST')
+            .then(res => {
+
+                if (res.status === 200) {
+
+                    props.upd_app(res.body)
+
+                }
+
+            })
+
+    }
+
     const acess_point = () => {
 
         if (!props.app) return '';
@@ -63,13 +81,26 @@ const NavbarPage = props => {
             .filter(stock => stock.is_valid)
             .filter(stock => allowedStocks.includes(stock.id))
 
-        return (validStocks)
+        return validStocks
             ? props.app.stock_id
-                ? <MDBDropdown>
+                ? <>
                     <strong className="white-text">
                         {validStocks.find(stock => +stock.id === props.app.stock_id).name}
                     </strong>
-                </MDBDropdown>
+
+                    {props.app.daily && props.auth.admin && !props.app.daily.find(d => d.employees.includes(props.auth.user_id))
+                        ? <Button
+                            variant="outlined"
+                            style={{
+                                margin: '1rem',
+                                color: '#fff'
+                            }}
+                            onClick={() => newDay()}
+                        >
+                            Начать смену
+                        </Button>
+                        : ''}
+                </>
                 : <MDBDropdown>
                     <MDBDropdownToggle nav caret>
                         <div className="d-none d-md-inline">Выбрать точку</div>
@@ -102,40 +133,41 @@ const NavbarPage = props => {
     const getUserName = () => {
 
         if (!props.app) return ''
+
         const user = props.app.users.find(v => +v.id === +props.auth.user_id)
-        return user === undefined
-            ? ''
-            : user.name
+        return user
+            ? user.name
+            : ''
 
     }
 
     const auth_menu = () => props.auth.user_id > 0
-            ? <MDBDropdownMenu className="text-center" right>
+        ? <MDBDropdownMenu className="text-center" right>
 
-                <MDBCardHeader className={"font-weight-bold"}>
-                    {getUserName()}
-                </MDBCardHeader>
+            <MDBCardHeader className={"font-weight-bold"}>
+                {getUserName()}
+            </MDBCardHeader>
 
-                <MDBDropdownItem>
-                    <MDBNavLink to="/settings" className="text-dark">
-                        Настройки
-                    </MDBNavLink>
+            <MDBDropdownItem>
+                <MDBNavLink to="/settings" className="text-dark">
+                    Настройки
+                </MDBNavLink>
+            </MDBDropdownItem>
+            <MDBDropdownItem>
+                <MDBNavLink to="/subscribe" className="text-dark">
+                    Подписка до: {unixConverter(props.auth.expiration_time)}
+                </MDBNavLink>
+            </MDBDropdownItem>
+            {props.app
+                ? <MDBDropdownItem onClick={() => setBalanceModalOpen(true)}>
+                    Баланс: {props.app.balance}
                 </MDBDropdownItem>
-                <MDBDropdownItem>
-                    <MDBNavLink to="/subscribe" className="text-dark">
-                        Подписка до: {unixConverter(props.auth.expiration_time)}
-                    </MDBNavLink>
-                </MDBDropdownItem>
-                {props.app
-                    ? <MDBDropdownItem onClick={() => setBalanceModalOpen(true)}>
-                        Баланс: {props.app.balance}
-                    </MDBDropdownItem>
-                    : ''}
-                <MDBBtn className="btn btn-sm mx-4" color="danger" onClick={exit}>
-                    Выйти
-                </MDBBtn>
-            </MDBDropdownMenu>
-            : ''
+                : ''}
+            <MDBBtn className="btn btn-sm mx-4" color="danger" onClick={exit}>
+                Выйти
+            </MDBBtn>
+        </MDBDropdownMenu>
+        : ''
 
     return <MDBNavbar color="default-color" dark expand="md">
         <MDBNavbarBrand>

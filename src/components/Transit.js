@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 
 import rest from "../components/Rest"
 import TableContainer from "@material-ui/core/TableContainer";
@@ -16,29 +16,20 @@ import CheckIcon from '@material-ui/icons/Check';
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
 import TextField from "@material-ui/core/TextField/TextField";
+import {bindActionCreators} from "redux";
+import {upd_app} from "../actions/actionCreator";
+import {useSnackbar} from "notistack";
+
+const mapDispatchToProps = dispatch => bindActionCreators({
+    upd_app
+}, dispatch);
+
 
 const Transit = props => {
-
-    const [state, setState] = useState()
 
     const [infoOpen, setInfoOpen] = useState(false)
 
     const [good, setGood] = useState({})
-
-    useEffect(() => {
-
-        rest('transit')
-            .then(res => {
-
-                if (res.status === 200) {
-
-                    setState(res.body)
-
-                }
-
-            })
-
-    }, [])
 
     const getInfo = good => {
 
@@ -46,6 +37,8 @@ const Transit = props => {
         setInfoOpen(true)
 
     }
+
+    const {enqueueSnackbar} = useSnackbar()
 
     const fromTransit = (e, good) => {
 
@@ -56,7 +49,11 @@ const Transit = props => {
             .then(res => {
 
                 if (res.status === 200) {
-                    setState(res.body)
+
+                    props.upd_app(res.body)
+
+                    enqueueSnackbar('ok', {variant: 'success'})
+
                     setInfoOpen(false)
                     return true
                 }
@@ -69,7 +66,7 @@ const Transit = props => {
 
     }
 
-    return state
+    return props.transit
         ? <>
             <MDBContainer>
                 <MDBModal isOpen={infoOpen} toggle={() => setInfoOpen(false)}>
@@ -126,7 +123,7 @@ const Transit = props => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {state.map(good => {
+                        {props.transit.map(good => {
 
                             good.id = +good.barcode.toString().substr(6, 6)
                             let stock = props.stocks.find(st => st.id === good.stock_id)
@@ -185,4 +182,4 @@ const Transit = props => {
 
 }
 
-export default connect(state => state.app)(Transit);
+export default connect(state => (state.app), mapDispatchToProps)(Transit);

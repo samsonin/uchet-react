@@ -2,10 +2,6 @@ import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
 import {makeStyles} from '@material-ui/core/styles';
 import TextField from "@material-ui/core/TextField";
 
@@ -35,7 +31,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const minDate = '2020-01-01'
-const today = ( new Date() ).toISOString().slice(0, 10)
+const full = d => d < 10 ? '0' + d : d
+const today = (new Date()).getFullYear() + '-' + full(1 + (new Date()).getMonth()) + '-' + full((new Date()).getDate())
 
 export default connect(state => state)(props => {
 

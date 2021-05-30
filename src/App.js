@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, {Component, useEffect, useState} from "react";
 import {Route} from "react-router-dom";
 import {connect} from "react-redux";
 
@@ -34,29 +34,25 @@ import {Records} from "./components/Records";
 import Docs from "./components/Settings/Docs";
 import Typography from "@material-ui/core/Typography";
 import Daily from "./components/Daily";
+import {useSnackbar} from "notistack";
 
 let barcode = '';
 
-class App extends Component {
+const App = props => {
 
-    state = {
-        good: {},
-        barcodes: []
-    }
+    const [good, setGood] = useState({})
+    const [barcodes, setBarcodes] = useState([])
 
-    componentDidMount() {
+    const {enqueueSnackbar} = useSnackbar()
 
-        document.addEventListener('keydown', this.handleKeyPress);
+    useEffect(() => {
 
-    }
+        document.addEventListener('keydown', handleKeyPress)
 
-    componentWillUnmount() {
+    }, [])
 
-        document.removeEventListener('keydown', this.handleKeyPress)
 
-    }
-
-    handleKeyPress = e => {
+    const handleKeyPress = e => {
 
         if (e.key === "Enter") {
 
@@ -65,26 +61,33 @@ class App extends Component {
 
                 e.preventDefault();
 
-                this.setState({barcodes: [barcode]})
+                if (window.location.pathname === '/transit' && props.app.stock_id) {
 
-                rest("goods/" + barcode)
-                    .then(data => {
+                    rest('transit/' + props.app.stock_id + '/' + barcode, 'PATCH')
+                        .then(res => {
 
-                        console.log(data)
+                            if (res.status === 200) {
 
-                        if (data.ok) {
-
-                            if (data.status === 200) {
-
-                                // TODO отследить если IMEI
-                                this.setState({
-                                    good: data.body,
-                                });
+                                enqueueSnackbar('ok', {variant: 'success'})
 
                             }
 
-                        }
-                    });
+                        })
+
+                } else {
+
+                    setBarcodes([barcode])
+
+                    rest("goods/" + barcode)
+                        .then(res => {
+
+                            if (res.ok && res.status === 200) {
+
+                                setGood(res.body)
+
+                            }})
+
+                }
 
             } else if (barcode.substr(0, 1) === "R" &&
                 barcode.length === 13) {
@@ -112,105 +115,93 @@ class App extends Component {
 
     }
 
-    closeGoodModal = () => this.setState({good: {}});
+    const closeGoodModal = () => setGood({})
 
-    keyHandle = () => {
+    return <>
+        {barcodes
+            ? <Barcodes
+                barcodes={barcodes}
+            />
+            : ''}
 
-    }
+        <Header className={'d-print-none'}/>
+        <div className="d-flex d-print-none" id="wrapper">
+            <Sidebar/>
+            <div id="sidebaredivider"/>
+            {
+                +props.auth.user_id > 0
+                    ? <div className="m-2 p-2">
+                        <Route exact path="/" component={
+                            props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0)
+                                ? Main
+                                : Subscribe
+                        }/>
+                        <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
+                        <Route exact path="/settings" component={Settings}/>
+                        <Route path="/subscribe" component={Subscribe}/>
 
-    saltHandle = () => {
+                        {props.app.stocks[0]
+                            ? <>
+                                <Route path="/daily" component={Daily}/>
+                            </>
+                            : ''}
 
-    }
-
-    render() {
-
-        return <>
-            {this.state.barcodes
-                ? <Barcodes
-                    barcodes={this.state.barcodes}
-                />
-                : null}
-
-            <Header className={'d-print-none'}/>
-            <div className="d-flex d-print-none" id="wrapper">
-                <Sidebar/>
-                <div id="sidebaredivider"/>
-                {
-                    +this.props.auth.user_id > 0
-                        ? <div className="m-2 p-2">
-                            <Route exact path="/" component={
-                                this.props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0)
-                                    ? Main
-                                    : Subscribe
-                            }/>
-                            <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
-                            <Route exact path="/settings" component={Settings}/>
-                            <Route path="/subscribe" component={Subscribe}/>
-
-                            {this.props.app.stocks[0]
-                                ? <>
-                                    <Route path="/daily" component={Daily}/>
-                                </>
-                                : ''}
-
-                            <Route exact path="/customers" component={Customers}/>
-                            <Route exact path="/customers/:id" component={Customer}/>
-                            <Route exact path="/entities" component={Entities}/>
-                            {this.props.app.fields.allElements
-                                ? <Route exact path="/entities/:id" component={Entity}/>
-                                : ''
-                            }
-                            <Route path="/call_records" component={Records}/>
-                            {/*<Route path="/orders" component={Orders}/>*/}
-                            {/*<Route path="/order" component={Order}/>*/}
-                            <Route path="/queue" component={Queue}/>
-                            <Route path="/arrival" component={Arrival}/>
-                            <Route path="/transit" component={Transit}/>
+                        <Route exact path="/customers" component={Customers}/>
+                        <Route exact path="/customers/:id" component={Customer}/>
+                        <Route exact path="/entities" component={Entities}/>
+                        {props.app.fields.allElements
+                            ? <Route exact path="/entities/:id" component={Entity}/>
+                            : ''
+                        }
+                        <Route path="/call_records" component={Records}/>
+                        {/*<Route path="/orders" component={Orders}/>*/}
+                        {/*<Route path="/order" component={Order}/>*/}
+                        <Route path="/queue" component={Queue}/>
+                        <Route path="/arrival" component={Arrival}/>
+                        <Route path="/transit" component={Transit}/>
 
 
-                            {this.props.auth.admin
-                                ? <>
-                                    <Route path="/funds" component={FundsFlow}/>
+                        {props.auth.admin
+                            ? <>
+                                <Route path="/funds" component={FundsFlow}/>
 
-                                    <Route path="/settings/organization" component={Organization}/>
-                                    <Route path="/settings/employees" component={Employees}/>
-                                    <Route exact path="/settings/stocks" component={Stocks}/>
-                                    {this.props.app.users && this.props.app.stocks && this.props.app.stockusers
-                                        ? <Route exact path="/settings/stocks/:id" component={Stock}/>
-                                        : null
-                                    }
-                                    <Route path="/settings/config" component={Config}/>
-                                    <Route path="/settings/config" component={Config}/>
-                                    <Route path="/settings/fields" component={Fields}/>
-                                    {/*<Route path="/settings/docs" component={Docs}/>*/}
-                                    <Route path="/integration/mango"
-                                           component={() => <IntegrationMango
-                                               org_id={this.props.auth.organization_id}
-                                               vpbx_api_key={'секретный ключ'}
-                                               vpbx_api_salt={'секретная соль'}
-                                               keyHandle={this.keyHandle}
-                                               saltHandle={this.saltHandle}
-                                           />}
-                                    />
-                                    <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
-                                </>
-                                : ''}
+                                <Route path="/settings/organization" component={Organization}/>
+                                <Route path="/settings/employees" component={Employees}/>
+                                <Route exact path="/settings/stocks" component={Stocks}/>
+                                {props.app.users && props.app.stocks && props.app.stockusers
+                                    ? <Route exact path="/settings/stocks/:id" component={Stock}/>
+                                    : null
+                                }
+                                <Route path="/settings/config" component={Config}/>
+                                <Route path="/settings/config" component={Config}/>
+                                <Route path="/settings/fields" component={Fields}/>
+                                {/*<Route path="/settings/docs" component={Docs}/>*/}
+                                <Route path="/integration/mango"
+                                       component={() => <IntegrationMango
+                                           org_id={props.auth.organization_id}
+                                           vpbx_api_key={'секретный ключ'}
+                                           vpbx_api_salt={'секретная соль'}
+                                           // keyHandle={keyHandle}
+                                           // saltHandle={saltHandle}
+                                       />}
+                                />
+                                <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
+                            </>
+                            : ''}
 
-                            <GoodModal
-                                good={this.state.good}
-                                close={this.closeGoodModal}
-                            />
+                        <GoodModal
+                            good={good}
+                            close={closeGoodModal}
+                        />
 
-                            <WebSocketAdapter/>
+                        <WebSocketAdapter/>
 
-                        </div>
-                        : <Authmodal/>
-                }
-            </div>
-        </>
-
-    }
+                    </div>
+                    : <Authmodal/>
+            }
+        </div>
+    </>
 
 }
 
-export default connect((state) => state)(App);
+export default connect(state => state)(App);
