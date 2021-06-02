@@ -17,7 +17,7 @@ import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
-import restRequest from "../Rest";
+import rest from "../Rest";
 
 
 const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
@@ -29,7 +29,7 @@ const Fields = props => {
     // при добавлении, удалении и редактировании полей они меняются локально
     // при нажатии сохранить изменения отправляются на сервер и затем попадают в Redux-store
 
-    const [index, setIndex] = useState('customer')
+    const [index, setIndex] = useState('entity')
     const [fields, setFields] = useState(() => initial())
     const [systemFieldsHandle, setSystemFieldsHandle] = useState(0)
     const [request, setRequest] = useState(false)
@@ -69,26 +69,28 @@ const Fields = props => {
 
     const addField = () => {
 
-        let fields = fields
-        if (systemFieldsHandle === 0) {
+        setFields(prev => {
 
-            fields.splice(0, 0, {
-                index: index,
-                value: '',
-                is_system: false,
-                is_valid: true,
-            })
-            setFields(fields)
+            if (systemFieldsHandle === 0) {
+                let newFields = [...prev]
+                newFields.splice(0, 0, {
+                    index,
+                    value: '',
+                    is_system: false,
+                    is_valid: true,
+                })
+                return newFields
+            }
 
-        } else {
-
-            let fields = fields.map(f => {
-                if (f.name === systemFieldsHandle) f.is_valid = true;
-                return f;
-            })
-            setFields(fields)
             setSystemFieldsHandle(0)
-        }
+
+            return prev.map(f => {
+                if (f.name === systemFieldsHandle) f.is_valid = true
+                return f
+            })
+
+        })
+
     }
 
     const fieldHandle = (name, value) => {
@@ -105,30 +107,32 @@ const Fields = props => {
 
     const moveField = (name, direction) => {
 
-        let field = fields.filter(f => f.name === name)[0]
-        let i = fields.indexOf(field)
-        let fields = fields.filter(f => f.name !== name)
+        setFields(prev => {
 
-        if (direction === 'up') i--
-        if (direction === 'down') i++
-        if (i === -1) i = 0
+            let field = prev.filter(f => f.name === name)[0]
+            let i = prev.indexOf(field)
+            let newFields = fields.filter(f => f.name !== name)
 
-        fields.splice(i, 0, field)
+            if (direction === 'up') i--
+            if (direction === 'down') i++
+            if (i === -1) i = 0
 
-        setFields(fields)
+            newFields.splice(i, 0, field)
+
+            return newFields
+
+        })
 
     }
 
     const deleteField = field => {
 
-        const fields = field.is_system ?
-            fields.map(el => el === field
+        setFields(prev => field.is_system
+            ? fields.map(el => el === field
                 ? {...el, is_valid: false}
                 : el
-            ) :
-            fields.filter(f => f.name !== field.name);
-
-        setFields(fields)
+            )
+            : fields.filter(f => f.name !== field.name))
 
     }
 
@@ -136,20 +140,21 @@ const Fields = props => {
 
         setRequest(true)
 
-        restRequest('fields', 'PATCH', fields)
+        rest('fields', 'PATCH', fields)
             .then(res => {
 
                 setRequest(false)
 
-                props.upd_app(res.body)
-
-                initial(res.body.fields.allElements)
+                if (res.status === 200) {
+                    props.upd_app(res.body)
+                    initial(res.body.fields.allElements)
+                }
 
             })
     }
 
-    let disabled = !request && JSON.stringify(fields) === JSON.stringify(props.app.fields.allElements
-        .filter(field => field.index === index))
+    let disabled = request || JSON.stringify(fields) === JSON.stringify(props.app.fields.allElements
+        .filter(f => f.index === index))
 
     return typeof fields === "object"
         ? <Paper style={{padding: '1rem'}}>
