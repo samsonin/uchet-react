@@ -7,7 +7,7 @@ export default function fetchPost(data = {}, url = "", jwt = "") {
 
     let headers = {
         'Content-Type': 'application/json'
-    };
+    }
     if (jwt) {
         headers['Jwt'] = jwt
         headers['Authorization'] = jwt

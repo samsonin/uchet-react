@@ -7,7 +7,7 @@ import {useSnackbar} from 'notistack';
 
 import rest from "./Rest";
 
-const WebSocketAdapter = props => {
+const WebSocketAdapter = ({jwt, upd_app}) => {
 
     const notifyMe = text => {
 
@@ -36,8 +36,6 @@ const WebSocketAdapter = props => {
         // At last, if the user has denied notifications, and you
         // want to be respectful there is no need to bother them any more.
     }
-
-    const {jwt, upd_app} = props;
 
     const {enqueueSnackbar} = useSnackbar();
 

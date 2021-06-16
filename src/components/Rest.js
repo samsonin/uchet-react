@@ -27,9 +27,9 @@ export default function fetchPost(url, method = 'GET', data = '') {
     if (data) init.body = JSON.stringify(data);
 
     // тестовая организация
-    let server = JSON.parse(window.localStorage.getItem('auth')).organization_id === 5 ?
-        'https://api.uchet.store' :
-        SERVER;
+    let server = false && JSON.parse(window.localStorage.getItem('auth')).organization_id === 5
+        ? 'https://api.uchet.store'
+        : SERVER;
 
     return fetch(server + '/' + url, init)
         .then(res => {
