@@ -97,7 +97,7 @@ const WebSocketAdapter = ({jwt, upd_app}) => {
         }
 
 
-    }, [jwt, upd_app, enqueueSnackbar])
+    }, [jwt])
 
     return null;
 

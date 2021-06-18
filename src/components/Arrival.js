@@ -368,7 +368,7 @@ const Arrival = props => {
             </Grid>
 
         </>
-        : <Typography variant="h5" align="center">Выберите точку</Typography>
+        : <Typography variant="h5">Выберите точку</Typography>
 }
 
 export default connect(state => state)(Arrival);
