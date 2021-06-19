@@ -70,7 +70,7 @@ export default function PhoneNumberSelect() {
                         >
                             {
                                 countries.map((value) => {
-                                    console.log(value);
+                                    // console.log(value);
                                     if (c.indexOf(value.code) !== -1) return;
                                     c.push(value.code);
                                         return (

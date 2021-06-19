@@ -100,8 +100,8 @@ const App = props => {
                 let stock_id = +barcode.substr(1, 3);
                 let rem_id = +barcode.substr(4, 8);
 
-                console.log('stock_id', stock_id)
-                console.log('rem_id', rem_id)
+                // console.log('stock_id', stock_id)
+                // console.log('rem_id', rem_id)
 
             }
 

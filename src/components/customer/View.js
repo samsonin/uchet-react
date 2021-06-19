@@ -71,7 +71,7 @@ const View = props => {
                     .filter(field => isDetails || ['fio', 'phone_number'].includes(field.name))
                     .map(field => {
 
-                        console.log(props.customer[field.name])
+                        // console.log(props.customer[field.name])
 
                         return field.name === 'referal_id'
                                 ? <ReferalSelect

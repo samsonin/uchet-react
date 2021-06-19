@@ -243,7 +243,7 @@ class authModal extends Component {
                     try {
                         if (this.init(data)) this.setState({status: 'login'});
                     } catch (e) {
-                        console.log(e, data);
+                        // console.log(e, data);
                         this.props.enqueueSnackbar({
                             message: 'Ошибка',
                             options: {
