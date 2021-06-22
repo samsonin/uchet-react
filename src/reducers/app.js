@@ -28,12 +28,6 @@ const app = (state = JSON.parse(window.localStorage.getItem('app')) || initialSt
 
                     newState.providers = action.data[k]
 
-                //     newState.providers = newState.providers.map(p => {
-                //
-                //         return p.id === action.data[k][0].id
-                //             ? action.data[k][0]
-                //             : p
-                //     })
 
                 } else {
 
