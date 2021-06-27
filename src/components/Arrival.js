@@ -320,6 +320,10 @@ const Arrival = props => {
 
     const currentTr = state.consignment.products[state.currentTr]
 
+    const dailyReport = props.app.daily.find(d => d.stock_id === props.app.stock_id)
+
+    console.log(dailyReport)
+
     return props.app.stock_id
         ? <>
 
@@ -457,6 +461,13 @@ const Arrival = props => {
                         </Button>
                     </Grid>
                 </Grid>
+
+                {dailyReport && dailyReport.imprests && dailyReport.imprests.map(i => {
+
+                    console.log(i)
+
+                })}
+
             </Grid>
 
         </>
