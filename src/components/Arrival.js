@@ -1,5 +1,6 @@
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import {connect} from "react-redux";
+import Context from "../context";
 
 import {useSnackbar} from 'notistack';
 
@@ -14,25 +15,36 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import TextField from "@material-ui/core/TextField/TextField";
 import IconButton from "@material-ui/core/IconButton";
+import DoneIcon from '@material-ui/icons/Done';
+import DoneAllIcon from '@material-ui/icons/DoneAll';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import CropFreeIcon from '@material-ui/icons/CropFree';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from "@material-ui/core/Button";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 
 import TreeModal from "./TreeModal";
-import request from "./Request";
+import rest from "../components/Rest";
+import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
+
+
+const emptyTr = {
+    barcode: '',
+    isInBase: false,
+    categoryId: 0,
+    model: '',
+    quantity: 1,
+    cost: 0,
+    sum: 0,
+}
 
 const initialState = () => ({
     currentTr: false,
     consignment: {
-        products: [{
-            categoryId: 0,
-            model: '',
-            quantity: 1,
-            cost: 0,
-            sum: 0,
-        }],
+        products: [
+            {...emptyTr}
+        ],
         providerId: 0,
         consignmentNumber: '',
         actuallyPaid: 0,
@@ -43,12 +55,42 @@ const initialState = () => ({
 const Arrival = props => {
 
     const [state, setState] = useState(initialState)
-    const [isSending, setIsSending] = useState(false)
+    const [isScanOpen, setIsScanOpen] = useState(false)
+    const [scanTr, setScanTr] = useState(0)
+    const [scanValue, setScanValue] = useState('')
+    const [isRequesting, setIsRequesting] = useState(false)
+
+    const {barcode} = useContext(Context)
+
+    const scanRef = useRef()
 
     const {enqueueSnackbar} = useSnackbar();
 
     const providerOptions = props.app.providers.map(p => ({id: p.id, name: p.name}))
     providerOptions.unshift({id: 0, name: ''})
+
+    useEffect(() => {
+
+        if (!isScanOpen) return
+
+        setTimeout(() => {
+
+            scanRef.current.focus()
+
+        }, 500)
+
+    }, [isScanOpen]);
+
+    const addTrByScan = barcode => {
+
+        handleAdd()
+
+        setScanTr(1)
+        setScanValue(barcode)
+
+        scanDone()
+
+    }
 
     const addConsignment = () => {
 
@@ -61,62 +103,46 @@ const Arrival = props => {
             if (product.quantity === 0) error = 'Количество должно быть больше 0';
             return product;
         })
-        if (error !== undefined) {
 
-            return (enqueueSnackbar(error, {
-                variant: 'error'
-            }))
+        if (error) return (enqueueSnackbar(error, {
+            variant: 'error'
+        }))
 
-        }
+        setIsRequesting(true)
 
-        setIsSending(true)
+        rest('consignments/' + props.app.stock_id, 'POST', state.consignment)
+            .then(res => {
 
-        request({
-            action: 'addConsignment',
-            stock_id: props.app.stock_id,
-            consignment: state.consignment
-        }, '/arrival', props.auth.jwt)
-            .then(data => {
+                setIsRequesting(false)
 
-                setIsSending(false)
+                if (res.status === 200) {
 
-                if (data.result) {
+                    setState(initialState)
 
-                    enqueueSnackbar('Внесено ' + data.counter + ' товаров', {
-                        variant: 'success',
+                    return enqueueSnackbar('Ok, внесено!', {
+                        variant: 'success'
                     })
-
-                    setState(initialState);
-
-                } else {
-
-                    let message = 'Ошибка';
-                    if (data.error === "not authenticated") {
-                        message = 'Доступ для пользователя запрещен'
-                    }
-                    else if (data === 'wrong stock') message = 'Выберите точку';
-                    else if (data === 'consignment exist') message = 'Такая накладная уже существует';
-                    enqueueSnackbar(message, {
-                        variant: 'error'
-                    });
 
                 }
 
-            })
+                let message = res.body.error === 'consignment already exist'
+                    ? 'Такая накладная уже существует'
+                    : res.body.error === 'stock not allowed'
+                        ? 'Доступ для пользователя запрещен'
+                        : 'Ошибка'
 
+                return enqueueSnackbar(res.status + ' ' + message, {
+                    variant: 'error'
+                })
+
+            })
     }
 
     const handleAdd = () => {
         setState(prev => {
 
             let newState = {...prev};
-            newState.consignment.products.push({
-                categoryId: 0,
-                model: '',
-                quantity: 1,
-                cost: 0,
-                sum: 0,
-            });
+            newState.consignment.products.push({...emptyTr});
             return newState
 
         })
@@ -132,26 +158,67 @@ const Arrival = props => {
         })
     }
 
+    const handleScan = i => {
+
+        setScanTr(i)
+
+        setScanValue(state.consignment.products[i].barcode)
+
+        setIsScanOpen(true)
+
+    }
+
+    const scanDone = () => {
+
+        handleTr(scanTr, 'barcode', scanValue)
+
+        setIsScanOpen(false)
+
+        setIsRequesting(true)
+
+        rest('products/' + scanValue)
+            .then(res => {
+
+                setIsRequesting(false)
+
+                if (res.status === 200) {
+
+                    handleTr(scanTr, 'model', res.body.name)
+                    handleTr(scanTr, 'categoryId', res.body.categories[0])
+                    handleTr(scanTr, 'isInBase', true)
+
+                    enqueueSnackbar(res.body.name, {
+                        variant: 'success'
+                    })
+
+                } else {
+
+                    handleTr(scanTr, 'isInBase', false)
+
+                    enqueueSnackbar('нет в базе', {
+                        variant: 'warning'
+                    })
+
+                }
+
+            })
+
+    }
+
     const handleCategories = id => {
 
-        setState(prev => {
+        handleTr(state.currentTr, 'categoryId', id)
 
-            let newState = {...prev};
-            if (id) newState.consignment.products[prev.currentTr].categoryId = +id;
-            newState.currentTr = false;
-
-            return newState
-        })
     }
 
     const handleTr = (i, index, val) => {
         setState(prev => {
 
             let newState = {...prev};
-            newState.consignment.products[i][index] = index === 'model'
+            newState.consignment.products[i][index] = ['barcode', 'isInBase', 'model'].includes(index)
                 ? val
                 : +val
-            if (index === 'cost') newState.consignment.products[i].sum = +val * 2;
+            if (index === 'cost') newState.consignment.products[i].sum = +val * 2
 
             newState.currentTr = false;
             newState.consignment.actuallyPaid = getConsignmentTotal();
@@ -160,16 +227,11 @@ const Arrival = props => {
         })
     }
 
-    const handleProvider = v => {
+    const handleProvider = p => {
 
         setState(prev => {
-            let id = 0;
-            try {
-                id = v.id;
-            } catch (e) {
-            }
             let newState = {...prev};
-            newState.consignment.providerId = id;
+            newState.consignment.providerId = p ? p.id : 0
             return newState
         })
 
@@ -200,64 +262,89 @@ const Arrival = props => {
         return state.consignment.delivery + getConsignmentTotal();
     }
 
-    const renderTr = (i, product) => {
-
-        return <TableRow key={'gberbrv' + i}>
-            <TableCell component="th" scope="row" className={"p-1"}>
-                <Button size="small" className="w-100" variant="outlined"
-                        onClick={() => setState(prev => ({...prev, currentTr: i}))}>
-                    {product.categoryId > 0
-                        ? props.app.categories.find(v => v.id === product.categoryId).name
-                        : "выбрать..."}
-                </Button>
-            </TableCell>
-            <TableCell className={"p-1"}>
-                <TextField className={"w-100"}
-                           onChange={e => handleTr(i, 'model', e.target.value)}
-                           value={product.model}
-                />
-            </TableCell>
-            <TableCell align="center" className={"p-1"}>
-                <TextField
-                    onChange={e => handleTr(i, 'quantity', e.target.value)}
-                    type="number"
-                    value={product.quantity}
-                />
-            </TableCell>
-            <TableCell align="center" className={"p-1"}>
-                <TextField
-                    onChange={e => handleTr(i, 'cost', e.target.value)}
-                    type="number"
-                    value={product.cost}
-                />
-            </TableCell>
-            <TableCell align="center" className={"p-1"}>
-                <TextField
-                    onChange={e => handleTr(i, 'sum', e.target.value)}
-                    type="number"
-                    value={product.sum}
-                />
-            </TableCell>
-            <TableCell align="center" className={"p-1"}>
-                <Tooltip title="Удалить строку">
-                    <IconButton className="p-2 m-2" onClick={() => handleDelete(i)}>
-                        <DeleteIcon/>
-                    </IconButton>
-                </Tooltip>
-            </TableCell>
-        </TableRow>
-    }
-
-    useEffect(() => {
-
-        // console.log(state.currentTr)
-
-    }, [state.currentTr])
+    const renderTr = (i, product) => <TableRow key={'gberbrv' + i}>
+        <TableCell align="center" className={"p-1"}>
+            <Tooltip title="Сканировать">
+                <IconButton className="p-2 m-2" onClick={() => handleScan(i)}>
+                    {product.barcode
+                        ? product.isInBase
+                            ? <DoneAllIcon/>
+                            : <DoneIcon/>
+                        : <CropFreeIcon/>}
+                </IconButton>
+            </Tooltip>
+        </TableCell>
+        <TableCell component="th" scope="row" className={"p-1"}>
+            <Button size="small" className="w-100" variant="outlined"
+                    onClick={() => setState(prev => ({...prev, currentTr: i}))}>
+                {product.categoryId > 0
+                    ? props.app.categories.find(v => v.id === product.categoryId).name
+                    : "выбрать..."}
+            </Button>
+        </TableCell>
+        <TableCell className={"p-1"}>
+            <TextField className={"w-100"}
+                       onChange={e => handleTr(i, 'model', e.target.value)}
+                       value={product.model}
+            />
+        </TableCell>
+        <TableCell align="center" className={"p-1"}>
+            <TextField
+                onChange={e => handleTr(i, 'quantity', e.target.value)}
+                type="number"
+                value={product.quantity}
+            />
+        </TableCell>
+        <TableCell align="center" className={"p-1"}>
+            <TextField
+                onChange={e => handleTr(i, 'cost', e.target.value)}
+                type="number"
+                value={product.cost}
+            />
+        </TableCell>
+        <TableCell align="center" className={"p-1"}>
+            <TextField
+                onChange={e => handleTr(i, 'sum', e.target.value)}
+                type="number"
+                value={product.sum}
+            />
+        </TableCell>
+        <TableCell align="center" className={"p-1"}>
+            <Tooltip title="Удалить строку">
+                <IconButton className="p-2 m-2" onClick={() => handleDelete(i)}>
+                    <DeleteIcon/>
+                </IconButton>
+            </Tooltip>
+        </TableCell>
+    </TableRow>
 
     const currentTr = state.consignment.products[state.currentTr]
 
     return props.app.stock_id
         ? <>
+
+            <MDBContainer>
+                <MDBModal isOpen={isScanOpen} toggle={() => setIsScanOpen(false)}>
+                    <MDBModalHeader toggle={() => setIsScanOpen(false)}>
+                        Просканируйте или введите штрихкод
+                    </MDBModalHeader>
+                    <MDBModalBody>
+                        <TextField className={"w-100"}
+                                   value={scanValue}
+                                   onChange={e => setScanValue(e.target.value)}
+                                   inputRef={scanRef}
+                        />
+                    </MDBModalBody>
+                    <MDBModalFooter>
+                        <MDBBtn color="secondary" onClick={() => setIsScanOpen(false)}>
+                            Отмена
+                        </MDBBtn>
+                        <MDBBtn color="primary" onClick={() => scanDone()}>
+                            Сохранить
+                        </MDBBtn>
+                    </MDBModalFooter>
+                </MDBModal>
+            </MDBContainer>
 
             <TreeModal isOpen={state.currentTr !== false}
                        onClose={handleCategories}
@@ -279,13 +366,13 @@ const Arrival = props => {
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell colSpan={2} className="pt-3">
+                                    <TableCell colSpan={3} className="pt-3">
 
                                         <Autocomplete
                                             value={providerOptions.find(v => v.id === state.consignment.providerId)}
                                             options={providerOptions}
                                             onChange={
-                                                (_, newValue) => handleProvider(newValue)
+                                                (_, v) => handleProvider(v)
                                             }
                                             getOptionLabel={option => option.name}
                                             getOptionSelected={option => option.id}
@@ -303,7 +390,12 @@ const Arrival = props => {
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
-                                    <TableCell align="center" style={{width: "30%"}}>Категория </TableCell>
+                                    <TableCell align="center" style={{width: "10%"}}>
+
+                                    </TableCell>
+                                    <TableCell align="center" style={{width: "30%"}}>
+                                        Категория
+                                    </TableCell>
                                     <TableCell align="center" style={{width: "35%"}}>Наименование</TableCell>
                                     <TableCell align="center">Кол-во</TableCell>
                                     <TableCell align="center">Себ-ть</TableCell>
@@ -358,7 +450,7 @@ const Arrival = props => {
                             variant="contained"
                             color="primary"
                             size="small"
-                            disabled={isSending}
+                            disabled={isRequesting}
                             onClick={() => addConsignment()}
                         >
                             Внести
