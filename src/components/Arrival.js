@@ -27,7 +27,10 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import TreeModal from "./TreeModal";
 import rest from "../components/Rest";
 import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
+import {bindActionCreators} from "redux";
+import {initScan} from "../actions/actionCreator";
 
+const mapDispatchToProps = dispatch => bindActionCreators({initScan}, dispatch);
 
 const emptyTr = {
     barcode: '',
@@ -69,11 +72,11 @@ const Arrival = props => {
 
     useEffect(() => {
 
-        scanAction.current = function (barcode) {
-            console.log('from setScanAction', barcode)
-        }
+        console.log('from Arrival useEffect props', props)
 
-        console.log('from Arrival useEffect', scanAction.current)
+        const {initScan} = props
+
+        initScan()
 
     }, [])
 
@@ -482,4 +485,4 @@ const Arrival = props => {
         : <Typography variant="h5">Выберите точку</Typography>
 }
 
-export default connect(state => state)(Arrival);
+export default connect(state => state, mapDispatchToProps)(Arrival);

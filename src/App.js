@@ -38,8 +38,12 @@ import Docs from "./components/Settings/Docs";
 import Typography from "@material-ui/core/Typography";
 import Daily from "./components/Daily";
 import {useSnackbar} from "notistack";
+import {bindActionCreators} from "redux";
+import {initScan} from "./actions/actionCreator";
 
 let barcode = ''
+
+const mapDispatchToProps = dispatch => bindActionCreators({initScan}, dispatch);
 
 const App = props => {
 
@@ -105,11 +109,11 @@ const App = props => {
 
             } else {
 
-                console.log('barcode in App', barcode)
-
                 console.log('scanAction in App', scanAction)
 
                 enqueueSnackbar(window.location.pathname + ' ' + barcode)
+
+                props.initScan(barcode)
 
             }
 
@@ -213,4 +217,4 @@ const App = props => {
 
 }
 
-export default connect(state => state)(App);
+export default connect(state => state, mapDispatchToProps)(App);

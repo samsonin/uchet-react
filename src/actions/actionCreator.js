@@ -1,5 +1,5 @@
 import {
-    INIT_USER, UPD_APP, EXIT_APP,
+    INIT_USER, UPD_APP, EXIT_APP, SCAN,
     ENQUEUE_SNACKBAR, CLOSE_SNACKBAR, REMOVE_SNACKBAR,
 } from "../constants";
 
@@ -20,6 +20,10 @@ export const upd_app = data => ({
 
 export const exit_app = () => ({
     type: EXIT_APP
+})
+
+export const initScan = () => ({
+    type: SCAN,
 })
 
 export const enqueueSnackbar = notification => {
