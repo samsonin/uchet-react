@@ -44,7 +44,8 @@ let barcode = ''
 const App = props => {
 
     const [good, setGood] = useState({})
-    const [barcodes, setBarcodes] = useState([])
+
+    const scanAction = useRef()
 
     const {enqueueSnackbar} = useSnackbar()
 
@@ -53,7 +54,6 @@ const App = props => {
         document.addEventListener('keydown', handleKeyPress)
 
     }, [])
-
 
     const handleKeyPress = e => {
 
@@ -105,7 +105,9 @@ const App = props => {
 
             } else {
 
-                console.log(barcode)
+                console.log('barcode in App', barcode)
+
+                console.log('scanAction in App', scanAction)
 
                 enqueueSnackbar(window.location.pathname + ' ' + barcode)
 
@@ -128,7 +130,7 @@ const App = props => {
 
     return <>
 
-        {barcodes && <Barcodes barcodes={barcodes}/>}
+        {/*{barcodes && <Barcodes barcodes={barcodes}/>}*/}
 
         <Header className={'d-print-none'}/>
         <div className="d-flex d-print-none" id="wrapper">
@@ -137,10 +139,6 @@ const App = props => {
             {+props.auth.user_id
                 ? <div className="m-2 p-2">
 
-                    < Context.Provider
-                        value={{
-                            barcode
-                        }}>
                         <Route exact path="/" component={
                             props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0)
                                 ? Main
@@ -207,7 +205,6 @@ const App = props => {
 
                         <WebSocketAdapter/>
 
-                    </Context.Provider>
                 </div>
                 : <Authmodal/>
             }

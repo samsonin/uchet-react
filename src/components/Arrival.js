@@ -60,14 +60,22 @@ const Arrival = props => {
     const [scanValue, setScanValue] = useState('')
     const [isRequesting, setIsRequesting] = useState(false)
 
-    const {barcode} = useContext(Context)
-
     const scanRef = useRef()
 
     const {enqueueSnackbar} = useSnackbar();
 
     const providerOptions = props.app.providers.map(p => ({id: p.id, name: p.name}))
     providerOptions.unshift({id: 0, name: ''})
+
+    useEffect(() => {
+
+        scanAction.current = function (barcode) {
+            console.log('from setScanAction', barcode)
+        }
+
+        console.log('from Arrival useEffect', scanAction.current)
+
+    }, [])
 
     useEffect(() => {
 
