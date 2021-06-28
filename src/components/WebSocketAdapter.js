@@ -96,7 +96,7 @@ const WebSocketAdapter = ({jwt, upd_app}) => {
             // console.error("ws " + e)
         }
 
-
+        // eslint-disable-next-line
     }, [jwt])
 
     return null;

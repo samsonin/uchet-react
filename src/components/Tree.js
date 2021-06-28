@@ -18,6 +18,7 @@ export default function ControlledTreeView({categories, initialId, onSelected, f
 
         onSelected(expandedInitial.current[0])
 
+        // eslint-disable-next-line
     }, [])
 
     // вызывается при клике на TreeItem

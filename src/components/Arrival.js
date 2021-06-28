@@ -1,6 +1,5 @@
-import React, {useContext, useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {connect} from "react-redux";
-import Context from "../context";
 
 import {useSnackbar} from 'notistack';
 
@@ -27,10 +26,11 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import TreeModal from "./TreeModal";
 import rest from "../components/Rest";
 import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
-import {bindActionCreators} from "redux";
-import {initScan} from "../actions/actionCreator";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
 
-const mapDispatchToProps = dispatch => bindActionCreators({initScan}, dispatch);
 
 const emptyTr = {
     barcode: '',
@@ -59,26 +59,17 @@ const Arrival = props => {
 
     const [state, setState] = useState(initialState)
     const [isScanOpen, setIsScanOpen] = useState(false)
-    const [scanTr, setScanTr] = useState(0)
     const [scanValue, setScanValue] = useState('')
+    const [imprestId, setImprestId] = useState(0)
     const [isRequesting, setIsRequesting] = useState(false)
 
     const scanRef = useRef()
+    const scanTr = useRef(0)
 
     const {enqueueSnackbar} = useSnackbar();
 
     const providerOptions = props.app.providers.map(p => ({id: p.id, name: p.name}))
     providerOptions.unshift({id: 0, name: ''})
-
-    useEffect(() => {
-
-        console.log('from Arrival useEffect props', props)
-
-        const {initScan} = props
-
-        initScan()
-
-    }, [])
 
     useEffect(() => {
 
@@ -90,18 +81,37 @@ const Arrival = props => {
 
         }, 500)
 
-    }, [isScanOpen]);
+    }, [isScanOpen])
 
-    const addTrByScan = barcode => {
+    useEffect(() => {
 
-        handleAdd()
+        if (!props.newScan || isScanOpen) return
 
-        setScanTr(1)
-        setScanValue(barcode)
+        if (state.consignment.products.find(p => p.barcode === props.newScan)) {
 
-        scanDone()
+            enqueueSnackbar('Уже внесли', {variant: 'info'})
 
-    }
+            return
+
+        }
+
+        if (!state.consignment.products.find((tr, i) => {
+            if (!(tr.barcode || tr.categoryId || tr.model || tr.cost || tr.sum)) {
+
+                scanTr.current = i
+                scanDone(props.newScan)
+                return true
+
+            }
+        })) {
+
+            scanTr.current = state.consignment.products.length
+            handleAdd(props.newScan)
+            getProduct(props.newScan)
+
+        }
+
+    }, [props.newScan])
 
     const addConsignment = () => {
 
@@ -121,7 +131,7 @@ const Arrival = props => {
 
         setIsRequesting(true)
 
-        rest('consignments/' + props.app.stock_id, 'POST', state.consignment)
+        rest('consignments/' + props.app.stock_id, 'POST', {...state.consignment, imprestId})
             .then(res => {
 
                 setIsRequesting(false)
@@ -129,6 +139,7 @@ const Arrival = props => {
                 if (res.status === 200) {
 
                     setState(initialState)
+                    setImprestId(0)
 
                     return enqueueSnackbar('Ok, внесено!', {
                         variant: 'success'
@@ -136,9 +147,9 @@ const Arrival = props => {
 
                 }
 
-                let message = res.body.error === 'consignment already exist'
+                let message = res.error === 'consignment already exist'
                     ? 'Такая накладная уже существует'
-                    : res.body.error === 'stock not allowed'
+                    : res.error === 'stock not allowed'
                         ? 'Доступ для пользователя запрещен'
                         : 'Ошибка'
 
@@ -149,14 +160,16 @@ const Arrival = props => {
             })
     }
 
-    const handleAdd = () => {
+    const handleAdd = barcode => {
+
         setState(prev => {
 
             let newState = {...prev};
-            newState.consignment.products.push({...emptyTr});
+            newState.consignment.products.push({...emptyTr, barcode});
             return newState
 
         })
+
     }
 
     const handleDelete = i => {
@@ -171,7 +184,7 @@ const Arrival = props => {
 
     const handleScan = i => {
 
-        setScanTr(i)
+        scanTr.current = i
 
         setScanValue(state.consignment.products[i].barcode)
 
@@ -179,24 +192,29 @@ const Arrival = props => {
 
     }
 
-    const scanDone = () => {
+    const scanDone = barcode => {
 
-        handleTr(scanTr, 'barcode', scanValue)
+        handleTr(scanTr.current, 'barcode', barcode)
 
         setIsScanOpen(false)
 
+        getProduct(barcode)
+    }
+
+    const getProduct = barcode => {
+
         setIsRequesting(true)
 
-        rest('products/' + scanValue)
+        rest('products/' + barcode)
             .then(res => {
 
                 setIsRequesting(false)
 
                 if (res.status === 200) {
 
-                    handleTr(scanTr, 'model', res.body.name)
-                    handleTr(scanTr, 'categoryId', res.body.categories[0])
-                    handleTr(scanTr, 'isInBase', true)
+                    handleTr(scanTr.current, 'model', res.body.name)
+                    handleTr(scanTr.current, 'categoryId', res.body.categories[0])
+                    handleTr(scanTr.current, 'isInBase', true)
 
                     enqueueSnackbar(res.body.name, {
                         variant: 'success'
@@ -204,7 +222,7 @@ const Arrival = props => {
 
                 } else {
 
-                    handleTr(scanTr, 'isInBase', false)
+                    handleTr(scanTr.current, 'isInBase', false)
 
                     enqueueSnackbar('нет в базе', {
                         variant: 'warning'
@@ -213,6 +231,7 @@ const Arrival = props => {
                 }
 
             })
+
 
     }
 
@@ -287,7 +306,9 @@ const Arrival = props => {
         </TableCell>
         <TableCell component="th" scope="row" className={"p-1"}>
             <Button size="small" className="w-100" variant="outlined"
-                    onClick={() => setState(prev => ({...prev, currentTr: i}))}>
+                    disabled={product.isInBase}
+                    onClick={() => setState(prev => ({...prev, currentTr: i}))}
+            >
                 {product.categoryId > 0
                     ? props.app.categories.find(v => v.id === product.categoryId).name
                     : "выбрать..."}
@@ -297,6 +318,7 @@ const Arrival = props => {
             <TextField className={"w-100"}
                        onChange={e => handleTr(i, 'model', e.target.value)}
                        value={product.model}
+                       disabled={product.isInBase}
             />
         </TableCell>
         <TableCell align="center" className={"p-1"}>
@@ -333,8 +355,6 @@ const Arrival = props => {
 
     const dailyReport = props.app.daily.find(d => d.stock_id === props.app.stock_id)
 
-    console.log(dailyReport)
-
     return props.app.stock_id
         ? <>
 
@@ -354,7 +374,7 @@ const Arrival = props => {
                         <MDBBtn color="secondary" onClick={() => setIsScanOpen(false)}>
                             Отмена
                         </MDBBtn>
-                        <MDBBtn color="primary" onClick={() => scanDone()}>
+                        <MDBBtn color="primary" onClick={() => scanDone(scanValue)}>
                             Сохранить
                         </MDBBtn>
                     </MDBModalFooter>
@@ -452,6 +472,43 @@ const Arrival = props => {
                                         />
                                     </TableCell>
                                 </TableRow>
+
+                                {dailyReport && dailyReport.imprests && <TableRow>
+                                    <TableCell align="center" className="pt-3" colSpan={3}>
+                                        <FormControl className="w-100">
+                                            <InputLabel id="arrival-imprests-control-select-outlined-label">
+                                                Учесть подотчет
+                                            </InputLabel>
+                                            <Select
+                                                labelId="arrival-imprests-control-select-outlined-label"
+                                                value={imprestId}
+                                                onChange={e => setImprestId(e.target.value)}
+                                                className="justify-content-between"
+                                            >
+                                                <MenuItem key={'menuitimorestscontrollinarrival'}
+                                                          value={0}
+                                                          // className="justify-content-between"
+                                                >
+                                                    <br/>
+                                                </MenuItem>
+                                                {dailyReport.imprests.map(i => <MenuItem
+                                                    key={'menuitimorestscontrollinarrival' + i.id}
+                                                    value={i.id}
+                                                    className="justify-content-between"
+                                                >
+                                                    <Typography variant="subtitle2" className="p-2">
+                                                        {props.app.users.find(u => u.id === i.user_id).name}
+                                                    </Typography>
+                                                    {i.item}
+                                                    <Typography variant="subtitle2" className="p-2">
+                                                        {i.sum}
+                                                    </Typography>
+                                                </MenuItem>)}
+                                            </Select>
+                                        </FormControl>
+                                    </TableCell>
+                                </TableRow>}
+
                             </TableBody>
                         </Table>
                     </TableContainer>
@@ -472,17 +529,10 @@ const Arrival = props => {
                         </Button>
                     </Grid>
                 </Grid>
-
-                {dailyReport && dailyReport.imprests && dailyReport.imprests.map(i => {
-
-                    console.log(i)
-
-                })}
-
             </Grid>
 
         </>
         : <Typography variant="h5">Выберите точку</Typography>
 }
 
-export default connect(state => state, mapDispatchToProps)(Arrival);
+export default connect(state => state)(Arrival);

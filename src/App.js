@@ -1,7 +1,6 @@
-import React, {Component, useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Route} from "react-router-dom";
 import {connect} from "react-redux";
-import Context from "./context";
 
 import "./index.css";
 import Header from "./components/Header";
@@ -34,22 +33,18 @@ import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
 import {Records} from "./components/Records";
-import Docs from "./components/Settings/Docs";
-import Typography from "@material-ui/core/Typography";
+// import Docs from "./components/Settings/Docs";
 import Daily from "./components/Daily";
 import {useSnackbar} from "notistack";
-import {bindActionCreators} from "redux";
-import {initScan} from "./actions/actionCreator";
+
 
 let barcode = ''
 
-const mapDispatchToProps = dispatch => bindActionCreators({initScan}, dispatch);
 
 const App = props => {
 
     const [good, setGood] = useState({})
-
-    const scanAction = useRef()
+    const [newScan, setNewScan] = useState()
 
     const {enqueueSnackbar} = useSnackbar()
 
@@ -58,6 +53,24 @@ const App = props => {
         document.addEventListener('keydown', handleKeyPress)
 
     }, [])
+
+    const isBarcodeValid = barcode => {
+
+        const checkInt = +barcode.slice(-1)
+
+        let checkSum = 0
+
+        barcode.split('').reverse().slice(1).map((n, i) => {
+
+            checkSum += i % 2 ? +n : +n * 3
+
+        })
+
+        checkSum = +checkSum.toString().slice(-1)
+
+        return !(checkInt || checkSum) || checkInt === 10 - checkSum
+
+    }
 
     const handleKeyPress = e => {
 
@@ -109,13 +122,11 @@ const App = props => {
 
             } else {
 
-                console.log('scanAction in App', scanAction)
-
-                enqueueSnackbar(window.location.pathname + ' ' + barcode)
-
-                props.initScan(barcode)
+                if (true || isBarcodeValid(barcode)) setNewScan(barcode)
 
             }
+
+            enqueueSnackbar(window.location.pathname + ' ' + barcode)
 
             barcode = ''
 
@@ -123,8 +134,12 @@ const App = props => {
 
             let newChar = String.fromCharCode(e.keyCode);
 
-            if (newChar === "R") barcode = 'R'
-            else if (e.keyCode > 47 && e.keyCode < 58) barcode = barcode + newChar
+            // if (newChar === "R") barcode = 'R'
+            // else
+
+            if (e.keyCode > 47 && e.keyCode < 58) barcode = barcode + newChar
+
+            // barcode = barcode + newChar
 
         }
 
@@ -143,71 +158,69 @@ const App = props => {
             {+props.auth.user_id
                 ? <div className="m-2 p-2">
 
-                        <Route exact path="/" component={
-                            props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0)
-                                ? Main
-                                : Subscribe
-                        }/>
+                    <Route exact path="/" component={
+                        props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0)
+                            ? Main
+                            : Subscribe
+                    }/>
 
-                        <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
-                        <Route exact path="/settings" component={Settings}/>
-                        <Route path="/subscribe" component={Subscribe}/>
+                    <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
+                    <Route exact path="/settings" component={Settings}/>
+                    <Route path="/subscribe" component={Subscribe}/>
 
-                        {props.app.stocks[0] && <>
-                            <Route path="/daily" component={Daily}/>
-                        </>}
+                    {props.app.stocks[0] && <>
+                        <Route path="/daily" component={Daily}/>
+                    </>}
 
-                        <Route exact path="/customers" component={Customers}/>
-                        <Route exact path="/customers/:id" component={Customer}/>
-                        <Route exact path="/entities" component={Entities}/>
-                        {props.app.fields.allElements &&
-                        <Route exact path="/entities/:id" component={Entity}/>
+                    <Route exact path="/customers" component={Customers}/>
+                    <Route exact path="/customers/:id" component={Customer}/>
+                    <Route exact path="/entities" component={Entities}/>
+                    {props.app.fields.allElements &&
+                    <Route exact path="/entities/:id" component={Entity}/>
+                    }
+
+                    <Route path="/call_records" component={Records}/>
+                    <Route path="/orders" component={Orders}/>
+                    {/*<Route path="/order" component={Order}/>*/}
+                    <Route path="/queue" component={Queue}/>
+
+                    {!props.app.stock_id || <>
+                        <Route path="/arrival" render={props => <Arrival newScan={newScan} {...props} />}/>
+                        <Route path="/consignments" component={Consignments}/>
+                        <Route path="/transit" render={props => <Transit newScan={newScan} {...props} />}/>
+                    </>}
+
+                    {props.auth.admin && <>
+                        <Route path="/funds" component={FundsFlow}/>
+
+                        <Route path="/settings/organization" component={Organization}/>
+                        <Route path="/settings/employees" component={Employees}/>
+                        <Route exact path="/settings/stocks" component={Stocks}/>
+                        {props.app.users && props.app.stocks && props.app.stockusers
+                            ? <Route exact path="/settings/stocks/:id" component={Stock}/>
+                            : null
                         }
-
-                        <Route path="/call_records" component={Records}/>
-                        <Route path="/orders" component={Orders}/>
-                        {/*<Route path="/order" component={Order}/>*/}
-                        <Route path="/queue" component={Queue}/>
-
-                        {!props.app.stock_id || <>
-                            <Route path="/arrival" component={Arrival}/>
-                            <Route path="/consignments" component={Consignments}/>
-                            <Route path="/transit" component={Transit}/>
-                        </>}
-
-
-                        {props.auth.admin && <>
-                            <Route path="/funds" component={FundsFlow}/>
-
-                            <Route path="/settings/organization" component={Organization}/>
-                            <Route path="/settings/employees" component={Employees}/>
-                            <Route exact path="/settings/stocks" component={Stocks}/>
-                            {props.app.users && props.app.stocks && props.app.stockusers
-                                ? <Route exact path="/settings/stocks/:id" component={Stock}/>
-                                : null
-                            }
-                            <Route path="/settings/config" component={Config}/>
-                            <Route path="/settings/config" component={Config}/>
-                            <Route path="/settings/fields" component={Fields}/>
-                            {/*<Route path="/settings/docs" component={Docs}/>*/}
-                            <Route path="/integration/mango"
-                                   component={() => <IntegrationMango
-                                       org_id={props.auth.organization_id}
-                                       vpbx_api_key={'секретный ключ'}
-                                       vpbx_api_salt={'секретная соль'}
-                                       // keyHandle={keyHandle}
-                                       // saltHandle={saltHandle}
-                                   />}
-                            />
-                            <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
-                        </>}
-
-                        <GoodModal
-                            good={good}
-                            close={closeGoodModal}
+                        <Route path="/settings/config" component={Config}/>
+                        <Route path="/settings/fields" component={Fields}/>
+                        {/*<Route path="/settings/docs" component={Docs}/>*/}
+                        <Route path="/integration/mango"
+                               component={() => <IntegrationMango
+                                   org_id={props.auth.organization_id}
+                                   vpbx_api_key={'секретный ключ'}
+                                   vpbx_api_salt={'секретная соль'}
+                                   // keyHandle={keyHandle}
+                                   // saltHandle={saltHandle}
+                               />}
                         />
+                        <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
+                    </>}
 
-                        <WebSocketAdapter/>
+                    <GoodModal
+                        good={good}
+                        close={closeGoodModal}
+                    />
+
+                    <WebSocketAdapter/>
 
                 </div>
                 : <Authmodal/>
@@ -217,4 +230,4 @@ const App = props => {
 
 }
 
-export default connect(state => state, mapDispatchToProps)(App);
+export default connect(state => state)(App);

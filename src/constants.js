@@ -17,7 +17,6 @@ export const
     INIT_USER = 'INIT_USER',
     UPD_APP = 'UPD_APP',
     EXIT_APP = 'EXIT_APP',
-    SCAN = 'SCAN',
 
     SERVER = isLocalhost ?
         'http://127.0.0.1:8000' :
