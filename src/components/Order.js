@@ -61,7 +61,7 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
         }, '/order', this.props.auth.jwt)
             .then(data => {
 
-                console.log(data);
+                // console.log(data);
 
                 if (data.result) {
 

@@ -57,8 +57,6 @@ const Organization = props => {
 
     useEffect(() => {
 
-        // console.log('useEffect')
-
         let isEqual = true;
 
         orgFields.map(f => {
@@ -149,11 +147,7 @@ const Organization = props => {
 
     }, [state.bank_code])
 
-    const cancel = () => {
-
-        setState(initialState(props))
-
-    }
+    const cancel = () => setState(initialState(props))
 
     const save = () => {
 
@@ -172,11 +166,7 @@ const Organization = props => {
 
     }
 
-    const updateFields = newObject => {
-
-        setState(prev => ({...prev, ...newObject}))
-
-    }
+    const updateFields = newObject => setState(prev => ({...prev, ...newObject}))
 
     const renderField = v => {
         return <FormControl

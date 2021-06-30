@@ -5,8 +5,9 @@ import {
     MDBNavbar, MDBNavbarBrand, MDBNavbarNav, MDBNavItem, MDBNavLink, MDBNavbarToggler, MDBCollapse, MDBDropdown,
     MDBDropdownToggle, MDBDropdownMenu, MDBDropdownItem, MDBIcon, MDBBtn, MDBCardHeader
 } from "mdbreact";
-import {init_user, upd_app, exit_app, enqueueSnackbar, closeSnackbar} from "../actions/actionCreator";
-import {Button} from "@material-ui/core";
+import {init_user, upd_app, exit_app} from "../actions/actionCreator";
+import {Button, IconButton} from "@material-ui/core";
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import BalanceModal from "./BalanceModal";
 import rest from './Rest'
@@ -42,25 +43,18 @@ const NavbarPage = props => {
 
     const toggleCollapse = () => setIsOpen(!isOpen)
 
-    const pointChange = e => {
-        const {upd_app} = props;
-        upd_app({stock_id: +e.target.value})
-    }
+    const pointChange = e => props.upd_app({stock_id: +e.target.value})
 
-    const newDay = () => {
+    const pointExit = () => props.upd_app({stock_id: 0})
 
-        rest('daily/' + props.app.stock_id, 'POST')
-            .then(res => {
+    const newDay = () => rest('daily/' + props.app.stock_id, 'POST')
+        .then(res => {
+            if (res.status === 200) {
 
-                if (res.status === 200) {
+                props.upd_app(res.body)
 
-                    props.upd_app(res.body)
-
-                }
-
-            })
-
-    }
+            }
+        })
 
     const acess_point = () => {
 
@@ -88,7 +82,8 @@ const NavbarPage = props => {
                         {validStocks.find(stock => +stock.id === props.app.stock_id).name}
                     </strong>
 
-                    {props.app.daily && props.auth.admin && !props.app.daily.find(d => d.employees.includes(props.auth.user_id))
+                    {props.app.daily && props.auth.admin && !props.app.daily
+                        .find(d => d.employees.includes(props.auth.user_id))
                         ? <Button
                             variant="outlined"
                             style={{
@@ -100,22 +95,30 @@ const NavbarPage = props => {
                             Начать смену
                         </Button>
                         : ''}
+
+                    {props.app.stock_id && <IconButton
+                        variant="outlined"
+                        className="ml-2"
+                        style={{
+                            color: '#fff'
+                        }}
+                        onClick={pointExit}
+                    >
+                        <ExitToAppIcon/>
+                    </IconButton>}
                 </>
                 : <MDBDropdown>
                     <MDBDropdownToggle nav caret>
                         <div className="d-none d-md-inline">Выбрать точку</div>
                     </MDBDropdownToggle>
                     <MDBDropdownMenu className="text-center">
-                        {validStocks.map(v => {
-                            return v.is_valid
-                                ? <MDBDropdownItem onClick={pointChange}
-                                                   value={v.id}
-                                                   key={"mdbdkey" + v.id}
-                                >
-                                    {v.name}
-                                </MDBDropdownItem>
-                                : ''
-                        })}
+                        {validStocks.map(v => v.is_valid && <MDBDropdownItem
+                            onClick={pointChange}
+                            value={v.id}
+                            key={"mdbdkey" + v.id}
+                        >
+                            {v.name}
+                        </MDBDropdownItem>)}
                     </MDBDropdownMenu>
                 </MDBDropdown>
             : ''
@@ -123,9 +126,8 @@ const NavbarPage = props => {
 
     const exit = () => {
 
-        const {init_user, exit_app} = props
-        init_user('', 0, '', '', '')
-        exit_app()
+        props.init_user('', 0, '', '', '')
+        props.exit_app()
         setIsOpen(false)
 
     }
@@ -215,11 +217,9 @@ const NavbarPage = props => {
 }
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-    enqueueSnackbar,
-    closeSnackbar,
     init_user,
     upd_app,
     exit_app
 }, dispatch);
 
-export default connect(state => (state), mapDispatchToProps)(NavbarPage);
+export default connect(state => state, mapDispatchToProps)(NavbarPage);

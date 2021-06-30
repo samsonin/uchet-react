@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Route} from "react-router-dom";
 import {connect} from "react-redux";
 
@@ -38,21 +38,17 @@ import Daily from "./components/Daily";
 import {useSnackbar} from "notistack";
 
 
-let barcode = ''
-
-
 const App = props => {
 
     const [good, setGood] = useState({})
-    const [newScan, setNewScan] = useState()
+
+    const [orderBarcode, setOrderBarcode] = useState()
+    const [ourBarcode, setOurBarcode] = useState()
+    const [globalBarcode, setGlobalBarcode] = useState()
+
+    const barcode = useRef()
 
     const {enqueueSnackbar} = useSnackbar()
-
-    useEffect(() => {
-
-        document.addEventListener('keydown', handleKeyPress)
-
-    }, [])
 
     const isBarcodeValid = barcode => {
 
@@ -72,74 +68,65 @@ const App = props => {
 
     }
 
+    useEffect(() => {
+
+        document.addEventListener('keydown', handleKeyPress)
+
+    }, [])
+
+    useEffect(() => {
+
+        if (!ourBarcode) return
+
+        if (!['/transit'].includes(window.location.pathname)) {
+
+            rest("goods/" + ourBarcode)
+                .then(res => {
+
+                    if (res.ok && res.status === 200) {
+
+                        setGood(res.body)
+
+                    }
+                })
+
+        }
+
+    }, [ourBarcode])
+
     const handleKeyPress = e => {
 
         if (e.key === "Enter") {
 
-            if (["112116", "103100"].includes(barcode.substr(0, 6)) ||
-                barcode.length === 15) {
+            if (!barcode.current) return
 
-                // e.preventDefault();
+            if (["112116", "103100"].includes(barcode.current.substr(0, 6)) || barcode.current.length === 15) {
 
-                if (window.location.pathname === '/transit' && props.app.stock_id) {
+                setOurBarcode(barcode.current)
+                setOurBarcode()
 
-                    rest('transit/' + props.app.stock_id + '/' + barcode, 'PATCH')
-                        .then(res => {
+            } else if (barcode.current.substr(0, 1) === "R" && barcode.current.length === 13) {
 
-                            if (res.status === 200) {
+                setOrderBarcode(barcode.current)
+                setOrderBarcode()
 
-                                enqueueSnackbar('ok', {variant: 'success'})
+            } else if (isBarcodeValid(barcode.current)) {
 
-                            }
-
-                        })
-
-                } else {
-
-                    // setBarcodes([barcode])
-
-                    rest("goods/" + barcode)
-                        .then(res => {
-
-                            if (res.ok && res.status === 200) {
-
-                                setGood(res.body)
-
-                            }
-                        })
-
-                }
-
-            } else if (barcode.substr(0, 1) === "R" && barcode.length === 13) {
-
-                // e.preventDefault();
-
-                // let stock_id = +barcode.substr(1, 3);
-                // let rem_id = +barcode.substr(4, 8);
-
-                // console.log('stock_id', stock_id)
-                // console.log('rem_id', rem_id)
-
-            } else {
-
-                if (true || isBarcodeValid(barcode)) setNewScan(barcode)
+                setGlobalBarcode(barcode.current)
+                setGlobalBarcode()
 
             }
 
-            enqueueSnackbar(window.location.pathname + ' ' + barcode)
-
-            barcode = ''
+            barcode.current = ''
 
         } else {
 
             let newChar = String.fromCharCode(e.keyCode);
 
-            // if (newChar === "R") barcode = 'R'
+            // if (newChar === "R") barcode.current = 'R'
             // else
 
-            if (e.keyCode > 47 && e.keyCode < 58) barcode = barcode + newChar
-
-            // barcode = barcode + newChar
+            if (e.keyCode > 47 && e.keyCode < 58) barcode.current = barcode.current + newChar
 
         }
 
@@ -148,8 +135,6 @@ const App = props => {
     const closeGoodModal = () => setGood({})
 
     return <>
-
-        {/*{barcodes && <Barcodes barcodes={barcodes}/>}*/}
 
         <Header className={'d-print-none'}/>
         <div className="d-flex d-print-none" id="wrapper">
@@ -185,9 +170,9 @@ const App = props => {
                     <Route path="/queue" component={Queue}/>
 
                     {!props.app.stock_id || <>
-                        <Route path="/arrival" render={props => <Arrival newScan={newScan} {...props} />}/>
+                        <Route path="/arrival" render={props => <Arrival newScan={globalBarcode} {...props} />}/>
                         <Route path="/consignments" component={Consignments}/>
-                        <Route path="/transit" render={props => <Transit newScan={newScan} {...props} />}/>
+                        <Route path="/transit" render={props => <Transit newScan={ourBarcode} {...props} />}/>
                     </>}
 
                     {props.auth.admin && <>

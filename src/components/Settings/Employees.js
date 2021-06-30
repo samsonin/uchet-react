@@ -108,7 +108,7 @@ const Employees = props => {
             let isvalid = authControl.validate_phone_number("#add-employee")
                 || authControl.validate_email("#add-employee")
 
-            console.log(isvalid)
+            // console.log(isvalid)
 
             setEndAdornment (isvalid)
         }

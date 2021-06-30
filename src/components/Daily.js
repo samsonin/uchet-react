@@ -177,7 +177,7 @@ const Daily = props => {
                 title: 'Работы, услуги', addText: 'Продать услугу', addOnClick: () => console.log('addService'),
                 titles: ['#', 'Что сделали', 'Сумма', 'Сотрудник'],
                 rows: services,
-                rowsValues: ['id', 'item', 'sum', 'user_id'],
+                rowsValues: ['id', 'item', 'sum', 'ui_user_id'],
                 sum: serviceSum
             },
             {
@@ -189,88 +189,98 @@ const Daily = props => {
             },
             {
                 title: 'Подотчеты', addText: 'Внести подотчет', addOnClick: () => console.log('addImprest'),
-                titles: ['Наименование', 'Сумма', 'Сотрудник', 'Примечание'],
+                titles: ['Наименование', 'Сотрудник', 'Сумма', 'Примечание'],
                 rows: imprests,
-                rowsValues: ['item', 'sum', 'user_id', 'note'],
+                rowsValues: ['item', 'ui_user_id', 'sum', 'note'],
                 sum: imprestsSum
             },
         ]
             .map(t => date !== today && t.rows === imprests
                 ? ''
                 : <TableContainer
-                key={'tablecontindailykey' + t.title}
-                className={classes.table}
-                component={Paper}
-            >
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell colSpan={t.titles.length - 1}>
-                                <Typography variant="h6">
-                                    {t.title}
-                                </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                                {date === today && props.app.stock_id === stock
-                                    ? <Tooltip title={t.addText}>
-                                    <IconButton className={classes.add}
-                                                onClick={() => t.addOnClick}
-                                    >
-                                        <AddCircleIcon/>
-                                    </IconButton>
-                                </Tooltip>
-                                : ''}
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableHead>
-                        <TableRow>
-                            {t.titles.map(t => <TableCell
-                                key={'rowsintabledaily' + t}
-                            >{t}</TableCell>)}
-                        </TableRow>
-                    </TableHead>
-
-                    <TableBody>
-                        {t.rows.map(row => <TableRow
-                            key={'prepaidstablerowindaily' + t.title + JSON.stringify(row)}
-                        >
-                            {t.rowsValues.map(v => {
-
-                                let value = row[v]
-
-                                if (v === 'user_id') {
-
-                                    let user = props.app.users.find(u => u.id === row[v])
-
-                                    value = user
-                                        ? user.name
-                                        : ''
-
-                                }
-
-                                return <TableCell
-                                    key={'rowsintabledailysec' + v}
-                                >
-                                    {value}
+                    key={'tablecontindailykey' + t.title}
+                    className={classes.table}
+                    component={Paper}
+                >
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell colSpan={t.titles.length - 1}>
+                                    <Typography variant="h6">
+                                        {t.title}
+                                    </Typography>
                                 </TableCell>
-                            })}
-                        </TableRow>)}
-                    </TableBody>
+                                <TableCell align="right">
+                                    {date === today && props.app.stock_id === stock
+                                        ? <Tooltip title={t.addText}>
+                                            <IconButton className={classes.add}
+                                                        onClick={() => t.addOnClick}
+                                            >
+                                                <AddCircleIcon/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        : ''}
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableHead>
+                            <TableRow>
+                                {t.titles.map(t => <TableCell
+                                    key={'rowsintabledaily' + t}
+                                >{t}</TableCell>)}
+                            </TableRow>
+                        </TableHead>
 
-                    <TableHead>
-                        <TableRow>
-                            <TableCell colSpan={t.titles.length - 2}>
-                                Итого:
-                            </TableCell>
-                            <TableCell>
-                                {t.sum}
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
+                        <TableBody>
+                            {t.rows.map(row => <TableRow
+                                key={'tablerowindaily' + t.title + JSON.stringify(row)}
+                            >
+                                {t.rowsValues.map(v => {
 
-                </Table>
-            </TableContainer>)}
+                                    let value = row[v]
+
+                                    if (v === 'ui_user_id') {
+
+                                        let user = props.app.users.find(u => u.id === row.ui_user_id)
+
+                                        value = user
+                                            ? user.name
+                                            : row.ui_user_id
+
+                                    }
+
+                                    return <TableCell
+                                        key={'rowsintabledailysec' + v}
+                                    >
+                                        {row.work
+                                            ? v === 'item'
+                                                ? <>
+                                                    <span className="font-weight-bold pr-3">{row.item}</span>
+                                                    <br/>
+                                                    {row.work}
+                                                </>
+                                                : value
+                                            : v === 'id'
+                                                ? ''
+                                                : value}
+                                    </TableCell>
+                                })}
+                            </TableRow>)}
+                        </TableBody>
+
+                        <TableHead>
+                            <TableRow>
+                                <TableCell colSpan={t.titles.length - 2}>
+                                    Итого:
+                                </TableCell>
+                                <TableCell>
+                                    {t.sum}
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+
+                    </Table>
+                </TableContainer>)}
 
         {daily
             ? <Grid container

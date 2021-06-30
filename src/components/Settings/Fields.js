@@ -55,7 +55,7 @@ const Fields = props => {
 
     useEffect(() => {
 
-        console.log(fields)
+        // console.log(fields)
 
     }, [fields])
 

@@ -6,7 +6,7 @@ const auth = (state = JSON.parse(window.localStorage.getItem('auth')) || {user_i
         if (type === INIT_USER) {
             let newAuth = {
                 user_id
-            };
+            }
             if (user_id > 0) {
                 newAuth = Object.assign(newAuth,
                     {
@@ -18,10 +18,10 @@ const auth = (state = JSON.parse(window.localStorage.getItem('auth')) || {user_i
                 )
             }
             window.localStorage.setItem('auth', JSON.stringify(newAuth));
-            return newAuth;
+            return newAuth
         } else {
-            return state;
+            return state
         }
-    };
+    }
 
-export default auth;
+export default auth

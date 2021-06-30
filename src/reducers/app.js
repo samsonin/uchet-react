@@ -3,7 +3,7 @@ import {EXIT_APP} from "../constants";
 
 let initialState = {
     balance: 0,
-    stock_id: 0,
+    // stock_id: 0,
     stocks: [],
     users: [],
     organization: [],

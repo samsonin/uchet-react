@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
 import rest from "../components/Rest"
 import TableContainer from "@material-ui/core/TableContainer";
@@ -39,6 +39,23 @@ const Transit = props => {
     }
 
     const {enqueueSnackbar} = useSnackbar()
+
+    useEffect(() => {
+
+        if (!props.newScan) return
+
+        rest('transit/' + props.stock_id + '/' + props.newScan, 'PATCH')
+            .then(res => {
+
+                if (res.status === 200) {
+
+                    enqueueSnackbar('ok', {variant: 'success'})
+
+                }
+
+            })
+
+    }, [props.newScan])
 
     const fromTransit = (e, good) => {
 

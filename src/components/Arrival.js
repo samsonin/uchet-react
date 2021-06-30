@@ -96,6 +96,7 @@ const Arrival = props => {
         }
 
         if (!state.consignment.products.find((tr, i) => {
+
             if (!(tr.barcode || tr.categoryId || tr.model || tr.cost || tr.sum)) {
 
                 scanTr.current = i
@@ -103,6 +104,9 @@ const Arrival = props => {
                 return true
 
             }
+
+            return false
+
         })) {
 
             scanTr.current = state.consignment.products.length
@@ -487,7 +491,6 @@ const Arrival = props => {
                                             >
                                                 <MenuItem key={'menuitimorestscontrollinarrival'}
                                                           value={0}
-                                                          // className="justify-content-between"
                                                 >
                                                     <br/>
                                                 </MenuItem>
@@ -496,13 +499,13 @@ const Arrival = props => {
                                                     value={i.id}
                                                     className="justify-content-between"
                                                 >
-                                                    <Typography variant="subtitle2" className="p-2">
-                                                        {props.app.users.find(u => u.id === i.user_id).name}
-                                                    </Typography>
+                                                    <span className="p-2 font-weight-bold">
+                                                        {props.app.users.find(u => u.id === i.ui_user_id).name}
+                                                    </span>
                                                     {i.item}
-                                                    <Typography variant="subtitle2" className="p-2">
+                                                    <span className="p-2 font-weight-bold">
                                                         {i.sum}
-                                                    </Typography>
+                                                    </span>
                                                 </MenuItem>)}
                                             </Select>
                                         </FormControl>
