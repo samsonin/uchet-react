@@ -16,6 +16,15 @@ import TableBody from "@material-ui/core/TableBody";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
+import SaveOutlinedIcon from '@material-ui/icons/SaveOutlined';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import {bindActionCreators} from "redux";
+import {upd_app} from "../actions/actionCreator";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import List from "@material-ui/core/List";
+
 
 const useStyles = makeStyles((theme) => ({
     controls: {
@@ -32,6 +41,9 @@ const useStyles = makeStyles((theme) => ({
     totals: {
         margin: '1rem',
         padding: '1rem'
+    },
+    icon: {
+        padding: 0
     }
 }))
 
@@ -44,11 +56,18 @@ const salesArray = ['продажа', 'возврат', 'из залога', 'в
 const serviceArray = ['0']
 const costsArray = ['поступление', 'покупка', 'в залог', 'вернули', 'расход', 'зарплата', 'другое']
 
+const mapDispatchToProps = dispatch => bindActionCreators({
+    upd_app
+}, dispatch);
+
 const Daily = props => {
 
     const [stock, setStock] = useState(() => props.app.stock_id || props.app.stocks.find(s => s.is_valid).id)
     const [date, setDate] = useState(() => today)
     const [localDaily, setLocalDaily] = useState([])
+
+    const [cashless, setCashless] = useState(0)
+    const [handed, setHanded] = useState(0)
 
     const classes = useStyles()
 
@@ -81,17 +100,56 @@ const Daily = props => {
         ? props.app.daily.find(d => d.stock_id === stock)
         : localDaily
 
-    let employeesText = daily && daily.employees
-        ? daily.employees.map(e => {
+    const canChange = date === today && props.app.stock_id === stock
 
-            let user = props.app.users.find(u => u.id === e)
+    const canAdminChange = date === today && props.auth.admin
 
-            return user
-                ? user.name
-                : ''
+    const afterRes = res => {
 
-        }).join(', ')
-        : ''
+        if (res.status === 200) {
+
+            props.upd_app(res.body)
+
+        }
+
+    }
+
+    const cashlessHandler = () => {
+
+        rest('daily/' + stock, 'PATCH', {cashless})
+            .then(afterRes)
+
+    }
+
+    const handedHandler = () => {
+
+        if (!props.auth.admin) return
+
+        rest('daily/' + stock + '/' + handed, 'PUT')
+            .then(afterRes)
+
+    }
+
+    const employeeCheckout = employee_id => {
+
+        const employees = daily.employees.filter(e => e !== employee_id)
+
+        rest('daily/' + stock, 'PATCH', {employees})
+            .then(afterRes)
+
+    }
+
+    useEffect(() => {
+
+        setCashless(daily.cashless)
+
+    }, [daily.cashless])
+
+    useEffect(() => {
+
+        setHanded(daily.handed)
+
+    }, [daily.handed])
 
     const makeForTable = array => {
 
@@ -154,9 +212,31 @@ const Daily = props => {
             </Grid>
         </Grid>
 
-        <Typography variant="h6" className={classes.employees}>
-            {employeesText}
-        </Typography>
+        <Grid item className="p-2">
+            <List dense>
+                {daily && daily.employees && daily.employees.map(e => {
+
+                    let user = props.app.users.find(u => u.id === e)
+
+                    return user && <ListItem
+                        key={'userindailylistitem' + user.id}
+                        component={Paper}
+                        className="m-1"
+                    >
+                        <ListItemText
+                            primary={user.name}
+                        />
+                        {canAdminChange && <ListItemSecondaryAction>
+                            <IconButton
+                                onClick={() => employeeCheckout(user.id)}
+                            >
+                                <ExitToAppIcon/>
+                            </IconButton>
+                        </ListItemSecondaryAction>}
+                    </ListItem>
+                })}
+            </List>
+        </Grid>
 
         {[
             {
@@ -211,9 +291,9 @@ const Daily = props => {
                                     </Typography>
                                 </TableCell>
                                 <TableCell align="right">
-                                    {date === today && props.app.stock_id === stock
+                                    {canChange
                                         ? <Tooltip title={t.addText}>
-                                            <IconButton className={classes.add}
+                                            <IconButton className={classes.icon}
                                                         onClick={() => t.addOnClick}
                                             >
                                                 <AddCircleIcon/>
@@ -282,39 +362,72 @@ const Daily = props => {
                     </Table>
                 </TableContainer>)}
 
-        {daily
-            ? <Grid container
-                    direction={'column'}
-                    justify={'center'}
-                    component={Paper}
-                    className={classes.totals}
-                    spacing={1}
-            >
-                <Grid item>
-                    <Typography variant="h6">
-                        Наличные
-                    </Typography>
-                </Grid>
-                {[
-                    {text: 'Остаток на утро:', value: daily.morning},
-                    {text: 'Выручка:', value: daily.proceeds},
-                    {text: 'Подотчеты:', value: imprestsSum},
-                    {text: 'Безнал:', value: daily.cashless},
-                    {text: 'Сдали:', value: daily.handed},
-                    {text: 'Остаток:', value: daily.evening},
-                ].map(l => date !== today && l.text === 'Подотчеты:'
-                    ? ''
-                    : <Grid item
-                            key={'griditemkeyindailypertotals' + l.text}
-                    >
-                        <Typography variant={'subtitle2'}>
-                            {l.text + ' ' + l.value}
-                        </Typography>
-                    </Grid>)}
-            </Grid>
-            : ''}
+        {daily && <TableContainer
+            className={classes.table}
+            component={Paper}
+        >
+            <Table size="small">
+                <TableBody>
+                    {[
+                        {text: 'Остаток на утро:', value: daily.morning},
+                        {text: 'Выручка:', value: daily.proceeds},
+                        {text: 'Подотчеты:', value: imprestsSum},
+                        {
+                            text: 'Безнал:', value: cashless,
+                            change: e => setCashless(+e.target.value),
+                            click: canChange && cashlessHandler,
+                            disabled: cashless === daily.cashless
+                        },
+                        {
+                            text: 'Сдали:', value: handed,
+                            change: e => setHanded(+e.target.value),
+                            click: (canChange || canAdminChange) && handedHandler,
+                            disabled: handed === daily.handed
+                        },
+                        {text: 'Остаток:', value: daily.evening},
+                    ].map(l => {
+                        return date === today || l.text !== 'Подотчеты:'
+                            ? <TableRow
+                                key={'griditemkeyindailypertotals' + l.text}
+                            >
+
+                                <TableCell style={{
+                                    fontWeight: 'bold'
+                                }}>
+                                    {l.text}
+                                </TableCell>
+
+                                <TableCell>
+                                    {l.click
+                                        ? <TextField
+                                            value={l.value}
+                                            type="number"
+                                            onChange={l.change}
+                                        />
+                                        : l.value}
+                                </TableCell>
+
+                                {l.click && <TableCell style={{
+                                    width: '15%'
+                                }}>
+                                    <IconButton
+                                        className={classes.icon}
+                                        onClick={l.click}
+                                        disabled={l.disabled}
+                                    >
+                                        <SaveOutlinedIcon/>
+                                    </IconButton>
+                                </TableCell>}
+
+                            </TableRow>
+                            : ''
+                    })}
+                </TableBody>
+            </Table>
+        </TableContainer>}
+
     </>
 
 }
 
-export default connect(state => state)(Daily);
+export default connect(state => state, mapDispatchToProps)(Daily);
