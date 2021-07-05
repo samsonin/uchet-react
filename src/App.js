@@ -45,6 +45,7 @@ const App = props => {
     const [orderBarcode, setOrderBarcode] = useState()
     const [ourBarcode, setOurBarcode] = useState()
     const [globalBarcode, setGlobalBarcode] = useState()
+    const [enterPress, setEnterPress] = useState(false)
 
     const barcode = useRef()
 
@@ -98,7 +99,14 @@ const App = props => {
 
         if (e.key === "Enter") {
 
-            if (!barcode.current) return
+            if (!barcode.current) {
+
+                setEnterPress(true)
+                setEnterPress(false)
+
+                return
+
+            }
 
             if (["112116", "103100"].includes(barcode.current.substr(0, 6)) || barcode.current.length === 15) {
 
@@ -170,7 +178,12 @@ const App = props => {
                     <Route path="/queue" component={Queue}/>
 
                     {!props.app.stock_id || <>
-                        <Route path="/arrival" render={props => <Arrival newScan={globalBarcode} {...props} />}/>
+                        <Route path="/arrival" render={props => <Arrival
+                            newScan={globalBarcode}
+                            enterPress={enterPress}
+                            {...props}
+                        />
+                        }/>
                         <Route path="/consignments" component={Consignments}/>
                         <Route path="/transit" render={props => <Transit newScan={ourBarcode} {...props} />}/>
                     </>}

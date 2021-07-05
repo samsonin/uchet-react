@@ -48,13 +48,14 @@ const woAlliases = {
 const GoodModal = props => {
 
     const [treeOpen, setTreeOpen] = useState(false)
+    const [orderId, setOrderId] = useState()
 
     const {enqueueSnackbar} = useSnackbar()
 
     const getStockName = stockId => {
-        let stockName = props.app.stocks.find(v => +v.id === +stockId);
-        return stockName
-            ? stockName.name
+        let stock = props.app.stocks.find(v => +v.id === +stockId);
+        return stock
+            ? stock.name
             : ''
     }
 
@@ -84,22 +85,16 @@ const GoodModal = props => {
 
     }
 
-    const goodRequest = (barcode, action) => {
+    const toOrder = () => {
 
-        let rem_id = '';
-        if (action === 'toOrder') {
-            rem_id = +document.getElementById('goodToOrderInput').value;
-            if (rem_id <= 0) {
+        console.log(orderId)
 
-                props.enqueueSnackbar({
-                    message: 'Некорректный номер заказа',
-                    options: {
-                        variant: 'error',
-                        autoHideDuration: 1000
-                    }
-                })
-                return false;
-            }
+        if (+orderId < 1) {
+
+            enqueueSnackbar('Некорректный номер заказа', {
+                variant: 'error',
+            })
+
         }
 
 
@@ -210,7 +205,7 @@ const GoodModal = props => {
                                 </Tooltip>
                                 <Tooltip title="На возврат">
                                     <IconButton
-                                        onClick={() => goodRequest(good.barcode, 'reject')}
+                                        // onClick={() => goodRequest(good.barcode, 'reject')}
                                     >
                                         <i className="fas fa-redo"/>
                                     </IconButton>
@@ -222,7 +217,7 @@ const GoodModal = props => {
                         good.wo === 'use' ?
                             <Tooltip title="Восстановить">
                                 <IconButton
-                                    onClick={() => goodRequest(good.barcode, 'restore')}
+                                    // onClick={() => goodRequest(good.barcode, 'restore')}
                                 >
                                     <RestoreFromTrashIcon/>
                                 </IconButton>
@@ -230,7 +225,7 @@ const GoodModal = props => {
                             good.wo === '' ?
                                 <Tooltip title="Списать">
                                     <IconButton
-                                        onClick={() => goodRequest(good.barcode, 'deduct')}
+                                        // onClick={() => goodRequest(good.barcode, 'deduct')}
                                     >
                                         <DeleteIcon/>
                                     </IconButton>
@@ -287,13 +282,17 @@ const GoodModal = props => {
                 ? <>
                     <MDBInputGroup
                         material
+                        // onChange={e => setOrderId(e.target.value)}
+
+                        onChange={() => console.log('onChange')}
+
                         containerClassName="mb-3 mt-0"
                         type="number"
-                        id="goodToOrderInput"
                         hint="Введите номер заказа"
+
                         append={
                             <MDBBtn className="m-0 px-3 py-2 z-depth-0"
-                                    onClick={() => goodRequest(good.barcode, 'toOrder')}>
+                                    onClick={() => toOrder()}>
                                 Внести в заказ
                             </MDBBtn>
                         }

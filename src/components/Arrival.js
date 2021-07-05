@@ -31,6 +31,13 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 
+const productOption = [
+    'Кабель micro usb черный с желтой бумажкой',
+    'Защитное стекло iPhone X/XS/11 Pro (тех упак)'
+    // {id: 1, name: 'Кабель micro usb черный с желтой бумажкой'},
+    // {id: 2, name: 'Защитное стекло iPhone X/XS/11 Pro (тех упак)'},
+    // {id: 3, name: 'наушники промо с микрофоном цветные микс MX02 матовые'},
+]
 
 const emptyTr = {
     barcode: '',
@@ -58,6 +65,8 @@ const initialState = () => ({
 const Arrival = props => {
 
     const [state, setState] = useState(initialState)
+    const [product, setProduct] = useState()
+
     const [isScanOpen, setIsScanOpen] = useState(false)
     const [scanValue, setScanValue] = useState('')
     const [imprestId, setImprestId] = useState(0)
@@ -116,6 +125,18 @@ const Arrival = props => {
         }
 
     }, [props.newScan])
+
+    useEffect(() => {
+
+        if (props.enterPress) addConsignment()
+
+    }, [props.enterPress])
+
+    useEffect(() => {
+
+        console.log('product selected', product)
+
+    }, [product])
 
     const addConsignment = () => {
 
@@ -245,14 +266,19 @@ const Arrival = props => {
 
     }
 
+    const toNumber = val => +val < 0 || isNaN(+val)
+        ? 0
+        : +val
+
     const handleTr = (i, index, val) => {
         setState(prev => {
 
             let newState = {...prev};
             newState.consignment.products[i][index] = ['barcode', 'isInBase', 'model'].includes(index)
                 ? val
-                : +val
-            if (index === 'cost') newState.consignment.products[i].sum = +val * 2
+                : toNumber(val)
+
+            if (index === 'cost') newState.consignment.products[i].sum = toNumber(val) * 2
 
             newState.currentTr = false;
             newState.consignment.actuallyPaid = getConsignmentTotal();
@@ -273,11 +299,11 @@ const Arrival = props => {
 
     const handleTotals = (index, val) => {
 
-        if (val < 0) return;
-
         setState(prev => {
             let newState = {...prev};
-            newState.consignment[index] = val;
+            newState.consignment[index] = index === 'consignmentNumber'
+                ? val
+                : toNumber(val);
             return newState
         })
 
@@ -292,9 +318,7 @@ const Arrival = props => {
         return consignmentTotal;
     }
 
-    const getTotal = () => {
-        return state.consignment.delivery + getConsignmentTotal();
-    }
+    const getTotal = () => state.consignment.delivery + getConsignmentTotal();
 
     const renderTr = (i, product) => <TableRow key={'gberbrv' + i}>
         <TableCell align="center" className={"p-1"}>
@@ -319,30 +343,38 @@ const Arrival = props => {
             </Button>
         </TableCell>
         <TableCell className={"p-1"}>
-            <TextField className={"w-100"}
-                       onChange={e => handleTr(i, 'model', e.target.value)}
-                       value={product.model}
-                       disabled={product.isInBase}
+
+            <Autocomplete
+                value={productOption.find(p => p === product)}
+                options={productOption}
+                onChange={(_, v) => setProduct(v)}
+                getOptionLabel={option => option}
+                getOptionSelected={option => option}
+                renderInput={params => <TextField {...params} />}
             />
+
+            {/*<TextField className={"w-100"}*/}
+            {/*           onChange={e => handleTr(i, 'model', e.target.value)}*/}
+            {/*           value={product.model}*/}
+            {/*           disabled={product.isInBase}*/}
+            {/*/>*/}
+
         </TableCell>
         <TableCell align="center" className={"p-1"}>
             <TextField
                 onChange={e => handleTr(i, 'quantity', e.target.value)}
-                type="number"
                 value={product.quantity}
             />
         </TableCell>
         <TableCell align="center" className={"p-1"}>
             <TextField
                 onChange={e => handleTr(i, 'cost', e.target.value)}
-                type="number"
                 value={product.cost}
             />
         </TableCell>
         <TableCell align="center" className={"p-1"}>
             <TextField
                 onChange={e => handleTr(i, 'sum', e.target.value)}
-                type="number"
                 value={product.sum}
             />
         </TableCell>
@@ -458,9 +490,8 @@ const Arrival = props => {
                                     </TableCell>
                                     <TableCell align="center" className="pt-3">
                                         <TextField label="Доставка"
-                                                   type="number" min={0}
                                                    value={state.consignment.delivery}
-                                                   onChange={e => handleTotals('delivery', +e.target.value)}
+                                                   onChange={e => handleTotals('delivery', e.target.value)}
                                         />
                                     </TableCell>
                                     <TableCell colSpan="2" align="center" className="pt-3">
@@ -470,9 +501,8 @@ const Arrival = props => {
                                     </TableCell>
                                     <TableCell colSpan="2" align="center" className="pt-3">
                                         <TextField label="Оплатили"
-                                                   type="number"
                                                    value={state.consignment.actuallyPaid}
-                                                   onChange={e => handleTotals('actuallyPaid', +e.target.value)}
+                                                   onChange={e => handleTotals('actuallyPaid', e.target.value)}
                                         />
                                     </TableCell>
                                 </TableRow>
