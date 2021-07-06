@@ -139,18 +139,18 @@ const Daily = props => {
 
     }
 
-    useEffect(() => {
-
-        setCashless(daily.cashless)
-
-    }, [daily.cashless])
-
-    useEffect(() => {
-
-        setHanded(daily.handed)
-
-    }, [daily.handed])
-
+    // useEffect(() => {
+    //
+    //     setCashless(daily.cashless)
+    //
+    // }, [daily.cashless])
+    //
+    // useEffect(() => {
+    //
+    //     setHanded(daily.handed)
+    //
+    // }, [daily.handed])
+    //
     const makeForTable = array => {
 
         let answer = daily && daily.sales
