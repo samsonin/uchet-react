@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import EditIcon from '@material-ui/icons/Edit';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
@@ -20,121 +20,110 @@ import TableContainer from "@material-ui/core/TableContainer";
 
 import rest from "./Rest";
 
-let request = false;
+export default function () {
 
-export default class extends React.Component {
+    const [search, setSearch] = useState('')
+    const [customers, setCustomers] = useState()
 
-  state = {
-    searchStr: '',
-  }
+    const request = useRef(false)
 
-  componentDidMount() {
+    useEffect(() => {
 
-    request = true;
-    rest('customers')
-      .then(res => {
-        if (res.ok) this.setState({customers: res.body});
-        request = false;
-      })
+        request.current = true;
+        rest('customers')
+            .then(res => {
+                if (res.ok) setCustomers(res.body)
+                request.current = false;
+            })
 
-  }
+    }, [])
 
-  handleSearch(v) {
-    this.setState({searchStr: v})
+    const handleSearch = v => {
 
-    if (!request) {
-      request = true;
+        setSearch(v)
 
-      rest('customers?all=' + v)
-        .then(res => {
-          if (res.ok) this.setState({customers: res.body});
-          request = false;
-          if (this.state.searchStr !== v) this.handleSearch(this.state.searchStr)
-        })
+        if (!request.current) {
+            request.current = true;
+
+            rest('customers?all=' + v)
+                .then(res => {
+                    if (res.ok) setCustomers(res.body);
+                    request.current = false;
+                })
+        }
     }
-  }
 
-  renderBody() {
+    const renderBody = () => customers
 
-    return this.state.customers ?
+        ? customers.map(c => search === '' ||
+        (c.fio.indexOf(search) > -1) ||
+        (c.phone_number.indexOf(search) > -1)
 
-      this.state.customers.map(c => {
-
-        return this.state.searchStr === '' ||
-        (c.fio.indexOf(this.state.searchStr) > -1) ||
-        (c.phone_number.indexOf(this.state.searchStr) > -1) ?
-
-          <TableRow key={'teblerowcust' + c.id}>
-            <TableCell>{c.fio}</TableCell>
-            <TableCell>{c.phone_number}</TableCell>
-            <TableCell>
-              <Tooltip title="Редактировать">
-                <Link to={"/customers/" + c.id}>
-                  <IconButton>
-                    <EditIcon/>
-                  </IconButton>
-                </Link>
-              </Tooltip>
-            </TableCell>
-          </TableRow> : ''
-      }) :
-      <TableRow>
-        <TableCell colSpan={3}>
-          Загружаем данные...
-        </TableCell>
-      </TableRow>
-
-  }
-
-  render() {
-    return <Grid container>
-      <Grid item>
-        <TableContainer component={Paper}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell style={{weight: '40%'}}>
-                  <Typography variant="h5">
-                    Физ. лица
-                  </Typography>
-                </TableCell>
-                <TableCell colSpan={2}>
-                  <Input
-                    onChange={e => this.handleSearch(e.target.value)}
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <SearchIcon/>
-                      </InputAdornment>
-                    }/>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>ФИО</TableCell>
-                <TableCell>Номер телефона</TableCell>
+            ? <TableRow key={'teblerowcust' + c.id}>
+                <TableCell>{c.fio}</TableCell>
+                <TableCell>{c.phone_number}</TableCell>
                 <TableCell>
-                  <Tooltip title="Добавить">
-                    <Link to="/customers/0">
-                      <IconButton>
-                        <AddCircleIcon/>
-                      </IconButton>
-                    </Link>
-                  </Tooltip>
+                    <Tooltip title="Редактировать">
+                        <Link to={"/customers/" + c.id}>
+                            <IconButton>
+                                <EditIcon/>
+                            </IconButton>
+                        </Link>
+                    </Tooltip>
                 </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+            </TableRow>
+            : '')
+        : <TableRow>
+            <TableCell colSpan={3}>
+                Загружаем данные...
+            </TableCell>
+        </TableRow>
 
-              {this.renderBody()}
 
-            </TableBody>
-          </Table>
-        </TableContainer>
-        {/*<Typography variant="h5" style={{margin: 25}}>*/}
-        {/*    Загружаем данные...*/}
-        {/*</Typography>*/}
+    return <Grid container>
+        <Grid item>
+            <TableContainer component={Paper}>
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell style={{weight: '40%'}}>
+                                <Typography variant="h5">
+                                    Физ. лица
+                                </Typography>
+                            </TableCell>
+                            <TableCell colSpan={2}>
+                                <Input
+                                    onChange={e => handleSearch(e.target.value)}
+                                    endAdornment={
+                                        <InputAdornment position="end">
+                                            <SearchIcon/>
+                                        </InputAdornment>
+                                    }/>
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>ФИО</TableCell>
+                            <TableCell>Номер телефона</TableCell>
+                            <TableCell>
+                                <Tooltip title="Добавить">
+                                    <Link to="/customers/0">
+                                        <IconButton>
+                                            <AddCircleIcon/>
+                                        </IconButton>
+                                    </Link>
+                                </Tooltip>
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
 
-      </ Grid>
+                        {renderBody()}
+
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+        </ Grid>
     </Grid>
-  }
 
 }

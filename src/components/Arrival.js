@@ -31,13 +31,11 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 
-const productOption = [
-    'Кабель micro usb черный с желтой бумажкой',
-    'Защитное стекло iPhone X/XS/11 Pro (тех упак)'
-    // {id: 1, name: 'Кабель micro usb черный с желтой бумажкой'},
-    // {id: 2, name: 'Защитное стекло iPhone X/XS/11 Pro (тех упак)'},
-    // {id: 3, name: 'наушники промо с микрофоном цветные микс MX02 матовые'},
-]
+// const productOption = [
+//     {category_id: 22, product_id: 123, name: 'Кабель micro usb черный с желтой бумажкой'},
+//     {category_id: 23, product_id: 456, name: 'Защитное стекло iPhone X/XS/11 Pro (тех упак)'},
+//     {category_id: 23, product_id: 456, name: 'Наушники промо с микрофоном цветные микс MX02 матовые'},
+// ]
 
 const emptyTr = {
     barcode: '',
@@ -71,6 +69,9 @@ const Arrival = props => {
     const [scanValue, setScanValue] = useState('')
     const [imprestId, setImprestId] = useState(0)
     const [isRequesting, setIsRequesting] = useState(false)
+
+    const [productOption, setProductOption] = useState([])
+    const [productNameLoading, setProductNameLoading] = useState(false)
 
     const scanRef = useRef()
     const scanTr = useRef(0)
@@ -270,6 +271,27 @@ const Arrival = props => {
         ? 0
         : +val
 
+    const productHandler = name => {
+
+        if (name.length < 4 || productNameLoading) return
+
+        setProductNameLoading(true)
+
+        rest('products/' + name)
+            .then(res => {
+
+                setProductNameLoading(false)
+
+                if (res.status === 200) {
+
+                    setProductOption(res.body)
+
+                }
+
+            })
+
+    }
+
     const handleTr = (i, index, val) => {
         setState(prev => {
 
@@ -347,10 +369,13 @@ const Arrival = props => {
             <Autocomplete
                 value={productOption.find(p => p === product)}
                 options={productOption}
-                onChange={(_, v) => setProduct(v)}
-                getOptionLabel={option => option}
-                getOptionSelected={option => option}
-                renderInput={params => <TextField {...params} />}
+                loading={productNameLoading}
+                onInputChange={(e, v, r) => productHandler(v)}
+                onChange={(e, v) => setProduct(v)}
+                getOptionLabel={option => option.name}
+                renderInput={params => <TextField
+                    {...params}
+                />}
             />
 
             {/*<TextField className={"w-100"}*/}
