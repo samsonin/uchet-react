@@ -148,15 +148,21 @@ class Disassemble extends React.Component {
                     {this.state.trs.map(value => this.createTr(value))}
 
                     <tr>
-                        <td colSpan="3">Суммарная себестоимость должна быть не меньше: <span
-                            className="mx-2">{device.cost}</span></td>
-                        <td><span id="sum"/>сейчас: {this.state.totalCost}</td>
+                        <td colSpan="3">
+                            Суммарная себестоимость должна быть не меньше:
+                            <span className="mx-2">
+                                {device.cost}
+                            </span></td>
+                        <td><span id="sum"/>
+                        сейчас: {this.state.totalCost}
+                        </td>
                         <td colSpan="2">
                             <button
                                 onClick={this.submit}
                                 className="btn btn-block btn-outline-primary"
                                 disabled={!this.state.is_submit_enable}
-                            >Разобрать
+                            >
+                                Разобрать
                             </button>
                         </td>
                     </tr>
