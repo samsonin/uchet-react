@@ -58,7 +58,6 @@ export default function () {
         ? customers.map(c => search === '' ||
         (c.fio.indexOf(search) > -1) ||
         (c.phone_number.indexOf(search) > -1)
-
             ? <TableRow key={'teblerowcust' + c.id}>
                 <TableCell>{c.fio}</TableCell>
                 <TableCell>{c.phone_number}</TableCell>
@@ -73,12 +72,12 @@ export default function () {
                 </TableCell>
             </TableRow>
             : '')
+
         : <TableRow>
             <TableCell colSpan={3}>
                 Загружаем данные...
             </TableCell>
         </TableRow>
-
 
     return <Grid container>
         <Grid item>

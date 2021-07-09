@@ -137,6 +137,12 @@ const Arrival = props => {
 
         console.log('product selected', product)
 
+        if (product) {
+
+            console.log('product selected', product)
+
+        }
+
     }, [product])
 
     const addConsignment = () => {
@@ -271,13 +277,15 @@ const Arrival = props => {
         ? 0
         : +val
 
-    const productHandler = name => {
+    const productHandler = (name, reason, i) => {
 
-        if (name.length < 4 || productNameLoading) return
+        handleTr(i, 'model', name)
+
+        if (reason !== 'input' || name.length < 4 || productNameLoading) return
 
         setProductNameLoading(true)
 
-        rest('products/' + name)
+        rest('products?name=' + name)
             .then(res => {
 
                 setProductNameLoading(false)
@@ -367,22 +375,16 @@ const Arrival = props => {
         <TableCell className={"p-1"}>
 
             <Autocomplete
-                value={productOption.find(p => p === product)}
+                value={{name: product.model}}
                 options={productOption}
                 loading={productNameLoading}
-                onInputChange={(e, v, r) => productHandler(v)}
+                onInputChange={(e, v, r) => productHandler(v, r, i)}
                 onChange={(e, v) => setProduct(v)}
                 getOptionLabel={option => option.name}
-                renderInput={params => <TextField
-                    {...params}
-                />}
+                getOptionSelected={option => option.name}
+                renderInput={params => <TextField {...params} />}
+                disabled={product.isInBase}
             />
-
-            {/*<TextField className={"w-100"}*/}
-            {/*           onChange={e => handleTr(i, 'model', e.target.value)}*/}
-            {/*           value={product.model}*/}
-            {/*           disabled={product.isInBase}*/}
-            {/*/>*/}
 
         </TableCell>
         <TableCell align="center" className={"p-1"}>

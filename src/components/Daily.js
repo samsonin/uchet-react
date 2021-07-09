@@ -25,6 +25,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import List from "@material-ui/core/List";
 
+import {SaleModal} from './Modals/Sale'
 
 const useStyles = makeStyles((theme) => ({
     controls: {
@@ -43,7 +44,9 @@ const useStyles = makeStyles((theme) => ({
         padding: '1rem'
     },
     icon: {
-        padding: 0
+        padding: 0,
+        marginLeft: '.1rem',
+        marginRight: '.1rem',
     }
 }))
 
@@ -68,6 +71,9 @@ const Daily = props => {
 
     const [cashless, setCashless] = useState(0)
     const [handed, setHanded] = useState(0)
+
+    const [row, setRow] = useState()
+    const [isSaleOpen, setIsSaleOpen] = useState(false)
 
     const classes = useStyles()
 
@@ -121,7 +127,23 @@ const Daily = props => {
 
     }
 
+    const cashlessHandlerAdd = () => {
+
+        rest('daily/' + stock, 'PATCH', {cashless})
+            .then(afterRes)
+
+    }
+
     const handedHandler = () => {
+
+        if (!props.auth.admin) return
+
+        rest('daily/' + stock + '/' + handed, 'PUT')
+            .then(afterRes)
+
+    }
+
+    const handedHandlerAdd = () => {
 
         if (!props.auth.admin) return
 
@@ -150,7 +172,18 @@ const Daily = props => {
     //     setHanded(daily.handed)
     //
     // }, [daily.handed])
-    //
+
+    const handler = row => {
+
+        if (row.action === 'продажа') {
+
+            setRow(row)
+            setIsSaleOpen(true)
+
+        }
+
+    }
+
     const makeForTable = array => {
 
         let answer = daily && daily.sales
@@ -181,6 +214,13 @@ const Daily = props => {
     imprests.map(i => imprestsSum += i.sum)
 
     return <>
+
+        <SaleModal
+            isOpen={isSaleOpen}
+            close={() => setIsSaleOpen(false)}
+            row={row}
+        />
+
         <Grid container
               justify={'center'}
               alignItems={'center'}
@@ -194,6 +234,7 @@ const Daily = props => {
                     disabled={false}
                     classes={classes.controls}
                 />
+
             </Grid>
 
             <Grid item xs={6}>
@@ -314,6 +355,10 @@ const Daily = props => {
                         <TableBody>
                             {t.rows.map(row => <TableRow
                                 key={'tablerowindaily' + t.title + JSON.stringify(row)}
+                                style={{
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => handler(row)}
                             >
                                 {t.rowsValues.map(v => {
 
@@ -376,12 +421,14 @@ const Daily = props => {
                             text: 'Безнал:', value: cashless,
                             change: e => setCashless(+e.target.value),
                             click: canChange && cashlessHandler,
+                            clickAdd: canChange && cashlessHandlerAdd,
                             disabled: cashless === daily.cashless
                         },
                         {
                             text: 'Сдали:', value: handed,
                             change: e => setHanded(+e.target.value),
                             click: (canChange || canAdminChange) && handedHandler,
+                            clickAdd: (canChange || canAdminChange) && handedHandlerAdd,
                             disabled: handed === daily.handed
                         },
                         {text: 'Остаток:', value: daily.evening},
@@ -407,15 +454,23 @@ const Daily = props => {
                                         : l.value}
                                 </TableCell>
 
-                                {l.click && <TableCell style={{
-                                    width: '15%'
-                                }}>
+                                {l.click && <TableCell
+                                    style={{
+                                        width: '15%',
+                                    }}>
                                     <IconButton
                                         className={classes.icon}
                                         onClick={l.click}
                                         disabled={l.disabled}
                                     >
                                         <SaveOutlinedIcon/>
+                                    </IconButton>
+                                    <IconButton
+                                        className={classes.icon}
+                                        onClick={l.clickAdd}
+                                        disabled={l.disabled}
+                                    >
+                                        <AddCircleIcon/>
                                     </IconButton>
                                 </TableCell>}
 
