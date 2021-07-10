@@ -25,7 +25,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import List from "@material-ui/core/List";
 
-import {SaleModal} from './Modals/Sale'
+import SaleModal from './Modals/Sale'
 
 const useStyles = makeStyles((theme) => ({
     controls: {
@@ -420,21 +420,19 @@ const Daily = props => {
                         {
                             text: 'Безнал:', value: cashless,
                             change: e => setCashless(+e.target.value),
+                            disabled: cashless === daily.cashless,
                             click: canChange && cashlessHandler,
-                            clickAdd: canChange && cashlessHandlerAdd,
-                            disabled: cashless === daily.cashless
+                            clickAdd: canChange && cashlessHandlerAdd
                         },
                         {
                             text: 'Сдали:', value: handed,
                             change: e => setHanded(+e.target.value),
+                            disabled: handed === daily.handed,
                             click: (canChange || canAdminChange) && handedHandler,
-                            clickAdd: (canChange || canAdminChange) && handedHandlerAdd,
-                            disabled: handed === daily.handed
+                            clickAdd: (canChange || canAdminChange) && handedHandlerAdd
                         },
                         {text: 'Остаток:', value: daily.evening},
-                    ].map(l => {
-                        return date === today || l.text !== 'Подотчеты:'
-                            ? <TableRow
+                    ].map(l => (date === today || l.text !== 'Подотчеты:') && <TableRow
                                 key={'griditemkeyindailypertotals' + l.text}
                             >
 
@@ -474,15 +472,13 @@ const Daily = props => {
                                     </IconButton>
                                 </TableCell>}
 
-                            </TableRow>
-                            : ''
-                    })}
-                </TableBody>
-            </Table>
-        </TableContainer>}
+                            </TableRow>)}
+                        </TableBody>
+                        </Table>
+                        </TableContainer>}
 
-    </>
+                        </>
 
-}
+                        }
 
-export default connect(state => state, mapDispatchToProps)(Daily);
+                        export default connect(state => state, mapDispatchToProps)(Daily);
