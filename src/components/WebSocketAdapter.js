@@ -85,6 +85,12 @@ const WebSocketAdapter = ({jwt, upd_app}) => {
 
             };
 
+            ws.onerror = e => {
+
+                    console.log('error', e)
+
+            }
+
             // ws.onclose = () => {
             //     console.log('onclose');
             // };

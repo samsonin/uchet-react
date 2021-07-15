@@ -31,12 +31,6 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 
-// const productOption = [
-//     {category_id: 22, product_id: 123, name: 'Кабель micro usb черный с желтой бумажкой'},
-//     {category_id: 23, product_id: 456, name: 'Защитное стекло iPhone X/XS/11 Pro (тех упак)'},
-//     {category_id: 23, product_id: 456, name: 'Наушники промо с микрофоном цветные микс MX02 матовые'},
-// ]
-
 const emptyTr = {
     barcode: '',
     isInBase: false,
@@ -135,11 +129,21 @@ const Arrival = props => {
 
     useEffect(() => {
 
-        console.log('product selected', product)
-
         if (product) {
 
-            console.log('product selected', product)
+            console.log('scanTr', scanTr)
+
+            if (product.categoryId) {
+
+                handleTr(scanTr.current, 'categoryId', product.categoryId || product.categories[0])
+
+            }
+
+            if (product.barcode) {
+
+                handleTr(scanTr.current, 'barcode', product.barcode)
+
+            }
 
         }
 
