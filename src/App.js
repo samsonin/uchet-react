@@ -185,8 +185,9 @@ const App = props => {
                         />
                         }/>
                         <Route path="/consignments" component={Consignments}/>
-                        <Route path="/transit" render={props => <Transit newScan={ourBarcode} {...props} />}/>
                     </>}
+
+                    <Route path="/transit" render={props => <Transit newScan={ourBarcode} {...props} />}/>
 
                     {props.auth.admin && <>
                         <Route path="/funds" component={FundsFlow}/>
