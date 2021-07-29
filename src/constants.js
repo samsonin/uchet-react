@@ -20,4 +20,8 @@ export const
 
     SERVER = isLocalhost ?
         'http://127.0.0.1:8000' :
-        'https://api.uchet.store';
+        'https://api.uchet.store',
+
+    NEW_SERVER = isLocalhost ?
+        'http://127.0.0.1:8000' :
+        'https://api.appblog.ru';

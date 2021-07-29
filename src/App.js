@@ -10,7 +10,6 @@ import Entities from "./components/Entities";
 import Entity from "./components/Entity";
 import Sidebar from "./components/Sidebar";
 import Main from "./components/Main";
-import Authmodal from "./components/Authmodal";
 import Settings from "./components/Settings";
 import Subscribe from "./components/Subscribe";
 import Queue from "./components/Queue";
@@ -36,6 +35,7 @@ import {Records} from "./components/Records";
 // import Docs from "./components/Settings/Docs";
 import Daily from "./components/Daily";
 import {useSnackbar} from "notistack";
+import LoginModal from "./components/LoginModal";
 
 
 const App = props => {
@@ -148,8 +148,14 @@ const App = props => {
         <div className="d-flex d-print-none" id="wrapper">
             <Sidebar/>
             <div id="sidebaredivider"/>
+
+            <LoginModal
+                isOpen={!+props.auth.user_id}
+                close={() => console.log('close')}
+            />
+
             {+props.auth.user_id
-                ? <div className="m-2 p-2">
+            ? <div className="m-2 p-2">
 
                     <Route exact path="/" component={
                         props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0)
@@ -222,7 +228,7 @@ const App = props => {
                     <WebSocketAdapter/>
 
                 </div>
-                : <Authmodal/>
+: null
             }
         </div>
     </>

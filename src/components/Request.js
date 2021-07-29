@@ -1,4 +1,5 @@
-const SERVER = 'https://uchet.store';
+import {SERVER, NEW_SERVER} from '../constants';
+
 
 export default function fetchPost(data = {}, url = "", jwt = "") {
 

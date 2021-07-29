@@ -1,12 +1,14 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {MDBBtn, MDBModal, MDBRow, MDBCol} from 'mdbreact';
 import request from "./Request";
+import doubleRequest from './doubleRequest'
 
 import {connect} from "react-redux";
 import {init_user, upd_app} from "../actions/actionCreator";
 import {bindActionCreators} from 'redux';
 import AuthControl from './AuthControl';
 import {useSnackbar} from "notistack";
+import auth from "../reducers/auth";
 // import {inputToA} from "./EditorFunctions";
 
 let authControl = new AuthControl()
@@ -33,16 +35,22 @@ export default connect(state => state, mapDispatchToProps)(props => {
     const [org_id, setOrgId] = useState(0)
     const [orgName, setOrgName] = useState('')
 
+    const userNameEl = useRef()
+    const emailEL = useRef()
+    const phoneNumberEl = useRef()
+    const passEl = useRef()
+    const confirmEl = useRef()
+
     const {enqueueSnackbar} = useSnackbar()
 
     const validate_email = () => {
-        authControl.validate_email_phone_number('#email', '#div_phone_number');
-        return authControl.validate_email('email');
+        authControl.validate_email_phone_number(emailEL, '#div_phone_number');
+        return authControl.validate_email(emailEL);
     }
 
     const validate_phone_number = () => {
-        authControl.validate_email_phone_number('#phone_number', '#div_email');
-        return authControl.validate_phone_number('phone_number');
+        authControl.validate_email_phone_number(phoneNumberEl, '#div_email');
+        return authControl.validate_phone_number(phoneNumberEl);
     }
 
     const validate_passsword = () => authControl.validate_passwords('password', 'password2', status === 'register' || status === 'restore_confirm');
@@ -59,44 +67,25 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const keyPress = e => {
         if (typeof e === 'undefined') return false;
-        if (e.key === 'Enter') { // eslint-disable-next-line
-            switch (status) {
-                case "login":
-                    enter();
-                    break;
-                case "register":
-                    registration();
-                    break;
-                case "restore":
-                    restore();
-                    break;
-                case "register_confirm":
-                    register_confirm();
-                    break;
-                case "restore_confirm":
-                    restore_confirm();
-                    break;
-            }
-        }
+        if (e.key === 'Enter') [status]()
     };
 
-    const enter = () => {
+    const login = () => {
 
         if ((validate_email() || validate_phone_number()) && validate_passsword()) {
 
-            request({
-                action: "sign_in",
-                phone_number: +document.querySelector('#phone_number').value,
-                email: document.querySelector('#email').value,
-                password: document.querySelector('#password').value
-            })
+            doubleRequest({
+                login: +phoneNumberEl.current.value || emailEL.current.value,
+                password: passEl.value
+            }, 'login')
                 .then(data => {
 
                     try {
                         init(data);
                     } catch (e) {
                         enqueueSnackbar('Неправильный логин или пароль',
-                            {variant: 'error',
+                            {
+                                variant: 'error',
                                 autoHideDuration: 1000
                             });
                     }
@@ -113,8 +102,8 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
             request({
                 action: "confirmation_code_request",
-                phone_number: +document.querySelector('#phone_number').value,
-                email: document.querySelector('#email').value,
+                phone_number: +phoneNumberEl.current.value,
+                email: emailEL.current.value,
             })
                 .then(data => {
                     if (data.result) {
@@ -123,7 +112,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
                             ? 'register_invitation_confirm'
                             : 'register_confirm')
 
-                        setRegPassword(document.querySelector('#password').value)
+                        setRegPassword(passEl.value)
                         setOrgId(data.org_id)
                         setOrgName(data.org_name)
 
@@ -141,8 +130,8 @@ export default connect(state => state, mapDispatchToProps)(props => {
                             enqueueSnackbar('Неправильный формат',
                                 {variant: 'warning'}
                             )
-                            document.querySelector('#phone_number').classList.remove('valid')
-                            document.querySelector('#phone_number').classList.add('invalid')
+                            phoneNumberEl.current.classList.remove('valid')
+                            phoneNumberEl.current.classList.add('invalid')
 
                         }
                     }
@@ -156,25 +145,21 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
         if (validate_email() || validate_phone_number()) {
 
-            request({
-                action: "password_restore_request",
-                email: document.querySelector('#email').value,
-                phone_number: +document.querySelector('#phone_number').value
-            })
-                .then(data => {
-                    if (data.result) {
+            const login = emailEL.current.value || +phoneNumberEl.current.value
+
+            doubleRequest({login}, 'codes')
+                .then(res => {
+                    if (res.status === 200) {
                         setStatus('restore_confirm')
                     } else {
-                        if (data.error === 'not_user') {
 
-                            document.querySelector('#phone_number').classList.remove('valid')
-                            document.querySelector('#phone_number').classList.add('invalid')
-                            enqueueSnackbar('Пользователь не существует',
-                                {variant: 'error'}
-                            );
-                        }
+                        phoneNumberEl.current.classList.remove('valid')
+                        phoneNumberEl.current.classList.add('invalid')
+                        enqueueSnackbar('Пользователь не существует',
+                            {variant: 'error'}
+                        );
+
                     }
-
                 });
 
         }
@@ -187,11 +172,11 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
             request({
                 action: "registration",
-                user_name: document.querySelector('#user_name').value,
-                email: document.querySelector('#email').value,
-                phone_number: +document.querySelector('#phone_number').value,
+                user_name: userNameEl.value,
+                email: emailEL.current.value,
+                phone_number: +phoneNumberEl.current.value,
                 password: regPassword,
-                confirmation_code: document.querySelector('#confirmation_code').value,
+                confirmation_code: confirmEl.value,
                 org_id: org_id,
                 isInvitation
             })
@@ -217,24 +202,19 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
         if (validate_passsword() && authControl.isValid('#confirmation_code')) {
 
-
-            request({
-                action: "password_change",
-                email: document.querySelector('#email').value,
-                phone_number: +document.querySelector('#phone_number').value,
-                password: document.querySelector('#password').value,
-                confirmation_code: document.querySelector('#confirmation_code').value,
-            })
-                .then(data => {
+            doubleRequest({
+                login: emailEL.current.value || +phoneNumberEl.current.value,
+                password: passEl.value,
+                code: confirmEl.value,
+            }, 'restore')
+                .then(res => {
                     try {
-                        if (init(data)) setStatus('login');
+                        if (init(res)) setStatus('login');
                     } catch (e) {
-                        // console.log(e, data);
                         enqueueSnackbar('Ошибка',
                             {variant: 'warning'}
                         )
                     }
-
                 })
         }
 
@@ -249,7 +229,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
         return authControl.renderPasswordDiv('div_' + id, id, validate_passsword, label);
     }
 
-    const enter_btn = () => <MDBBtn className="btn-sm" onClick={enter}>
+    const enter_btn = () => <MDBBtn className="btn-sm" onClick={login}>
         Войти
     </MDBBtn>
 
@@ -364,16 +344,13 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
             <div className="modal-body mx-3">
 
-                {status.substr(0, 8) === 'register' ?
-                    authControl.renderUserNameDiv('user_name', isConfirm) :
-                    ''}
-                {authControl.renderEmailDiv('div_email', 'email', validate_email, isConfirm)}
-                {authControl.renderPhoneNumberDiv('div_phone_number', 'phone_number', validate_phone_number, isConfirm)}
+                {status.substr(0, 8) === 'register' && authControl.renderUserNameDiv(userNameEl, isConfirm)}
+                {authControl.renderEmailDiv('div_email', emailEL, validate_email, isConfirm)}
+                {authControl.renderPhoneNumberDiv('div_phone_number', phoneNumberEl, validate_phone_number, isConfirm)}
                 {password_div('password')}
                 {password_div('password2')}
-                {isConfirm ?
-                    authControl.renderConfirmationCodeDiv('confirmation_code', 'Код подтверждения') :
-                    ''}
+                {isConfirm &&
+                    authControl.renderConfirmationCodeDiv('confirmation_code', 'Код подтверждения')}
 
             </div>
 

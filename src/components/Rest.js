@@ -1,4 +1,4 @@
-import {SERVER} from '../constants';
+import {SERVER, NEW_SERVER} from '../constants';
 
 let response = {};
 
@@ -26,9 +26,8 @@ export default function fetchPost(url, method = 'GET', data = '') {
     }
     if (data) init.body = JSON.stringify(data);
 
-    // тестовая организация
-    let server = false && JSON.parse(window.localStorage.getItem('auth')).organization_id === 5
-        ? 'https://api.uchet.store'
+    let server = JSON.parse(window.localStorage.getItem('auth')).organization_id > 1000
+        ? NEW_SERVER
         : SERVER;
 
     return fetch(server + '/' + url, init)

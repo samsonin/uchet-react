@@ -42,19 +42,19 @@ export default class {
 
     };
 
-    validate_email_phone_number(current_input_selector, other_div_selector) {
+    validate_email_phone_number(ref, other_div_selector) {
 
         const otherDiv = document.querySelector(other_div_selector)
 
-        document.querySelector(current_input_selector).value.trim() === "" ?
+        ref.current.value.trim() === "" ?
             otherDiv.classList.remove('hideBlock') :
             otherDiv.classList.add('hideBlock')
 
     }
 
-    validate_email = id_selector_elem => {
+    validate_email = ref => {
 
-        let email = this.getElement(id_selector_elem);
+        let email = ref.current;
         let r = /^\w+@\w+\.\w{2,5}$/i;
         let result = r.test(email.value);
 
@@ -70,9 +70,9 @@ export default class {
 
     };
 
-    validate_phone_number = id_selector_elem => {
+    validate_phone_number = ref => {
 
-        let phone_number = this.getElement(id_selector_elem);
+        let phone_number = ref.current
         let number = +phone_number.value;
 
         if (isNaN(number) || number < 999999 || number > 99999999999999) {
@@ -114,10 +114,12 @@ export default class {
 
     }
 
-    renderUserNameDiv(input_id, isReadonly) {
+    renderUserNameDiv(ref, isReadonly) {
         return <div className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
             <i className="fas fa-user prefix grey-text"/>
-            <input type="text" id={input_id} onBlur={this.blur}
+            <input type="text"
+                   ref={ref}
+                   onBlur={this.blur}
                    onChange={this.isValid}
                    className="form-control validate" readOnly={isReadonly}/>
             <label className="">
@@ -126,10 +128,11 @@ export default class {
         </div>
     }
 
-    renderEmailDiv(div_id, input_id, onChange, isReadonly) {
+    renderEmailDiv(div_id, ref, onChange, isReadonly) {
         return <div id={div_id} className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
-            <i className="fas fa-envelope prefix grey-text"/>
-            <input type="text" id={input_id} onBlur={this.blur}
+            <input type="text"
+                   ref={ref}
+                   onBlur={this.blur}
                    onChange={onChange}
                    className="form-control validate" readOnly={isReadonly}/>
             <label className="">
@@ -138,10 +141,12 @@ export default class {
         </div>
     }
 
-    renderPhoneNumberDiv(div_id, input_id, onChange, isReadonly = false) {
+    renderPhoneNumberDiv(div_id, ref, onChange, isReadonly = false) {
         return <div id={div_id} className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
             <i className="fas fa-phone prefix grey-text"/>
-            <input type="text" id={input_id} onBlur={this.blur}
+            <input type="text"
+                   ref={ref}
+                   onBlur={this.blur}
                    onChange={onChange} className="form-control validate" readOnly={isReadonly}/>
             <label className="">
                 Номер телефона
