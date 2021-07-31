@@ -149,6 +149,8 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
                     init(res.text())
 
+                    return setStatus('signIn')
+
                 }
 
                 enqueueSnackbar('ошибка: ' + res.body, {
