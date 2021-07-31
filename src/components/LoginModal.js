@@ -88,7 +88,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const keyPress = e => {
         if (typeof e === 'undefined') return false;
-        if (e.key === 'Enter') signIn()
+        if (e.key === 'Enter') [status]()
     }
 
     const signIn = (isDemo = false) => {
@@ -116,7 +116,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
             variant: 'error'
         })
 
-    const restore = nextStatus => {
+    const sendCode = nextStatus => {
 
         doubleRequest({login}, 'codes')
             .then(res => res.status === 200
@@ -127,180 +127,141 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     }
 
-    const nameField = () => <TextField
-        id="name"
-        margin="dense"
-        label="Ваше имя"
-        fullWidth
-        value={name}
-        onChange={e => setName(e.target.value)}
-    />
+    const confirm = (successText) => {
 
-    const loginField = () => <TextField
-        id="login"
-        autoFocus
-        margin="dense"
-        label="Номер телефона или email"
-        fullWidth
-        value={login}
-        onChange={e => setLogin(e.target.value)}
-        error={!isLoginValid(login)}
-        disabled={status !== 'signIn'}
-    />
+        if (password !== password2) enqueueSnackbar('Пароли не совпадают', {
+            variant: 'error'
+        })
 
-    const passField = () => <TextField
-        id="password"
-        margin="dense"
-        label="Пароль"
-        type="password"
-        fullWidth
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-    />
+        doubleRequest({
+            name,
+            login,
+            code,
+            password
+        }, status)
+            .then(res => {
 
-    const pass2Field = () => <TextField
-        id="password2"
-        margin="dense"
-        label="Повторить пароль"
-        type="password"
-        fullWidth
-        value={password2}
-        onChange={e => setPassword2(e.target.value)}
-    />
+                if (res.status === 200) {
 
-    const codeField = () => <TextField
-        margin="dense"
-        label="Код из сообщения"
-        fullWidth
-        value={code}
-        onChange={e => setCode(e.target.value)}
-    />
+                    enqueueSnackbar(successText, {
+                        variant: 'success'
+                    })
 
-    const privacyField = () => <DialogContentText>
-        <br/>
-        Нажимая "Запросить код", вы принимаете
-        <span
-            className={classes.span}
-            onClick={() => setStatus('license')}
-        >
+                    init(res.text())
+
+                }
+
+                enqueueSnackbar('ошибка: ' + res.body, {
+                    variant: 'error'
+                })
+
+            })
+
+    }
+
+    const renderField = n => {
+
+        if (n === 'privacy') return <DialogContentText>
+            <br/>
+            Нажимая "Запросить код", вы принимаете
+            <span
+                className={classes.span}
+                onClick={() => setStatus('license')}
+            >
             Пользовательское соглашение
         </span>
-        и даете согласие на
-        <span
-            className={classes.span}
-            onClick={() => setStatus('privacy')}
-        >
+            и даете согласие на
+            <span
+                className={classes.span}
+                onClick={() => setStatus('privacy')}
+            >
             обработку персональных данных
         </span>
-    </DialogContentText>
+        </DialogContentText>
 
-    const signInButton = () => <Button onClick={() => signIn()} color="primary">
-        Вход
-    </Button>
+        const fields = {
+            name: {l: 'Ваше имя', a: e => setName(e.target.value), v: name},
+            password: {l: 'Пароль', a: e => setPassword(e.target.value), v: password},
+            password2: {l: 'Повторить пароль', a: e => setPassword2(e.target.value), v: password2},
+            code: {l: 'Код из сообщения', a: e => setCode(e.target.value), v: code},
+        }
 
-    const backButton = () => <Button onClick={() => setStatus('signIn')} color="secondary">
-        Назад
-    </Button>
+        return n === 'login'
+            ? <TextField
+                key={'fieldkeyinloginmodal' + n}
+                id="login"
+                autoFocus={true}
+                margin="dense"
+                label="Номер телефона или email"
+                fullWidth
+                value={login}
+                onChange={e => setLogin(e.target.value)}
+                error={!isLoginValid(login)}
+                disabled={status !== 'signIn'}
+            />
+            : <TextField
+                key={'fieldkeyinloginmodal' + n}
+                id={n}
+                type={n.length > 7 ? 'password' : 'text'}
+                margin="dense"
+                label={fields[n].l}
+                fullWidth
+                value={fields[n].v}
+                onChange={fields[n].a}
+            />
 
-    const preRestoreButton = () => <Button onClick={() => pre('preRestore')} color="secondary">
-        Забыли пароль?
-    </Button>
+    }
 
-    const restoreButton = () => <Button onClick={() => restore('restore')} color="primary">
-        Запросить код восстановления
-    </Button>
+    const colors = ['default', 'primary', 'secondary']
 
-    const restoreConfirmButton = () => <Button onClick={() => setStatus('restore')} color="primary">
-        Подтвердить
-    </Button>
+    const buttons = {
+        signIn: {a: () => signIn(), color: 1, text: 'Вход'},
+        back: {a: () => setStatus('signIn'), color: 2, text: 'Назад'},
+        preRestore: {a: () => pre('preRestore'), color: 2, text: 'Забыли пароль?'},
+        restore: {a: () => sendCode('restore'), color: 1, text: 'Запросить код восстановления'},
+        restoreConfirm: {a: () => confirm('Пароль изменен!'), color: 1, text: 'Подтвердить'},
+        preRegister: {a: () => pre('preRegister'), color: 1, text: 'Регистрация'},
+        register: {a: () => sendCode('register'), color: 1, text: 'Запросить код регистрации'},
+        registerConfirm: {a: () => confirm('Поздравляем, Вы зарегистрированны!'), color: 1,
+            text: 'Зарегистрироваться'},
+        demo: {a: () => signIn(true), color: 0, text: 'Демо'},
+    }
 
-    const preRegisterButton = () => <Button onClick={() => pre('preRegister')} color="primary">
-        Регистрация
-    </Button>
-
-    const registerButton = () => <Button onClick={() => restore('register')} color="primary">
-        Запросить код регистрации
-    </Button>
-
-    const registerConfirmButton = () => <Button onClick={() => setStatus('register')} color="primary">
-        Зарегистрироваться
-    </Button>
-
-    const demoButton = () => <Button onClick={() => signIn(true)}>
-        Демо доступ
+    const renderButton = name => <Button onClick={buttons[name].a}
+                                         color={colors[buttons[name].color]}
+                                         key={'buttonskeyinloginmodal' + name}
+    >
+        {buttons[name].text}
     </Button>
 
     const statuses = {
         signIn: {
-            fields: [
-                loginField(),
-                passField()
-            ],
-            buttons: [
-                signInButton(),
-                preRestoreButton(),
-                preRegisterButton(),
-                demoButton()
-            ],
+            fields: ['login', 'password'],
+            buttons: ['signIn', 'preRestore', 'preRegister', 'demo'],
         },
         preRestore: {
-            fields: [
-                loginField(),
-            ],
-            buttons: [
-                backButton(),
-                restoreButton()
-            ]
+            fields: ['login'],
+            buttons: ['back', 'restore']
         },
         restore: {
-            fields: [
-                loginField(),
-                passField(),
-                pass2Field(),
-                codeField()
-            ],
-            buttons: [
-                backButton(),
-                restoreConfirmButton()
-            ]
+            fields: ['login', 'password', 'password2', 'code'],
+            buttons: ['back', 'restoreConfirm']
         },
         preRegister: {
-            fields: [
-                nameField(),
-                loginField(),
-                passField(),
-                pass2Field(),
-                privacyField()
-            ],
-            buttons: [
-                backButton(),
-                registerButton(),
-            ]
+            fields: ['name', 'login', 'password', 'password2', 'privacy'],
+            buttons: ['back', 'register',]
         },
         register: {
-            fields: [
-                nameField(),
-                loginField(),
-                codeField()
-            ],
-            buttons: [
-                backButton(),
-                registerConfirmButton()
-            ]
+            fields: ['name', 'login', 'code'],
+            buttons: ['back', 'registerConfirm']
         },
         privacy: {
             fields: [<Privacy/>],
-            buttons: [
-                backButton(),
-                preRegisterButton()
-            ]
+            buttons: ['back', 'preRegister']
         },
         license: {
             fields: [<License/>],
-            buttons: [
-                backButton(),
-                preRegisterButton()
-            ]
+            buttons: ['back', 'preRegister']
         },
     }
 
@@ -312,8 +273,6 @@ export default connect(state => state, mapDispatchToProps)(props => {
         onKeyPress={keyPress}
     >
 
-        {/*<DialogTitle*/}
-        {/*>*/}
         <div
             className={classes.title}
         >
@@ -321,16 +280,13 @@ export default connect(state => state, mapDispatchToProps)(props => {
                  width="120"
                  alt="Uchet.store"/>
         </div>
-        {/*</DialogTitle>*/}
 
-        <DialogContent
-            className=""
-        >
-            {statuses[status].fields}
+        <DialogContent>
+            {statuses[status].fields.map(f => typeof f === 'string' ? renderField(f) : f)}
         </DialogContent>
 
         <DialogActions className="m-2 p-2">
-            {statuses[status].buttons}
+            {statuses[status].buttons.map(b => renderButton(b))}
         </DialogActions>
 
     </Dialog>

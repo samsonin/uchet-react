@@ -7,7 +7,9 @@ import {useSnackbar} from 'notistack';
 
 import rest from "./Rest";
 
-const WebSocketAdapter = ({jwt, upd_app}) => {
+const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
+
+export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app}) => {
 
     const notifyMe = text => {
 
@@ -40,6 +42,8 @@ const WebSocketAdapter = ({jwt, upd_app}) => {
     const {enqueueSnackbar} = useSnackbar();
 
     useEffect(() => {
+
+        if (!jwt) return
 
         rest('initial')
             .then(res => upd_app(res.body))
@@ -87,7 +91,7 @@ const WebSocketAdapter = ({jwt, upd_app}) => {
 
             ws.onerror = e => {
 
-                    console.log('error', e)
+                console.log('error', e)
 
             }
 
@@ -107,8 +111,4 @@ const WebSocketAdapter = ({jwt, upd_app}) => {
 
     return null;
 
-}
-
-const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
-
-export default connect(state => state.auth, mapDispatchToProps)(WebSocketAdapter);
+})

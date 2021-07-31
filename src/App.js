@@ -27,14 +27,12 @@ import Organization from "./components/Settings/Organization";
 import Employees from "./components/Settings/Employees";
 import Stocks from "./components/Settings/Stocks";
 import Stock from "./components/Settings/Stock"
-// import Docs from "./components/Settings/Docs";
 import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
 import {Records} from "./components/Records";
 // import Docs from "./components/Settings/Docs";
 import Daily from "./components/Daily";
-import {useSnackbar} from "notistack";
 import LoginModal from "./components/LoginModal";
 
 
@@ -48,8 +46,6 @@ const App = props => {
     const [enterPress, setEnterPress] = useState(false)
 
     const barcode = useRef()
-
-    const {enqueueSnackbar} = useSnackbar()
 
     const isBarcodeValid = barcode => {
 
@@ -142,6 +138,8 @@ const App = props => {
 
     const closeGoodModal = () => setGood({})
 
+    const expire = !(+props.auth.user_id && props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0))
+
     return <>
 
         <Header className={'d-print-none'}/>
@@ -155,9 +153,17 @@ const App = props => {
                 close={() => console.log('close')}
             />
 
+            <GoodModal
+                good={good}
+                close={closeGoodModal}
+            />
+
+            {!expire && <WebSocketAdapter/>}
+
             {+props.auth.user_id
-                ? props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0)
-                    ? <div className="m-2 p-2">
+                ? expire
+                    ? <Subscribe/>
+                    : <div className="m-2 p-2">
 
                         <Route exact path="/" component={Main}/>
                         <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
@@ -217,15 +223,7 @@ const App = props => {
                             <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
                         </>}
 
-                        <GoodModal
-                            good={good}
-                            close={closeGoodModal}
-                        />
-
-                        <WebSocketAdapter/>
-
                     </div>
-                    : <Subscribe/>
                 : null
             }
 
