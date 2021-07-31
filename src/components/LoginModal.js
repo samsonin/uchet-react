@@ -13,6 +13,10 @@ import {TextField} from "@material-ui/core";
 import doubleRequest from "./doubleRequest";
 import {bindActionCreators} from "redux";
 import {init_user, upd_app} from "../actions/actionCreator";
+import License from "./License";
+import Privacy from "./Privacy";
+import {makeStyles} from "@material-ui/core/styles";
+
 
 const parseJwt = token => {
 
@@ -29,14 +33,26 @@ const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
+const useStyles = makeStyles((theme) => ({
+    title: {
+        margin: '1rem',
+        alignSelf: 'center',
+    },
+    span: {
+        margin: 10,
+        cursor: 'pointer',
+        textDecoration: 'underline'
+    },
+}))
+
 const mapDispatchToProps = dispatch => bindActionCreators({
     init_user,
     upd_app
 }, dispatch);
 
-const LoginModal = props => {
+export default connect(state => state, mapDispatchToProps)(props => {
 
-    // signIn, preRestore, restore, preRegister, register,
+    // signIn, preRestore, restore, preRegister, register, privacy, license
     const [status, setStatus] = useState('signIn')
 
     const [name, setName] = useState('')
@@ -46,6 +62,8 @@ const LoginModal = props => {
     const [code, setCode] = useState('')
 
     const {enqueueSnackbar} = useSnackbar()
+
+    const classes = useStyles()
 
     const isLoginValid = login => {
 
@@ -92,26 +110,25 @@ const LoginModal = props => {
 
     }
 
+    const pre = nextStatus => isLoginValid(login)
+        ? setStatus(nextStatus)
+        : enqueueSnackbar('Неправильный номер телефона или email', {
+            variant: 'error'
+        })
+
     const restore = nextStatus => {
 
         doubleRequest({login}, 'codes')
             .then(res => res.status === 200
                 ? setStatus(nextStatus)
-                : enqueueSnackbar('Неправильный логин',
-                    {variant: 'error'}
-                ))
+                : enqueueSnackbar('Неправильный номер телефона или email', {
+                    variant: 'error'
+                }))
 
-    }
-
-    const passwordForgot = () => {
-        console.log('passwordForgot')
-    }
-
-    const signUp = () => {
-        console.log('signUp')
     }
 
     const nameField = () => <TextField
+        id="name"
         margin="dense"
         label="Ваше имя"
         fullWidth
@@ -119,7 +136,8 @@ const LoginModal = props => {
         onChange={e => setName(e.target.value)}
     />
 
-    const loginField = (disabled = false) => <TextField
+    const loginField = () => <TextField
+        id="login"
         autoFocus
         margin="dense"
         label="Номер телефона или email"
@@ -127,10 +145,11 @@ const LoginModal = props => {
         value={login}
         onChange={e => setLogin(e.target.value)}
         error={!isLoginValid(login)}
-        disabled={disabled}
+        disabled={status !== 'signIn'}
     />
 
     const passField = () => <TextField
+        id="password"
         margin="dense"
         label="Пароль"
         type="password"
@@ -140,6 +159,7 @@ const LoginModal = props => {
     />
 
     const pass2Field = () => <TextField
+        id="password2"
         margin="dense"
         label="Повторить пароль"
         type="password"
@@ -156,10 +176,22 @@ const LoginModal = props => {
         onChange={e => setCode(e.target.value)}
     />
 
-    const policyField = () => <DialogContentText>
-        Нажимая "Зарегистрироваться",
-        вы принимаете Пользовательское соглашение
-        и даете согласие на обработку персональных данных
+    const privacyField = () => <DialogContentText>
+        <br/>
+        Нажимая "Запросить код", вы принимаете
+        <span
+            className={classes.span}
+            onClick={() => setStatus('license')}
+        >
+            Пользовательское соглашение
+        </span>
+        и даете согласие на
+        <span
+            className={classes.span}
+            onClick={() => setStatus('privacy')}
+        >
+            обработку персональных данных
+        </span>
     </DialogContentText>
 
     const signInButton = () => <Button onClick={() => signIn()} color="primary">
@@ -170,24 +202,24 @@ const LoginModal = props => {
         Назад
     </Button>
 
-    const preRestoreButton = () => <Button onClick={() => setStatus('preRestore')} color="secondary">
+    const preRestoreButton = () => <Button onClick={() => pre('preRestore')} color="secondary">
         Забыли пароль?
     </Button>
 
     const restoreButton = () => <Button onClick={() => restore('restore')} color="primary">
-        Запросить код
+        Запросить код восстановления
     </Button>
 
     const restoreConfirmButton = () => <Button onClick={() => setStatus('restore')} color="primary">
         Подтвердить
     </Button>
 
-    const preRegisterButton = () => <Button onClick={() => setStatus('preRegister')} color="primary">
+    const preRegisterButton = () => <Button onClick={() => pre('preRegister')} color="primary">
         Регистрация
     </Button>
 
     const registerButton = () => <Button onClick={() => restore('register')} color="primary">
-        Запросить код
+        Запросить код регистрации
     </Button>
 
     const registerConfirmButton = () => <Button onClick={() => setStatus('register')} color="primary">
@@ -213,7 +245,7 @@ const LoginModal = props => {
         },
         preRestore: {
             fields: [
-                loginField(true),
+                loginField(),
             ],
             buttons: [
                 backButton(),
@@ -222,7 +254,7 @@ const LoginModal = props => {
         },
         restore: {
             fields: [
-                loginField(true),
+                loginField(),
                 passField(),
                 pass2Field(),
                 codeField()
@@ -237,22 +269,37 @@ const LoginModal = props => {
                 nameField(),
                 loginField(),
                 passField(),
-                pass2Field()
+                pass2Field(),
+                privacyField()
             ],
             buttons: [
                 backButton(),
-                registerButton()
+                registerButton(),
             ]
         },
         register: {
             fields: [
                 nameField(),
-                loginField(false),
+                loginField(),
                 codeField()
             ],
             buttons: [
                 backButton(),
                 registerConfirmButton()
+            ]
+        },
+        privacy: {
+            fields: [<Privacy/>],
+            buttons: [
+                backButton(),
+                preRegisterButton()
+            ]
+        },
+        license: {
+            fields: [<License/>],
+            buttons: [
+                backButton(),
+                preRegisterButton()
             ]
         },
     }
@@ -265,12 +312,20 @@ const LoginModal = props => {
         onKeyPress={keyPress}
     >
 
-        <DialogTitle>
-            <img src="https://uchet.store/src/images/uchet.gif" width="120"
+        {/*<DialogTitle*/}
+        {/*>*/}
+        <div
+            className={classes.title}
+        >
+            <img src="https://uchet.store/src/images/uchet.gif"
+                 width="120"
                  alt="Uchet.store"/>
-        </DialogTitle>
+        </div>
+        {/*</DialogTitle>*/}
 
-        <DialogContent>
+        <DialogContent
+            className=""
+        >
             {statuses[status].fields}
         </DialogContent>
 
@@ -279,6 +334,4 @@ const LoginModal = props => {
         </DialogActions>
 
     </Dialog>
-}
-
-export default connect(state => state, mapDispatchToProps)(LoginModal);
+})
