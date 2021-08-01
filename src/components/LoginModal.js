@@ -1,7 +1,6 @@
 import React, {forwardRef, useEffect, useState} from "react";
 
 import Dialog from "@material-ui/core/Dialog";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -11,6 +10,7 @@ import {useSnackbar} from "notistack";
 import {connect} from "react-redux";
 import {TextField} from "@material-ui/core";
 import doubleRequest from "./doubleRequest";
+import rest from "./Rest";
 import {bindActionCreators} from "redux";
 import {init_user, upd_app} from "../actions/actionCreator";
 import License from "./License";
@@ -116,12 +116,23 @@ export default connect(state => state, mapDispatchToProps)(props => {
             variant: 'error'
         })
 
-    const sendCode = nextStatus => {
+    const sendRestoreCode = () => {
 
         doubleRequest({login}, 'codes')
             .then(res => res.status === 200
-                ? setStatus(nextStatus)
+                ? setStatus('restore')
                 : enqueueSnackbar('Неправильный номер телефона или email', {
+                    variant: 'error'
+                }))
+
+    }
+
+    const sendRegisterCode = () => {
+
+        rest('codes/register', 'POST', {login})
+            .then(res => res.status === 200
+                ? setStatus('register')
+                : enqueueSnackbar('ошибка: ' + res.body.error, {
                     variant: 'error'
                 }))
 
@@ -129,7 +140,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const confirm = (successText) => {
 
-        if (password !== password2) enqueueSnackbar('Пароли не совпадают', {
+        if (password !== password2) return enqueueSnackbar('Пароли не совпадают', {
             variant: 'error'
         })
 
@@ -153,7 +164,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
                 }
 
-                enqueueSnackbar('ошибка: ' + res.body, {
+                enqueueSnackbar('ошибка: ' + res, {
                     variant: 'error'
                 })
 
@@ -163,7 +174,9 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const renderField = n => {
 
-        if (n === 'privacy') return <DialogContentText>
+        if (n === 'privacy') return <DialogContentText
+            key={'fieldkeyinloginmodal' + n}
+        >
             <br/>
             Нажимая "Запросить код", вы принимаете
             <span
@@ -220,12 +233,14 @@ export default connect(state => state, mapDispatchToProps)(props => {
         signIn: {a: () => signIn(), color: 1, text: 'Вход'},
         back: {a: () => setStatus('signIn'), color: 2, text: 'Назад'},
         preRestore: {a: () => pre('preRestore'), color: 2, text: 'Забыли пароль?'},
-        restore: {a: () => sendCode('restore'), color: 1, text: 'Запросить код восстановления'},
+        restore: {a: () => sendRestoreCode(), color: 1, text: 'Запросить код восстановления'},
         restoreConfirm: {a: () => confirm('Пароль изменен!'), color: 1, text: 'Подтвердить'},
         preRegister: {a: () => pre('preRegister'), color: 1, text: 'Регистрация'},
-        register: {a: () => sendCode('register'), color: 1, text: 'Запросить код регистрации'},
-        registerConfirm: {a: () => confirm('Поздравляем, Вы зарегистрированны!'), color: 1,
-            text: 'Зарегистрироваться'},
+        register: {a: () => sendRegisterCode('register'), color: 1, text: 'Запросить код регистрации'},
+        registerConfirm: {
+            a: () => confirm('Поздравляем, Вы зарегистрированны!'), color: 1,
+            text: 'Зарегистрироваться'
+        },
         demo: {a: () => signIn(true), color: 0, text: 'Демо'},
     }
 

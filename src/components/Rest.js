@@ -6,11 +6,9 @@ export default function fetchPost(url, method = 'GET', data = '') {
 
     let auth = JSON.parse(window.localStorage.getItem('auth'));
 
-    if (!auth) return false;
-
-    let jwt = auth.jwt;
-
-    if (typeof jwt !== "string") return false;
+    let jwt = auth
+        ? auth.jwt
+        : ''
 
     let circularln = document.getElementById('circularln');
     if (circularln) circularln.style.display = '';
@@ -26,7 +24,7 @@ export default function fetchPost(url, method = 'GET', data = '') {
     }
     if (data) init.body = JSON.stringify(data);
 
-    let server = JSON.parse(window.localStorage.getItem('auth')).organization_id > 1000
+    let server = !jwt || JSON.parse(window.localStorage.getItem('auth')).organization_id > 1000
         ? NEW_SERVER
         : SERVER;
 

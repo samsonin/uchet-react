@@ -15,7 +15,7 @@ const dadataInit = {
     headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Authorization": "Token " + process.env.REACT_APP_DADATA_TOKEN
+        "Authorization": "Token " + process.env.DADATA_TOKEN
     }
 }
 
