@@ -24,8 +24,10 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import List from "@material-ui/core/List";
+import {useSnackbar} from "notistack";
 
 import SaleModal from './Modals/Sale'
+import ImprestModal from './Modals/Imprest'
 
 const useStyles = makeStyles((theme) => ({
     controls: {
@@ -74,8 +76,11 @@ const Daily = props => {
 
     const [row, setRow] = useState()
     const [isSaleOpen, setIsSaleOpen] = useState(false)
+    const [isImprestOpen, setIsImprestOpen] = useState(false)
 
     const classes = useStyles()
+    const {enqueueSnackbar} = useSnackbar()
+
 
     const setInRange = date => date > today
         ? today
@@ -110,47 +115,47 @@ const Daily = props => {
 
     const canAdminChange = date === today && props.auth.admin
 
-    const afterRes = res => {
+    const afterRes = (res, local, text) => {
 
         if (res.status === 200) {
 
             props.upd_app(res.body)
 
+            local && local(0)
+
+            enqueueSnackbar(text || 'ok', {variant: 'success'})
+
+        } else {
+
+            enqueueSnackbar('ошибка', {variant: 'error'})
+
         }
 
     }
 
-    const cashlessHandler = () => {
+    const cashlessRest = data => {
 
-        rest('daily/' + stock, 'PATCH', {cashless})
-            .then(afterRes)
-
-    }
-
-    const cashlessHandlerAdd = () => {
-
-        rest('daily/' + stock, 'PATCH', {cashless})
-            .then(afterRes)
+        rest('daily/' + stock, 'PATCH', data)
+            .then(res => afterRes(res, setCashless, 'безнал: ' + data.cashless))
 
     }
 
-    const handedHandler = () => {
+    const cashlessHandler = () =>  cashlessRest({cashless})
+
+    const cashlessHandlerAdd = () => cashlessRest({cashless: daily.cashless + cashless})
+
+    const handedRest = handed => {
 
         if (!props.auth.admin) return
 
         rest('daily/' + stock + '/' + handed, 'PUT')
-            .then(afterRes)
+            .then(res => afterRes(res, setHanded, 'сдано: ' + handed))
 
     }
 
-    const handedHandlerAdd = () => {
+    const handedHandler = () => handedRest(handed)
 
-        if (!props.auth.admin) return
-
-        rest('daily/' + stock + '/' + handed, 'PUT')
-            .then(afterRes)
-
-    }
+    const handedHandlerAdd = () => handedRest(daily.handed + handed)
 
     const employeeCheckout = employee_id => {
 
@@ -173,6 +178,14 @@ const Daily = props => {
     //
     // }, [daily.handed])
 
+    const imprestHandler = row => {
+
+        console.log(row)
+
+        setIsImprestOpen(true)
+
+    }
+
     const handler = row => {
 
         if (row.action === 'продажа') {
@@ -180,7 +193,11 @@ const Daily = props => {
             setRow(row)
             setIsSaleOpen(true)
 
+        } else if (row.action === 'продажа') {
+
         }
+
+        console.log(row)
 
     }
 
@@ -218,6 +235,12 @@ const Daily = props => {
         <SaleModal
             isOpen={isSaleOpen}
             close={() => setIsSaleOpen(false)}
+            row={row}
+        />
+
+        <ImprestModal
+            isOpen={isImprestOpen}
+            close={() => setIsImprestOpen(false)}
             row={row}
         />
 
@@ -285,35 +308,40 @@ const Daily = props => {
                 titles: ['Наименование', 'Сумма', 'Примечание'],
                 rows: prepaids,
                 rowsValues: ['item', 'sum', 'note'],
-                sum: prepaidsSum
+                sum: prepaidsSum,
+                click: handler
             },
             {
                 title: 'Товары', addText: 'Продать товар', addOnClick: () => console.log('addGood'),
                 titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
                 rows: sales,
                 rowsValues: ['action', 'item', 'sum', 'note'],
-                sum: salesSum
+                sum: salesSum,
+                click: handler
             },
             {
                 title: 'Работы, услуги', addText: 'Продать услугу', addOnClick: () => console.log('addService'),
                 titles: ['#', 'Что сделали', 'Сумма', 'Сотрудник'],
                 rows: services,
                 rowsValues: ['id', 'item', 'sum', 'ui_user_id'],
-                sum: serviceSum
+                sum: serviceSum,
+                click: handler
             },
             {
                 title: 'Расходы', addText: 'Внести расход, зарплату', addOnClick: () => console.log('addCost'),
                 titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
                 rows: costs,
                 rowsValues: ['action', 'item', 'sum', 'note'],
-                sum: costSum
+                sum: costSum,
+                click: handler
             },
             {
                 title: 'Подотчеты', addText: 'Внести подотчет', addOnClick: () => console.log('addImprest'),
                 titles: ['Наименование', 'Сотрудник', 'Сумма', 'Примечание'],
                 rows: imprests,
                 rowsValues: ['item', 'ui_user_id', 'sum', 'note'],
-                sum: imprestsSum
+                sum: imprestsSum,
+                click: imprestHandler
             },
         ]
             .map(t => date !== today && t.rows === imprests
@@ -358,7 +386,7 @@ const Daily = props => {
                                 style={{
                                     cursor: 'pointer'
                                 }}
-                                onClick={() => handler(row)}
+                                onClick={() => t.click(row)}
                             >
                                 {t.rowsValues.map(v => {
 
@@ -418,67 +446,66 @@ const Daily = props => {
                         {text: 'Выручка:', value: daily.proceeds},
                         {text: 'Подотчеты:', value: imprestsSum},
                         {
-                            text: 'Безнал:', value: cashless,
+                            text: 'Безнал:', value: daily.cashless,
+                            localValue: cashless,
                             change: e => setCashless(+e.target.value),
-                            disabled: cashless === daily.cashless,
                             click: canChange && cashlessHandler,
                             clickAdd: canChange && cashlessHandlerAdd
                         },
                         {
-                            text: 'Сдали:', value: handed,
+                            text: 'Сдали:', value: daily.handed,
+                            localValue: handed,
                             change: e => setHanded(+e.target.value),
-                            disabled: handed === daily.handed,
                             click: (canChange || canAdminChange) && handedHandler,
                             clickAdd: (canChange || canAdminChange) && handedHandlerAdd
                         },
                         {text: 'Остаток:', value: daily.evening},
                     ].map(l => (date === today || l.text !== 'Подотчеты:') && <TableRow
-                                key={'griditemkeyindailypertotals' + l.text}
+                        key={'griditemkeyindailypertotals' + l.text}
+                    >
+
+                        <TableCell style={{
+                            fontWeight: 'bold'
+                        }}>
+                            {l.text}
+                        </TableCell>
+
+                        <TableCell>
+                            {l.value}
+                        </TableCell>
+
+                        {l.click && <TableCell>
+
+                            <TextField
+                                value={l.localValue}
+                                type="number"
+                                onChange={l.change}
+                            />
+
+                            <IconButton
+                                className={classes.icon}
+                                onClick={l.click}
+                                disabled={l.value === l.localValue}
                             >
+                                <SaveOutlinedIcon/>
+                            </IconButton>
+                            <IconButton
+                                className={classes.icon}
+                                onClick={l.clickAdd}
+                                disabled={l.localValue === 0}
+                            >
+                                <AddCircleIcon/>
+                            </IconButton>
 
-                                <TableCell style={{
-                                    fontWeight: 'bold'
-                                }}>
-                                    {l.text}
-                                </TableCell>
+                        </TableCell>}
 
-                                <TableCell>
-                                    {l.click
-                                        ? <TextField
-                                            value={l.value}
-                                            type="number"
-                                            onChange={l.change}
-                                        />
-                                        : l.value}
-                                </TableCell>
+                    </TableRow>)}
+                </TableBody>
+            </Table>
+        </TableContainer>}
 
-                                {l.click && <TableCell
-                                    style={{
-                                        width: '15%',
-                                    }}>
-                                    <IconButton
-                                        className={classes.icon}
-                                        onClick={l.click}
-                                        disabled={l.disabled}
-                                    >
-                                        <SaveOutlinedIcon/>
-                                    </IconButton>
-                                    <IconButton
-                                        className={classes.icon}
-                                        onClick={l.clickAdd}
-                                        disabled={l.disabled}
-                                    >
-                                        <AddCircleIcon/>
-                                    </IconButton>
-                                </TableCell>}
+    </>
 
-                            </TableRow>)}
-                        </TableBody>
-                        </Table>
-                        </TableContainer>}
+}
 
-                        </>
-
-                        }
-
-                        export default connect(state => state, mapDispatchToProps)(Daily);
+export default connect(state => state, mapDispatchToProps)(Daily);
