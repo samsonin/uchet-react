@@ -180,8 +180,7 @@ const Daily = props => {
 
     const imprestHandler = row => {
 
-        console.log(row)
-
+        setRow(row)
         setIsImprestOpen(true)
 
     }
@@ -242,6 +241,7 @@ const Daily = props => {
             isOpen={isImprestOpen}
             close={() => setIsImprestOpen(false)}
             row={row}
+            disabled={!canChange}
         />
 
         <Grid container
