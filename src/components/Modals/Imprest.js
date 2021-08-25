@@ -38,85 +38,139 @@ const ImprestModal = props => {
     const classes = useStyles();
     const {enqueueSnackbar} = useSnackbar()
 
-    console.log(props.row)
+    const [item, setItem] = useState(props.row ? props.row.item : '')
+    const [sum, setSum] = useState(props.row ? props.row.sum : 0)
+    const [employee, setEmployee] = useState(props.row ? props.row.employee : 0)
+    const [note, setNote] = useState(props.row ? props.row.note : '')
+
+    useEffect(() => {
+
+        console.log('props.row', props.row)
+
+    }, [props.row])
+
+    const exit = () => {
+
+        setItem('')
+        setSum(0)
+        setEmployee(0)
+        setNote('')
+
+        props.close()
+
+    }
 
     const del = id => {
 
         rest('imprest/' + props.stock_id + '/' + id, 'DELETE')
             .then(res => {
-
-                if (res.ok) {
+                if (res.status === 200) {
                     enqueueSnackbar('удален', {variant: 'success'})
-                    props.close()
+                    exit()
                 } else {
-                    enqueueSnackbar('error', {variant: 'error'})
+                    enqueueSnackbar('ошибка', {variant: 'error'})
                 }
             })
 
     }
 
-    return props.row
-        ? <Dialog
-            open={props.isOpen}
-            TransitionComponent={Transition}
-            keepMounted
-            onClose={() => props.close()}
-        >
-            <DialogTitle>
-                Подотчет
+    const add = () => {
 
-                <IconButton aria-label="close" className={classes.closeButton} onClick={() => props.close()}>
-                    <CloseIcon/>
-                </IconButton>
+        rest('imprest/' + props.stock_id, 'POST', {
+            item,
+            sum,
+            employee,
+            note,
+        })
+            .then(res => {
+                if (res.status === 200) {
+                    enqueueSnackbar('внесен', {variant: 'success'})
+                    exit()
+                } else {
+                    enqueueSnackbar('ошибка', {variant: 'error'})
+                }
+            })
 
-            </DialogTitle>
-            <DialogContent>
+    }
 
-                <TextField label="Наименование"
-                           disabled={props.disabled}
-                           className={classes.field}
-                           value={props.row.item}
-                           onChange={e => console.log(e.target.value)}
-                />
+    const save = () => {
 
-                <TextField label="Сумма"
-                           disabled={props.disabled}
-                           className={classes.field}
-                           value={props.row.sum}
-                           onChange={e => console.log(e.target.value)}
-                />
+        console.log(props.row)
 
-                <UsersSelect
-                    classes={classes.field}
-                    disabled={props.disabled}
-                    users={props.users}
-                    user={props.row.ui_user_id}
-                    onlyValid={true}
-                />
+    }
 
-                <TextField label="Примечание"
-                           disabled={props.disabled}
-                           className={classes.field}
-                           value={props.row.note}
-                           onChange={e => console.log(e.target.value)}
-                />
+    return <Dialog
+        open={props.isOpen}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={() => props.close()}
+    >
+        <DialogTitle>
+            Подотчет
 
-            </DialogContent>
+            <IconButton aria-label="close" className={classes.closeButton} onClick={() => props.close()}>
+                <CloseIcon/>
+            </IconButton>
 
-            {props.disabled
-                ? ''
-                : <DialogActions>
-                    <Button onClick={() => del(props.row.id)} color="secondary">
-                        Удалить
-                    </Button>
-                    <Button onClick={() => {
-                    }} color="primary">
-                        Сохранить
-                    </Button>
-                </DialogActions>}
+        </DialogTitle>
+        <DialogContent>
 
-        </Dialog>
-        : ''
+            <TextField label="Наименование"
+                       disabled={props.disabled}
+                       className={classes.field}
+                       value={item}
+                       onChange={e => setItem(e.target.value)}
+            />
+
+            <TextField label="Сумма"
+                       type="number"
+                       disabled={props.disabled}
+                       className={classes.field}
+                       value={sum}
+                       onChange={e => setSum(e.target.value)}
+            />
+
+            <UsersSelect
+                classes={classes.field}
+                disabled={props.disabled}
+                users={props.users}
+                user={employee}
+                setUser={setEmployee}
+                onlyValid={true}
+            />
+
+            <TextField label="Примечание"
+                       disabled={props.disabled}
+                       className={classes.field}
+                       value={note}
+                       onChange={e => setNote(e.target.value)}
+            />
+
+        </DialogContent>
+
+        {props.disabled
+            ? ''
+            : <DialogActions>
+                <Button onClick={() => props.row
+                    ? del(props.row.id)
+                    : props.close()}
+                        color="secondary">
+                    {props.row
+                        ? 'Удалить'
+                        : 'Отмена'}
+                </Button>
+                <Button onClick={() => props.row
+                    ? save()
+                    : add()}
+                        color="primary">
+                    {props.row
+                        ? 'Сохранить'
+                        : 'Внести'}
+                </Button>
+            </DialogActions>
+        }
+
+    </Dialog>
 
 }
 

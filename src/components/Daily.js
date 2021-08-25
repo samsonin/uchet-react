@@ -178,7 +178,10 @@ const Daily = props => {
     //
     // }, [daily.handed])
 
+
     const imprestHandler = row => {
+
+        console.log('row', row)
 
         setRow(row)
         setIsImprestOpen(true)
@@ -192,11 +195,7 @@ const Daily = props => {
             setRow(row)
             setIsSaleOpen(true)
 
-        } else if (row.action === 'продажа') {
-
         }
-
-        console.log(row)
 
     }
 
@@ -233,13 +232,19 @@ const Daily = props => {
 
         <SaleModal
             isOpen={isSaleOpen}
-            close={() => setIsSaleOpen(false)}
+            close={() => {
+                setIsSaleOpen(false)
+                setRow(null)
+            }}
             row={row}
         />
 
         <ImprestModal
             isOpen={isImprestOpen}
-            close={() => setIsImprestOpen(false)}
+            close={() => {
+                setIsImprestOpen(false)
+                setRow(null)
+            }}
             row={row}
             disabled={!canChange}
         />
@@ -336,7 +341,7 @@ const Daily = props => {
                 click: handler
             },
             {
-                title: 'Подотчеты', addText: 'Внести подотчет', addOnClick: () => console.log('addImprest'),
+                title: 'Подотчеты', addText: 'Внести подотчет', addOnClick: () => setIsImprestOpen(true),
                 titles: ['Наименование', 'Сотрудник', 'Сумма', 'Примечание'],
                 rows: imprests,
                 rowsValues: ['item', 'ui_user_id', 'sum', 'note'],
@@ -363,7 +368,7 @@ const Daily = props => {
                                     {canChange
                                         ? <Tooltip title={t.addText}>
                                             <IconButton className={classes.icon}
-                                                        onClick={() => t.addOnClick}
+                                                        onClick={t.addOnClick}
                                             >
                                                 <AddCircleIcon/>
                                             </IconButton>
