@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useState} from "react";
+import React, {forwardRef, useState} from "react";
 
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";

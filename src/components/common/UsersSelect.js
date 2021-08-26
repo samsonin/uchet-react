@@ -19,12 +19,12 @@ export default function ({users, user, setUser, onlyValid, disabled, classes}) {
                           value={0}>
                     <br/>
                 </MenuItem>
-                {users.map(u => {
-                    if (!onlyValid || u.is_valid) return <MenuItem key={'menuuserscontrolinfundskey' + u.id}
+                {users.map(u => !onlyValid || u.is_valid
+                    ? <MenuItem key={'menuuserscontrolinfundskey' + u.id}
                               value={u.id}>
                         {u.name}
                     </MenuItem>
-                })}
+                    : null)}
             </Select>
         </FormControl>
 

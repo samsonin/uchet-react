@@ -38,64 +38,73 @@ const ImprestModal = props => {
     const classes = useStyles();
     const {enqueueSnackbar} = useSnackbar()
 
-    const [item, setItem] = useState(props.row ? props.row.item : '')
-    const [sum, setSum] = useState(props.row ? props.row.sum : 0)
-    const [employee, setEmployee] = useState(props.row ? props.row.employee : 0)
-    const [note, setNote] = useState(props.row ? props.row.note : '')
+    const [item, setItem] = useState('')
+    const [sum, setSum] = useState(0)
+    const [employee, setEmployee] = useState(0)
+    const [note, setNote] = useState('')
 
-    useEffect(() => {
-
-        console.log('props.row', props.row)
-
-    }, [props.row])
-
-    const exit = () => {
+    const reset = () => {
 
         setItem('')
         setSum(0)
         setEmployee(0)
         setNote('')
 
+    }
+
+    useEffect(() => {
+
+        if (props.row) {
+            setItem(props.row.item)
+            setSum(props.row.sum)
+            setEmployee(props.row.employee)
+            setNote(props.row.note)
+        } else {
+            reset()
+        }
+
+    }, [props.row])
+
+    const exit = () => {
+
+        reset()
         props.close()
 
     }
 
-    const del = id => {
+    const del = () => {
 
-        rest('imprest/' + props.stock_id + '/' + id, 'DELETE')
+        rest('imprest/' + props.stock_id + '/' + props.row.id, 'DELETE')
             .then(res => {
-                if (res.status === 200) {
-                    enqueueSnackbar('удален', {variant: 'success'})
-                    exit()
-                } else {
-                    enqueueSnackbar('ошибка', {variant: 'error'})
-                }
-            })
 
-    }
+                if (res.status === 200) exit()
+                props.afterRes(res)
 
-    const add = () => {
-
-        rest('imprest/' + props.stock_id, 'POST', {
-            item,
-            sum,
-            employee,
-            note,
-        })
-            .then(res => {
-                if (res.status === 200) {
-                    enqueueSnackbar('внесен', {variant: 'success'})
-                    exit()
-                } else {
-                    enqueueSnackbar('ошибка', {variant: 'error'})
-                }
             })
 
     }
 
     const save = () => {
 
-        console.log(props.row)
+        if (props.row && props.stock_id !== props.row.stock_id) {
+            return enqueueSnackbar('другая точка', {variant: 'error'})
+        }
+
+        let url = 'imprest/' + props.stock_id
+        if (props.row) url += '/' + props.row.id
+
+        rest(url, props.row ? 'PATCH' : 'POST', {
+            item,
+            sum,
+            employee,
+            note,
+        })
+            .then(res => {
+
+                if (res.status === 200) exit()
+                props.afterRes(res)
+
+            })
 
     }
 
@@ -152,16 +161,14 @@ const ImprestModal = props => {
             ? ''
             : <DialogActions>
                 <Button onClick={() => props.row
-                    ? del(props.row.id)
+                    ? del()
                     : props.close()}
                         color="secondary">
                     {props.row
                         ? 'Удалить'
                         : 'Отмена'}
                 </Button>
-                <Button onClick={() => props.row
-                    ? save()
-                    : add()}
+                <Button onClick={() => save()}
                         color="primary">
                     {props.row
                         ? 'Сохранить'

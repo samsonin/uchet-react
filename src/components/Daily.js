@@ -206,7 +206,7 @@ const Daily = props => {
             : []
 
         let sum = 0;
-
+// eslint-disable-next-line
         answer.map(s => {
             sum += s.sum
         })
@@ -247,6 +247,7 @@ const Daily = props => {
             }}
             row={row}
             disabled={!canChange}
+            afterRes={afterRes}
         />
 
         <Grid container

@@ -77,9 +77,7 @@ const Arrival = props => {
 
     useEffect(() => {
 
-        if (!isScanOpen) return
-
-        setTimeout(() => {
+        if (isScanOpen) setTimeout(() => {
 
             scanRef.current.focus()
 
@@ -118,13 +116,13 @@ const Arrival = props => {
             getProduct(props.newScan)
 
         }
-
+// eslint-disable-next-line
     }, [props.newScan])
 
     useEffect(() => {
 
         if (props.enterPress) addConsignment()
-
+// eslint-disable-next-line
     }, [props.enterPress])
 
     useEffect(() => {
@@ -146,7 +144,7 @@ const Arrival = props => {
             }
 
         }
-
+// eslint-disable-next-line
     }, [product])
 
     const addConsignment = () => {
