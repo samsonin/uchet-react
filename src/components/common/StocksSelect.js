@@ -16,7 +16,9 @@ export default function ({stocks, stock, setStock, disabled, classes}) {
                 label="точка"
             >
                 <MenuItem key={'menustockscontrolinfundskey0'}
-                          value={0}>Все</MenuItem>
+                          value={0}>
+                    <br/>
+                </MenuItem>
                 {stocks.map(st => <MenuItem key={'menustockscontrolinfundskey' + st.id}
                                      value={st.id}>
                         {st.name}

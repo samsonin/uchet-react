@@ -181,8 +181,6 @@ const Daily = props => {
 
     const imprestHandler = row => {
 
-        console.log('row', row)
-
         setRow(row)
         setIsImprestOpen(true)
 
