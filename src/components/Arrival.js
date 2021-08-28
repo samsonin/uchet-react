@@ -30,10 +30,7 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
-import {Link} from "react-router-dom";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 const emptyTr = {
     barcode: '',
@@ -62,8 +59,6 @@ const Arrival = props => {
 
     const [state, setState] = useState(initialState)
     const [product, setProduct] = useState()
-
-    const [isExists, setIsExists] = useState(false)
 
     const [isScanOpen, setIsScanOpen] = useState(false)
     const [scanValue, setScanValue] = useState('')
@@ -124,6 +119,19 @@ const Arrival = props => {
         }
 // eslint-disable-next-line
     }, [props.newScan])
+
+    useEffect(() => {
+
+        const providerId = props.consignment.provider_id
+        const consignmentNumber = props.consignment.provider_id
+
+        rest('consignments/' + providerId + '/' + consignmentNumber)
+            .then(res => {
+                console.log(res)
+            })
+
+// eslint-disable-next-line
+    }, [props.consignment])
 
     useEffect(() => {
 
@@ -426,8 +434,6 @@ const Arrival = props => {
 
     const dailyReport = props.app.daily.find(d => d.stock_id === props.app.stock_id)
 
-    console.log('props.back', props.back)
-
     return props.app.stock_id
         ? <>
 
@@ -462,30 +468,24 @@ const Arrival = props => {
             />
 
             <Grid container
-                  direction="column"
-                  style={{marginLeft: '1rem'}}
-                  alignContent="center">
+                  justify={'center'}
+                  alignItems={'center'}
+            >
 
                 <Grid container
                       style={{margin: '1rem'}}
                       justify="space-between"
                 >
 
-                    {isExists
-                        ? <Grid item>
-                            {props.back
+                    <Grid item>
+                        {props.close
                             ? <Tooltip title={'Назад'}>
-                                <Link to={props.back}>
-                                    <IconButton>
-                                        <ArrowBackIcon/>
-                                    </IconButton>
-                                </Link>
+                                <IconButton onClick={props.close}>
+                                    <ArrowBackIcon/>
+                                </IconButton>
                             </Tooltip>
-                            : ''}
-                        </Grid>
-                        : <Grid item>
-                            <Typography variant="h5">Новая накладная</Typography>
-                        </Grid>}
+                            : <Typography variant="h5">Новая накладная</Typography>}
+                    </Grid>
 
                     <Grid item>
                         <Tooltip title="Удалить">

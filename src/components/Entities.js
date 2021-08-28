@@ -101,5 +101,4 @@ const Entities = ({providers}) => {
 
 }
 
-
 export default connect(state => state.app)(Entities);

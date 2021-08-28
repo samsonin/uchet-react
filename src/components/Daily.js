@@ -78,6 +78,7 @@ const Daily = props => {
     const [row, setRow] = useState()
     const [isSaleOpen, setIsSaleOpen] = useState(false)
     const [isImprestOpen, setIsImprestOpen] = useState(false)
+    const [consignment, setConsignment] = useState()
     const [isConsignmentOpen, setIsConsignmentOpen] = useState(false)
 
     const classes = useStyles()
@@ -197,7 +198,18 @@ const Daily = props => {
 
         } else if (row.action === 'поступление') {
 
-            return setIsConsignmentOpen(true)
+            try {
+
+                const wf = JSON.parse(row.wf)
+
+                setConsignment(wf)
+                setIsConsignmentOpen(true)
+
+            } catch (e){
+
+                console.log(e)
+
+            }
 
         }
 
@@ -235,7 +247,7 @@ const Daily = props => {
     return isConsignmentOpen
         ? <Arrival
             close={() =>setIsConsignmentOpen(false)}
-            back="/daily"
+            consignment={consignment}
         />
         : <>
 
