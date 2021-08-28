@@ -28,6 +28,7 @@ import {useSnackbar} from "notistack";
 
 import SaleModal from './Modals/Sale'
 import ImprestModal from './Modals/Imprest'
+import Arrival from "./Arrival";
 
 const useStyles = makeStyles((theme) => ({
     controls: {
@@ -77,6 +78,7 @@ const Daily = props => {
     const [row, setRow] = useState()
     const [isSaleOpen, setIsSaleOpen] = useState(false)
     const [isImprestOpen, setIsImprestOpen] = useState(false)
+    const [isConsignmentOpen, setIsConsignmentOpen] = useState(false)
 
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
@@ -140,7 +142,7 @@ const Daily = props => {
 
     }
 
-    const cashlessHandler = () =>  cashlessRest({cashless})
+    const cashlessHandler = () => cashlessRest({cashless})
 
     const cashlessHandlerAdd = () => cashlessRest({cashless: daily.cashless + cashless})
 
@@ -193,6 +195,10 @@ const Daily = props => {
             setRow(row)
             setIsSaleOpen(true)
 
+        } else if (row.action === 'поступление') {
+
+            return setIsConsignmentOpen(true)
+
         }
 
     }
@@ -226,7 +232,12 @@ const Daily = props => {
 
     imprests.map(i => imprestsSum += i.sum)
 
-    return <>
+    return isConsignmentOpen
+        ? <Arrival
+            close={() =>setIsConsignmentOpen(false)}
+            back="/daily"
+        />
+        : <>
 
         <SaleModal
             isOpen={isSaleOpen}
