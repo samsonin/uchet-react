@@ -35,7 +35,7 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 const emptyTr = {
     barcode: '',
     isInBase: false,
-    categoryId: 0,
+    category_id: 0,
     model: '',
     quantity: 1,
     cost: 0,
@@ -55,7 +55,7 @@ const initialState = () => ({
     }
 })
 
-const Arrival = props => {
+const Consignment = props => {
 
     const [state, setState] = useState(initialState)
     const [product, setProduct] = useState()
@@ -100,7 +100,7 @@ const Arrival = props => {
 
         if (!state.consignment.products.find((tr, i) => {
 
-            if (!(tr.barcode || tr.categoryId || tr.model || tr.cost || tr.sum)) {
+            if (!(tr.barcode || tr.category_id || tr.model || tr.cost || tr.sum)) {
 
                 scanTr.current = i
                 scanDone(props.newScan)
@@ -122,13 +122,24 @@ const Arrival = props => {
 
     useEffect(() => {
 
-        const providerId = props.consignment.provider_id
-        const consignmentNumber = props.consignment.provider_id
+        if (props.consignment) {
 
-        rest('consignments/' + providerId + '/' + consignmentNumber)
-            .then(res => {
-                console.log(res)
-            })
+            const providerId = props.consignment.provider_id
+            const consignmentNumber = props.consignment.consignment_number
+
+            rest('consignments/' + providerId + '/' + consignmentNumber)
+                .then(res => {
+
+                    if (res.status === 200) {
+                        setState({
+                            currentTr: false,
+                            consignment: res.body
+                        })
+                    }
+
+                })
+
+        }
 
 // eslint-disable-next-line
     }, [props.consignment])
@@ -145,9 +156,9 @@ const Arrival = props => {
 
             console.log('scanTr', scanTr)
 
-            if (product.categoryId) {
+            if (product.category_id) {
 
-                handleTr(scanTr.current, 'categoryId', product.categoryId || product.categories[0])
+                handleTr(scanTr.current, 'category_id', product.category_id || product.categories[0])
 
             }
 
@@ -167,7 +178,7 @@ const Arrival = props => {
         if (state.consignment.providerId === 0) error = 'Выберите поставщика';
         if (state.consignment.consignmentNumber === '') error = 'Введите номер накладной';
         state.consignment.products.map(product => {
-            if (product.categoryId === 0) error = 'Выберите категорию';
+            if (product.category_id === 0) error = 'Выберите категорию';
             if (product.model === '') error = 'Введите наименование';
             if (product.quantity === 0) error = 'Количество должно быть больше 0';
             return product;
@@ -179,7 +190,9 @@ const Arrival = props => {
 
         setIsRequesting(true)
 
-        rest('consignments/' + props.app.stock_id, 'POST', {...state.consignment, imprestId})
+        rest('consignments/' + props.app.stock_id,
+            props.close ? 'PATCH' : 'POST',
+            {...state.consignment, imprestId})
             .then(res => {
 
                 setIsRequesting(false)
@@ -199,7 +212,9 @@ const Arrival = props => {
                     ? 'Такая накладная уже существует'
                     : res.error === 'stock not allowed'
                         ? 'Доступ для пользователя запрещен'
-                        : 'Ошибка'
+                        : res.error === 'already used'
+                            ? 'Продуция уже использована'
+                            : 'Ошибка'
 
                 return enqueueSnackbar(res.status + ' ' + message, {
                     variant: 'error'
@@ -228,6 +243,32 @@ const Arrival = props => {
             return newState
 
         })
+    }
+
+    const del = () => {
+
+        if (props.consignment) {
+
+            const providerId = props.consignment.provider_id
+            const consignmentNumber = props.consignment.consignment_number
+
+            rest('consignments/' + providerId + '/' + consignmentNumber, 'DELETE')
+                .then(res => {
+
+                    if (res.status === 200) {
+
+                        enqueueSnackbar('Ок, Удалено!', {variant: 'success'})
+                        props.close()
+
+                    } else {
+
+                        enqueueSnackbar('Ошибка: ' + res.error[0], {variant: 'error'})
+
+                    }
+
+                })
+        }
+
     }
 
     const handleScan = i => {
@@ -261,7 +302,7 @@ const Arrival = props => {
                 if (res.status === 200) {
 
                     handleTr(scanTr.current, 'model', res.body.name)
-                    handleTr(scanTr.current, 'categoryId', res.body.categories[0])
+                    handleTr(scanTr.current, 'category_id', res.body.categories[0])
                     handleTr(scanTr.current, 'isInBase', true)
 
                     enqueueSnackbar(res.body.name, {
@@ -285,7 +326,7 @@ const Arrival = props => {
 
     const handleCategories = id => {
 
-        handleTr(state.currentTr, 'categoryId', id)
+        handleTr(state.currentTr, 'category_id', id)
 
     }
 
@@ -358,7 +399,7 @@ const Arrival = props => {
     const getConsignmentTotal = () => {
         let consignmentTotal = 0;
         state.consignment.products.map(product => {
-            consignmentTotal += product.quantity * product.cost;
+            consignmentTotal += (product.quantity ?? 1) * product.cost;
             return product;
         })
         return consignmentTotal;
@@ -383,8 +424,8 @@ const Arrival = props => {
                     disabled={product.isInBase}
                     onClick={() => setState(prev => ({...prev, currentTr: i}))}
             >
-                {product.categoryId > 0
-                    ? props.app.categories.find(v => v.id === product.categoryId).name
+                {product.category_id > 0
+                    ? props.app.categories.find(v => v.id === product.category_id).name
                     : "выбрать..."}
             </Button>
         </TableCell>
@@ -462,8 +503,8 @@ const Arrival = props => {
 
             <TreeModal isOpen={state.currentTr !== false}
                        onClose={handleCategories}
-                       initialCategoryId={currentTr
-                           ? currentTr.categoryId
+                       initialcategory_id={currentTr
+                           ? currentTr.category_id
                            : 0}
             />
 
@@ -488,9 +529,13 @@ const Arrival = props => {
                     </Grid>
 
                     <Grid item>
-                        <Tooltip title="Удалить">
+                        <Tooltip title={props.close ? 'Удалить' : 'Очистить'}>
                             <IconButton
-                                // onClick={() => props.remove()}
+                                disabled={props.close && isRequesting}
+                                onClick={() => props.close
+                                    ? del()
+                                    : setState(initialState)
+                                }
                             >
                                 <DeleteIcon/>
                             </IconButton>
@@ -624,7 +669,7 @@ const Arrival = props => {
                             disabled={isRequesting}
                             onClick={() => addConsignment()}
                         >
-                            Внести
+                            {props.close ? 'Coxранить' : 'Внести'}
                         </Button>
                     </Grid>
                 </Grid>
@@ -634,4 +679,4 @@ const Arrival = props => {
         : <Typography variant="h5">Выберите точку</Typography>
 }
 
-export default connect(state => state)(Arrival);
+export default connect(state => state)(Consignment);

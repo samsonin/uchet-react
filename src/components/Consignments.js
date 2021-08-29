@@ -13,6 +13,7 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
+import Consignment from "./Consignment";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -29,6 +30,8 @@ const useStyles = makeStyles((theme) => ({
 const Consignments = props => {
 
     const [cons, setCons] = useState()
+    const [consignment, setConsignment] = useState()
+    const [isConsignmentOpen, setIsConsignmentOpen] = useState(false)
 
     const {enqueueSnackbar} = useSnackbar()
 
@@ -71,10 +74,23 @@ const Consignments = props => {
 
     const classes = useStyles();
 
-    return cons && cons.length > 0
+    const openCons = cons => {
+
+        setConsignment(cons)
+        setIsConsignmentOpen(true)
+
+    }
+
+    return isConsignmentOpen
+        ? <Consignment
+            close={() =>setIsConsignmentOpen(false)}
+            consignment={consignment}
+        />
+        : cons && cons.length > 0
         ? <List className={classes.root}>
                 {cons.map(c => <ListItem button className={classes.cons}
                                 key={'consinview' + c.provider_id + c.consignment_number}
+                                         onClick={() => openCons(c)}
             >
                     <ListItemText
                         primary={props.app.providers.find(p => p.id === +c.provider_id).name + ', №' + c.consignment_number}
@@ -92,7 +108,6 @@ const Consignments = props => {
         : <Typography variant="h5">
             Сегодня не было накладных
         </Typography>
-
 
 }
 

@@ -15,7 +15,7 @@ import Subscribe from "./components/Subscribe";
 import Queue from "./components/Queue";
 import WebSocketAdapter from "./components/WebSocketAdapter";
 import Orders from "./components/Orders";
-import Arrival from "./components/Arrival";
+import Consignment from "./components/Consignment";
 import Consignments from "./components/Consignments";
 import Transit from "./components/Transit";
 import FundsFlow from "./components/FundsFlow";
@@ -187,7 +187,7 @@ const App = props => {
                         <Route path="/queue" component={Queue}/>
 
                         {!props.app.stock_id || <>
-                            <Route path="/arrival" render={props => <Arrival
+                            <Route path="/arrival" render={props => <Consignment
                                 newScan={globalBarcode}
                                 enterPress={enterPress}
                                 {...props}

@@ -28,7 +28,7 @@ import {useSnackbar} from "notistack";
 
 import SaleModal from './Modals/Sale'
 import ImprestModal from './Modals/Imprest'
-import Arrival from "./Arrival";
+import Consignment from "./Consignment";
 
 const useStyles = makeStyles((theme) => ({
     controls: {
@@ -245,7 +245,7 @@ const Daily = props => {
     imprests.map(i => imprestsSum += i.sum)
 
     return isConsignmentOpen
-        ? <Arrival
+        ? <Consignment
             close={() =>setIsConsignmentOpen(false)}
             consignment={consignment}
         />
