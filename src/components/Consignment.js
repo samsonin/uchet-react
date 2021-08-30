@@ -19,6 +19,7 @@ import DoneAllIcon from '@material-ui/icons/DoneAll';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import CropFreeIcon from '@material-ui/icons/CropFree';
 import DeleteIcon from '@material-ui/icons/Delete';
+import ClearIcon from '@material-ui/icons/Clear';
 import Button from "@material-ui/core/Button";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -48,9 +49,9 @@ const initialState = () => ({
         products: [
             {...emptyTr}
         ],
-        providerId: 0,
-        consignmentNumber: '',
-        actuallyPaid: 0,
+        provider_id: 0,
+        consignment_number: '',
+        actually_paid: 0,
         delivery: 0,
     }
 })
@@ -124,10 +125,10 @@ const Consignment = props => {
 
         if (props.consignment) {
 
-            const providerId = props.consignment.provider_id
-            const consignmentNumber = props.consignment.consignment_number
+            const provider_id = props.consignment.provider_id
+            const consignment_number = props.consignment.consignment_number
 
-            rest('consignments/' + providerId + '/' + consignmentNumber)
+            rest('consignments/' + provider_id + '/' + consignment_number)
                 .then(res => {
 
                     if (res.status === 200) {
@@ -175,8 +176,8 @@ const Consignment = props => {
     const addConsignment = () => {
 
         let error;
-        if (state.consignment.providerId === 0) error = 'Выберите поставщика';
-        if (state.consignment.consignmentNumber === '') error = 'Введите номер накладной';
+        if (state.consignment.provider_id === 0) error = 'Выберите поставщика';
+        if (state.consignment.consignment_number === '') error = 'Введите номер накладной';
         state.consignment.products.map(product => {
             if (product.category_id === 0) error = 'Выберите категорию';
             if (product.model === '') error = 'Введите наименование';
@@ -201,6 +202,7 @@ const Consignment = props => {
 
                     setState(initialState)
                     setImprestId(0)
+                    if (props.close) props.close()
 
                     return enqueueSnackbar('Ok, внесено!', {
                         variant: 'success'
@@ -249,11 +251,15 @@ const Consignment = props => {
 
         if (props.consignment) {
 
-            const providerId = props.consignment.provider_id
-            const consignmentNumber = props.consignment.consignment_number
+            const provider_id = props.consignment.provider_id
+            const consignment_number = props.consignment.consignment_number
 
-            rest('consignments/' + providerId + '/' + consignmentNumber, 'DELETE')
+            setIsRequesting(true)
+
+            rest('consignments/' + provider_id + '/' + consignment_number, 'DELETE')
                 .then(res => {
+
+                    setIsRequesting(false)
 
                     if (res.status === 200) {
 
@@ -368,9 +374,11 @@ const Consignment = props => {
             if (index === 'cost') newState.consignment.products[i].sum = toNumber(val) * 2
 
             newState.currentTr = false;
-            newState.consignment.actuallyPaid = getConsignmentTotal();
+
+            if (!props.close) newState.consignment.actually_paid = getConsignmentTotal();
 
             return newState
+
         })
     }
 
@@ -378,7 +386,7 @@ const Consignment = props => {
 
         setState(prev => {
             let newState = {...prev};
-            newState.consignment.providerId = p ? p.id : 0
+            newState.consignment.provider_id = p ? p.id : 0
             return newState
         })
 
@@ -386,13 +394,13 @@ const Consignment = props => {
 
     const handleTotals = (index, val) => {
 
-        setState(prev => {
-            let newState = {...prev};
-            newState.consignment[index] = index === 'consignmentNumber'
-                ? val
-                : toNumber(val);
-            return newState
-        })
+            setState(prev => {
+                let newState = {...prev};
+                newState.consignment[index] = index === 'consignment_number'
+                    ? val
+                    : toNumber(val);
+                return newState
+            })
 
     }
 
@@ -529,17 +537,19 @@ const Consignment = props => {
                     </Grid>
 
                     <Grid item>
-                        <Tooltip title={props.close ? 'Удалить' : 'Очистить'}>
+                        {<Tooltip title={props.close ? 'Удалить' : 'Очистить'}>
                             <IconButton
-                                disabled={props.close && isRequesting}
+                                disabled={isRequesting}
                                 onClick={() => props.close
                                     ? del()
                                     : setState(initialState)
                                 }
                             >
-                                <DeleteIcon/>
+                                {props.close
+                                ? <DeleteIcon/>
+                                : <ClearIcon/>}
                             </IconButton>
-                        </Tooltip>
+                        </Tooltip>}
                     </Grid>
                 </Grid>
 
@@ -551,7 +561,7 @@ const Consignment = props => {
                                     <TableCell colSpan={3} className="pt-3">
 
                                         <Autocomplete
-                                            value={providerOptions.find(v => v.id === state.consignment.providerId)}
+                                            value={providerOptions.find(v => v.id === state.consignment.provider_id)}
                                             options={providerOptions}
                                             onChange={
                                                 (_, v) => handleProvider(v)
@@ -566,8 +576,8 @@ const Consignment = props => {
                                     </TableCell>
                                     <TableCell colSpan={4} className="pt-3">
                                         <TextField label="Накладная"
-                                                   value={state.consignment.consignmentNumber}
-                                                   onChange={e => handleTotals('consignmentNumber', e.target.value)}
+                                                   value={state.consignment.consignment_number}
+                                                   onChange={e => handleTotals('consignment_number', e.target.value)}
                                         />
                                     </TableCell>
                                 </TableRow>
@@ -612,8 +622,8 @@ const Consignment = props => {
                                     </TableCell>
                                     <TableCell colSpan="2" align="center" className="pt-3">
                                         <TextField label="Оплатили"
-                                                   value={state.consignment.actuallyPaid}
-                                                   onChange={e => handleTotals('actuallyPaid', e.target.value)}
+                                                   value={state.consignment.actually_paid}
+                                                   onChange={e => handleTotals('actually_paid', e.target.value)}
                                         />
                                     </TableCell>
                                 </TableRow>
