@@ -29,6 +29,7 @@ import {useSnackbar} from "notistack";
 import SaleModal from './Modals/Sale'
 import ImprestModal from './Modals/Imprest'
 import Consignment from "./Consignment";
+import CostModal from "./Modals/Cost";
 
 const useStyles = makeStyles((theme) => ({
     controls: {
@@ -80,6 +81,7 @@ const Daily = props => {
     const [isImprestOpen, setIsImprestOpen] = useState(false)
     const [consignment, setConsignment] = useState()
     const [isConsignmentOpen, setIsConsignmentOpen] = useState(false)
+    const [isCostOpen, setIsCostOpen] = useState(false)
 
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
@@ -271,6 +273,17 @@ const Daily = props => {
             afterRes={afterRes}
         />
 
+        <CostModal
+            isOpen={isCostOpen}
+            close={() => {
+                setIsCostOpen(false)
+                setRow(null)
+            }}
+            row={row}
+            disabled={!canChange}
+            afterRes={afterRes}
+        />
+
         <Grid container
               justify={'center'}
               alignItems={'center'}
@@ -355,7 +368,7 @@ const Daily = props => {
                 click: handler
             },
             {
-                title: 'Расходы', addText: 'Внести расход, зарплату', addOnClick: () => console.log('addCost'),
+                title: 'Расходы', addText: 'Внести расход, зарплату', addOnClick: () => setIsCostOpen(true),
                 titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
                 rows: costs,
                 rowsValues: ['action', 'item', 'sum', 'note'],

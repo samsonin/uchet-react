@@ -35,7 +35,6 @@ import {Records} from "./components/Records";
 import Daily from "./components/Daily";
 import LoginModal from "./components/LoginModal";
 
-
 const App = props => {
 
     const [good, setGood] = useState({})
@@ -69,6 +68,7 @@ const App = props => {
 
         document.addEventListener('keydown', handleKeyPress)
 
+// eslint-disable-next-line
     }, [])
 
     useEffect(() => {
@@ -90,6 +90,18 @@ const App = props => {
         }
 
     }, [ourBarcode])
+
+    useEffect(() =>{
+
+        if (props.app.version && props.app.version !== 1) {
+
+            console.log('need reload')
+
+            // window.location.reload();
+
+        }
+
+    }, [props.app.version])
 
     const handleKeyPress = e => {
 

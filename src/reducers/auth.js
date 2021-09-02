@@ -13,7 +13,8 @@ const auth = (state = JSON.parse(window.localStorage.getItem('auth')) || {user_i
                         jwt,
                         organization_id,
                         admin,
-                        expiration_time
+                        expiration_time,
+                        time: Date.now()
                     }
                 )
             }

@@ -210,11 +210,11 @@ const Consignment = props => {
 
                 }
 
-                let message = res.error === 'consignment already exist'
+                let message = res.body && res.body.error === 'consignment already exists'
                     ? 'Такая накладная уже существует'
-                    : res.error === 'stock not allowed'
+                    : res.body.error === 'stock not allowed'
                         ? 'Доступ для пользователя запрещен'
-                        : res.error === 'already used'
+                        : res.body.error === 'already used'
                             ? 'Продуция уже использована'
                             : 'Ошибка'
 

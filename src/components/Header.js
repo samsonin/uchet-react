@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {connect} from 'react-redux';
 import {bindActionCreators} from "redux";
 import {
@@ -27,6 +27,14 @@ const NavbarPage = props => {
 
     const [balanceModalOpen, setBalanceModalOpen] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
+
+    useEffect(() => {
+
+        // если больше 12 часов выходим
+        if ((Date.now() - props.auth.time) > 43200000) exit()
+
+// eslint-disable-next-line
+    }, [])
 
     const toggleClick = () => {
 
