@@ -54,7 +54,7 @@ const Transit = props => {
                 }
 
             })
-
+// eslint-disable-next-line
     }, [props.newScan])
 
     const fromTransit = (e, good) => {

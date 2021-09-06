@@ -70,6 +70,7 @@ const Consignments = props => {
 
         init()
 
+// eslint-disable-next-line
     }, [])
 
     const classes = useStyles();

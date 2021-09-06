@@ -42,7 +42,7 @@ const SaleModal = props => {
                         variant: 'error'
                     })
 
-                    props.close()
+                    close()
 
                 }
             })
@@ -50,35 +50,46 @@ const SaleModal = props => {
 
     }
 
+    const close = () => {
+        setName('')
+        setAbsents(undefined)
+        props.close()
+    }
+
     return props.row
         ? <Dialog
             open={props.isOpen}
             TransitionComponent={Transition}
             keepMounted
-            onClose={() => props.close()}
+            onClose={() => close()}
         >
             <DialogTitle>
                 {props.row.item}
             </DialogTitle>
             <DialogContent>
                 {absents
-                    ? <>
-                        <DialogContentText>
-                            Найдно несколько подходящих товаров, выберите один для замены
+                    ? absents.length
+                        ? <>
+                            <DialogContentText>
+                                Найдно несколько подходящих товаров, выберите один для замены
+                            </DialogContentText>
+                            <FormControl className="w-100 m-1">
+                                <InputLabel id="sale-modal-select-label">Выбрать...</InputLabel>
+                                <Select
+                                    labelId={'sale-modal-select-label'}
+                                    value={name}
+                                    onChange={e => setName(e.target.value)}
+                                >
+                                    {absents.map(name => <MenuItem key={name} value={name}>
+                                        {name}
+                                    </MenuItem>)}
+                                </Select>
+                            </FormControl>
+                        </>
+                        : <DialogContentText>
+                            Товары для замены не найдены
                         </DialogContentText>
-                        <FormControl className="w-100 m-1">
-                            <InputLabel id="sale-modal-select-label">Выбрать...</InputLabel>
-                            <Select
-                                labelId={'sale-modal-select-label'}
-                                value={name}
-                                onChange={e => setName(e.target.value)}
-                            >
-                                {absents.map(name => <MenuItem key={name} value={name}>
-                                    {name}
-                                </MenuItem>)}
-                            </Select>
-                        </FormControl>
-                    </>
+
                     : <>
                         <DialogContentText>
                             Данная запись внесена без списания товара со склада!
@@ -89,12 +100,12 @@ const SaleModal = props => {
                     </>}
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => props.close()} color="primary">
+                <Button onClick={() => close()} color="secondary">
                     Отказаться
                 </Button>
-                <Button onClick={handleTry} color="primary">
+                {(absents && !absents.length) || <Button onClick={handleTry} color="primary">
                     Попробовать
-                </Button>
+                </Button>}
             </DialogActions>
         </Dialog>
         : ''

@@ -14,8 +14,6 @@ import TextField from "@material-ui/core/TextField/TextField";
 import UsersSelect from "../common/UsersSelect";
 import {makeStyles} from '@material-ui/core/styles';
 import IconButton from "@material-ui/core/IconButton";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 
@@ -36,23 +34,27 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const actions = ['Расход', 'Зарплата']
+const actions = ['0', 'предоплата', 'продажа', 'расход', 'зарплата']
 
 const full = d => d < 10 ? '0' + d : d
 const toString = unix => {
     const date = new Date(unix * 1000)
     return date.getFullYear() + '-' + full(1 + date.getMonth()) + '-' + full(date.getDate())
 }
-const weeks = Math.trunc(Date.now()/1209600000) - 2
+const weeks = Math.trunc(Date.now() / 1209600000) - 2
 const getDate1 = () => toString(weeks * 1209600 + 345600)
 const getDate2 = () => toString(weeks * 1209600 + 1468800)
 
-const CostModal = props => {
+const toZp = (date1, date2) => date1.substr(8, 2) + '.' + date1.substr(5, 2) + '-' +
+    date2.substr(8, 2) + '.' + date2.substr(5, 2)
+
+
+const DailyModal = props => {
 
     const classes = useStyles();
     const {enqueueSnackbar} = useSnackbar()
 
-    const [action, setAction] = useState(1)
+    const [isZp, setIsZp] = useState(false)
     const [date1, setDate1] = useState(() => getDate1())
     const [date2, setDate2] = useState(() => getDate2())
     const [item, setItem] = useState('')
@@ -91,13 +93,17 @@ const CostModal = props => {
 
     const del = () => {
 
-        // rest('imprest/' + props.stock_id + '/' + props.row.id, 'DELETE')
-        //     .then(res => {
-        //
-        //         if (res.status === 200) exit()
-        //         props.afterRes(res)
-        //
-        //     })
+        const url = props.type === 'Подотчеты'
+            ? 'imprest'
+            : 'sales'
+
+        rest(url + '/' + props.stock_id + '/' + props.row.id, 'DELETE')
+            .then(res => {
+
+                if (res.status === 200) exit()
+                props.afterRes(res)
+
+            })
 
     }
 
@@ -107,21 +113,55 @@ const CostModal = props => {
             return enqueueSnackbar('другая точка', {variant: 'error'})
         }
 
-        // let url = 'imprest/' + props.stock_id
-        // if (props.row) url += '/' + props.row.id
-        //
-        // rest(url, props.row ? 'PATCH' : 'POST', {
-        //     item,
-        //     sum,
-        //     employee,
-        //     note,
-        // })
-        //     .then(res => {
-        //
-        //         if (res.status === 200) exit()
-        //         props.afterRes(res)
-        //
-        //     })
+        if (isZp && !employee) {
+            return enqueueSnackbar('не указан получатель зарплаты',
+                {variant: 'error'})
+        }
+
+        if (!sum) {
+            return enqueueSnackbar('сумма должна отличатся от нуля',
+                {variant: 'error'})
+        }
+
+        let url = (props.type === 'Подотчеты'
+            ? 'imprest'
+            : 'sales') + '/' + props.stock_id
+
+        if (props.row) url += '/' + props.row.id
+
+        const data = {
+            item,
+            sum,
+            employee,
+            note,
+        }
+
+        if (props.type !== 'Подотчеты') {
+
+            const types = ['Работы, услуги', 'Предоплаты', 'Товары', 'Расходы, зарплата']
+
+            let actionId = types.indexOf(props.type)
+
+            if (actionId === 3 && isZp) {
+
+                actionId = 4
+
+                data.item = toZp(date1, date2)
+
+            }
+
+            data.action = actions[actionId]
+
+
+        }
+
+        rest(url, props.row ? 'PATCH' : 'POST', data)
+            .then(res => {
+
+                if (res.status === 200) exit()
+                props.afterRes(res)
+
+            })
 
     }
 
@@ -133,19 +173,22 @@ const CostModal = props => {
     >
         <DialogTitle>
 
-            <Select
-                labelId="actions-cost-control-select-outlined-label"
-                disabled={props.disabled}
-                value={action}
-                onChange={e => setAction(e.target.value)}
-                className={classes.field}
-            >
-                {actions.map((a, i) => <MenuItem
-                    key={'menucostactionskey' + a}
-                    value={i}>
-                    {a}
-                </MenuItem>)}
-            </Select>
+            {props.type === 'Расходы, зарплата'
+                ? <Select
+                    labelId="actions-cost-control-select-outlined-label"
+                    disabled={props.disabled}
+                    value={isZp}
+                    onChange={e => setIsZp(e.target.value)}
+                    className={classes.field}
+                >
+                    {['расход', 'зарплата'].map((a, i) => <MenuItem
+                        key={'menucostactionskey' + a}
+                        value={!!i}>
+                        {a}
+                    </MenuItem>)}
+                </Select>
+                : props.type
+            }
 
             <IconButton aria-label="close" className={classes.closeButton}
                         onClick={() => props.close()}>
@@ -155,7 +198,7 @@ const CostModal = props => {
         </DialogTitle>
         <DialogContent>
 
-            {action
+            {props.type === 'Расходы, зарплата' && isZp
                 ? <>
                     <TextField label="дата по"
                                type="date"
@@ -228,4 +271,4 @@ const CostModal = props => {
 
 }
 
-export default connect(state => state.app)(CostModal);
+export default connect(state => state.app)(DailyModal);

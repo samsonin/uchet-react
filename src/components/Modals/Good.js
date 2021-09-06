@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-import {upd_app} from "../actions/actionCreator";
+import {upd_app} from "../../actions/actionCreator";
 import {
     MDBBtn,
     MDBIcon,
@@ -21,9 +21,9 @@ import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import {useSnackbar} from "notistack";
 
-import rest from './Rest'
-import Tree from "./Tree";
-import {Barcodes} from './Barcodes'
+import rest from '../Rest'
+import Tree from "../Tree";
+// import {Barcodes} from '../Barcodes'
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     upd_app
@@ -45,7 +45,7 @@ const woAlliases = {
 }
 
 
-const GoodModal = props => {
+const Good = props => {
 
     const [treeOpen, setTreeOpen] = useState(false)
     const [orderId, setOrderId] = useState()
@@ -390,4 +390,4 @@ const GoodModal = props => {
 
 }
 
-export default connect(state => (state), mapDispatchToProps)(GoodModal)
+export default connect(state => (state), mapDispatchToProps)(Good)

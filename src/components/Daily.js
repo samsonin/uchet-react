@@ -27,9 +27,8 @@ import List from "@material-ui/core/List";
 import {useSnackbar} from "notistack";
 
 import SaleModal from './Modals/Sale'
-import ImprestModal from './Modals/Imprest'
 import Consignment from "./Consignment";
-import CostModal from "./Modals/Cost";
+import DailyModal from "./Modals/Daily";
 
 const useStyles = makeStyles((theme) => ({
     controls: {
@@ -77,11 +76,11 @@ const Daily = props => {
     const [handed, setHanded] = useState(0)
 
     const [row, setRow] = useState()
+    const [modalType, setModalType] = useState()
+    const [isDailyModalOpen, setIsDailyModalOpen] = useState(false)
     const [isSaleOpen, setIsSaleOpen] = useState(false)
-    const [isImprestOpen, setIsImprestOpen] = useState(false)
     const [consignment, setConsignment] = useState()
     const [isConsignmentOpen, setIsConsignmentOpen] = useState(false)
-    const [isCostOpen, setIsCostOpen] = useState(false)
 
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
@@ -145,10 +144,6 @@ const Daily = props => {
 
     }
 
-    const cashlessHandler = () => cashlessRest({cashless})
-
-    const cashlessHandlerAdd = () => cashlessRest({cashless: daily.cashless + cashless})
-
     const handedRest = handed => {
 
         if (!props.auth.admin) return
@@ -157,6 +152,10 @@ const Daily = props => {
             .then(res => afterRes(res, setHanded, 'сдано: ' + handed))
 
     }
+
+    const cashlessHandler = () => cashlessRest({cashless})
+
+    const cashlessHandlerAdd = () => cashlessRest({cashless: daily.cashless + cashless})
 
     const handedHandler = () => handedRest(handed)
 
@@ -171,45 +170,42 @@ const Daily = props => {
 
     }
 
-    // useEffect(() => {
-    //
-    //     setCashless(daily.cashless)
-    //
-    // }, [daily.cashless])
-    //
-    // useEffect(() => {
-    //
-    //     setHanded(daily.handed)
-    //
-    // }, [daily.handed])
+    const handler = (modalType, row) => {
 
+        console.log('modalType', modalType)
+        console.log('row', row)
 
-    const imprestHandler = row => {
-
+        setModalType(modalType)
         setRow(row)
-        setIsImprestOpen(true)
 
-    }
 
-    const handler = row => {
 
-        if (row.action === 'продажа') {
+        if (['Расходы, зарплата', 'Подотчеты'].includes(modalType)) {
 
-            setRow(row)
-            setIsSaleOpen(true)
+            setIsDailyModalOpen(true)
 
-        } else if (row.action === 'поступление') {
+        }
 
-            try {
+        if (row) {
 
-                const wf = JSON.parse(row.wf)
+            if (row.action === 'продажа') {
 
-                setConsignment(wf)
-                setIsConsignmentOpen(true)
+                setIsSaleOpen(true)
 
-            } catch (e){
+            } else if (row.action === 'поступление') {
 
-                console.log(e)
+                try {
+
+                    const wf = JSON.parse(row.wf)
+
+                    setConsignment(wf)
+                    setIsConsignmentOpen(true)
+
+                } catch (e) {
+
+                    console.log(e)
+
+                }
 
             }
 
@@ -248,303 +244,288 @@ const Daily = props => {
 
     return isConsignmentOpen
         ? <Consignment
-            close={() =>setIsConsignmentOpen(false)}
+            close={() => setIsConsignmentOpen(false)}
             consignment={consignment}
         />
         : <>
 
-        <SaleModal
-            isOpen={isSaleOpen}
-            close={() => {
-                setIsSaleOpen(false)
-                setRow(null)
-            }}
-            row={row}
-        />
+            <SaleModal
+                isOpen={isSaleOpen}
+                close={() => {
+                    setIsSaleOpen(false)
+                    setRow(null)
+                }}
+                row={row}
+            />
 
-        <ImprestModal
-            isOpen={isImprestOpen}
-            close={() => {
-                setIsImprestOpen(false)
-                setRow(null)
-            }}
-            row={row}
-            disabled={!canChange}
-            afterRes={afterRes}
-        />
+            <DailyModal
+                type={modalType}
+                isOpen={isDailyModalOpen}
+                close={() => {
+                    setIsDailyModalOpen(false)
+                    setRow(null)
+                }}
+                row={row}
+                disabled={!canChange}
+                afterRes={afterRes}
+            />
 
-        <CostModal
-            isOpen={isCostOpen}
-            close={() => {
-                setIsCostOpen(false)
-                setRow(null)
-            }}
-            row={row}
-            disabled={!canChange}
-            afterRes={afterRes}
-        />
+            <Grid container
+                  justify={'center'}
+                  alignItems={'center'}
+            >
+                <Grid item xs={6}>
 
-        <Grid container
-              justify={'center'}
-              alignItems={'center'}
-        >
-            <Grid item xs={6}>
+                    <StocksSelect
+                        stocks={props.app.stocks}
+                        stock={stock}
+                        setStock={setStock}
+                        disabled={false}
+                        classes={classes.controls}
+                    />
 
-                <StocksSelect
-                    stocks={props.app.stocks}
-                    stock={stock}
-                    setStock={setStock}
-                    disabled={false}
-                    classes={classes.controls}
-                />
+                </Grid>
 
+                <Grid item xs={6}>
+                    <TextField
+                        className={classes.controls}
+                        variant="outlined"
+                        disabled={false}
+                        label="дата"
+                        type="date"
+                        value={date}
+                        onChange={e => setDate(e.target.value)}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                    />
+                </Grid>
             </Grid>
 
-            <Grid item xs={6}>
-                <TextField
-                    className={classes.controls}
-                    variant="outlined"
-                    disabled={false}
-                    label="дата"
-                    type="date"
-                    value={date}
-                    onChange={e => setDate(e.target.value)}
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                />
-            </Grid>
-        </Grid>
+            <Grid item className="p-2">
+                <List dense>
+                    {daily && daily.employees && daily.employees.map(e => {
 
-        <Grid item className="p-2">
-            <List dense>
-                {daily && daily.employees && daily.employees.map(e => {
+                        let user = props.app.users.find(u => u.id === e)
 
-                    let user = props.app.users.find(u => u.id === e)
-
-                    return user && <ListItem
-                        key={'userindailylistitem' + user.id}
-                        component={Paper}
-                        className="m-1"
-                    >
-                        <ListItemText
-                            primary={user.name}
-                        />
-                        {canAdminChange && <ListItemSecondaryAction>
-                            <IconButton
-                                onClick={() => employeeCheckout(user.id)}
-                            >
-                                <ExitToAppIcon/>
-                            </IconButton>
-                        </ListItemSecondaryAction>}
-                    </ListItem>
-                })}
-            </List>
-        </Grid>
-
-        {[
-            {
-                title: 'Предоплаты', addText: 'Внести предоплату', addOnClick: () => console.log('addPrepaid'),
-                titles: ['Наименование', 'Сумма', 'Примечание'],
-                rows: prepaids,
-                rowsValues: ['item', 'sum', 'note'],
-                sum: prepaidsSum,
-                click: handler
-            },
-            {
-                title: 'Товары', addText: 'Продать товар', addOnClick: () => console.log('addGood'),
-                titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
-                rows: sales,
-                rowsValues: ['action', 'item', 'sum', 'note'],
-                sum: salesSum,
-                click: handler
-            },
-            {
-                title: 'Работы, услуги', addText: 'Продать услугу', addOnClick: () => console.log('addService'),
-                titles: ['#', 'Что сделали', 'Сумма', 'Сотрудник'],
-                rows: services,
-                rowsValues: ['id', 'item', 'sum', 'ui_user_id'],
-                sum: serviceSum,
-                click: handler
-            },
-            {
-                title: 'Расходы', addText: 'Внести расход, зарплату', addOnClick: () => setIsCostOpen(true),
-                titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
-                rows: costs,
-                rowsValues: ['action', 'item', 'sum', 'note'],
-                sum: costSum,
-                click: handler
-            },
-            {
-                title: 'Подотчеты', addText: 'Внести подотчет', addOnClick: () => setIsImprestOpen(true),
-                titles: ['Наименование', 'Сотрудник', 'Сумма', 'Примечание'],
-                rows: imprests,
-                rowsValues: ['item', 'ui_user_id', 'sum', 'note'],
-                sum: imprestsSum,
-                click: imprestHandler
-            },
-        ]
-            .map(t => date !== today && t.rows === imprests
-                ? ''
-                : <TableContainer
-                    key={'tablecontindailykey' + t.title}
-                    className={classes.table}
-                    component={Paper}
-                >
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell colSpan={t.titles.length - 1}>
-                                    <Typography variant="h6">
-                                        {t.title}
-                                    </Typography>
-                                </TableCell>
-                                <TableCell align="right">
-                                    {canChange
-                                        ? <Tooltip title={t.addText}>
-                                            <IconButton className={classes.icon}
-                                                        onClick={t.addOnClick}
-                                            >
-                                                <AddCircleIcon/>
-                                            </IconButton>
-                                        </Tooltip>
-                                        : ''}
-                                </TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableHead>
-                            <TableRow>
-                                {t.titles.map(t => <TableCell
-                                    key={'rowsintabledaily' + t}
-                                >{t}</TableCell>)}
-                            </TableRow>
-                        </TableHead>
-
-                        <TableBody>
-                            {t.rows.map(row => <TableRow
-                                key={'tablerowindaily' + t.title + JSON.stringify(row)}
-                                style={{
-                                    cursor: 'pointer'
-                                }}
-                                onClick={() => t.click(row)}
-                            >
-                                {t.rowsValues.map(v => {
-
-                                    let value = row[v]
-
-                                    if (v === 'ui_user_id') {
-
-                                        let user = props.app.users.find(u => u.id === row.ui_user_id)
-
-                                        value = user
-                                            ? user.name
-                                            : row.ui_user_id
-
-                                    }
-
-                                    return <TableCell
-                                        key={'rowsintabledailysec' + v}
-                                    >
-                                        {row.work
-                                            ? v === 'item'
-                                                ? <>
-                                                    <span className="font-weight-bold pr-3">{row.item}</span>
-                                                    <br/>
-                                                    {row.work}
-                                                </>
-                                                : value
-                                            : v === 'id'
-                                                ? ''
-                                                : value}
-                                    </TableCell>
-                                })}
-                            </TableRow>)}
-                        </TableBody>
-
-                        <TableHead>
-                            <TableRow>
-                                <TableCell colSpan={t.titles.length - 2}>
-                                    Итого:
-                                </TableCell>
-                                <TableCell>
-                                    {t.sum}
-                                </TableCell>
-                            </TableRow>
-                        </TableHead>
-
-                    </Table>
-                </TableContainer>)}
-
-        {daily && <TableContainer
-            className={classes.table}
-            component={Paper}
-        >
-            <Table size="small">
-                <TableBody>
-                    {[
-                        {text: 'Остаток на утро:', value: daily.morning},
-                        {text: 'Выручка:', value: daily.proceeds},
-                        {text: 'Подотчеты:', value: imprestsSum},
-                        {
-                            text: 'Безнал:', value: daily.cashless,
-                            localValue: cashless,
-                            change: e => setCashless(+e.target.value),
-                            click: canChange && cashlessHandler,
-                            clickAdd: canChange && cashlessHandlerAdd
-                        },
-                        {
-                            text: 'Сдали:', value: daily.handed,
-                            localValue: handed,
-                            change: e => setHanded(+e.target.value),
-                            click: (canChange || canAdminChange) && handedHandler,
-                            clickAdd: (canChange || canAdminChange) && handedHandlerAdd
-                        },
-                        {text: 'Остаток:', value: daily.evening},
-                    ].map(l => (date === today || l.text !== 'Подотчеты:') && <TableRow
-                        key={'griditemkeyindailypertotals' + l.text}
-                    >
-
-                        <TableCell style={{
-                            fontWeight: 'bold'
-                        }}>
-                            {l.text}
-                        </TableCell>
-
-                        <TableCell>
-                            {l.value}
-                        </TableCell>
-
-                        {l.click && <TableCell>
-
-                            <TextField
-                                value={l.localValue}
-                                type="number"
-                                onChange={l.change}
+                        return user && <ListItem
+                            key={'userindailylistitem' + user.id}
+                            component={Paper}
+                            className="m-1"
+                        >
+                            <ListItemText
+                                primary={user.name}
                             />
+                            {canAdminChange && <ListItemSecondaryAction>
+                                <IconButton
+                                    onClick={() => employeeCheckout(user.id)}
+                                >
+                                    <ExitToAppIcon/>
+                                </IconButton>
+                            </ListItemSecondaryAction>}
+                        </ListItem>
+                    })}
+                </List>
+            </Grid>
 
-                            <IconButton
-                                className={classes.icon}
-                                onClick={l.click}
-                                disabled={l.value === l.localValue}
-                            >
-                                <SaveOutlinedIcon/>
-                            </IconButton>
-                            <IconButton
-                                className={classes.icon}
-                                onClick={l.clickAdd}
-                                disabled={l.localValue === 0}
-                            >
-                                <AddCircleIcon/>
-                            </IconButton>
+            {[
+                {
+                    title: 'Предоплаты', addText: 'Внести предоплату',
+                    titles: ['Наименование', 'Сумма', 'Примечание'],
+                    rows: prepaids,
+                    rowsValues: ['item', 'sum', 'note'],
+                    sum: prepaidsSum,
+                },
+                {
+                    title: 'Товары', addText: 'Продать товар',
+                    titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
+                    rows: sales,
+                    rowsValues: ['action', 'item', 'sum', 'note'],
+                    sum: salesSum,
+                },
+                {
+                    title: 'Работы, услуги', addText: 'Продать услугу',
+                    titles: ['#', 'Что сделали', 'Сумма', 'Сотрудник'],
+                    rows: services,
+                    rowsValues: ['id', 'item', 'sum', 'ui_user_id'],
+                    sum: serviceSum,
+                },
+                {
+                    title: 'Расходы, зарплата', addText: 'Внести расход, зарплату',
+                    titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
+                    rows: costs,
+                    rowsValues: ['action', 'item', 'sum', 'note'],
+                    sum: costSum,
+                },
+                {
+                    title: 'Подотчеты', addText: 'Внести подотчет',
+                    titles: ['Наименование', 'Сотрудник', 'Сумма', 'Примечание'],
+                    rows: imprests,
+                    rowsValues: ['item', 'ui_user_id', 'sum', 'note'],
+                    sum: imprestsSum,
+                },
+            ]
+                .map(t => date !== today && t.rows === imprests
+                    ? ''
+                    : <TableContainer
+                        key={'tablecontindailykey' + t.title}
+                        className={classes.table}
+                        component={Paper}
+                    >
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell colSpan={t.titles.length - 1}>
+                                        <Typography variant="h6">
+                                            {t.title}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        {canChange
+                                            ? <Tooltip title={t.addText}>
+                                                <IconButton className={classes.icon}
+                                                            onClick={() => handler(t.title)}
+                                                >
+                                                    <AddCircleIcon/>
+                                                </IconButton>
+                                            </Tooltip>
+                                            : ''}
+                                    </TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableHead>
+                                <TableRow>
+                                    {t.titles.map(t => <TableCell
+                                        key={'rowsintabledaily' + t}
+                                    >{t}</TableCell>)}
+                                </TableRow>
+                            </TableHead>
 
-                        </TableCell>}
+                            <TableBody>
+                                {t.rows.map(row => <TableRow
+                                    key={'tablerowindaily' + t.title + JSON.stringify(row)}
+                                    style={{
+                                        cursor: 'pointer'
+                                    }}
+                                    onClick={() => handler(t.title, row)}
+                                >
+                                    {t.rowsValues.map(v => {
 
-                    </TableRow>)}
-                </TableBody>
-            </Table>
-        </TableContainer>}
+                                        let value = row[v]
 
-    </>
+                                        if (v === 'ui_user_id') {
+
+                                            let user = props.app.users.find(u => u.id === row.ui_user_id)
+
+                                            value = user
+                                                ? user.name
+                                                : row.ui_user_id
+
+                                        }
+
+                                        return <TableCell
+                                            key={'rowsintabledailysec' + v}
+                                        >
+                                            {row.work
+                                                ? v === 'item'
+                                                    ? <>
+                                                        <span className="font-weight-bold pr-3">{row.item}</span>
+                                                        <br/>
+                                                        {row.work}
+                                                    </>
+                                                    : value
+                                                : v === 'id'
+                                                    ? ''
+                                                    : value}
+                                        </TableCell>
+                                    })}
+                                </TableRow>)}
+                            </TableBody>
+
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell colSpan={t.titles.length - 2}>
+                                        Итого:
+                                    </TableCell>
+                                    <TableCell>
+                                        {t.sum}
+                                    </TableCell>
+                                </TableRow>
+                            </TableHead>
+
+                        </Table>
+                    </TableContainer>)}
+
+            {daily && <TableContainer
+                className={classes.table}
+                component={Paper}
+            >
+                <Table size="small">
+                    <TableBody>
+                        {[
+                            {text: 'Остаток на утро:', value: daily.morning},
+                            {text: 'Выручка:', value: daily.proceeds},
+                            {text: 'Подотчеты:', value: imprestsSum},
+                            {
+                                text: 'Безнал:', value: daily.cashless,
+                                localValue: cashless,
+                                change: e => setCashless(+e.target.value),
+                                click: canChange && cashlessHandler,
+                                clickAdd: canChange && cashlessHandlerAdd
+                            },
+                            {
+                                text: 'Сдали:', value: daily.handed,
+                                localValue: handed,
+                                change: e => setHanded(+e.target.value),
+                                click: (canChange || canAdminChange) && handedHandler,
+                                clickAdd: (canChange || canAdminChange) && handedHandlerAdd
+                            },
+                            {text: 'Остаток:', value: daily.evening},
+                        ].map(l => (date === today || l.text !== 'Подотчеты:') && <TableRow
+                            key={'griditemkeyindailypertotals' + l.text}
+                        >
+
+                            <TableCell style={{
+                                fontWeight: 'bold'
+                            }}>
+                                {l.text}
+                            </TableCell>
+
+                            <TableCell>
+                                {l.value}
+                            </TableCell>
+
+                            {l.click && <TableCell>
+
+                                <TextField
+                                    value={l.localValue}
+                                    type="number"
+                                    onChange={l.change}
+                                />
+
+                                <IconButton
+                                    className={classes.icon}
+                                    onClick={l.click}
+                                    disabled={l.value === l.localValue}
+                                >
+                                    <SaveOutlinedIcon/>
+                                </IconButton>
+                                <IconButton
+                                    className={classes.icon}
+                                    onClick={l.clickAdd}
+                                    disabled={l.localValue === 0}
+                                >
+                                    <AddCircleIcon/>
+                                </IconButton>
+
+                            </TableCell>}
+
+                        </TableRow>)}
+                    </TableBody>
+                </Table>
+            </TableContainer>}
+
+        </>
 
 }
 

@@ -80,7 +80,7 @@ export default connect(state => state)(props => {
 
         if (!data) return
 
-        data.map(d => {
+        data.forEach(d => {
             p += d.proceeds
             c += d.cashless
             h += d.handed
@@ -111,7 +111,7 @@ export default connect(state => state)(props => {
 
                     let totalData = []
 
-                    res.body.map(d => {
+                    res.body.forEach(d => {
 
                         let lastDay = totalData.find(t => t.date === d.date)
 
@@ -139,6 +139,7 @@ export default connect(state => state)(props => {
 
     }
 
+// eslint-disable-next-line
     useEffect(() => getReport(), [])
 
     const renderBody = () => data && data.length
