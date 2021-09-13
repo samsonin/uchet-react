@@ -88,7 +88,13 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const keyPress = e => {
         if (typeof e === 'undefined') return false;
-        if (e.key === 'Enter') [status]()
+        if (e.key === 'Enter') {
+
+            // TODO переименовать имена функций в соответствии со статусами
+            const func = eval(status)
+            if (typeof func === "function") func()
+
+        }
     }
 
     const signIn = (isDemo = false) => {

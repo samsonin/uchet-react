@@ -128,7 +128,11 @@ const Consignment = props => {
             const provider_id = props.consignment.provider_id
             const consignment_number = props.consignment.consignment_number
 
-            rest('consignments/' + provider_id + '/' + consignment_number)
+            let url = 'consignments/' + provider_id + '/' + consignment_number
+
+            if (props.consignment.date) url += '/' + props.consignment.date
+
+            rest(url)
                 .then(res => {
 
                     if (res.status === 200) {
@@ -191,7 +195,9 @@ const Consignment = props => {
 
         setIsRequesting(true)
 
-        rest('consignments/' + props.app.stock_id,
+        rest('consignments/' + (props.close
+            ? props.consignment.provider_id + '/' + props.consignment.consignment_number
+            : props.app.stock_id),
             props.close ? 'PATCH' : 'POST',
             {...state.consignment, imprestId})
             .then(res => {
@@ -394,13 +400,13 @@ const Consignment = props => {
 
     const handleTotals = (index, val) => {
 
-            setState(prev => {
-                let newState = {...prev};
-                newState.consignment[index] = index === 'consignment_number'
-                    ? val
-                    : toNumber(val);
-                return newState
-            })
+        setState(prev => {
+            let newState = {...prev};
+            newState.consignment[index] = index === 'consignment_number'
+                ? val
+                : toNumber(val);
+            return newState
+        })
 
     }
 
@@ -546,8 +552,8 @@ const Consignment = props => {
                                 }
                             >
                                 {props.close
-                                ? <DeleteIcon/>
-                                : <ClearIcon/>}
+                                    ? <DeleteIcon/>
+                                    : <ClearIcon/>}
                             </IconButton>
                         </Tooltip>}
                     </Grid>

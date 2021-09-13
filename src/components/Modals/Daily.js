@@ -109,7 +109,7 @@ const DailyModal = props => {
 
     const save = () => {
 
-        if (props.row && props.stock_id !== props.row.stock_id) {
+        if (props.row && props.row.stock_id && props.stock_id !== props.row.stock_id) {
             return enqueueSnackbar('другая точка', {variant: 'error'})
         }
 

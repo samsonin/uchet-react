@@ -182,7 +182,9 @@ const Daily = props => {
 
         if (['Расходы, зарплата', 'Подотчеты'].includes(modalType)) {
 
-            setIsDailyModalOpen(true)
+            if (row.action !== 'поступление') {
+                setIsDailyModalOpen(true)
+            }
 
         }
 
@@ -197,6 +199,8 @@ const Daily = props => {
                 try {
 
                     const wf = JSON.parse(row.wf)
+
+                    if (date !== today) wf.date = date
 
                     setConsignment(wf)
                     setIsConsignmentOpen(true)
