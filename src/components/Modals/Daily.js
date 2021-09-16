@@ -12,6 +12,7 @@ import {useSnackbar} from "notistack";
 import {connect} from "react-redux";
 import TextField from "@material-ui/core/TextField/TextField";
 import UsersSelect from "../common/UsersSelect";
+import CustomersSelect from "../common/CustomersSelect"
 import {makeStyles} from '@material-ui/core/styles';
 import IconButton from "@material-ui/core/IconButton";
 import Select from "@material-ui/core/Select";
@@ -41,7 +42,7 @@ const toString = unix => {
     const date = new Date(unix * 1000)
     return date.getFullYear() + '-' + full(1 + date.getMonth()) + '-' + full(date.getDate())
 }
-const weeks = Math.trunc(Date.now() / 1209600000) - 2
+const weeks = Math.trunc(Date.now() / 1209600000) - 1
 const getDate1 = () => toString(weeks * 1209600 + 345600)
 const getDate2 = () => toString(weeks * 1209600 + 1468800)
 
@@ -78,11 +79,31 @@ const DailyModal = props => {
             setSum(props.row.sum)
             setEmployee(props.row.employee)
             setNote(props.row.note)
+
+            if (props.type === 'Расходы, зарплата') {
+                setIsZp(props.row.action === 'зарплата')
+
+                if (props.row.action === 'зарплата') {
+
+                    console.log(props.row.item)
+
+                    // 09.08-22.08
+
+                    setDate1('2021-09-14')
+                    setDate2('2021-09-15')
+                }
+
+            }
+
         } else {
             reset()
         }
 
-    }, [props.row])
+        console.log('row', props.row)
+        console.log('type', props.type)
+        console.log('isZp', isZp)
+
+    }, [props.row, props.isOpen])
 
     const exit = () => {
 
@@ -229,14 +250,16 @@ const DailyModal = props => {
                        onChange={e => setSum(+e.target.value)}
             />
 
-            <UsersSelect
-                classes={classes.field}
-                disabled={props.disabled}
-                users={props.users}
-                user={employee}
-                setUser={setEmployee}
-                onlyValid={true}
-            />
+            {props.type === 'Предоплаты'
+                ? <CustomersSelect />
+                : <UsersSelect
+                    classes={classes.field}
+                    disabled={props.disabled}
+                    users={props.users}
+                    user={employee}
+                    setUser={setEmployee}
+                    onlyValid={true}
+                />}
 
             <TextField label="Примечание"
                        disabled={props.disabled}

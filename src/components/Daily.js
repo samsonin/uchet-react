@@ -172,21 +172,11 @@ const Daily = props => {
 
     const handler = (modalType, row) => {
 
-        console.log('modalType', modalType)
-        console.log('row', row)
+        // console.log('modalType', modalType)
+        // console.log('row', row)
 
         setModalType(modalType)
         setRow(row)
-
-
-
-        if (['Расходы, зарплата', 'Подотчеты'].includes(modalType)) {
-
-            if (row.action !== 'поступление') {
-                setIsDailyModalOpen(true)
-            }
-
-        }
 
         if (row) {
 
@@ -211,7 +201,15 @@ const Daily = props => {
 
                 }
 
+            } else {
+
+                    setIsDailyModalOpen(true)
+
             }
+
+        } else {
+
+            setIsDailyModalOpen(true)
 
         }
 
