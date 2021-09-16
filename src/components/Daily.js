@@ -27,6 +27,7 @@ import List from "@material-ui/core/List";
 import {useSnackbar} from "notistack";
 
 import SaleModal from './Modals/Sale'
+import PrepaidModal from './Modals/Prepaid'
 import Consignment from "./Consignment";
 import DailyModal from "./Modals/Daily";
 
@@ -78,6 +79,7 @@ const Daily = props => {
     const [row, setRow] = useState()
     const [modalType, setModalType] = useState()
     const [isDailyModalOpen, setIsDailyModalOpen] = useState(false)
+    const [isPrepaidOpen, setIsPrepaidOpen] = useState(false)
     const [isSaleOpen, setIsSaleOpen] = useState(false)
     const [consignment, setConsignment] = useState()
     const [isConsignmentOpen, setIsConsignmentOpen] = useState(false)
@@ -172,13 +174,19 @@ const Daily = props => {
 
     const handler = (modalType, row) => {
 
-        // console.log('modalType', modalType)
-        // console.log('row', row)
+        console.log('modalType', modalType)
+        console.log('row', row)
 
         setModalType(modalType)
         setRow(row)
 
-        if (row) {
+        if (modalType === 'Предоплаты') {
+
+            console.log('Предоплаты')
+
+            setIsPrepaidOpen(true)
+
+        } else if (row) {
 
             if (row.action === 'продажа') {
 
@@ -200,10 +208,9 @@ const Daily = props => {
                     console.log(e)
 
                 }
-
             } else {
 
-                    setIsDailyModalOpen(true)
+                setIsDailyModalOpen(true)
 
             }
 
@@ -250,6 +257,15 @@ const Daily = props => {
             consignment={consignment}
         />
         : <>
+
+            <PrepaidModal
+                isOpen={isPrepaidOpen}
+                close={() => {
+                    setIsPrepaidOpen(false)
+                    setRow(null)
+                }}
+                row={row}
+            />
 
             <SaleModal
                 isOpen={isSaleOpen}

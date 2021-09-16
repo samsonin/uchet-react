@@ -12,7 +12,6 @@ import {useSnackbar} from "notistack";
 import {connect} from "react-redux";
 import TextField from "@material-ui/core/TextField/TextField";
 import UsersSelect from "../common/UsersSelect";
-import CustomersSelect from "../common/CustomersSelect"
 import {makeStyles} from '@material-ui/core/styles';
 import IconButton from "@material-ui/core/IconButton";
 import Select from "@material-ui/core/Select";
@@ -250,16 +249,14 @@ const DailyModal = props => {
                        onChange={e => setSum(+e.target.value)}
             />
 
-            {props.type === 'Предоплаты'
-                ? <CustomersSelect />
-                : <UsersSelect
+            <UsersSelect
                     classes={classes.field}
                     disabled={props.disabled}
                     users={props.users}
                     user={employee}
                     setUser={setEmployee}
                     onlyValid={true}
-                />}
+                />
 
             <TextField label="Примечание"
                        disabled={props.disabled}
