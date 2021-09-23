@@ -33,15 +33,14 @@ const useStyles = makeStyles({
         marginTop: '0.5rem',
     },
     name: {
-        width: '70%',
+        width: '80%',
         marginTop: '0.8rem',
+        alignContent: 'center',
+        cursor: 'pointer',
     },
     switch: {
         width: '10%',
         marginTop: '0.3rem',
-    },
-    edit: {
-        width: '10%',
     },
 })
 
@@ -127,74 +126,42 @@ const Stocks = props => {
 
         {props.app.stocks.map(stock => <Grid container
                                              className={"hoverable"}
+                                             onClick={() => props.history.push('/settings/stocks/' + stock.id)}
                                              style={{padding: '1rem'}}
                                              key={"conteinerinstockgrid" + stock.id}
             >
-                <Grid item
-                      className={classes.icon}
-                >
-                    <Typography variant="h6">
-                        <i className="fas fa-store"/>
-                    </Typography>
-                </Grid>
-                <Grid item
-                      className={classes.name}
-                >
-                    <Typography variant="subtitle1">
-                        {stock.name}
-                    </Typography>
-                </Grid>
-                <Grid item
-                      className={classes.switch}
-                >
-                    <Tooltip title={stock.is_valid
-                        ? "Отключить"
-                        : "Включить"}
+                    <Grid item
+                          className={classes.icon}
                     >
-                        <FormControlLabel
-                            control={
-                                <Switch checked={!!stock.is_valid}
-                                        disabled={isRequest}
-                                        onChange={e => isValidToggleHandler(stock.id, e.target.checked)}
-                                        color="primary"/>
-                            }
-                        />
-                    </Tooltip>
-                </Grid>
+                        <Typography variant="h6">
+                            <i className="fas fa-store"/>
+                        </Typography>
+                    </Grid>
+                    <Grid item
+                          className={classes.name}
+                    >
+                        <Typography variant="subtitle1">
+                            {stock.name}
+                        </Typography>
+                    </Grid>
+                    <Grid item
+                          className={classes.switch}
+                    >
+                        <Tooltip title={stock.is_valid
+                            ? "Отключить"
+                            : "Включить"}
+                        >
+                            <FormControlLabel
+                                control={
+                                    <Switch checked={!!stock.is_valid}
+                                            disabled={isRequest}
+                                            onChange={e => isValidToggleHandler(stock.id, e.target.checked)}
+                                            color="primary"/>
+                                }
+                            />
+                        </Tooltip>
+                    </Grid>
 
-                <Grid item
-                      className={classes.edit}
-                >
-                    <Tooltip title="Редактировать">
-                        <Link to={"/settings/stocks/" + stock.id}>
-                            <IconButton>
-                                <EditIcon/>
-                            </IconButton>
-                        </Link>
-                    </Tooltip>
-                </Grid>
-
-                {/*<Grid item xs={12}>*/}
-                {/*    <InputLabel className="mt-2 font-weight-bold">Название:</InputLabel>*/}
-                {/*    <TextField*/}
-                {/*        defaultValue={stock.name} className="w-75"*/}
-                {/*        onBlur={e => requestSettings(stock.id, 'name', e.target.value)}*/}
-                {/*    />*/}
-                {/*</Grid>*/}
-                {/*<Grid item xs={12}>*/}
-                {/*    <InputLabel className="mt-2 font-weight-bold">Адрес:</InputLabel>*/}
-                {/*    <TextField*/}
-                {/*        defaultValue={stock.address} className="w-75"*/}
-                {/*        onBlur={(e) => requestSettings(stock.id, 'address', e.target.value)}*/}
-                {/*    />*/}
-                {/*</Grid>*/}
-                {/*<Grid item xs={12}>*/}
-                {/*    <InputLabel className="mt-2 font-weight-bold">Телефон:</InputLabel>*/}
-                {/*    <TextField*/}
-                {/*        defaultValue={stock.phone_number} className="w-75"*/}
-                {/*        onBlur={e => requestSettings(stock.id, 'phone_number', e.target.value)}*/}
-                {/*    />*/}
-                {/*</Grid>*/}
             </Grid>
         )}
     </Grid>
