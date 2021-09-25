@@ -26,43 +26,45 @@ const View = props => {
 
     return <Grid container component={Paper} spacing={1} justify="space-around">
 
-        <Grid container
-              style={{margin: '1rem'}}
-              justify="space-between"
-        >
-            <Grid item>
-                <Tooltip title={'Все физ. лица'}>
-                    <Link to="/customers">
-                        <IconButton>
-                            <ArrowBackIcon/>
+        {props.remove
+            ? <Grid container
+                    style={{margin: '1rem'}}
+                    justify="space-between"
+            >
+                <Grid item>
+                    <Tooltip title={'Все физ. лица'}>
+                        <Link to="/customers">
+                            <IconButton>
+                                <ArrowBackIcon/>
+                            </IconButton>
+                        </Link>
+                    </Tooltip>
+                </Grid>
+                <Grid item>
+                    <Tooltip title="Удалить">
+                        <IconButton
+                            onClick={() => props.remove()}
+                        >
+                            <DeleteIcon/>
                         </IconButton>
-                    </Link>
-                </Tooltip>
+                    </Tooltip>
+                    <Tooltip title={
+                        isDetails
+                            ? ''
+                            : 'Подробнее'
+                    }>
+                        <IconButton
+                            onClick={() => setDetails(!isDetails)}
+                        >
+                            {isDetails
+                                ? <ExpandLessIcon/>
+                                : <ExpandMoreIcon/>
+                            }
+                        </IconButton>
+                    </Tooltip>
+                </Grid>
             </Grid>
-            <Grid item>
-                <Tooltip title="Удалить">
-                    <IconButton
-                        onClick={() => props.remove()}
-                    >
-                        <DeleteIcon/>
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title={
-                    isDetails
-                        ? ''
-                        : 'Подробнее'
-                }>
-                    <IconButton
-                        onClick={() => setDetails(!isDetails)}
-                    >
-                        {isDetails
-                            ? <ExpandLessIcon/>
-                            : <ExpandMoreIcon/>
-                        }
-                    </IconButton>
-                </Tooltip>
-            </Grid>
-        </Grid>
+            : null}
 
         <Grid item xs={12}>
             {
@@ -71,9 +73,9 @@ const View = props => {
                     .filter(field => isDetails || ['fio', 'phone_number'].includes(field.name))
                     .map(field => {
 
-                        // console.log(props.customer[field.name])
+                            // console.log(props.customer[field.name])
 
-                        return field.name === 'referal_id'
+                            return field.name === 'referal_id'
                                 ? <ReferalSelect
                                     key={'customerfieldskey' + field.name}
                                     value={props.customer[field.name]}
@@ -87,7 +89,7 @@ const View = props => {
                                     key={'customerfieldskey' + field.name + field.index + field.value}
                                     type={types[field.name] || 'text'}
                                     label={field.value}
-                                    value={props.customer[field.name]|| ''}
+                                    value={props.customer[field.name] || ''}
                                     onChange={e => props.handleChange(field.name, e.target.value)}
                                 />
                         }
@@ -95,13 +97,15 @@ const View = props => {
             }
         </Grid>
 
-        {BottomButtons(props.customer.id === undefined
-            ? props.create
-            : props.update,
-            props.reset,
-            props.disabled,
-            props.customer.id === undefined
-        )}
+        {props.remove
+            ? BottomButtons(props.customer.id === undefined
+                ? props.create
+                : props.update,
+                props.reset,
+                props.disabled,
+                props.customer.id === undefined
+            )
+            : null}
 
     </Grid>
 

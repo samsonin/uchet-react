@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const Prepaid = ({isOpen, close, row, disabled = false}) => {
+export default function ({isOpen, close, row, disabled = false, stock_id}) {
 
     const classes = useStyles();
     const {enqueueSnackbar} = useSnackbar()
@@ -52,7 +52,7 @@ const Prepaid = ({isOpen, close, row, disabled = false}) => {
     const [item, setItem] = useState('')
     const [presum, setPresum] = useState(0)
     const [sum, setSum] = useState(0)
-    const [customerId, setCustomerId] = useState(0)
+    const [customer, setCustomer] = useState({})
     const [status, setStatus] = useState('')
     const [note, setNote] = useState('')
 
@@ -61,7 +61,7 @@ const Prepaid = ({isOpen, close, row, disabled = false}) => {
         setItem('')
         setPresum(0)
         setSum(0)
-        setCustomerId(0)
+        setCustomer({})
         setStatus('')
         setNote('')
     }
@@ -71,25 +71,47 @@ const Prepaid = ({isOpen, close, row, disabled = false}) => {
         console.log('row', row)
 
         if (row) {
+
             setItem(row.item)
             setPresum(row.presum)
             setSum(row.sum)
-            setCustomerId(row.customer_id)
             setStatus(row.status)
             setNote(row.note)
+
+            if (row.customer_id) {
+                rest('customers/' + row.customer_id)
+                    .then(res => {
+                        if (res.status === 200 && res.body) {
+                            setCustomer(res.body)
+                        }
+                    })
+            } else {
+                setCustomer({})
+            }
+
         } else {
             reset()
         }
 
     }, [row, isOpen])
 
+    useEffect(() => {
+
+        console.log('customer', customer)
+
+    }, [customer])
+
     const save = () => {
 
-        rest('zakaz/', 'POST', {
-
+        rest('zakaz/' + stock_id, 'POST', {
+            item,
+            presum,
+            sum,
+            customer,
+            note
         })
             .then(res => {
-
+                enqueueSnackbar(res.status)
             })
 
     }
@@ -151,9 +173,8 @@ const Prepaid = ({isOpen, close, row, disabled = false}) => {
 
             <div className={classes.field}>
                 <CustomersSelect
-                    customerId={0}
-                    setCustomerId={() => {
-                    }}
+                    customer={customer}
+                    setCustomer={setCustomer}
                 />
             </div>
 
@@ -211,5 +232,3 @@ const Prepaid = ({isOpen, close, row, disabled = false}) => {
 
     </Dialog>
 }
-
-export default Prepaid

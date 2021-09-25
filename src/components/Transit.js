@@ -85,6 +85,7 @@ const Transit = props => {
 
     return props.transit
         ? <>
+
             <MDBContainer>
                 <MDBModal isOpen={infoOpen} toggle={() => setInfoOpen(false)}>
                     <MDBModalHeader toggle={() => setInfoOpen(false)}>
@@ -121,6 +122,7 @@ const Transit = props => {
                     </MDBModalFooter>
                 </MDBModal>
             </MDBContainer>
+
             <TableContainer component={Paper}>
                 <Table size="small">
                     <TableHead>
@@ -129,14 +131,15 @@ const Transit = props => {
                                 #
                             </TableCell>
                             <TableCell>
+                                Категория
+                            </TableCell>
+                            <TableCell>
                                 Наименование
                             </TableCell>
                             <TableCell>
                                 откуда
                             </TableCell>
-                            <TableCell>
-                                действия
-                            </TableCell>
+                            {!!props.stock_id && <TableCell/>}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -145,6 +148,7 @@ const Transit = props => {
                             good.id = +good.barcode.toString().substr(6, 6)
                             let stock = props.stocks.find(st => st.id === good.stock_id)
                             let user = props.users.find(u => u.id === good.responsible_id)
+                            let category = props.categories.find(c => c.id === good.category_id)
 
                             good.c = ''
 
@@ -156,12 +160,21 @@ const Transit = props => {
                                 ? user.name
                                 : ''
 
+                            good.category = category
+                                ? category.name
+                                : 'нет'
+
                             return <TableRow
                                 key={'tablerowintransitkey' + good.barcode}
                                 className={good.c}
+                                onClick={() => getInfo(good)}
+                                style={{cursor: 'pointer'}}
                             >
                                 <TableCell>
                                     {good.id}
+                                </TableCell>
+                                <TableCell>
+                                    {good.category}
                                 </TableCell>
                                 <TableCell>
                                     {good.model}
@@ -169,34 +182,24 @@ const Transit = props => {
                                 <TableCell>
                                     {good.stock}
                                 </TableCell>
-                                <TableCell>
-                                    <Tooltip title="Информация">
+                                {!!props.stock_id && <TableCell>
+                                    <Tooltip title="Принять">
                                         <IconButton
                                             style={{padding: '0.2rem'}}
-                                            onClick={() => getInfo(good)}
+                                            onClick={e => fromTransit(e, good)}
                                         >
-                                            <InfoOutlinedIcon/>
+                                            <CheckIcon/>
                                         </IconButton>
                                     </Tooltip>
-                                    {props.stock_id
-                                        ? <Tooltip title="Принять">
-                                            <IconButton
-                                                style={{padding: '0.2rem'}}
-                                                onClick={e => fromTransit(e, good)}
-                                            >
-                                                <CheckIcon/>
-                                            </IconButton>
-                                        </Tooltip>
-                                        : ''}
-                                </TableCell>
+                                </TableCell>}
                             </TableRow>
                         })}
                     </TableBody>
                 </Table>
             </TableContainer>
+
         </>
         : <h5>Загружаем данные...</h5>
-
 }
 
 export default connect(state => (state.app), mapDispatchToProps)(Transit);

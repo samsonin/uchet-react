@@ -265,6 +265,7 @@ const Daily = props => {
                     setRow(null)
                 }}
                 row={row}
+                stock_id={props.app.stock_id}
             />
 
             <SaleModal

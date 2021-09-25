@@ -1,6 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
 
-import EditIcon from '@material-ui/icons/Edit';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import SearchIcon from '@material-ui/icons/Search';
 import Table from "@material-ui/core/Table";
@@ -20,7 +19,7 @@ import TableContainer from "@material-ui/core/TableContainer";
 
 import rest from "./Rest";
 
-export default function () {
+export default function (props) {
 
     const [search, setSearch] = useState('')
     const [customers, setCustomers] = useState()
@@ -55,23 +54,20 @@ export default function () {
 
     const renderBody = () => customers
 
-        ? customers.map(c => search === '' ||
+        ? customers.map(c => !search ||
         (c.fio.indexOf(search) > -1) ||
         (c.phone_number.indexOf(search) > -1)
-            ? <TableRow key={'teblerowcust' + c.id}>
+            ? <TableRow
+                key={'teblerowcust' + c.id}
+                onClick={() => props.history.push('/customers/' + c.id)}
+                style={{
+                    cursor: 'pointer'
+                }}
+            >
                 <TableCell>{c.fio}</TableCell>
                 <TableCell>{c.phone_number}</TableCell>
-                <TableCell>
-                    <Tooltip title="Редактировать">
-                        <Link to={"/customers/" + c.id}>
-                            <IconButton>
-                                <EditIcon/>
-                            </IconButton>
-                        </Link>
-                    </Tooltip>
-                </TableCell>
             </TableRow>
-            : '')
+            : null)
 
         : <TableRow>
             <TableCell colSpan={3}>
@@ -92,18 +88,14 @@ export default function () {
                             </TableCell>
                             <TableCell colSpan={2}>
                                 <Input
+                                    id={'searchCustomerString'}
+                                    name={'searchCustomerString'}
                                     onChange={e => handleSearch(e.target.value)}
                                     endAdornment={
                                         <InputAdornment position="end">
                                             <SearchIcon/>
                                         </InputAdornment>
                                     }/>
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>ФИО</TableCell>
-                            <TableCell>Номер телефона</TableCell>
-                            <TableCell>
                                 <Tooltip title="Добавить">
                                     <Link to="/customers/0">
                                         <IconButton>
@@ -112,6 +104,10 @@ export default function () {
                                     </Link>
                                 </Tooltip>
                             </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>ФИО</TableCell>
+                            <TableCell>Номер телефона</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>

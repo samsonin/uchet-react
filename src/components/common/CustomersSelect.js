@@ -3,12 +3,13 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import TextField from "@material-ui/core/TextField/TextField";
 import TableCell from "@material-ui/core/TableCell";
 import rest from "../Rest";
+import View from "../customer/View";
 
 const initialValue = []
 
 export default function (props) {
 
-    const {customerId, setCustomerId} = props
+    const {customer, setCustomer} = props
 
     const request = useRef(false)
 
@@ -19,21 +20,17 @@ export default function (props) {
 
     useEffect(() => {
 
-        if (customerId) {
-            rest('customers/' + customerId)
-                .then(res => {
-                    if (res.status === 200 && res.body) {
-                        setFio(res.body.fio)
-                        setPhone(res.body.phone_number)
-                    }
-                })
-        } else {
-            setValue('')
-        }
+        console.log('value', value)
 
-    }, [customerId])
+        setCustomer(value)
+
+    }, [value])
 
     const handler = (name, reason) => {
+
+        // if (reason === 'reset') {
+        //     console.log(name, reason)
+        // }
 
         if (reason !== 'input' || name.length < 4 || request.current) return
 
@@ -49,16 +46,19 @@ export default function (props) {
 
     }
 
-
-    return <Autocomplete
-        value={value}
-        options={customers}
-        loading={request.current}
-        onInputChange={(e, v, r) => handler(v, r)}
-        onChange={(e, v) => setValue(v)}
-        getOptionLabel={option => option ? option.fio + ' ' + option.phone_number : ''}
-        getOptionSelected={option => option.name}
-        renderInput={params => <TextField {...params} label="Заказчик"/>}
-    />
-
+    return <>
+        <Autocomplete
+            value={value}
+            options={customers}
+            loading={request.current}
+            onInputChange={(e, v, r) => handler(v, r)}
+            onChange={(e, v) => setValue(v)}
+            getOptionLabel={option => option ? option.fio + ' ' + option.phone_number : ''}
+            getOptionSelected={option => option.id}
+            renderInput={params => <TextField {...params} label="Заказчик"/>}
+        />
+        {customer && customer.id && <View
+            customer={customer}
+            />}
+    </>
 }
