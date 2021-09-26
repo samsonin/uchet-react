@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useState} from "react";
+import React, {forwardRef, useEffect, useRef, useState} from "react";
 
 import rest from "../../components/Rest";
 import Dialog from "@material-ui/core/Dialog";
@@ -34,7 +34,7 @@ const Transition = forwardRef(function Transition(props, ref) {
 const useStyles = makeStyles((theme) => ({
     field: {
         margin: '1rem .3rem',
-        width: '90%'
+        width: '100%'
     },
     closeButton: {
         position: 'absolute',
@@ -44,6 +44,14 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+const needleCustomerFields = ['id', 'fio', 'phone_number']
+
+const initCustomer = {
+    id: 0,
+    phone_number: '',
+    fio: '',
+}
+
 export default function ({isOpen, close, row, disabled = false, stock_id}) {
 
     const classes = useStyles();
@@ -52,8 +60,8 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
     const [item, setItem] = useState('')
     const [presum, setPresum] = useState(0)
     const [sum, setSum] = useState(0)
-    const [customer, setCustomer] = useState({})
-    const [status, setStatus] = useState('')
+    const [customer, setCustomer] = useState(initCustomer)
+    const [status, setStatus] = useState(statuses[0])
     const [note, setNote] = useState('')
 
 
@@ -61,32 +69,43 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
         setItem('')
         setPresum(0)
         setSum(0)
-        setCustomer({})
-        setStatus('')
+        setCustomer(initCustomer)
+        setStatus(statuses[0])
         setNote('')
     }
 
     useEffect(() => {
 
-        console.log('row', row)
-
         if (row) {
 
             setItem(row.item)
-            setPresum(row.presum)
-            setSum(row.sum)
-            setStatus(row.status)
+            setPresum(row.sum)
             setNote(row.note)
 
-            if (row.customer_id) {
-                rest('customers/' + row.customer_id)
-                    .then(res => {
-                        if (res.status === 200 && res.body) {
-                            setCustomer(res.body)
-                        }
-                    })
-            } else {
-                setCustomer({})
+            try {
+
+                const wf = JSON.parse(row.wf)
+
+                if (wf.zakaz) {
+                    rest('zakaz/' + wf.zakaz)
+                        .then(res => {
+                            if (res.status === 200 && res.body) {
+
+                                setSum(res.body.sum)
+                                setStatus(res.body.status)
+
+                                needleCustomerFields.map(f => updateCustomer(f, res.body.customer[f]))
+
+                            }
+                        })
+                } else {
+
+                    enqueueSnackbar('не удалось загрузить предоплату', {variant: 'error'})
+
+                }
+
+            } catch (e) {
+                enqueueSnackbar('не удалось определить предоплату', {variant: 'error'})
             }
 
         } else {
@@ -111,7 +130,12 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
             note
         })
             .then(res => {
-                enqueueSnackbar(res.status)
+
+                if (res.status === 200) {
+                    exit()
+                } else {
+                    enqueueSnackbar(res.status)
+                }
             })
 
     }
@@ -124,6 +148,22 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
 
         reset()
         close()
+
+    }
+
+    const updateCustomer = (name, val) => {
+
+        if (needleCustomerFields.includes(name)) {
+
+            setCustomer(prev => {
+
+                const newState = {...prev}
+                newState[name] = val
+                return newState
+
+            })
+
+        }
 
     }
 
@@ -171,16 +211,16 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
                        onChange={e => setSum(+e.target.value)}
             />
 
-            <div className={classes.field}>
-                <CustomersSelect
-                    customer={customer}
-                    setCustomer={setCustomer}
-                />
-            </div>
+            <CustomersSelect
+                customer={customer}
+                updateCustomer={updateCustomer}
+            />
 
             {row
                 ? <FormControl className={classes.field}>
-                    <InputLabel id="prepaid-status-control-select-label">Статус</InputLabel>
+                    <InputLabel id="prepaid-status-control-select-label">
+                        Статус
+                    </InputLabel>
                     <Select
                         labelId="prepaid-status-control-select-label"
                         disabled={disabled}
@@ -188,10 +228,6 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
                         onChange={e => setStatus(e.target.value)}
                         label="Статус"
                     >
-                        <MenuItem key={'menustatusinprepaidkey0'}
-                                  value={0}>
-                            <br/>
-                        </MenuItem>
                         {statuses.map(s => <MenuItem key={'menustatusinprepaidkey' + s}
                                                      value={s}>
                             {s}

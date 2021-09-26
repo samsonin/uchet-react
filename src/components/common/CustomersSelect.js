@@ -1,64 +1,66 @@
 import React, {useEffect, useRef, useState} from 'react'
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import TextField from "@material-ui/core/TextField/TextField";
-import TableCell from "@material-ui/core/TableCell";
 import rest from "../Rest";
-import View from "../customer/View";
 
-const initialValue = []
 
 export default function (props) {
 
-    const {customer, setCustomer} = props
-
     const request = useRef(false)
 
-    const [customers, setCustomers] = useState(initialValue)
-    const [value, setValue] = useState('')
-    const [fio, setFio] = useState('')
-    const [phone, setPhone] = useState('')
+    const [customers, setCustomers] = useState([])
+    const [value, setValue] = useState({})
 
     useEffect(() => {
 
-        console.log('value', value)
+        setValue(props.customer)
+        setCustomers([])
 
-        setCustomer(value)
+    }, [props.customer])
 
-    }, [value])
+    const handlerInput = (val, reason, name) => {
 
-    const handler = (name, reason) => {
+        if (reason !== 'input') return
 
-        // if (reason === 'reset') {
-        //     console.log(name, reason)
-        // }
+        props.updateCustomer(name, val)
 
-        if (reason !== 'input' || name.length < 4 || request.current) return
+        if (val.length < 4 || request.current) return
 
         request.current = true;
 
-        rest('customers?all=' + name)
+        rest('customers?all=' + val)
             .then(res => {
                 if (res.ok) {
-                    setCustomers(res.body ? res.body : initialValue)
+                    setCustomers(res.body ? res.body : [])
                 }
                 request.current = false;
             })
 
     }
 
+    const handler = val => {
+        setValue(val)
+        setCustomers([])
+    }
+
     return <>
-        <Autocomplete
+        {[
+            {name: 'phone_number', label: 'Телефон заказчика', margin: '1rem .3rem 3rem .3rem'},
+            {name: 'fio', label: 'ФИО заказчика', margin: '1rem .3rem 2rem .3rem'},
+        ].map(f => <Autocomplete
+            key={'customerselectkeyincustselect' + f.label}
+            style={{
+                margin: f.margin,
+                width: '100%'
+            }}
             value={value}
             options={customers}
             loading={request.current}
-            onInputChange={(e, v, r) => handler(v, r)}
-            onChange={(e, v) => setValue(v)}
-            getOptionLabel={option => option ? option.fio + ' ' + option.phone_number : ''}
-            getOptionSelected={option => option.id}
-            renderInput={params => <TextField {...params} label="Заказчик"/>}
-        />
-        {customer && customer.id && <View
-            customer={customer}
-            />}
+            onInputChange={(e, v, r) => handlerInput(v, r, f.name)}
+            onChange={(e, v) => handler(v)}
+            getOptionLabel={option => option ? option[f.name] || '' : ''}
+            getOptionSelected={option => option.id === props.customer.id}
+            renderInput={params => <TextField {...params} label={f.label}/>}
+        />)}
     </>
 }
