@@ -52,11 +52,30 @@ const initCustomer = {
     fio: '',
 }
 
+const sale = {
+    item: '',
+    sum: 0,
+    zakaz: {
+        id: 0,
+        item: '',
+        sum: '',
+        customer_id: '',
+        note: ''
+    },
+    customer: {
+        id: 0,
+        phone_number: '',
+        fio: '',
+    },
+    note: ''
+}
+
 export default function ({isOpen, close, row, disabled = false, stock_id}) {
 
     const classes = useStyles();
     const {enqueueSnackbar} = useSnackbar()
 
+    const [id, setId] = useState(0)
     const [item, setItem] = useState('')
     const [presum, setPresum] = useState(0)
     const [sum, setSum] = useState(0)
@@ -114,29 +133,46 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
 
     }, [row, isOpen])
 
-    useEffect(() => {
-
-        console.log('customer', customer)
-
-    }, [customer])
+    // useEffect(() => {
+    //
+    //     console.log('customer', customer)
+    //
+    // }, [customer])
 
     const save = () => {
 
-        rest('zakaz/' + stock_id, 'POST', {
-            item,
-            presum,
-            sum,
-            customer,
-            note
-        })
+        let error;
+
+        if (!item) error = 'Укажите наименование'
+        else if (customer === initCustomer) error = 'Не указан заказчик'
+        else if (sum < 1) error = 'Окончательная стоимость должна быть больше 0'
+
+        if (error) return enqueueSnackbar(error, {variant: 'error'})
+
+
+        let url = 'zakaz/' + stock_id
+
+        if (id) url += '/' + id
+
+        rest(url,
+            id ? 'PATCH' : 'POST',
+            {item, presum, sum, customer, note})
             .then(res => {
 
-                if (res.status === 200) {
-                    exit()
-                } else {
-                    enqueueSnackbar(res.status)
+                    console.log(res)
+
+                    if (res.status === 200) {
+                        exit()
+                    } else {
+                        enqueueSnackbar((res.status || '') + ' ' + (res.body
+                            ? res.body[0].toString()
+                            : 'error'),
+                            {variant: 'error'}
+                        )
+                    }
+
                 }
-            })
+            )
 
     }
 
@@ -175,8 +211,6 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
     >
         <DialogTitle>
 
-            {row ? '#' + row.id : ''}
-
             Предоплата
 
             <IconButton aria-label="close" className={classes.closeButton}
@@ -213,6 +247,7 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
 
             <CustomersSelect
                 customer={customer}
+                needleCustomerFields={needleCustomerFields}
                 updateCustomer={updateCustomer}
             />
 

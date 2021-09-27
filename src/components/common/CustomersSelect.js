@@ -40,19 +40,36 @@ export default function (props) {
 
     const handler = val => {
         setValue(val)
+        if (!val) val = {
+            id: 0,
+            fio: '',
+            phone_number: ''
+        }
+        props.needleCustomerFields.map(f => props.updateCustomer(f, val[f]))
         setCustomers([])
     }
 
-    return <>
+    return <div
+        style={{
+            backgroundColor: '#e2f6e2',
+            padding: '1rem'
+        }}
+    >
+        <div style={{
+            textDecoration: 'bold',
+        }}>
+            {props.customer.id
+                ? 'Заказчик из базы'
+                : 'Новый заказчик'
+            }
+        </div>
         {[
-            {name: 'phone_number', label: 'Телефон заказчика', margin: '1rem .3rem 3rem .3rem'},
-            {name: 'fio', label: 'ФИО заказчика', margin: '1rem .3rem 2rem .3rem'},
+            {name: 'phone_number', label: 'Телефон', margin: '1rem .3rem 3rem .3rem'},
+            {name: 'fio', label: 'ФИО', margin: '1rem .3rem 2rem .3rem'},
         ].map(f => <Autocomplete
             key={'customerselectkeyincustselect' + f.label}
-            style={{
-                margin: f.margin,
-                width: '100%'
-            }}
+            style={{margin: f.margin}}
+            fullWidth
             value={value}
             options={customers}
             loading={request.current}
@@ -62,5 +79,5 @@ export default function (props) {
             getOptionSelected={option => option.id === props.customer.id}
             renderInput={params => <TextField {...params} label={f.label}/>}
         />)}
-    </>
+    </div>
 }
