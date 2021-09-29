@@ -52,29 +52,28 @@ const initCustomer = {
     fio: '',
 }
 
-const sale = {
+const zakaz = {
+    sale_id: 0, // если редактируется
+    id: 0, // если редактируется
     item: '',
+    presum: 0,
     sum: 0,
-    zakaz: {
-        id: 0,
-        item: '',
-        sum: '',
-        customer_id: '',
-        note: ''
-    },
     customer: {
-        id: 0,
+        id: 0, // если редактируется
         phone_number: '',
         fio: '',
     },
+    status: '', // если редактируется
     note: ''
 }
+
 
 export default function ({isOpen, close, row, disabled = false, stock_id}) {
 
     const classes = useStyles();
     const {enqueueSnackbar} = useSnackbar()
 
+    const [saleId, setSaleId] = useState(0)
     const [id, setId] = useState(0)
     const [item, setItem] = useState('')
     const [presum, setPresum] = useState(0)
@@ -83,8 +82,9 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
     const [status, setStatus] = useState(statuses[0])
     const [note, setNote] = useState('')
 
-
     const reset = () => {
+        setSaleId(0)
+        setId(0)
         setItem('')
         setPresum(0)
         setSum(0)
@@ -97,6 +97,7 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
 
         if (row) {
 
+            setSaleId(row.id)
             setItem(row.item)
             setPresum(row.sum)
             setNote(row.note)
@@ -110,17 +111,18 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
                         .then(res => {
                             if (res.status === 200 && res.body) {
 
+                                setId(+wf.zakaz || res.body.id)
+                                setItem(res.body.item)
+                                setPresum(res.body.presum)
                                 setSum(res.body.sum)
                                 setStatus(res.body.status)
-
                                 needleCustomerFields.map(f => updateCustomer(f, res.body.customer[f]))
+                                setNote(res.body.note)
 
                             }
                         })
                 } else {
-
                     enqueueSnackbar('не удалось загрузить предоплату', {variant: 'error'})
-
                 }
 
             } catch (e) {
@@ -149,14 +151,13 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
 
         if (error) return enqueueSnackbar(error, {variant: 'error'})
 
-
         let url = 'zakaz/' + stock_id
+        const data = {item, presum, sum, customer, status, note}
 
         if (id) url += '/' + id
+        if (saleId) data.sale_id = saleId
 
-        rest(url,
-            id ? 'PATCH' : 'POST',
-            {item, presum, sum, customer, note})
+        rest(url, id ? 'PATCH' : 'POST', data)
             .then(res => {
 
                     console.log(res)
