@@ -25,6 +25,7 @@ const statuses = [
     'Заказали',
     'В магазине',
     'Ждем Клиента',
+    'Надо заказать'
 ]
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -68,7 +69,7 @@ const zakaz = {
 }
 
 
-export default function ({isOpen, close, row, disabled = false, stock_id}) {
+export default function ({isOpen, close, row, stock_id}) {
 
     const classes = useStyles();
     const {enqueueSnackbar} = useSnackbar()
@@ -81,6 +82,8 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
     const [customer, setCustomer] = useState(initCustomer)
     const [status, setStatus] = useState(statuses[0])
     const [note, setNote] = useState('')
+
+    const [disabled, setDisabled] = useState(false)
 
     const reset = () => {
         setSaleId(0)
@@ -97,6 +100,8 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
 
         if (row) {
 
+            setDisabled(true)
+
             setSaleId(row.id)
             setItem(row.item)
             setPresum(row.sum)
@@ -110,6 +115,8 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
                     rest('zakaz/' + wf.zakaz)
                         .then(res => {
                             if (res.status === 200 && res.body) {
+
+                                setDisabled(!statuses.includes(res.body.status))
 
                                 setId(+wf.zakaz || res.body.id)
                                 setItem(res.body.item)
@@ -157,12 +164,16 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
         if (id) url += '/' + id
         if (saleId) data.sale_id = saleId
 
+        setDisabled(true)
+
         rest(url, id ? 'PATCH' : 'POST', data)
             .then(res => {
 
-                    console.log(res)
+                    // console.log(res)
 
-                    if (res.status === 200) {
+                setDisabled(false)
+
+                if (res.status === 200) {
                         exit()
                     } else {
                         enqueueSnackbar((res.status || '') + ' ' + (res.body
@@ -248,6 +259,7 @@ export default function ({isOpen, close, row, disabled = false, stock_id}) {
 
             <CustomersSelect
                 customer={customer}
+                disabled={disabled}
                 needleCustomerFields={needleCustomerFields}
                 updateCustomer={updateCustomer}
             />

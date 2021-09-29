@@ -68,6 +68,7 @@ export default function (props) {
             {name: 'fio', label: 'ФИО', margin: '1rem .3rem 2rem .3rem'},
         ].map(f => <Autocomplete
             key={'customerselectkeyincustselect' + f.label}
+            disabled={props.disabled}
             style={{margin: f.margin}}
             fullWidth
             value={value}
