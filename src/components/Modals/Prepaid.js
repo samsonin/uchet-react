@@ -171,9 +171,9 @@ export default function ({isOpen, close, row, stock_id}) {
 
                     // console.log(res)
 
-                setDisabled(false)
+                    setDisabled(false)
 
-                if (res.status === 200) {
+                    if (res.status === 200) {
                         exit()
                     } else {
                         enqueueSnackbar((res.status || '') + ' ' + (res.body
@@ -189,6 +189,18 @@ export default function ({isOpen, close, row, stock_id}) {
     }
 
     const del = () => {
+
+        rest('zakaz/' + stock_id + '/' + id, 'DELETE')
+            .then(res => {
+
+                if (res.status === 200) {
+                    enqueueSnackbar('возврат записан', {variant: 'success'})
+                    exit()
+                } else {
+                    enqueueSnackbar('ошибка', {variant: 'error'})
+                }
+
+            })
 
     }
 
