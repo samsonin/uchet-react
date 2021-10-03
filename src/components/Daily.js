@@ -182,8 +182,6 @@ const Daily = props => {
 
         if (modalType === 'Предоплаты') {
 
-            console.log('Предоплаты')
-
             setIsPrepaidOpen(true)
 
         } else if (row) {
@@ -208,6 +206,29 @@ const Daily = props => {
                     console.log(e)
 
                 }
+
+            } else if (row.action === '0') {
+
+                console.log('Работы, услуги')
+
+                try {
+
+                    const wf = JSON.parse(row.wf)
+
+                    if (wf.rem_id) {
+
+                        return console.log('открыть заказ ' + wf.rem_id)
+
+                    }
+
+                } catch (e) {
+
+                    console.log(e)
+
+                }
+
+                setIsDailyModalOpen(true)
+
             } else {
 
                 setIsDailyModalOpen(true)
@@ -258,7 +279,7 @@ const Daily = props => {
         />
         : <>
 
-            <PrepaidModal
+            {isPrepaidOpen && <PrepaidModal
                 isOpen={isPrepaidOpen}
                 close={() => {
                     setIsPrepaidOpen(false)
@@ -266,18 +287,18 @@ const Daily = props => {
                 }}
                 row={row}
                 stock_id={props.app.stock_id}
-            />
+            />}
 
-            <SaleModal
+            {isSaleOpen && <SaleModal
                 isOpen={isSaleOpen}
                 close={() => {
                     setIsSaleOpen(false)
                     setRow(null)
                 }}
                 row={row}
-            />
+            />}
 
-            <DailyModal
+            {isDailyModalOpen && <DailyModal
                 type={modalType}
                 isOpen={isDailyModalOpen}
                 close={() => {
@@ -287,7 +308,7 @@ const Daily = props => {
                 row={row}
                 disabled={!canChange}
                 afterRes={afterRes}
-            />
+            />}
 
             <Grid container
                   justify={'center'}

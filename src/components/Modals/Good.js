@@ -1,9 +1,8 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import {upd_app} from "../../actions/actionCreator";
 import {
-    MDBBtn,
     MDBIcon,
     MDBInput,
     MDBInputGroup,
@@ -23,6 +22,7 @@ import {useSnackbar} from "notistack";
 
 import rest from '../Rest'
 import Tree from "../Tree";
+import {TextField} from "@material-ui/core";
 // import {Barcodes} from '../Barcodes'
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -49,8 +49,15 @@ const Good = props => {
 
     const [treeOpen, setTreeOpen] = useState(false)
     const [orderId, setOrderId] = useState()
+    const [sum, setSum] = useState(0)
 
     const {enqueueSnackbar} = useSnackbar()
+
+    useEffect(() => {
+
+        setSum(props.good.sum)
+
+    }, [props.good.sum])
 
     const getStockName = stockId => {
         let stock = props.app.stocks.find(v => +v.id === +stockId);
@@ -97,6 +104,27 @@ const Good = props => {
 
         }
 
+
+    }
+
+    const toSale = () => {
+
+        let url = 'sales/' + props.app.stock_id + '/' + good.barcode + '/' + sum
+
+        rest(url, 'POST')
+            .then(res => {
+                if (res.status === 200) {
+
+                    enqueueSnackbar('продано!', {variant: 'success'})
+                    props.upd_app(res.body)
+                    props.close()
+
+                } else {
+
+                    enqueueSnackbar('не удалось продать', {variant: 'error'})
+
+                }
+            })
 
     }
 
@@ -163,6 +191,8 @@ const Good = props => {
         ? props.app.categories.find(v => v.id === good.category_id).name
         : 'Выбрать...'
 
+    const editable = !good.wo && good.stock_id === props.app.stock_id
+
     return <MDBModal
         isOpen={good.id !== undefined}
         centered
@@ -185,7 +215,7 @@ const Good = props => {
                                 <i className="fas fa-truck"/>
                             </IconButton>
                         </Tooltip>
-                        : good.wo === ''
+                        : editable
                             ? <>
                                 {isBarcodePrinted
                                     ? <Tooltip title="Штрихкод">
@@ -268,47 +298,55 @@ const Good = props => {
             </Grid>
 
             <MDBInput label="Наименование" size="lg" valueDefault={good.model}
-                      disabled={good.wo !== ''}
+                      disabled={!editable}
             />
 
             {good.imei
                 ? <MDBInput label="imei" valueDefault={good.imei}
-                            disabled={good.wo !== ''}
+                            disabled={!editable}
                 />
                 : ''
             }
 
-            {props.app.stock_id && !good.wo
+            {editable
                 ? <>
-                    <MDBInputGroup
-                        material
-                        // onChange={e => setOrderId(e.target.value)}
 
-                        onChange={() => console.log('onChange')}
+                    <div
+                        style={{
+                            width: '100%'
+                        }}
+                    >
+                        <TextField label="Номер заказа"
+                                   type="number"
+                                   disabled={!editable}
+                                   value={orderId}
+                                   onChange={e => setOrderId(+e.target.value)}
+                        />
 
-                        containerClassName="mb-3 mt-0"
-                        type="number"
-                        hint="Введите номер заказа"
+                        <Button onClick={() => toOrder()}
+                                color="primary">
+                            Внести в заказ
+                        </Button>
+                    </div>
 
-                        append={
-                            <MDBBtn className="m-0 px-3 py-2 z-depth-0"
-                                    onClick={() => toOrder()}>
-                                Внести в заказ
-                            </MDBBtn>
-                        }
-                    />
-                    <MDBInputGroup
-                        material
-                        containerClassName="mb-3 mt-0"
-                        type="number"
-                        valueDefault={good.sum}
-                        hint="Стоимость"
-                        append={
-                            <MDBBtn className="m-0 px-3 py-2 z-depth-0">
-                                продать
-                            </MDBBtn>
-                        }
-                    />
+                    <div
+                        style={{
+                            width: '100%'
+                        }}
+                    >
+                        <TextField label="Цена"
+                                   type="number"
+                                   disabled={!editable}
+                                   value={sum}
+                                   onChange={e => setSum(+e.target.value)}
+                        />
+
+                        <Button onClick={() => toSale()}
+                                color="primary">
+                            Продать
+                        </Button>
+                    </div>
+
                 </>
                 : ''}
 
@@ -332,7 +370,7 @@ const Good = props => {
 
             <MDBInput label="Точка" value={getStockName(good.stock_id)} disabled={true}/>
 
-            {good.wo === '' ? <>
+            {editable ? <>
                 <MDBInput label="Хранение" valueDefault={good.storage_place}
                           onChange={() => console.log('Хранение')}
                 />

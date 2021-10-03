@@ -28,6 +28,13 @@ const statuses = [
     'Надо заказать'
 ]
 
+const notEditableStatuses = {
+    refund: 'Возвращена',
+    left: 'Списана',
+    rem: 'В ремонте',
+    sale: 'Продали'
+}
+
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -53,20 +60,20 @@ const initCustomer = {
     fio: '',
 }
 
-const zakaz = {
-    sale_id: 0, // если редактируется
-    id: 0, // если редактируется
-    item: '',
-    presum: 0,
-    sum: 0,
-    customer: {
-        id: 0, // если редактируется
-        phone_number: '',
-        fio: '',
-    },
-    status: '', // если редактируется
-    note: ''
-}
+// const zakaz = {
+//     sale_id: 0, // если редактируется
+//     id: 0, // если редактируется
+//     item: '',
+//     presum: 0,
+//     sum: 0,
+//     customer: {
+//         id: 0, // если редактируется
+//         phone_number: '',
+//         fio: '',
+//     },
+//     status: '', // если редактируется
+//     note: ''
+// }
 
 
 export default function ({isOpen, close, row, stock_id}) {
@@ -76,6 +83,7 @@ export default function ({isOpen, close, row, stock_id}) {
 
     const [saleId, setSaleId] = useState(0)
     const [id, setId] = useState(0)
+    const [created, setCreated] = useState('')
     const [item, setItem] = useState('')
     const [presum, setPresum] = useState(0)
     const [sum, setSum] = useState(0)
@@ -88,6 +96,7 @@ export default function ({isOpen, close, row, stock_id}) {
     const reset = () => {
         setSaleId(0)
         setId(0)
+        setCreated('')
         setItem('')
         setPresum(0)
         setSum(0)
@@ -98,7 +107,7 @@ export default function ({isOpen, close, row, stock_id}) {
 
     useEffect(() => {
 
-        if (row) {
+        if (row && row.action === 'предоплата' && isOpen) {
 
             setDisabled(true)
 
@@ -116,13 +125,16 @@ export default function ({isOpen, close, row, stock_id}) {
                         .then(res => {
                             if (res.status === 200 && res.body) {
 
-                                setDisabled(!statuses.includes(res.body.status))
+                                const status = res.body.status === 'new' ? 'Новая' : res.body.status
+
+                                setDisabled(!statuses.includes(status))
 
                                 setId(+wf.zakaz || res.body.id)
+                                setCreated(res.body.time.substr(0, 10))
                                 setItem(res.body.item)
                                 setPresum(res.body.presum)
                                 setSum(res.body.sum)
-                                setStatus(res.body.status)
+                                setStatus(status)
                                 needleCustomerFields.map(f => updateCustomer(f, res.body.customer[f]))
                                 setNote(res.body.note)
 
@@ -141,12 +153,6 @@ export default function ({isOpen, close, row, stock_id}) {
         }
 
     }, [row, isOpen])
-
-    // useEffect(() => {
-    //
-    //     console.log('customer', customer)
-    //
-    // }, [customer])
 
     const save = () => {
 
@@ -168,8 +174,6 @@ export default function ({isOpen, close, row, stock_id}) {
 
         rest(url, id ? 'PATCH' : 'POST', data)
             .then(res => {
-
-                    // console.log(res)
 
                     setDisabled(false)
 
@@ -246,6 +250,12 @@ export default function ({isOpen, close, row, stock_id}) {
 
         <DialogContent>
 
+            {created
+                ? <DialogContentText>
+                    {'#' + id + ' от ' + created}
+                </DialogContentText>
+                : null}
+
             <TextField label="Наименование"
                        disabled={disabled}
                        className={classes.field}
@@ -277,23 +287,30 @@ export default function ({isOpen, close, row, stock_id}) {
             />
 
             {row
-                ? <FormControl className={classes.field}>
-                    <InputLabel id="prepaid-status-control-select-label">
-                        Статус
-                    </InputLabel>
-                    <Select
-                        labelId="prepaid-status-control-select-label"
-                        disabled={disabled}
-                        value={status}
-                        onChange={e => setStatus(e.target.value)}
+                ? statuses.includes(status)
+                    ? <FormControl className={classes.field}>
+                        <InputLabel id="prepaid-status-control-select-label">
+                            Статус
+                        </InputLabel>
+                        <Select
+                            labelId="prepaid-status-control-select-label"
+                            disabled={disabled}
+                            value={status}
+                            onChange={e => setStatus(e.target.value)}
+                            label="Статус"
+                        >
+                            {statuses.map(s => <MenuItem key={'menustatusinprepaidkey' + s}
+                                                         value={s}>
+                                {s}
+                            </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    : <TextField
                         label="Статус"
-                    >
-                        {statuses.map(s => <MenuItem key={'menustatusinprepaidkey' + s}
-                                                     value={s}>
-                            {s}
-                        </MenuItem>)}
-                    </Select>
-                </FormControl>
+                        disabled={disabled}
+                        className={classes.field}
+                        value={notEditableStatuses[status] || 'Не определен'}
+                    />
                 : ''}
 
             <TextField label="Примечание"
