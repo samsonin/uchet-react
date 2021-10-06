@@ -45,6 +45,17 @@ const weeks = Math.trunc(Date.now() / 1209600000) - 1
 const getDate1 = () => toString(weeks * 1209600 + 345600)
 const getDate2 = () => toString(weeks * 1209600 + 1468800)
 
+const itemToDate = item => {
+
+    const year = (new Date).getFullYear()
+
+    const dateFrom = year + '-' + item.substr( 3, 2) + '-' + item.substr( 0, 2)
+    const dateTo = year + '-' + item.substr( 9, 2) + '-' + item.substr( 6, 2)
+
+    return [dateFrom, dateTo]
+
+}
+
 const toZp = (date1, date2) => date1.substr(8, 2) + '.' + date1.substr(5, 2) + '-' +
     date2.substr(8, 2) + '.' + date2.substr(5, 2)
 
@@ -74,22 +85,23 @@ const DailyModal = props => {
     useEffect(() => {
 
         if (props.row) {
+
             setItem(props.row.item)
             setSum(props.row.sum)
             setEmployee(props.row.employee)
             setNote(props.row.note)
 
             if (props.type === 'Расходы, зарплата') {
+
                 setIsZp(props.row.action === 'зарплата')
 
                 if (props.row.action === 'зарплата') {
 
-                    console.log(props.row.item)
+                    const [dateFrom, dateTo] = itemToDate(props.row.item)
 
-                    // 09.08-22.08
+                    setDate1(dateFrom)
+                    setDate2(dateTo)
 
-                    setDate1('2021-09-14')
-                    setDate2('2021-09-15')
                 }
 
             }
@@ -98,9 +110,9 @@ const DailyModal = props => {
             reset()
         }
 
-        console.log('row', props.row)
-        console.log('type', props.type)
-        console.log('isZp', isZp)
+        // console.log('row in Modals/Daily', props.row)
+        // console.log('type in Modals/Daily', props.type)
+        // console.log('isZp in Modals/Daily', isZp)
 
     }, [props.row, props.isOpen])
 

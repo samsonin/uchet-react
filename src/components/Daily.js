@@ -174,8 +174,8 @@ const Daily = props => {
 
     const handler = (modalType, row) => {
 
-        console.log('modalType', modalType)
-        console.log('row', row)
+        // console.log('modalType', modalType)
+        // console.log('row', row)
 
         setModalType(modalType)
         setRow(row)
@@ -209,8 +209,6 @@ const Daily = props => {
 
             } else if (row.action === '0') {
 
-                console.log('Работы, услуги')
-
                 try {
 
                     const wf = JSON.parse(row.wf)
@@ -227,11 +225,9 @@ const Daily = props => {
 
                 }
 
-                setIsDailyModalOpen(true)
-
             } else {
 
-                setIsDailyModalOpen(true)
+                if (date === today) setIsDailyModalOpen(true)
 
             }
 
