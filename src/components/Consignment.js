@@ -159,7 +159,7 @@ const Consignment = props => {
 
         if (product) {
 
-            console.log('scanTr', scanTr)
+            // console.log('scanTr', scanTr)
 
             if (product.category_id) {
 
