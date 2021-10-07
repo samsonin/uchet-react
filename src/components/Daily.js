@@ -225,6 +225,24 @@ const Daily = props => {
 
                 }
 
+            } else if (['продали', 'вернули', 'купили', 'покупка', 'возврат'].includes(row.action)) {
+
+                console.log('открыть товар', row.good || row)
+
+            } else if (['в залог', 'выкупили'].includes(row.action)) {
+
+                try {
+
+                    const wf = JSON.parse(row.wf)
+
+                    if (wf.zalog_id) {
+                        console.log('открыть залог #', wf.zalog_id)
+                    }
+
+                } catch (e) {
+                    console.log(e)
+                }
+
             } else {
 
                 if (date === today) setIsDailyModalOpen(true)
@@ -459,6 +477,23 @@ const Daily = props => {
 
                                         }
 
+                                        if (row.action === 'зарплата' && v === 'note') {
+
+                                            let user = props.app.users.find(u => u.id === row.ui_user_id)
+
+                                            const userName = user
+                                                ? user.name
+                                                : row.ui_user_id
+
+                                            return <TableCell
+                                                key={'rowsintabledailysec' + v}
+                                            >
+                                                <span className="font-weight-bold pr-3">{userName}</span>
+                                                <br/>
+                                                {row.note}
+                                            </TableCell>
+                                        }
+
                                         return <TableCell
                                             key={'rowsintabledailysec' + v}
                                         >
@@ -565,4 +600,4 @@ const Daily = props => {
 
 }
 
-export default connect(state => state, mapDispatchToProps)(Daily);
+export default connect(state => state, mapDispatchToProps)(Daily)
