@@ -183,7 +183,12 @@ const App = props => {
                         <Route path="/subscribe" component={Subscribe}/>
 
                         {props.app.stocks[0] && <>
-                            <Route path="/daily" component={Daily}/>
+                            <Route path="/daily"
+                                   render={props => <Daily
+                                       setOurBarcode={setOurBarcode}
+                                       {...props}
+                                   />}
+                            />
                         </>}
 
                         <Route exact path="/customers" component={Customers}/>
@@ -196,7 +201,7 @@ const App = props => {
                         <Route path="/call_records" component={Records}/>
                         <Route path="/orders" component={Orders}/>
                         {/*<Route path="/order" component={Order}/>*/}
-                        <Route path="/queue" component={Queue}/>
+                        {props.app.users[0] && <Route path="/queue" component={Queue}/>}
 
                         {!props.app.stock_id || <>
                             <Route path="/arrival" render={props => <Consignment

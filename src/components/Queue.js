@@ -62,33 +62,47 @@ const Queue = (props) => {
 
     const renderTable = queue => <TableBody>
 
-        {queue.map(q => <TableRow key={'rowinqueuetablekey' + q.user_id}>
-            <TableCell>
-                {props.app.users.find(v => +v.id === q.user_id).name}
-            </TableCell>
-            <TableCell>
-                <MyFormControl variant="outlined">
-                    <Select onChange={e => pointChange(q.user_id, +e.target.value)}
-                            value={q.stock_id}
-                            disabled={request}
-                    >
-                        <MenuItem key={'queueselectstockskey' + q.user_id + '0'}
-                                  value={0}
-                        >
-                            <br/>
-                        </MenuItem>
+        {queue.map(q => {
 
-                        {q.allowed_stocks.map(as => <MenuItem
-                            key={'queueselectstockskeytest' + q.user_id + as}
-                            value={as}
-                        >
-                            {props.app.stocks.find(s => s.id === as).name}
-                        </MenuItem>)}
+            const user = props.app.users.find(u => +u.id === q.user_id)
 
-                    </Select>
-                </MyFormControl>
-            </TableCell>
-        </TableRow>)}
+            return user
+                ? <TableRow key={'rowinqueuetablekey' + q.user_id}>
+                    <TableCell>
+                        {user.name}
+                    </TableCell>
+                    <TableCell>
+                        <MyFormControl variant="outlined">
+                            <Select onChange={e => pointChange(q.user_id, +e.target.value)}
+                                    value={q.stock_id}
+                                    disabled={request}
+                            >
+                                <MenuItem key={'queueselectstockskey' + q.user_id + '0'}
+                                          value={0}
+                                >
+                                    <br/>
+                                </MenuItem>
+
+                                {q.allowed_stocks.map(as => {
+
+                                    const stock = props.app.stocks.find(s => s.id === as)
+                                    return stock
+                                        ? <MenuItem
+                                            key={'queueselectstockskeytest' + q.user_id + as}
+                                            value={as}
+                                        >
+                                            {stock.name}
+                                        </MenuItem>
+                                        : null
+                                })}
+
+                            </Select>
+                        </MyFormControl>
+                    </TableCell>
+                </TableRow>
+                : null
+
+        })}
 
     </TableBody>
 

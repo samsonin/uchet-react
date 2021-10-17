@@ -1,19 +1,14 @@
-import React, {useEffect, useState} from "react";
+import React, {forwardRef, useEffect, useState} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import {upd_app} from "../../actions/actionCreator";
-import {
-    MDBIcon,
-    MDBInput,
-    MDBInputGroup,
-    MDBModal,
-    MDBModalBody,
-    MDBModalHeader
-} from "mdbreact";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import DeleteIcon from '@material-ui/icons/Delete';
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash';
+import {Restore} from "@material-ui/icons";
+import LineWeightIcon from '@material-ui/icons/LineWeight';
+
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Button from "@material-ui/core/Button";
@@ -23,6 +18,12 @@ import {useSnackbar} from "notistack";
 import rest from '../Rest'
 import Tree from "../Tree";
 import {TextField} from "@material-ui/core";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import CloseIcon from "@material-ui/icons/Close";
+import Slide from "@material-ui/core/Slide";
+import {makeStyles} from "@material-ui/core/styles";
+import DialogContent from "@material-ui/core/DialogContent";
 // import {Barcodes} from '../Barcodes'
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -44,6 +45,30 @@ const woAlliases = {
     t: "В транзите",
 }
 
+const Transition = forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
+
+const useStyles = makeStyles((theme) => ({
+    field: {
+        margin: '1rem .3rem',
+        width: '100%'
+    },
+    halfField: {
+        margin: '1rem .3rem',
+        width: '50%'
+    },
+    button: {
+        margin: '2rem auto 0 auto',
+    },
+    closeButton: {
+        position: 'absolute',
+        right: theme.spacing(1),
+        top: theme.spacing(1),
+        color: theme.palette.grey[500],
+    }
+}));
+
 
 const Good = props => {
 
@@ -51,6 +76,7 @@ const Good = props => {
     const [orderId, setOrderId] = useState()
     const [sum, setSum] = useState(0)
 
+    const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
 
     useEffect(() => {
@@ -104,6 +130,22 @@ const Good = props => {
 
         }
 
+        rest('orders/' + props.app.stock_id + '/' + orderId + '/' + props.good.barcode,
+            'POST')
+            .then(res => {
+                if (res.status === 200) {
+
+                    enqueueSnackbar('В заказе')
+                    props.close()
+
+                } else {
+
+                    enqueueSnackbar(res.body.error || 'ошибка', {
+                        variant: 'error',
+                    })
+
+                }
+            })
 
     }
 
@@ -125,6 +167,25 @@ const Good = props => {
 
                 }
             })
+
+    }
+
+    const refund = () => {
+
+        if (good.barcode) {
+
+            rest('sales/' + props.app.stock_id + '/' + good.barcode + '/' + good.sum, 'DELETE')
+                .then(res => {
+
+                    console.log(res)
+
+                })
+
+        } else {
+
+            console.error('нет штрихкода')
+
+        }
 
     }
 
@@ -162,7 +223,7 @@ const Good = props => {
         }
     }
 
-    let consignment = "0";
+    let consignment;
     try {
         let wf = JSON.parse(good.wf)
         good.provider_id = wf.provider_id || good.provider_id;
@@ -193,13 +254,24 @@ const Good = props => {
 
     const editable = !good.wo && good.stock_id === props.app.stock_id
 
-    return <MDBModal
-        isOpen={good.id !== undefined}
-        centered
-    >
-        <MDBModalHeader
-            toggle={props.close}
+    const renderIcon = (title, onClick, elem) => <Tooltip title={title}>
+        <IconButton
+            onClick={onClick}
         >
+            {elem}
+        </IconButton>
+    </Tooltip>
+
+
+    return <Dialog
+        open={!!(good ?? good.id)}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={() => props.close()}
+    >
+
+        <DialogTitle>
+
             {'#' + good.id}
 
             {props.app.stock_id
@@ -208,40 +280,28 @@ const Good = props => {
                     right: "50px"
                 }}>
                     {good.wo === 't'
-                        ? <Tooltip title="Из транзита">
-                            <IconButton
-                                onClick={() => transit(good.barcode, false)}
-                            >
-                                <i className="fas fa-truck"/>
-                            </IconButton>
-                        </Tooltip>
+                        ? renderIcon('Из транзита',
+                            () => transit(good.barcode, false),
+                            <i className="fas fa-truck"/>)
                         : editable
                             ? <>
                                 {isBarcodePrinted
-                                    ? <Tooltip title="Штрихкод">
-                                        <IconButton
-                                            onClick={() => window.print()}
-                                        >
-                                            <MDBIcon icon="barcode"/>
-                                        </IconButton>
-                                    </Tooltip>
+                                    ? renderIcon('Штрихкод',
+                                        () => window.print(),
+                                        <LineWeightIcon />)
                                     : ''}
-                                <Tooltip title="В транзит">
-                                    <IconButton
-                                        onClick={() => transit(good.barcode, true)}
-                                    >
-                                        <i className="fas fa-truck"/>
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title="На возврат">
-                                    <IconButton
-                                        // onClick={() => goodRequest(good.barcode, 'reject')}
-                                    >
-                                        <i className="fas fa-redo"/>
-                                    </IconButton>
-                                </Tooltip>
+                                {renderIcon('В транзит',
+                                    () => transit(good.barcode, true),
+                                    <i className="fas fa-truck"/>)}
+                                {renderIcon('В брак',
+                                    () => console.log('В брак'),
+                                    <i className="fas fa-redo"/>)}
                             </>
-                            : ''}
+                            : good.stock_id === props.app.stock_id && good.wo === 'sale'
+                                ? renderIcon('Вернуть',
+                                () => refund(),
+                                <Restore/>)
+                                : null}
 
                     {props.auth.admin ?
                         good.wo === 'use' ?
@@ -265,9 +325,14 @@ const Good = props => {
             </span>
                 : ''}
 
-        </MDBModalHeader>
+            <IconButton aria-label="close" className={classes.closeButton}
+                        onClick={() => props.close()}>
+                <CloseIcon/>
+            </IconButton>
 
-        <MDBModalBody>
+        </DialogTitle>
+
+        <DialogContent>
 
             <Grid container>
 
@@ -297,13 +362,17 @@ const Good = props => {
 
             </Grid>
 
-            <MDBInput label="Наименование" size="lg" valueDefault={good.model}
-                      disabled={!editable}
+            <TextField label="Наименование"
+                       className={classes.field}
+                       value={good.model}
+                       disabled={!editable}
             />
 
             {good.imei
-                ? <MDBInput label="imei" valueDefault={good.imei}
-                            disabled={!editable}
+                ? <TextField label="imei"
+                             className={classes.field}
+                             value={good.imei}
+                             disabled={!editable}
                 />
                 : ''
             }
@@ -311,12 +380,9 @@ const Good = props => {
             {editable
                 ? <>
 
-                    <div
-                        style={{
-                            width: '100%'
-                        }}
-                    >
+                    <div style={{width: '100%'}}>
                         <TextField label="Номер заказа"
+                                   className={classes.halfField}
                                    type="number"
                                    disabled={!editable}
                                    value={orderId}
@@ -324,17 +390,15 @@ const Good = props => {
                         />
 
                         <Button onClick={() => toOrder()}
+                                className={classes.button}
                                 color="primary">
                             Внести в заказ
                         </Button>
                     </div>
 
-                    <div
-                        style={{
-                            width: '100%'
-                        }}
-                    >
+                    <div style={{width: '100%'}}>
                         <TextField label="Цена"
+                                   className={classes.halfField}
                                    type="number"
                                    disabled={!editable}
                                    value={sum}
@@ -342,6 +406,7 @@ const Good = props => {
                         />
 
                         <Button onClick={() => toSale()}
+                                className={classes.button}
                                 color="primary">
                             Продать
                         </Button>
@@ -350,81 +415,105 @@ const Good = props => {
                 </>
                 : ''}
 
-            <MDBInputGroup containerClassName="mb-3" prepend="Себестоимость"
-                           value={good.remcost}
+            <TextField label="Себестоимость"
+                       className={classes.field}
+                       value={good.remcost ?? good.cost ?? '0'}
             />
-            <MDBInputGroup containerClassName="mb-3" prepend="Оприходовали"
-                           value={time}
+            <TextField label="Оприходовали"
+                       className={classes.field}
+                       value={time}
             />
-
-            {provider ? <MDBInputGroup containerClassName="mb-3" prepend="Поставщик"
-                                       value={provider}
-            /> : ''}
+            {provider
+                ? <TextField label="Поставщик"
+                             className={classes.field}
+                             value={provider}
+                />
+                : null}
 
             {consignment
-                ? <MDBInputGroup
-                    containerClassName="mb-3" prepend="Накладная"
+                ? <TextField
+                    className={classes.field}
+                    label="Накладная"
                     value={consignment}
                 />
-                : ''}
+                : null}
 
-            <MDBInput label="Точка" value={getStockName(good.stock_id)} disabled={true}/>
+
+            <TextField label="Точка"
+                       className={classes.field}
+                       value={getStockName(good.stock_id)}
+            />
 
             {editable ? <>
-                <MDBInput label="Хранение" valueDefault={good.storage_place}
-                          onChange={() => console.log('Хранение')}
-                />
+                    <TextField label="Хранение"
+                               className={classes.field}
+                               value={good.storage_place}
+                               onChange={() => console.log('Хранение')}
+                    />
 
-                {/*{(+good.responsible_id > 0 && typeof (responsibleName) === 'string')*/}
-                {/*    ? <MDBInput label="Ответственный" value={responsibleName}/>*/}
-                {/*    : <FormControl className="m-2 w-100">*/}
-                {/*        <InputLabel>*/}
-                {/*            Ответственный*/}
-                {/*        </InputLabel>*/}
-                {/*        <Select*/}
-                {/*            value={+good.responsible_id}*/}
-                {/*            onChange={(e) => console.log(e.target.value)}*/}
-                {/*        >*/}
-                {/*            <MenuItem value={0} key={"goodmodaluserseklerjger" + 0}><br/></MenuItem>*/}
-                {/*            {props.app.users.map(v => v.is_valid ?*/}
-                {/*                <MenuItem value={v.id} key={"goodmodaluserseklerjger" + v.id}*/}
-                {/*                          selected={+good.responsible_id === v.id}*/}
-                {/*                >*/}
-                {/*                    {v.name}*/}
-                {/*                </MenuItem> : ''*/}
-                {/*            )}*/}
-                {/*        </Select>*/}
-                {/*    </FormControl>*/}
-                {/*}*/}
+                    {/*{(+good.responsible_id > 0 && typeof (responsibleName) === 'string')*/}
+                    {/*    ? <MDBInput label="Ответственный" value={responsibleName}/>*/}
+                    {/*    : <FormControl className="m-2 w-100">*/}
+                    {/*        <InputLabel>*/}
+                    {/*            Ответственный*/}
+                    {/*        </InputLabel>*/}
+                    {/*        <Select*/}
+                    {/*            value={+good.responsible_id}*/}
+                    {/*            onChange={(e) => console.log(e.target.value)}*/}
+                    {/*        >*/}
+                    {/*            <MenuItem value={0} key={"goodmodaluserseklerjger" + 0}><br/></MenuItem>*/}
+                    {/*            {props.app.users.map(v => v.is_valid ?*/}
+                    {/*                <MenuItem value={v.id} key={"goodmodaluserseklerjger" + v.id}*/}
+                    {/*                          selected={+good.responsible_id === v.id}*/}
+                    {/*                >*/}
+                    {/*                    {v.name}*/}
+                    {/*                </MenuItem> : ''*/}
+                    {/*            )}*/}
+                    {/*        </Select>*/}
+                    {/*    </FormControl>*/}
+                    {/*}*/}
 
-                <FormControlLabel
-                    className="m-2 p-2"
-                    control={
-                        <Checkbox
-                            defaultChecked={isPublic}
-                            // checked={isPublic}
-                            // onChange={handleChange}
-                            // name="checkedB"
-                            color="primary"
+                    <FormControlLabel
+                        className="m-2 p-2"
+                        control={
+                            <Checkbox
+                                defaultChecked={isPublic}
+                                // checked={isPublic}
+                                // onChange={handleChange}
+                                // name="checkedB"
+                                color="primary"
+                            />
+                        }
+                        label="Опубликовать в интернете"
+                    />
+                </>
+                : <>
+                    {wo.action
+                        ? <TextField label="Израсходованна"
+                                     value={wo.action}
+                                     className={classes.field}
                         />
+                        : null
                     }
-                    label="Опубликовать в интернете"
-                />
-            </> : <>
-                {wo.action ?
-                    <MDBInput label="Израсходованна" value={wo.action} disabled={true}/> : ''
-                }
-                {good.outtime ?
-                    <MDBInput label="Время расхода" value={good.outtime} disabled={true}/> : ''
-                }
-                {wo.remId ?
-                    <MDBInput label="Заказ" value={wo.remId} disabled={true}/> : ''
-                }
-            </>
+                    {wo.remId
+                        ? <TextField label="В Заказе"
+                                     className={classes.field}
+                                     value={wo.remId}
+                        />
+                        : null
+                    }
+                    {good.outtime
+                        ? <TextField label="Время расхода"
+                                     className={classes.field}
+                                     value={good.outtime}
+                        />
+                        : null
+                    }
+                </>
             }
 
-        </MDBModalBody>
-    </MDBModal>
+        </DialogContent>
+    </Dialog>
 
 }
 

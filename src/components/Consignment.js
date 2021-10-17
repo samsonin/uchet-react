@@ -651,19 +651,26 @@ const Consignment = props => {
                                                 >
                                                     <br/>
                                                 </MenuItem>
-                                                {dailyReport.imprests.map(i => <MenuItem
-                                                    key={'menuitimorestscontrollinarrival' + i.id}
-                                                    value={i.id}
-                                                    className="justify-content-between"
-                                                >
+                                                {dailyReport.imprests.map(i => {
+
+                                                    const user = props.app.users.find(u => u.id === i.ui_user_id)
+
+                                                    return user
+                                                        ? <MenuItem
+                                                            key={'menuitimorestscontrollinarrival' + i.id}
+                                                            value={i.id}
+                                                            className="justify-content-between"
+                                                        >
                                                     <span className="p-2 font-weight-bold">
-                                                        {props.app.users.find(u => u.id === i.ui_user_id).name}
+                                                        {user.name}
                                                     </span>
-                                                    {i.item}
-                                                    <span className="p-2 font-weight-bold">
+                                                            {i.item}
+                                                            <span className="p-2 font-weight-bold">
                                                         {i.sum}
                                                     </span>
-                                                </MenuItem>)}
+                                                        </MenuItem>
+                                                        : null
+                                                })}
                                             </Select>
                                         </FormControl>
                                     </TableCell>

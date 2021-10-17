@@ -78,7 +78,7 @@ const initCustomer = {
 
 export default function ({isOpen, close, row, stock_id}) {
 
-    const classes = useStyles();
+    const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
 
     const [saleId, setSaleId] = useState(0)
