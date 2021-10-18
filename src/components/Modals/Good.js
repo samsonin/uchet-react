@@ -72,18 +72,26 @@ const useStyles = makeStyles((theme) => ({
 
 const Good = props => {
 
+    const classes = useStyles()
+    const {enqueueSnackbar} = useSnackbar()
+
     const [treeOpen, setTreeOpen] = useState(false)
     const [orderId, setOrderId] = useState()
     const [sum, setSum] = useState(0)
-
-    const classes = useStyles()
-    const {enqueueSnackbar} = useSnackbar()
+    const [reason, setReason] = useState('')
+    const [isReasonOpen, setIsReasonOpen] = useState(false)
 
     useEffect(() => {
 
         setSum(props.good.sum)
 
     }, [props.good.sum])
+
+    useEffect(() => {
+
+        setIsReasonOpen(false)
+
+    }, [props.good])
 
     const getStockName = stockId => {
         let stock = props.app.stocks.find(v => +v.id === +stockId);
@@ -174,12 +182,22 @@ const Good = props => {
 
         if (good.barcode) {
 
-            rest('sales/' + props.app.stock_id + '/' + good.barcode + '/' + good.sum, 'DELETE')
-                .then(res => {
+            if (reason) {
 
-                    console.log(res)
+                rest('sales/' + props.app.stock_id + '/' + good.barcode + '/' + reason, 'DELETE')
+                    .then(res => {
 
-                })
+                        if (res.status === 200) {
+                            enqueueSnackbar('возврат записан', {variant: 'success'})
+                            setReason('')
+                            setIsReasonOpen(false)
+                            props.close()
+                        } else {
+                            enqueueSnackbar('не удалось вернуть', {variant: 'error'})
+                        }
+
+                    })
+            }
 
         } else {
 
@@ -299,7 +317,7 @@ const Good = props => {
                             </>
                             : good.stock_id === props.app.stock_id && good.wo === 'sale'
                                 ? renderIcon('Вернуть',
-                                () => refund(),
+                                () => setIsReasonOpen(!isReasonOpen),
                                 <Restore/>)
                                 : null}
 
@@ -329,6 +347,20 @@ const Good = props => {
                         onClick={() => props.close()}>
                 <CloseIcon/>
             </IconButton>
+            {isReasonOpen && <div style={{width: '100%'}}>
+                <TextField label="Причина возврата"
+                           className={classes.halfField}
+                           value={reason}
+                           onChange={e => setReason(e.target.value)}
+                />
+
+                <Button onClick={() => refund()}
+                        disabled={!reason}
+                        className={classes.button}
+                        color="secondary">
+                    Вернуть
+                </Button>
+            </div>}
 
         </DialogTitle>
 

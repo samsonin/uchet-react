@@ -148,7 +148,10 @@ const App = props => {
 
     }
 
-    const closeGoodModal = () => setGood({})
+    const closeGoodModal = () => {
+        setGood({})
+        setOurBarcode()
+    }
 
     const expire = !(+props.auth.user_id && props.auth.expiration_time > Math.round(new Date().getTime() / 1000.0))
 
