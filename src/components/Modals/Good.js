@@ -31,18 +31,15 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 const woAlliases = {
-    stock_id: "Точка",
-    remid: "Заказ",
-    rem_id: "Заказ",
-    sale: "Продан",
     use: "В пользовании",
     loss: "Потерян",
     lost: "Потерян",
-    shortrage: "Недостача",
+    shortage: "Недостача",
     remself: "Ремонт для продажи",
     reject: "В браке",
     refund: "Вернули поставщику",
     t: "В транзите",
+    prepaid: 'По предоплате'
 }
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -219,26 +216,36 @@ const Good = props => {
 
     let isBarcodePrinted = props.auth.admin || 12 > Math.round((Date.now() - Date.parse(good.time)) / 360000);
 
-    let wo = {action: 'Израсходован'}
+    let ui_wo = good.ui_wo
 
-    if (good.wo.substr(0, 4) === 'sale') {
-        wo = {
-            action: 'Продан',
-            stockId: good.wo.substr(4, 1),
-        }
-    } else {
-        try {
-            wo = JSON.parse(good.wo);
-            if (wo.remid !== undefined) {
-                wo = {
-                    action: 'В заказ',
-                    remId: wo.remid,
-                    stockId: wo.stock_id,
-                }
+    if (!ui_wo) {
+
+        if (good.wo.substr(0, 4) === 'sale') {
+
+            ui_wo = 'Продан'
+
+        } else {
+
+            try {
+
+                const wo = JSON.parse(good.wo);
+
+                ui_wo = wo.remid
+                    ? 'В заказ ' + wo.remid
+                    : wo.sale_id
+                        ? 'Продан'
+                        : wo.action && wo.action === 'remself'
+                            ? 'Для витрины'
+                            : woAlliases[good.wo]
+
+            } catch (e) {
+
             }
-        } catch (e) {
-            wo.action = woAlliases[good.wo] || good.wo;
+
         }
+
+        ui_wo = 'Израсходованна'
+
     }
 
     let consignment;
@@ -306,7 +313,7 @@ const Good = props => {
                                 {isBarcodePrinted
                                     ? renderIcon('Штрихкод',
                                         () => window.print(),
-                                        <LineWeightIcon />)
+                                        <LineWeightIcon/>)
                                     : ''}
                                 {renderIcon('В транзит',
                                     () => transit(good.barcode, true),
@@ -317,8 +324,8 @@ const Good = props => {
                             </>
                             : good.stock_id === props.app.stock_id && good.wo === 'sale'
                                 ? renderIcon('Вернуть',
-                                () => setIsReasonOpen(!isReasonOpen),
-                                <Restore/>)
+                                    () => setIsReasonOpen(!isReasonOpen),
+                                    <Restore/>)
                                 : null}
 
                     {props.auth.admin ?
@@ -520,17 +527,10 @@ const Good = props => {
                     />
                 </>
                 : <>
-                    {wo.action
+                    {good.wo
                         ? <TextField label="Израсходованна"
-                                     value={wo.action}
+                                     value={ui_wo}
                                      className={classes.field}
-                        />
-                        : null
-                    }
-                    {wo.remId
-                        ? <TextField label="В Заказе"
-                                     className={classes.field}
-                                     value={wo.remId}
                         />
                         : null
                     }

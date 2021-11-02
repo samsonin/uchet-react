@@ -69,14 +69,14 @@ const DailyModal = props => {
     const [date1, setDate1] = useState(() => getDate1())
     const [date2, setDate2] = useState(() => getDate2())
     const [item, setItem] = useState('')
-    const [sum, setSum] = useState(0)
+    const [sum, setSum] = useState('0')
     const [employee, setEmployee] = useState(0)
     const [note, setNote] = useState('')
 
     const reset = () => {
 
         setItem('')
-        setSum(0)
+        setSum('0')
         setEmployee(0)
         setNote('')
 
@@ -149,6 +149,8 @@ const DailyModal = props => {
             return enqueueSnackbar('не указан получатель зарплаты',
                 {variant: 'error'})
         }
+
+        const sum = +sum
 
         if (!sum) {
             return enqueueSnackbar('сумма должна отличатся от нуля',
@@ -254,11 +256,11 @@ const DailyModal = props => {
                 />}
 
             <TextField label="Сумма"
-                       type="number"
+                       // type="number"
                        disabled={props.disabled}
                        className={classes.field}
                        value={sum}
-                       onChange={e => setSum(+e.target.value)}
+                       onChange={e => setSum(e.target.value)}
             />
 
             <UsersSelect

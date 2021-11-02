@@ -80,10 +80,11 @@ const Orders = props => {
     }
 
     const renderOrderText = ({order_id, stock_id}) => props.app.stock_id === stock_id
-            ? order_id
-            : props.app && props.app.stocks.find(s => s.id === stock_id).name + ', ' + order_id
+        ? order_id
+        : props.app && props.app.stocks.find(s => s.id === stock_id).name + ', ' + order_id
 
-    return <Grid container component={Paper}
+    return <Grid container
+                 component={Paper}
                  className="p-2"
                  spacing={1}
                  direction="column"
@@ -185,32 +186,43 @@ const Orders = props => {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {orders && orders.map(o => <TableRow
-                    key={'ordertablerowkeyinorders' + o.stock_id + o.order_id}
-                    onClick={() => console.log('row onClick')}
-                >
-                    <TableCell>
-                        {o.created_at}
-                    </TableCell>
-                    <TableCell>
-                        {renderOrderText(o)}
-                    </TableCell>
-                    <TableCell>
-                        {o.model}
-                    </TableCell>
-                    <TableCell>
-                        {o.customer_id}
-                    </TableCell>
-                    <TableCell>
-                        {o.customer_id}
-                    </TableCell>
-                    <TableCell>
-                        {STATUSES[o.status_id]}
-                    </TableCell>
-                    {onlyMy || <TableCell>
-                        {o.master_id}
-                    </TableCell>}
-                </TableRow>)}
+                {orders && orders.map(o => {
+
+                    const status = props.app.statuses.find(s => s.id === o.status_id)
+
+                    console.log(status)
+
+                    return <TableRow
+                        style={{
+                            backgroundColor: status.color,
+                            cursor: 'pointer'
+                        }}
+                        key={'ordertablerowkeyinorders' + o.stock_id + o.order_id}
+                        onClick={() => console.log('row onClick')}
+                    >
+                        <TableCell>
+                            {o.created_at}
+                        </TableCell>
+                        <TableCell>
+                            {renderOrderText(o)}
+                        </TableCell>
+                        <TableCell>
+                            {o.model}
+                        </TableCell>
+                        <TableCell>
+                            {o.customer_id}
+                        </TableCell>
+                        <TableCell>
+                            {o.customer_id}
+                        </TableCell>
+                        <TableCell>
+                            {status.name}
+                        </TableCell>
+                        {onlyMy || <TableCell>
+                            {o.master_id}
+                        </TableCell>}
+                    </TableRow>
+                })}
             </TableBody>
         </Table>
 
