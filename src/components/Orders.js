@@ -7,8 +7,8 @@ import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import {Paper, Typography} from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
+// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+// import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import SearchIcon from '@material-ui/icons/Search';
 
 import rest from "../components/Rest"
@@ -18,6 +18,10 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import TableBody from "@material-ui/core/TableBody";
+import {makeStyles} from "@material-ui/core/styles";
+
+import CustomersSelect from "../components/common/CustomersSelect"
+
 
 const STATUSES = [
     'новый', // 0
@@ -32,13 +36,31 @@ const STATUSES = [
     'утилизирован', // 9
 ];
 
+const useStyles = makeStyles({
+    row: {
+        background: 'pink'
+    },
+})
+
+const needleCustomerFields = ['id', 'fio', 'phone_number']
+
+const initCustomer = {
+    id: 0,
+    phone_number: '',
+    fio: '',
+}
+
+
 const Orders = props => {
+
+    const classes = useStyles();
 
     const [onlyMy, setOnlyMy] = useState(true)
 
     const [stocks, setStocks] = useState(() => [props.app.stock_id])
 
     const [id, setId] = useState(0)
+    const [customer, setCustomer] = useState(initCustomer)
     const [createdDate, setCreatedDate] = useState()
     const [createdDate2, setCreatedDate2] = useState()
     const [checkoutDate, setCheckoutDate] = useState()
@@ -79,6 +101,22 @@ const Orders = props => {
 
     }
 
+    const updateCustomer = (name, val) => {
+
+        if (needleCustomerFields.includes(name)) {
+
+            setCustomer(prev => {
+
+                const newState = {...prev}
+                newState[name] = val
+                return newState
+
+            })
+
+        }
+
+    }
+
     const renderOrderText = ({order_id, stock_id}) => props.app.stock_id === stock_id
         ? order_id
         : props.app && props.app.stocks.find(s => s.id === stock_id).name + ', ' + order_id
@@ -93,6 +131,21 @@ const Orders = props => {
         <Grid container
               justify={'flex-end'}
         >
+            <TextField
+                id="order-id-in-orders-search"
+                key={"idonordersseach"}
+                className={"m-2 p-2"}
+                label={"Заказ №"}
+                value={id ? id.toString() : ''}
+                onChange={e => setId(e.target.value)}
+            />
+
+            <CustomersSelect
+                customer={customer}
+                needleCustomerFields={needleCustomerFields}
+                updateCustomer={updateCustomer}
+            />
+
             {/*<Typography variant="h5">*/}
             {/*    Парамерты поиска*/}
             {/*</Typography>*/}
@@ -123,19 +176,6 @@ const Orders = props => {
                     />
                     : null
                 )}
-
-            </Grid>
-
-            <Grid item className="w-100 m-2 p-2">
-
-                <TextField
-                    type="number"
-                    key={"idonordersseach"}
-                    className={"m-2 p-2"}
-                    label={"Заказ №"}
-                    value={id.toString()}
-                    onChange={e => setId(e.target.value)}
-                />
 
             </Grid>
 
@@ -193,6 +233,7 @@ const Orders = props => {
                     console.log(status)
 
                     return <TableRow
+                        className={classes.row}
                         style={{
                             backgroundColor: status.color,
                             cursor: 'pointer'
