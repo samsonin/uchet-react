@@ -28,6 +28,20 @@ const statuses = [
     'Надо заказать'
 ]
 
+const isEditableStatus = status => {
+
+    status = status.charAt(0).toUpperCase() + status.slice(1);
+
+    if (status === 'New') status = 'Новая'
+
+    const isEditable = statuses.includes(status)
+
+    console.log('isEditable', isEditable)
+
+    return isEditable
+
+}
+
 const notEditableStatuses = {
     refund: 'Возвращена',
     left: 'Списана',
@@ -52,13 +66,13 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const needleCustomerFields = ['id', 'fio', 'phone_number']
-
 const initCustomer = {
     id: 0,
     phone_number: '',
     fio: '',
 }
+
+const fields = ['id', 'fio', 'phone_number']
 
 // const zakaz = {
 //     sale_id: 0, // если редактируется
@@ -127,7 +141,7 @@ export default function ({isOpen, close, row, stock_id}) {
 
                                 const status = res.body.status === 'new' ? 'Новая' : res.body.status
 
-                                setDisabled(!statuses.includes(status))
+                                setDisabled(!isEditableStatus(status))
 
                                 setId(+wf.zakaz || res.body.id)
                                 setCreated(res.body.time.substr(0, 10))
@@ -135,7 +149,7 @@ export default function ({isOpen, close, row, stock_id}) {
                                 setPresum(res.body.presum)
                                 setSum(res.body.sum)
                                 setStatus(status)
-                                needleCustomerFields.map(f => updateCustomer(f, res.body.customer[f]))
+                                fields.map(f => updateCustomer(f, res.body.customer[f]))
                                 setNote(res.body.note)
 
                             }
@@ -217,17 +231,13 @@ export default function ({isOpen, close, row, stock_id}) {
 
     const updateCustomer = (name, val) => {
 
-        if (needleCustomerFields.includes(name)) {
+        setCustomer(prev => {
 
-            setCustomer(prev => {
+            const newState = {...prev}
+            newState[name] = val
+            return newState
 
-                const newState = {...prev}
-                newState[name] = val
-                return newState
-
-            })
-
-        }
+        })
 
     }
 
@@ -282,12 +292,11 @@ export default function ({isOpen, close, row, stock_id}) {
             <CustomersSelect
                 customer={customer}
                 disabled={disabled}
-                needleCustomerFields={needleCustomerFields}
                 updateCustomer={updateCustomer}
             />
 
             {row
-                ? statuses.includes(status)
+                ? isEditableStatus(status)
                     ? <FormControl className={classes.field}>
                         <InputLabel id="prepaid-status-control-select-label">
                             Статус

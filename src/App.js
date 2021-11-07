@@ -107,7 +107,7 @@ const App = props => {
 
         if (e.key === "Enter") {
 
-            if (!barcode.current) {
+            if (window.location.pathname === '/orders' || !barcode.current) {
 
                 setEnterPress(true)
                 setEnterPress(false)
@@ -202,7 +202,10 @@ const App = props => {
                         }
 
                         <Route path="/call_records" component={Records}/>
-                        <Route path="/orders" component={Orders}/>
+                        <Route path="/orders" render={props => <Orders
+                            enterPress={enterPress}
+                            {...props}
+                        />} />
                         {/*<Route path="/order" component={Order}/>*/}
                         {props.app.users[0] && <Route path="/queue" component={Queue}/>}
 

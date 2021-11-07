@@ -3,6 +3,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import TextField from "@material-ui/core/TextField/TextField";
 import rest from "../Rest";
 
+const fields = ['id', 'fio', 'phone_number']
 
 export default function (props) {
 
@@ -45,29 +46,31 @@ export default function (props) {
             fio: '',
             phone_number: ''
         }
-        props.needleCustomerFields.map(f => props.updateCustomer(f, val[f]))
+        fields.map(f => props.updateCustomer(f, val[f]))
         setCustomers([])
     }
 
     return <div
         style={{
             backgroundColor: '#e2f6e2',
-            padding: '1rem'
+            padding: '1rem',
+            width: '100%'
         }}
     >
-        <div style={{
+        {props.onlySearch || <div style={{
             textDecoration: 'bold',
         }}>
             {props.customer.id
                 ? 'Заказчик из базы'
                 : 'Новый заказчик'
             }
-        </div>
+        </div>}
         {[
             {name: 'phone_number', label: 'Телефон', margin: '1rem .3rem 3rem .3rem'},
             {name: 'fio', label: 'ФИО', margin: '1rem .3rem 2rem .3rem'},
         ].map(f => <Autocomplete
             key={'customerselectkeyincustselect' + f.label}
+            name={'customerselectkeyincustselect' + f.label}
             disabled={props.disabled}
             style={{margin: f.margin}}
             fullWidth
