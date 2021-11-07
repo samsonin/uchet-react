@@ -5,11 +5,9 @@ import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
-import {Paper} from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import SearchIcon from '@material-ui/icons/Search';
 
 import rest from "../components/Rest"
 import Button from "@material-ui/core/Button";
@@ -28,7 +26,6 @@ const initCustomer = {
 }
 
 const Orders = props => {
-
 
     const [onlyMy, setOnlyMy] = useState(true)
 
@@ -127,15 +124,15 @@ const Orders = props => {
             : props.app && props.app.stocks.find(s => s.id === stock_id).name + ', ' + i
     }
 
-    return <Grid container
-                 component={Paper}
-                 className="p-2"
-                 spacing={1}
-                 direction="column"
+    return <div
+        style={{
+            backgroundColor: '#fff',
+            borderRadius: 5,
+            padding: '1rem'
+        }}
     >
-
         <Grid container
-              justify={'space-between'}
+              justify='space-between'
         >
             <TextField
                 key={"idonordersseachr3"}
@@ -145,25 +142,21 @@ const Orders = props => {
                 onChange={e => setId(+e.target.value)}
             />
 
-            {id
-                ? null
-                : <IconButton
-                    onClick={() => setOnlyMy(!onlyMy)}
-                >
-                    {onlyMy
-                        ? <KeyboardArrowUpIcon/>
-                        : <KeyboardArrowDownIcon/>}
-                </IconButton>}
+            {!id && <IconButton
+                onClick={() => setOnlyMy(!onlyMy)}
+            >
+                {onlyMy
+                    ? <KeyboardArrowUpIcon/>
+                    : <KeyboardArrowDownIcon/>}
+            </IconButton>}
 
         </Grid>
 
-        {id
-            ? null
-            : <CustomersSelect
-                customer={customer}
-                updateCustomer={updateCustomer}
-                onlySearch={true}
-            />}
+        {!id && <CustomersSelect
+            customer={customer}
+            updateCustomer={updateCustomer}
+            onlySearch={true}
+        />}
 
         {onlyMy || <>
             <Grid item className="w-100 m-2 p-2">
@@ -199,7 +192,7 @@ const Orders = props => {
                     value={createdDate2}
                     onChange={e => setCreatedDate2(e.target.value)}
                 />
-            </Grid>}
+            </Grid>
 
             <Grid item className="w-100 m-2 p-2">
                 Заказ закрыт с
@@ -289,8 +282,7 @@ const Orders = props => {
             </TableBody>
         </Table>
 
-
-    </Grid>
+    </div>
 
 }
 

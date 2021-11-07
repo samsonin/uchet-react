@@ -32,13 +32,9 @@ const isEditableStatus = status => {
 
     status = status.charAt(0).toUpperCase() + status.slice(1);
 
-    if (status === 'New') status = 'Новая'
+    if (!status || status === 'New') return true
 
-    const isEditable = statuses.includes(status)
-
-    console.log('isEditable', isEditable)
-
-    return isEditable
+    return statuses.includes(status)
 
 }
 
@@ -90,7 +86,7 @@ const fields = ['id', 'fio', 'phone_number']
 // }
 
 
-export default function ({isOpen, close, row, stock_id}) {
+export default function ({isOpen, close, row, stock_id, prepaid_id}) {
 
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
@@ -121,21 +117,29 @@ export default function ({isOpen, close, row, stock_id}) {
 
     useEffect(() => {
 
-        if (row && row.action === 'предоплата' && isOpen) {
+        if (prepaid_id || (row && row.action === 'предоплата' && isOpen)) {
 
             setDisabled(true)
 
-            setSaleId(row.id)
-            setItem(row.item)
-            setPresum(row.sum)
-            setNote(row.note)
+            if (!prepaid_id) {
+                setSaleId(row.id)
+                setItem(row.item)
+                setPresum(row.sum)
+                setNote(row.note)
+            }
 
             try {
 
-                const wf = JSON.parse(row.wf)
+                let id;
+                if (prepaid_id) {
+                    id = prepaid_id
+                } else {
+                    const wf = JSON.parse(row.wf)
+                    id = wf.zakaz
+                }
 
-                if (wf.zakaz) {
-                    rest('zakaz/' + wf.zakaz)
+                if (id) {
+                    rest('zakaz/' + id)
                         .then(res => {
                             if (res.status === 200 && res.body) {
 
@@ -143,7 +147,7 @@ export default function ({isOpen, close, row, stock_id}) {
 
                                 setDisabled(!isEditableStatus(status))
 
-                                setId(+wf.zakaz || res.body.id)
+                                setId(+id || res.body.id)
                                 setCreated(res.body.time.substr(0, 10))
                                 setItem(res.body.item)
                                 setPresum(res.body.presum)

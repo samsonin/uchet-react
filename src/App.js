@@ -34,6 +34,7 @@ import {Records} from "./components/Records";
 // import Docs from "./components/Settings/Docs";
 import Daily from "./components/Daily";
 import LoginModal from "./components/LoginModal";
+import Prepaids from "./components/Prepaids";
 
 const App = props => {
 
@@ -194,6 +195,7 @@ const App = props => {
                             />
                         </>}
 
+                        <Route exact path="/prepaids" component={Prepaids}/>
                         <Route exact path="/customers" component={Customers}/>
                         <Route exact path="/customers/:id" component={Customer}/>
                         <Route exact path="/entities" component={Entities}/>

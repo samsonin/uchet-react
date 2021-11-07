@@ -69,8 +69,7 @@ export default function (props) {
             {name: 'phone_number', label: 'Телефон', margin: '1rem .3rem 3rem .3rem'},
             {name: 'fio', label: 'ФИО', margin: '1rem .3rem 2rem .3rem'},
         ].map(f => <Autocomplete
-            key={'customerselectkeyincustselect' + f.label}
-            name={'customerselectkeyincustselect' + f.label}
+            key={'customerselectkeyincustselect' + f.name + f.label}
             disabled={props.disabled}
             style={{margin: f.margin}}
             fullWidth
@@ -81,7 +80,12 @@ export default function (props) {
             onChange={(e, v) => handler(v)}
             getOptionLabel={option => option ? option[f.name] || '' : ''}
             getOptionSelected={option => option.id === props.customer.id}
-            renderInput={params => <TextField {...params} label={f.label}/>}
+            renderInput={params => <TextField
+                {...params}
+                label={f.label}
+                id={'customer-select-key-in-custselect' + f.name + f.label}
+                name={'customer-select-key-in-custselect' + f.name + f.label}
+            />}
         />)}
     </div>
 }
