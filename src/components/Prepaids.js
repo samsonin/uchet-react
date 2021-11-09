@@ -4,6 +4,7 @@ import {connect} from "react-redux";
 import rest from './Rest'
 import {Table, TableBody, TableRow, TableHead, TableCell} from "@material-ui/core";
 import PrepaidModal from "./Modals/Prepaid";
+import TwoLineInCell from "./common/TwoLineInCell";
 
 const Prepaids = props => {
 
@@ -11,18 +12,28 @@ const Prepaids = props => {
     const [prepaidId, setPrepaidId] = useState()
     const [prepaids, setPrepaids] = useState([])
 
+    const getPrepaids = () => {
+
+        if (props.app.stock_id) {
+
+            rest('prepaids/' + props.app.stock_id)
+                .then(res => {
+                    if (res.status === 200) {
+
+                        setPrepaids(res.body)
+
+                    }
+                })
+        }
+    }
+
     useEffect(() => {
-
-        rest('prepaids/' + props.app.stock_id)
-            .then(res => {
-                if (res.status === 200) {
-
-                    setPrepaids(res.body)
-
-                }
-            })
-
+        getPrepaids()
     }, [])
+
+    useEffect(() => {
+        getPrepaids()
+    }, [props.app.stock_id])
 
     const openPrepaid = id => {
 
@@ -47,41 +58,36 @@ const Prepaids = props => {
             }}
             prepaid_id={prepaidId}
             stock_id={props.app.stock_id}
+            setPrepaids={setPrepaids}
         />}
 
-        <Table size="small">
-            <TableHead>
-                <TableRow>
-                    <TableCell>Дата</TableCell>
-                    <TableCell>Наименование</TableCell>
-                    <TableCell>Заказчик</TableCell>
-                    <TableCell>Статус</TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {prepaids.map(p => <TableRow
-                    style={{
-                        cursor: 'pointer'
-                    }}
-                    onClick={() => openPrepaid(p.id)}
-                >
-                    <TableCell>{p.time}</TableCell>
-                    <TableCell>{p.item}</TableCell>
-                    <TableCell>
-                        {p.customer
-                            ? <TableCell>
-                                <span className="font-weight-bold">{p.customer.phone_number}</span>
-                                <br/>
-                                {p.customer.fio}
-                            </TableCell>
-                            : p.customer_id
-                                ? 'не идентифицирован'
-                                : 'не определен'}
-                    </TableCell>
-                    <TableCell>{p.status}</TableCell>
-                </TableRow>)}
-            </TableBody>
-        </Table>
+        {prepaids
+            ? <Table size="small">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Дата</TableCell>
+                        <TableCell>Наименование</TableCell>
+                        <TableCell>Заказчик</TableCell>
+                        <TableCell>Статус</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {prepaids.map(p => <TableRow
+                        style={{
+                            cursor: 'pointer'
+                        }}
+                        onClick={() => openPrepaid(p.id)}
+                    >
+                        <TableCell>{p.time}</TableCell>
+                        <TableCell>{p.item}</TableCell>
+                        <TableCell>
+                            {TwoLineInCell(p.customer.phone_number, p.customer.fio)}
+                        </TableCell>
+                        <TableCell>{p.status}</TableCell>
+                    </TableRow>)}
+                </TableBody>
+            </Table>
+            : 'Предоплаты не найдены'}
     </div>
 
 }

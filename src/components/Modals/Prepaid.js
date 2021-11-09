@@ -86,7 +86,7 @@ const fields = ['id', 'fio', 'phone_number']
 // }
 
 
-export default function ({isOpen, close, row, stock_id, prepaid_id}) {
+export default function ({isOpen, close, row, stock_id, prepaid_id, setPrepaids}) {
 
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
@@ -196,7 +196,11 @@ export default function ({isOpen, close, row, stock_id, prepaid_id}) {
                     setDisabled(false)
 
                     if (res.status === 200) {
+
+                        if (setPrepaids && res.body.prepaids) setPrepaids(res.body.prepaids)
+
                         exit()
+
                     } else {
                         enqueueSnackbar((res.status || '') + ' ' + (res.body
                             ? res.body[0].toString()
@@ -299,7 +303,7 @@ export default function ({isOpen, close, row, stock_id, prepaid_id}) {
                 updateCustomer={updateCustomer}
             />
 
-            {row
+            {row || prepaid_id
                 ? isEditableStatus(status)
                     ? <FormControl className={classes.field}>
                         <InputLabel id="prepaid-status-control-select-label">
