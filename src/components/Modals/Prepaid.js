@@ -70,7 +70,7 @@ const initCustomer = {
 
 const fields = ['id', 'fio', 'phone_number']
 
-export default function ({isOpen, close, row, stock_id, prepaid_id, setPrepaids}) {
+export default function ({isOpen, close, preData, preId, stock_id, setPrepaids}) {
 
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
@@ -99,62 +99,48 @@ export default function ({isOpen, close, row, stock_id, prepaid_id, setPrepaids}
         setNote('')
     }
 
+    console.log('preId', preId)
+    console.log('preData', preData)
+
     useEffect(() => {
 
-        if (prepaid_id || (row && row.action === 'предоплата' && isOpen)) {
+        // if (prepaid_id || (preData && preData.action === 'предоплата' && isOpen)) {
+        if (preId && isOpen) {
 
             setDisabled(true)
 
-            if (!prepaid_id) {
-                setSaleId(row.id)
-                setItem(row.item)
-                setPresum(row.sum)
-                setNote(row.note)
+            if (preData) {
+                setSaleId(preData.id)
+                setItem(preData.item)
+                setPresum(preData.sum)
+                setNote(preData.note)
             }
 
-            try {
+            rest('zakaz/' + preId)
+                .then(res => {
+                    if (res.status === 200 && res.body) {
 
-                let id;
-                if (prepaid_id) {
-                    id = prepaid_id
-                } else {
-                    const wf = JSON.parse(row.wf)
-                    id = wf.zakaz
-                }
+                        const status = res.body.status === 'new' ? 'Новая' : res.body.status
 
-                if (id) {
-                    rest('zakaz/' + id)
-                        .then(res => {
-                            if (res.status === 200 && res.body) {
+                        setDisabled(!isEditableStatus(status))
 
-                                const status = res.body.status === 'new' ? 'Новая' : res.body.status
+                        setId(+preId || res.body.id)
+                        setCreated(res.body.time.substr(0, 10))
+                        setItem(res.body.item)
+                        setPresum(res.body.presum)
+                        setSum(res.body.sum)
+                        setStatus(status)
+                        if (res.body.customer) fields.map(f => updateCustomer(f, res.body.customer[f]))
+                        setNote(res.body.note)
 
-                                setDisabled(!isEditableStatus(status))
-
-                                setId(+id || res.body.id)
-                                setCreated(res.body.time.substr(0, 10))
-                                setItem(res.body.item)
-                                setPresum(res.body.presum)
-                                setSum(res.body.sum)
-                                setStatus(status)
-                                if (res.body.customer) fields.map(f => updateCustomer(f, res.body.customer[f]))
-                                setNote(res.body.note)
-
-                            }
-                        })
-                } else {
-                    enqueueSnackbar('не удалось загрузить предоплату', {variant: 'error'})
-                }
-
-            } catch (e) {
-                enqueueSnackbar('не удалось определить предоплату', {variant: 'error'})
-            }
+                    }
+                })
 
         } else {
             reset()
         }
 
-    }, [row, isOpen])
+    }, [preData, isOpen])
 
     const save = () => {
 
@@ -287,7 +273,7 @@ export default function ({isOpen, close, row, stock_id, prepaid_id, setPrepaids}
                 updateCustomer={updateCustomer}
             />
 
-            {row || prepaid_id
+            {id
                 ? isEditableStatus(status)
                     ? <FormControl className={classes.field}>
                         <InputLabel id="prepaid-status-control-select-label">
@@ -326,17 +312,17 @@ export default function ({isOpen, close, row, stock_id, prepaid_id, setPrepaids}
         {disabled
             ? ''
             : <DialogActions>
-                <Button onClick={() => row || prepaid_id
+                <Button onClick={() => id
                     ? del()
                     : exit()}
                         color="secondary">
-                    {row || prepaid_id
+                    {id
                         ? 'Вернуть'
                         : 'Отмена'}
                 </Button>
                 <Button onClick={() => save()}
                         color="primary">
-                    {row || prepaid_id
+                    {id
                         ? 'Сохранить'
                         : 'Внести'}
                 </Button>

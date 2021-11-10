@@ -304,20 +304,28 @@ const Daily = props => {
 
     imprests.map(i => imprestsSum += i.sum)
 
+    let prepaidId
+    try {
+        const wf = JSON.parse(row.wf)
+        prepaidId = wf.zakaz
+    } catch (e){
+        console.log('JSON.parse.error', e)
+    }
+
     return isConsignmentOpen
         ? <Consignment
             close={() => setIsConsignmentOpen(false)}
             consignment={consignment}
         />
         : <>
-
             {isPrepaidOpen && <PrepaidModal
                 isOpen={isPrepaidOpen}
                 close={() => {
                     setIsPrepaidOpen(false)
                     setRow(null)
                 }}
-                row={row}
+                preData={row}
+                preId={prepaidId}
                 stock_id={props.app.stock_id}
             />}
 

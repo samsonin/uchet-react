@@ -13,6 +13,7 @@ const Prepaids = props => {
 
     const [isPrepaidOpen, setIsPrepaidOpen] = useState(false)
     const [prepaidId, setPrepaidId] = useState()
+    const [prepaidData, setPrepaidData] =useState()
     const [prepaids, setPrepaids] = useState([])
 
     const getPrepaids = () => {
@@ -38,10 +39,14 @@ const Prepaids = props => {
         getPrepaids()
     }, [props.app.stock_id])
 
-    const openPrepaid = id => {
+    const openPrepaid = prepaid => {
 
+        setPrepaidId(prepaid.id)
+
+        prepaid.id = undefined
+
+        setPrepaidData(prepaid)
         setIsPrepaidOpen(true)
-        setPrepaidId(id)
 
     }
 
@@ -59,7 +64,8 @@ const Prepaids = props => {
                 setIsPrepaidOpen(false)
                 setPrepaidId(null)
             }}
-            prepaid_id={prepaidId}
+            preId={prepaidId}
+            preData={prepaidData}
             stock_id={props.app.stock_id}
             setPrepaids={setPrepaids}
         />}
@@ -103,7 +109,7 @@ const Prepaids = props => {
                             style={{
                                 cursor: 'pointer'
                             }}
-                            onClick={() => openPrepaid(p.id)}
+                            onClick={() => openPrepaid(p)}
                         >
                             <TableCell>{p.time}</TableCell>
                             <TableCell>{p.item}</TableCell>
