@@ -2,9 +2,12 @@ import React, {useEffect, useState} from 'react';
 import {connect} from "react-redux";
 
 import rest from './Rest'
-import {Table, TableBody, TableRow, TableHead, TableCell} from "@material-ui/core";
+import {Table, TableBody, TableRow, TableHead, TableCell, Typography} from "@material-ui/core";
 import PrepaidModal from "./Modals/Prepaid";
 import TwoLineInCell from "./common/TwoLineInCell";
+import Tooltip from "@material-ui/core/Tooltip/Tooltip";
+import IconButton from "@material-ui/core/IconButton";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 const Prepaids = props => {
 
@@ -65,6 +68,28 @@ const Prepaids = props => {
             ? <Table size="small">
                 <TableHead>
                     <TableRow>
+                        <TableCell colSpan={3}>
+                            <Typography variant="h6">
+                                Предоплаты
+                            </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                            <Tooltip title={'Добавить предоплату'}>
+                                <IconButton style={{
+                                    padding: 0,
+                                    marginLeft: '.1rem',
+                                    marginRight: '.1rem',
+                                }}
+                                            onClick={() => setIsPrepaidOpen(true)}
+                                >
+                                    <AddCircleIcon/>
+                                </IconButton>
+                            </Tooltip>
+                        </TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableHead>
+                    <TableRow>
                         <TableCell>Дата</TableCell>
                         <TableCell>Наименование</TableCell>
                         <TableCell>Заказчик</TableCell>
@@ -73,6 +98,7 @@ const Prepaids = props => {
                 </TableHead>
                 <TableBody>
                     {prepaids.map(p => <TableRow
+                        key={'tablerowinprepaids' + p.id}
                         style={{
                             cursor: 'pointer'
                         }}

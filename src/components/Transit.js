@@ -31,10 +31,12 @@ const Transit = props => {
 
     const [good, setGood] = useState({})
 
-    const getInfo = good => {
+    const getInfo = (good, target) => {
 
-        setGood(good)
-        setInfoOpen(true)
+        if (target.tagName === 'TD') {
+            setGood(good)
+            setInfoOpen(true)
+        }
 
     }
 
@@ -167,7 +169,7 @@ const Transit = props => {
                             return <TableRow
                                 key={'tablerowintransitkey' + good.barcode}
                                 className={good.c}
-                                onClick={() => getInfo(good)}
+                                onClick={e => getInfo(good, e.target)}
                                 style={{cursor: 'pointer'}}
                             >
                                 <TableCell>

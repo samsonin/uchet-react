@@ -110,10 +110,6 @@ const DailyModal = props => {
             reset()
         }
 
-        // console.log('row in Modals/Daily', props.row)
-        // console.log('type in Modals/Daily', props.type)
-        // console.log('isZp in Modals/Daily', isZp)
-
     }, [props.row, props.isOpen])
 
     const exit = () => {
@@ -150,9 +146,7 @@ const DailyModal = props => {
                 {variant: 'error'})
         }
 
-        const sum = +sum
-
-        if (!sum) {
+        if (!+sum) {
             return enqueueSnackbar('сумма должна отличатся от нуля',
                 {variant: 'error'})
         }
@@ -165,7 +159,7 @@ const DailyModal = props => {
 
         const data = {
             item,
-            sum,
+            sum: +sum,
             employee,
             note,
         }

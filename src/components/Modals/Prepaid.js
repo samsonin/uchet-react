@@ -342,17 +342,17 @@ export default function ({isOpen, close, row, stock_id, prepaid_id, setPrepaids}
         {disabled
             ? ''
             : <DialogActions>
-                <Button onClick={() => row
+                <Button onClick={() => row || prepaid_id
                     ? del()
                     : exit()}
                         color="secondary">
-                    {row
+                    {row || prepaid_id
                         ? 'Вернуть'
                         : 'Отмена'}
                 </Button>
                 <Button onClick={() => save()}
                         color="primary">
-                    {row
+                    {row || prepaid_id
                         ? 'Сохранить'
                         : 'Внести'}
                 </Button>
