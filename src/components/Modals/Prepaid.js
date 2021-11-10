@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useRef, useState} from "react";
+import React, {forwardRef, useEffect, useState} from "react";
 
 import rest from "../../components/Rest";
 import Dialog from "@material-ui/core/Dialog";
@@ -70,22 +70,6 @@ const initCustomer = {
 
 const fields = ['id', 'fio', 'phone_number']
 
-// const zakaz = {
-//     sale_id: 0, // если редактируется
-//     id: 0, // если редактируется
-//     item: '',
-//     presum: 0,
-//     sum: 0,
-//     customer: {
-//         id: 0, // если редактируется
-//         phone_number: '',
-//         fio: '',
-//     },
-//     status: '', // если редактируется
-//     note: ''
-// }
-
-
 export default function ({isOpen, close, row, stock_id, prepaid_id, setPrepaids}) {
 
     const classes = useStyles()
@@ -153,7 +137,7 @@ export default function ({isOpen, close, row, stock_id, prepaid_id, setPrepaids}
                                 setPresum(res.body.presum)
                                 setSum(res.body.sum)
                                 setStatus(status)
-                                fields.map(f => updateCustomer(f, res.body.customer[f]))
+                                if (res.body.customer) fields.map(f => updateCustomer(f, res.body.customer[f]))
                                 setNote(res.body.note)
 
                             }

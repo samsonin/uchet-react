@@ -97,20 +97,24 @@ const Prepaids = props => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {prepaids.map(p => <TableRow
-                        key={'tablerowinprepaids' + p.id}
-                        style={{
-                            cursor: 'pointer'
-                        }}
-                        onClick={() => openPrepaid(p.id)}
-                    >
-                        <TableCell>{p.time}</TableCell>
-                        <TableCell>{p.item}</TableCell>
-                        <TableCell>
-                            {TwoLineInCell(p.customer.phone_number, p.customer.fio)}
-                        </TableCell>
-                        <TableCell>{p.status}</TableCell>
-                    </TableRow>)}
+                    {prepaids
+                        ? prepaids.map(p => <TableRow
+                            key={'tablerowinprepaids' + p.id}
+                            style={{
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => openPrepaid(p.id)}
+                        >
+                            <TableCell>{p.time}</TableCell>
+                            <TableCell>{p.item}</TableCell>
+                            <TableCell>
+                                {p.customer
+                                    ? TwoLineInCell(p.customer.phone_number, p.customer.fio)
+                                    : null}
+                            </TableCell>
+                            <TableCell>{p.status}</TableCell>
+                        </TableRow>)
+                        : null}
                 </TableBody>
             </Table>
             : 'Предоплаты не найдены'}
