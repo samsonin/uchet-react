@@ -1,20 +1,20 @@
-@media print {
+/*@media print {*/
 
-    .barcodes {
-        page-break-after: always;
-        page-break-before: always;
-        display: block !important;
-        margin: 0;
-        padding: 0;
-    }
+/*    .barcodes {*/
+/*        page-break-after: always;*/
+/*        page-break-before: always;*/
+/*        display: block !important;*/
+/*        margin: 0;*/
+/*        padding: 0;*/
+/*    }*/
 
-}
+/*}*/
 
-@page {
+/*@page {*/
 
-    size: 30mm 20mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: block !important;
+/*    size: 30mm 20mm !important;*/
+/*    margin: 0 !important;*/
+/*    padding: 0 !important;*/
+/*    display: block !important;*/
 
-}
+/*}*/

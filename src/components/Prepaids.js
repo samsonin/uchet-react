@@ -66,8 +66,8 @@ const Prepaids = props => {
             }}
             preId={prepaidId}
             preData={prepaidData}
-            stock_id={props.app.stock_id}
             setPrepaids={setPrepaids}
+            className='non-printable'
         />}
 
         {prepaids

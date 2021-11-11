@@ -159,8 +159,6 @@ const Consignment = props => {
 
         if (product) {
 
-            // console.log('scanTr', scanTr)
-
             if (product.category_id) {
 
                 handleTr(scanTr.current, 'category_id', product.category_id || product.categories[0])
@@ -220,9 +218,9 @@ const Consignment = props => {
                     ? 'Такая накладная уже существует'
                     : res.body.error === 'stock not allowed'
                         ? 'Доступ для пользователя запрещен'
-                        : res.body.error === 'already used'
+                        : res.body.error === 'already spent'
                             ? 'Продуция уже использована'
-                            : 'Ошибка'
+                            : 'Ошибка: ' + res.body.error
 
                 return enqueueSnackbar(res.status + ' ' + message, {
                     variant: 'error'
@@ -347,6 +345,8 @@ const Consignment = props => {
         : +val
 
     const productHandler = (name, reason, i) => {
+
+        scanTr.current = i
 
         handleTr(i, 'model', name)
 

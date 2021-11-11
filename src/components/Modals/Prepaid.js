@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useState} from "react";
+import React, {createElement, forwardRef, useEffect, useState} from "react";
 
 import rest from "../../components/Rest";
 import Dialog from "@material-ui/core/Dialog";
@@ -14,11 +14,13 @@ import MenuItem from "@material-ui/core/MenuItem";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
 import IconButton from "@material-ui/core/IconButton";
+import PrintIcon from '@material-ui/icons/Print';
 import CloseIcon from "@material-ui/icons/Close";
 import {makeStyles} from "@material-ui/core/styles";
 
 import CustomersSelect from "../common/CustomersSelect"
 import TextField from "@material-ui/core/TextField/TextField";
+import {connect} from "react-redux";
 
 const statuses = [
     'Новая',
@@ -49,6 +51,14 @@ const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
+const monthes = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
+
+const createDate = () => {
+    const date = new Date();
+    return date.getDate() + ' ' + monthes[date.getMonth()].toLowerCase() + ' ' + date.getFullYear() + 'г.'
+}
+
+
 const useStyles = makeStyles((theme) => ({
     field: {
         margin: '1rem .3rem',
@@ -59,6 +69,11 @@ const useStyles = makeStyles((theme) => ({
         right: theme.spacing(1),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
+    },
+    printButton: {
+        position: 'absolute',
+        right: '4rem',
+        top: theme.spacing(1),
     }
 }));
 
@@ -70,7 +85,7 @@ const initCustomer = {
 
 const fields = ['id', 'fio', 'phone_number']
 
-export default function ({isOpen, close, preData, preId, stock_id, setPrepaids}) {
+const Prepaid = props => {
 
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
@@ -99,24 +114,21 @@ export default function ({isOpen, close, preData, preId, stock_id, setPrepaids})
         setNote('')
     }
 
-    console.log('preId', preId)
-    console.log('preData', preData)
-
     useEffect(() => {
 
         // if (prepaid_id || (preData && preData.action === 'предоплата' && isOpen)) {
-        if (preId && isOpen) {
+        if (props.preId && props.isOpen) {
 
             setDisabled(true)
 
-            if (preData) {
-                setSaleId(preData.id)
-                setItem(preData.item)
-                setPresum(preData.sum)
-                setNote(preData.note)
+            if (props.preData) {
+                setSaleId(props.preData.id)
+                setItem(props.preData.item)
+                setPresum(props.preData.sum)
+                setNote(props.preData.note)
             }
 
-            rest('zakaz/' + preId)
+            rest('zakaz/' + props.preId)
                 .then(res => {
                     if (res.status === 200 && res.body) {
 
@@ -124,7 +136,7 @@ export default function ({isOpen, close, preData, preId, stock_id, setPrepaids})
 
                         setDisabled(!isEditableStatus(status))
 
-                        setId(+preId || res.body.id)
+                        setId(+props.preId || res.body.id)
                         setCreated(res.body.time.substr(0, 10))
                         setItem(res.body.item)
                         setPresum(res.body.presum)
@@ -140,7 +152,7 @@ export default function ({isOpen, close, preData, preId, stock_id, setPrepaids})
             reset()
         }
 
-    }, [preData, isOpen])
+    }, [props.preData, props.isOpen])
 
     const save = () => {
 
@@ -152,7 +164,7 @@ export default function ({isOpen, close, preData, preId, stock_id, setPrepaids})
 
         if (error) return enqueueSnackbar(error, {variant: 'error'})
 
-        let url = 'zakaz/' + stock_id
+        let url = 'zakaz/' + props.app.stock_id
         const data = {item, presum, sum, customer, status, note}
 
         if (id) url += '/' + id
@@ -167,7 +179,7 @@ export default function ({isOpen, close, preData, preId, stock_id, setPrepaids})
 
                     if (res.status === 200) {
 
-                        if (setPrepaids && res.body.prepaids) setPrepaids(res.body.prepaids)
+                        if (props.setPrepaids && res.body.prepaids) props.setPrepaids(res.body.prepaids)
 
                         exit()
 
@@ -186,7 +198,7 @@ export default function ({isOpen, close, preData, preId, stock_id, setPrepaids})
 
     const del = () => {
 
-        rest('zakaz/' + stock_id + '/' + id, 'DELETE')
+        rest('zakaz/' + props.app.stock_id + '/' + id, 'DELETE')
             .then(res => {
 
                 if (res.status === 200) {
@@ -203,7 +215,7 @@ export default function ({isOpen, close, preData, preId, stock_id, setPrepaids})
     const exit = () => {
 
         reset()
-        close()
+        props.close()
 
     }
 
@@ -219,18 +231,76 @@ export default function ({isOpen, close, preData, preId, stock_id, setPrepaids})
 
     }
 
+    const inputToText = elem => {
+
+        const inputs = elem.querySelectorAll('input')
+
+        for (let i of inputs) {
+
+            let span = document.createElement('span')
+
+            let value
+            if (i.name === 'organization_organization') {
+                value = props.app.organization.organization
+            } else if (i.name === 'organization_inn') {
+                value = props.app.organization.inn
+            } else if (i.name === 'today') {
+                value = createDate()
+            } else if (i.name === 'fio') {
+                value = customer.fio
+            } else if (i.name === 'model') {
+                value = item
+            } else if (i.name === 'sum') {
+                value = sum
+            } else if (i.name === 'presum') {
+                value = presum
+            }
+
+            span.innerHTML = value
+
+            i.parentNode.replaceChild(span, i)
+
+        }
+
+        return elem
+    }
+
+    const print = () => {
+
+        const doc = props.app.docs.find(d => d.name === 'prepaid')
+
+        const html = doc
+            ? doc.text
+            : 'Документ не найден'
+
+        let div = document.createElement('div')
+        div.className = 'printable'
+        div.innerHTML = html
+
+        document.body.append(inputToText(div))
+
+        window.print()
+
+    }
+
     return <Dialog
-        open={isOpen}
+        open={props.isOpen}
         TransitionComponent={Transition}
         keepMounted
         onClose={() => exit()}
+        className='non-printable'
     >
         <DialogTitle>
 
             Предоплата
 
+            <IconButton className={classes.printButton}
+                        onClick={() => print()}>
+                <PrintIcon/>
+            </IconButton>
+
             <IconButton aria-label="close" className={classes.closeButton}
-                        onClick={() => close()}>
+                        onClick={() => props.close()}>
                 <CloseIcon/>
             </IconButton>
 
@@ -332,3 +402,5 @@ export default function ({isOpen, close, preData, preId, stock_id, setPrepaids})
 
     </Dialog>
 }
+
+export default connect(state => state)(Prepaid)

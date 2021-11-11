@@ -27,7 +27,7 @@ ReactDOM.render((
                 <Circularln/>
             </div>
             <SnackbarProvider>
-                <App/>
+                <App />
             </SnackbarProvider>
         </BrowserRouter>
     </Provider>
