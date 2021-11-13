@@ -105,21 +105,21 @@ const Prepaids = props => {
                 <TableBody>
                     {prepaids
                         ? prepaids.map(p => <TableRow
-                            key={'tablerowinprepaids' + p.id}
-                            style={{
-                                cursor: 'pointer'
-                            }}
-                            onClick={() => openPrepaid(p)}
-                        >
-                            <TableCell>{p.time}</TableCell>
-                            <TableCell>{p.item}</TableCell>
-                            <TableCell>
-                                {p.customer
-                                    ? TwoLineInCell(p.customer.phone_number, p.customer.fio)
-                                    : null}
-                            </TableCell>
-                            <TableCell>{p.status}</TableCell>
-                        </TableRow>)
+                                key={'tablerowinprepaids' + p.id + p.time}
+                                style={{
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => openPrepaid(p)}
+                            >
+                                <TableCell>{p.time}</TableCell>
+                                <TableCell>{p.item}</TableCell>
+                                <TableCell>
+                                    {p.customer
+                                        ? TwoLineInCell(p.customer.phone_number, p.customer.fio)
+                                        : null}
+                                </TableCell>
+                                <TableCell>{p.status}</TableCell>
+                            </TableRow>)
                         : null}
                 </TableBody>
             </Table>

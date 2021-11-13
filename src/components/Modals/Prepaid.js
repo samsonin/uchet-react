@@ -56,7 +56,7 @@ const monthes = ['Января', 'Февраля', 'Марта', 'Апреля',
 const createDate = created => {
 
     if (created) {
-        return created.substr(8, 2) + ' ' + monthes[created.substr(5, 2)].toLowerCase() + ' ' + created.substr(0, 4) + 'г.'
+        return created.substr(8, 2) + ' ' + monthes[+created.substr(5, 2)].toLowerCase() + ' ' + created.substr(0, 4) + 'г.'
     } else {
         const date = new Date();
         return date.getDate() + ' ' + monthes[date.getMonth()].toLowerCase() + ' ' + date.getFullYear() + 'г.'
@@ -278,6 +278,12 @@ const Prepaid = props => {
         const html = doc
             ? doc.text
             : 'Документ не найден'
+
+        const printables = document.getElementsByClassName('printable')
+
+        for (let i = 0; i < printables.length; i++) {
+            printables[i].remove()
+        }
 
         let div = document.createElement('div')
         div.className = 'printable'
