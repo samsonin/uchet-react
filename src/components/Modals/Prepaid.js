@@ -53,9 +53,15 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const monthes = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
 
-const createDate = () => {
-    const date = new Date();
-    return date.getDate() + ' ' + monthes[date.getMonth()].toLowerCase() + ' ' + date.getFullYear() + 'г.'
+const createDate = created => {
+
+    if (created) {
+        return created.substr(8, 2) + ' ' + monthes[created.substr(5, 2)].toLowerCase() + ' ' + created.substr(0, 4) + 'г.'
+    } else {
+        const date = new Date();
+        return date.getDate() + ' ' + monthes[date.getMonth()].toLowerCase() + ' ' + date.getFullYear() + 'г.'
+    }
+
 }
 
 
@@ -245,7 +251,7 @@ const Prepaid = props => {
             } else if (i.name === 'organization_inn') {
                 value = props.app.organization.inn
             } else if (i.name === 'today') {
-                value = createDate()
+                value = createDate(created)
             } else if (i.name === 'fio') {
                 value = customer.fio
             } else if (i.name === 'model') {

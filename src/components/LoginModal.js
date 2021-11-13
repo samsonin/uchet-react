@@ -18,17 +18,6 @@ import Privacy from "./Privacy";
 import {makeStyles} from "@material-ui/core/styles";
 
 
-const parseJwt = token => {
-
-    const base64Url = token.split('.')[1]
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-    }).join(''))
-    return JSON.parse(jsonPayload)
-
-}
-
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -78,7 +67,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
         if (typeof jwt !== 'string') return false;
 
-        let payload = parseJwt(jwt);
+        let payload = props.parseJwt(jwt);
         if (typeof payload !== 'object') return false;
 
         props.init_user(jwt, +payload.user_id, +payload.organization_id, payload.admin, payload.exp);

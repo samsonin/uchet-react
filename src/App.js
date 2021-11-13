@@ -36,6 +36,25 @@ import {Records} from "./components/Records";
 import Daily from "./components/Daily";
 import LoginModal from "./components/LoginModal";
 import Prepaids from "./components/Prepaids";
+import {bindActionCreators} from "redux";
+import {init_user, upd_app} from "./actions/actionCreator";
+
+
+const parseJwt = token => {
+
+    try {
+        const base64Url = token.split('.')[1]
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        }).join(''))
+        return JSON.parse(jsonPayload)
+    } catch (e) {
+        console.log('parseJwt error', e)
+        return false
+    }
+
+}
 
 const App = props => {
 
@@ -70,6 +89,24 @@ const App = props => {
 
         document.addEventListener('keydown', handleKeyPress)
 
+        window.location.search
+            .replace('?', '')
+            .split('&')
+            .map(str => {
+                const param = str.split('=')
+                if (param[0] === 'jwt') {
+
+                    const jwt = param[1]
+                    let payload = parseJwt(jwt)
+                    if (typeof payload !== 'object') return false
+
+                    props.init_user(jwt, +payload.user_id, +payload.organization_id, payload.admin, payload.exp)
+
+                    window.location.search = ''
+                }
+            })
+
+
 // eslint-disable-next-line
     }, [])
 
@@ -93,7 +130,7 @@ const App = props => {
 
     }, [ourBarcode])
 
-    useEffect(() =>{
+    useEffect(() => {
 
         if (props.app.version && props.app.version !== 1) {
 
@@ -168,6 +205,7 @@ const App = props => {
             <LoginModal
                 isOpen={!+props.auth.user_id}
                 close={() => console.log('close')}
+                parseJwt={parseJwt}
             />
 
             <GoodModal
@@ -208,7 +246,7 @@ const App = props => {
                         <Route path="/orders" render={props => <Orders
                             enterPress={enterPress}
                             {...props}
-                        />} />
+                        />}/>
                         <Route path="/order" component={NewOrder}/>
                         {props.app.users[0] && <Route path="/queue" component={Queue}/>}
 
@@ -259,4 +297,9 @@ const App = props => {
 
 }
 
-export default connect(state => state)(App);
+const mapDispatchToProps = dispatch => bindActionCreators({
+    init_user,
+    upd_app
+}, dispatch);
+
+export default connect(state => state, mapDispatchToProps)(App);
