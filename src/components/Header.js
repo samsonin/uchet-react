@@ -134,7 +134,7 @@ const NavbarPage = props => {
 
     const exit = () => {
 
-        props.init_user('', 0, '', '', '')
+        props.init_user('', 0, '', '', '', 0)
         props.exit_app()
         setIsOpen(false)
 

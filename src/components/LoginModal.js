@@ -50,6 +50,8 @@ export default connect(state => state, mapDispatchToProps)(props => {
     const [password2, setPassword2] = useState('')
     const [code, setCode] = useState('')
 
+    const [requesting, setRequesting] = useState(false)
+
     const {enqueueSnackbar} = useSnackbar()
 
     const classes = useStyles()
@@ -70,16 +72,14 @@ export default connect(state => state, mapDispatchToProps)(props => {
         let payload = props.parseJwt(jwt);
         if (typeof payload !== 'object') return false;
 
-        props.init_user(jwt, +payload.user_id, +payload.organization_id, payload.admin, payload.exp);
+        props.init_user(jwt, +payload.user_id, +payload.organization_id, payload.admin, payload.exp, payload.position_id);
 
         return true;
     }
 
     const keyPress = e => {
-        if (typeof e === 'undefined') return false;
-        if (e.key === 'Enter') {
+        if (e && e.key === 'Enter') {
 
-            // TODO переименовать имена функций в соответствии со статусами
             const func = eval(status)
             if (typeof func === "function") func()
 
@@ -88,12 +88,18 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const signIn = (isDemo = false) => {
 
+        if (requesting) return
+        setRequesting(true)
+
         doubleRequest({
             login: isDemo ? 'mail@uchet.store' : login,
             password: isDemo ? '1' : password
         }, 'login')
             .then(res => res.text())
             .then(res => {
+
+                setRequesting(false)
+
                 try {
                     init(res)
                 } catch (e) {
@@ -113,12 +119,20 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const sendRestoreCode = () => {
 
+        if (requesting) return
+        setRequesting(true)
+
         doubleRequest({login}, 'codes')
-            .then(res => res.status === 200
-                ? setStatus('restore')
-                : enqueueSnackbar('Неправильный номер телефона или email', {
-                    variant: 'error'
-                }))
+            .then(res => {
+
+                setRequesting(false)
+
+                res.status === 200
+                    ? setStatus('restore')
+                    : enqueueSnackbar('Неправильный номер телефона или email', {
+                        variant: 'error'
+                    })
+            })
 
     }
 
@@ -139,6 +153,9 @@ export default connect(state => state, mapDispatchToProps)(props => {
             variant: 'error'
         })
 
+        if (requesting) return
+        setRequesting(true)
+
         doubleRequest({
             name,
             login,
@@ -146,6 +163,8 @@ export default connect(state => state, mapDispatchToProps)(props => {
             password
         }, status)
             .then(res => {
+
+                setRequesting(false)
 
                 if (res.status === 200) {
 
@@ -242,6 +261,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
     const renderButton = name => <Button onClick={buttons[name].a}
                                          color={colors[buttons[name].color]}
                                          key={'buttonskeyinloginmodal' + name}
+                                         disabled={requesting}
     >
         {buttons[name].text}
     </Button>

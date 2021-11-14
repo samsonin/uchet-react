@@ -579,8 +579,8 @@ const Daily = props => {
                                     text: 'Сдали:', value: daily.handed,
                                     localValue: handed,
                                     change: e => setHanded(+e.target.value),
-                                    click: (canChange || canAdminChange) && handedHandler,
-                                    clickAdd: (canChange || canAdminChange) && handedHandlerAdd
+                                    click: canChange && canAdminChange && handedHandler,
+                                    clickAdd: canChange && canAdminChange && handedHandlerAdd
                                 },
                                 {text: 'Остаток:', value: daily.evening},
                             ].map(l => (date === today || l.text !== 'Подотчеты:') && <TableRow

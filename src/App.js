@@ -100,7 +100,7 @@ const App = props => {
                     let payload = parseJwt(jwt)
                     if (typeof payload !== 'object') return false
 
-                    props.init_user(jwt, +payload.user_id, +payload.organization_id, payload.admin, payload.exp)
+                    props.init_user(jwt, +payload.user_id, +payload.organization_id, payload.admin, payload.exp, payload.position_id)
 
                     window.location.search = ''
                 }

@@ -40,6 +40,8 @@ const Orders = props => {
 
     const [orders, setOrders] = useState()
 
+    const position = props.app.positions.find(p => p.id === props.auth.position_id)
+
     const handleStocks = (stockId, checked) => {
 
         setStocks(prev => {
@@ -60,12 +62,25 @@ const Orders = props => {
 
     useEffect(() => {
 
-        rest('allowedOrders')
-            .then(res => {
-                if (res.status === 200) {
-                    setOrders(res.body)
-                }
-            })
+        if (position && position.is_sale && props.app.stock_id) {
+
+            rest('orders?current_shift_only&stock_ids[]=' + props.app.stock_id)
+                .then(res => {
+                    if (res.status === 200) {
+                        setOrders(res.body)
+                    }
+                })
+
+        } else {
+
+            rest('allowedOrders')
+                .then(res => {
+                    if (res.status === 200) {
+                        setOrders(res.body)
+                    }
+                })
+
+        }
 
     }, [])
 

@@ -4,13 +4,14 @@ import {
 } from "../constants";
 
 
-export const init_user = (jwt, user_id, organization_id, admin, expiration_time) => ({
+export const init_user = (jwt, user_id, organization_id, admin, expiration_time, position_id) => ({
     type: INIT_USER,
     jwt,
     user_id,
     organization_id,
     admin,
-    expiration_time
+    expiration_time,
+    position_id
 });
 
 export const upd_app = data => ({
