@@ -134,9 +134,13 @@ const Orders = props => {
 
         const i = order_id || id
 
+        const stock = props.app && props.app.stocks.find(s => s.id === stock_id)
+
         return props.app.stock_id === stock_id
             ? i
-            : props.app && props.app.stocks.find(s => s.id === stock_id).name + ', ' + i
+            : stock
+                ? stock.name + ', ' + i
+                : 'точка не определена, ' + i
     }
 
     return <div

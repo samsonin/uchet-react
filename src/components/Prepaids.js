@@ -2,19 +2,31 @@ import React, {useEffect, useState} from 'react';
 import {connect} from "react-redux";
 
 import rest from './Rest'
-import {Table, TableBody, TableRow, TableHead, TableCell, Typography} from "@material-ui/core";
+import {
+    Table,
+    TableBody,
+    TableRow,
+    TableHead,
+    TableCell,
+    Typography,
+    TextField,
+    InputAdornment
+} from "@material-ui/core";
 import PrepaidModal from "./Modals/Prepaid";
 import TwoLineInCell from "./common/TwoLineInCell";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
+import SearchIcon from '@material-ui/icons/Search';
+import CloseIcon from "@material-ui/icons/Close";
 
 const Prepaids = props => {
 
     const [isPrepaidOpen, setIsPrepaidOpen] = useState(false)
     const [prepaidId, setPrepaidId] = useState()
-    const [prepaidData, setPrepaidData] =useState()
+    const [prepaidData, setPrepaidData] = useState()
     const [prepaids, setPrepaids] = useState([])
+    const [search, setSearch] = useState('')
 
     const getPrepaids = () => {
 
@@ -74,10 +86,29 @@ const Prepaids = props => {
             ? <Table size="small">
                 <TableHead>
                     <TableRow>
-                        <TableCell colSpan={3}>
+                        <TableCell colSpan={2}>
                             <Typography variant="h6">
                                 Предоплаты
                             </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                            <TextField InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon/>
+                                    </InputAdornment>
+                                ),
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={() => setSearch('')}>
+                                            <CloseIcon/>
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                                       value={search}
+                                       onChange={e => setSearch(e.target.value)}
+                            />
                         </TableCell>
                         <TableCell align="right">
                             <Tooltip title={'Добавить предоплату'}>
@@ -104,22 +135,32 @@ const Prepaids = props => {
                 </TableHead>
                 <TableBody>
                     {prepaids
-                        ? prepaids.map(p => <TableRow
-                                key={'tablerowinprepaids' + p.id + p.time}
-                                style={{
-                                    cursor: 'pointer'
-                                }}
-                                onClick={() => openPrepaid(p)}
-                            >
-                                <TableCell>{p.time}</TableCell>
-                                <TableCell>{p.item}</TableCell>
-                                <TableCell>
-                                    {p.customer
-                                        ? TwoLineInCell(p.customer.phone_number, p.customer.fio)
-                                        : null}
-                                </TableCell>
-                                <TableCell>{p.status}</TableCell>
-                            </TableRow>)
+                        ? prepaids
+                            .filter(p => {
+
+                                if (!search) return true
+
+                                const row = (p.time + p.item + p.customer.phone_number + p.customer.fio).toLowerCase()
+
+                                return row.indexOf(search.toLowerCase()) > -1
+
+                            })
+                            .map(p => <TableRow
+                            key={'tablerowinprepaids' + p.id + p.time}
+                            style={{
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => openPrepaid(p)}
+                        >
+                            <TableCell>{p.time}</TableCell>
+                            <TableCell>{p.item}</TableCell>
+                            <TableCell>
+                                {p.customer
+                                    ? TwoLineInCell(p.customer.phone_number, p.customer.fio)
+                                    : null}
+                            </TableCell>
+                            <TableCell>{p.status}</TableCell>
+                        </TableRow>)
                         : null}
                 </TableBody>
             </Table>

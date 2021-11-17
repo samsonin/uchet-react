@@ -94,7 +94,7 @@ const fields = ['id', 'fio', 'phone_number']
 const Prepaid = props => {
 
     const classes = useStyles()
-    const {enqueueSnackbar} = useSnackbar()
+    const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
     const [saleId, setSaleId] = useState(0)
     const [id, setId] = useState(0)
@@ -160,15 +160,7 @@ const Prepaid = props => {
 
     }, [props.preData, props.isOpen])
 
-    const save = () => {
-
-        let error;
-
-        if (!item) error = 'Укажите наименование'
-        else if (customer === initCustomer) error = 'Не указан заказчик'
-        else if (sum < 1) error = 'Окончательная стоимость должна быть больше 0'
-
-        if (error) return enqueueSnackbar(error, {variant: 'error'})
+    const sendRest = () => {
 
         let url = 'zakaz/' + props.app.stock_id
         const data = {item, presum, sum, customer, status, note}
@@ -191,7 +183,7 @@ const Prepaid = props => {
 
                     } else {
                         enqueueSnackbar((res.status || '') + ' ' + (res.body
-                            ? res.body[0].toString()
+                            ? Object.keys(res.body)[0].toString() + ' ' + res.body[Object.keys(res.body)[0]]
                             : 'error'),
                             {variant: 'error'}
                         )
@@ -199,6 +191,41 @@ const Prepaid = props => {
 
                 }
             )
+
+    }
+
+    const save = afterCheckPhoneNumber => {
+
+        let error;
+
+        if (!item) error = 'Укажите наименование'
+        else if (customer === initCustomer) error = 'Не указан заказчик'
+        else if (!afterCheckPhoneNumber && !customer.phone_number) {
+
+            error = 'Не указан номер телефона заказчика'
+
+            const action = key => (
+                <>
+                    <Button onClick={() => save(true)}>
+                        Внести
+                    </Button>
+                    <Button onClick={() => closeSnackbar(key)}>
+                        Отмена
+                    </Button>
+                </>
+            )
+
+            return enqueueSnackbar(error, {
+                variant: 'warning',
+                autoHideDuration: 5000,
+                action,
+            })
+
+        } else if (sum < 1) error = 'Окончательная стоимость должна быть больше 0'
+
+        if (error) return enqueueSnackbar(error, {variant: 'error'})
+
+        sendRest()
 
     }
 

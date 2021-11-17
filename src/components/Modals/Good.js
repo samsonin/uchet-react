@@ -287,6 +287,23 @@ const Good = props => {
         </IconButton>
     </Tooltip>
 
+    const isSale = wo => {
+
+        if (wo === 'sale') return true
+
+        try {
+
+            const o = JSON.parse(wo)
+
+            return !!o.sale_id
+
+        } catch (e) {
+
+            return false
+
+        }
+
+    }
 
     return <Dialog
         open={!!(good ?? good.id)}
@@ -322,7 +339,7 @@ const Good = props => {
                                     () => console.log('В брак'),
                                     <i className="fas fa-redo"/>)}
                             </>
-                            : good.stock_id === props.app.stock_id && good.wo === 'sale'
+                            : good.stock_id === props.app.stock_id && isSale(good.wo)
                                 ? renderIcon('Вернуть',
                                     () => setIsReasonOpen(!isReasonOpen),
                                     <Restore/>)
