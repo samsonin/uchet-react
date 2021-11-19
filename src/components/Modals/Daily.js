@@ -228,14 +228,14 @@ const DailyModal = props => {
 
             {props.type === 'Расходы, зарплата' && isZp
                 ? <>
-                    <TextField label="дата по"
+                    <TextField label="дата с"
                                type="date"
                                disabled={props.disabled}
                                className={classes.field}
                                value={date1}
                                onChange={e => setDate1(e.target.value)}
                     />
-                    <TextField label="дата с"
+                    <TextField label="дата по"
                                type="date"
                                disabled={props.disabled}
                                className={classes.field}

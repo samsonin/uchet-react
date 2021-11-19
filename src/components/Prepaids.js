@@ -138,7 +138,7 @@ const Prepaids = props => {
                         ? prepaids
                             .filter(p => {
 
-                                if (!search) return true
+                                if (!search || !p.customer) return true
 
                                 const row = (p.time + p.item + p.customer.phone_number + p.customer.fio).toLowerCase()
 

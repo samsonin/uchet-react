@@ -1,4 +1,4 @@
-import React, {createElement, forwardRef, useEffect, useState} from "react";
+import React, {forwardRef, useEffect, useState} from "react";
 
 import rest from "../../components/Rest";
 import Dialog from "@material-ui/core/Dialog";
@@ -21,6 +21,8 @@ import {makeStyles} from "@material-ui/core/styles";
 import CustomersSelect from "../common/CustomersSelect"
 import TextField from "@material-ui/core/TextField/TextField";
 import {connect} from "react-redux";
+
+import Print from "../common/Print"
 
 const statuses = [
     'Новая',
@@ -160,6 +162,8 @@ const Prepaid = props => {
 
     }, [props.preData, props.isOpen])
 
+    const doc = props.app.docs.find(d => d.name === 'prepaid')
+
     const sendRest = () => {
 
         let url = 'zakaz/' + props.app.stock_id
@@ -178,6 +182,8 @@ const Prepaid = props => {
                     if (res.status === 200) {
 
                         if (props.setPrepaids && res.body.prepaids) props.setPrepaids(res.body.prepaids)
+
+                        if (!id) Print(doc, inputToText)
 
                         exit()
 
@@ -263,7 +269,6 @@ const Prepaid = props => {
         })
 
     }
-
     const inputToText = elem => {
 
         const inputs = elem.querySelectorAll('input')
@@ -298,30 +303,6 @@ const Prepaid = props => {
         return elem
     }
 
-    const print = () => {
-
-        const doc = props.app.docs.find(d => d.name === 'prepaid')
-
-        const html = doc
-            ? doc.text
-            : 'Документ не найден'
-
-        const printables = document.getElementsByClassName('printable')
-
-        for (let i = 0; i < printables.length; i++) {
-            printables[i].remove()
-        }
-
-        let div = document.createElement('div')
-        div.className = 'printable'
-        div.innerHTML = html
-
-        document.body.append(inputToText(div))
-
-        window.print()
-
-    }
-
     return <Dialog
         open={props.isOpen}
         TransitionComponent={Transition}
@@ -335,7 +316,7 @@ const Prepaid = props => {
 
             <IconButton className={classes.printButton}
                         disabled={!id}
-                        onClick={() => print()}
+                        onClick={() => Print(doc, inputToText)}
             >
                 <PrintIcon/>
             </IconButton>

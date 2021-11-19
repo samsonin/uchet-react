@@ -10,7 +10,6 @@ import TableCell from "@material-ui/core/TableCell/TableCell";
 import TableBody from "@material-ui/core/TableBody";
 import {connect} from "react-redux";
 
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import IconButton from "@material-ui/core/IconButton";
 import CheckIcon from '@material-ui/icons/Check';
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";

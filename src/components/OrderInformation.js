@@ -2,6 +2,7 @@ import TextField from "@material-ui/core/TextField/TextField";
 import CustomersSelect from "./common/CustomersSelect";
 import React, {useState} from "react";
 import {connect} from "react-redux";
+import Print from "./common/Print";
 
 const initCustomer = {
     id: 0,
@@ -23,6 +24,48 @@ const OrderInformation = props => {
     const [sum, setSum] = useState(0)
     const [sum2, setSum2] = useState(0)
     const [state, setState] = useState({})
+
+    const doc = props.app.docs.find(d => d.name === 'remont')
+
+    const inputToText = elem => {
+
+        const inputs = elem.querySelectorAll('input')
+
+        for (let i of inputs) {
+
+            let span = document.createElement('span')
+
+            let value
+            if (i.name === 'organization_organization') {
+                value = props.app.organization.organization
+            } else if (i.name === 'organization_inn') {
+                value = props.app.organization.inn
+            } else if (i.name === 'today') {
+                // value = createDate(created)
+            } else if (i.name === 'fio') {
+                value = customer.fio
+            } else if (i.name === 'model') {
+                // value = item
+            } else if (i.name === 'sum') {
+                value = sum
+            } else if (i.name === 'presum') {
+                // value = presum
+            }
+
+            span.innerHTML = value
+
+            i.parentNode.replaceChild(span, i)
+
+        }
+
+        return elem
+    }
+
+    const insert = () => {
+
+        Print(doc, inputToText)
+
+    }
 
     const setField = (name, value) => {
 
@@ -49,10 +92,6 @@ const OrderInformation = props => {
         })
 
     }
-
-    // useEffect(() => {
-    //
-    // }, [])
 
     return <>
         <CustomersSelect
