@@ -15,7 +15,7 @@ import Subscribe from "./components/Subscribe";
 import Queue from "./components/Queue";
 import WebSocketAdapter from "./components/WebSocketAdapter";
 import Orders from "./components/Orders";
-import NewOrder from "./components/NewOrder";
+import Order from "./components/Order";
 import Consignment from "./components/Consignment";
 import Consignments from "./components/Consignments";
 import Transit from "./components/Transit";
@@ -65,7 +65,7 @@ const App = props => {
     const [globalBarcode, setGlobalBarcode] = useState()
     const [enterPress, setEnterPress] = useState(false)
 
-    const barcode = useRef()
+    const barcode = useRef('')
 
     const isBarcodeValid = barcode => {
 
@@ -247,16 +247,16 @@ const App = props => {
                             enterPress={enterPress}
                             {...props}
                         />}/>
-                        <Route path="/order" component={NewOrder}/>
                         {props.app.users[0] && <Route path="/queue" component={Queue}/>}
+
+                        <Route path="/order" component={Order}/>
 
                         {!props.app.stock_id || <>
                             <Route path="/arrival" render={props => <Consignment
                                 newScan={globalBarcode}
                                 enterPress={enterPress}
                                 {...props}
-                            />
-                            }/>
+                            />}/>
                             <Route path="/consignments" component={Consignments}/>
                         </>}
 

@@ -54,9 +54,6 @@ const Prepaids = props => {
     const openPrepaid = prepaid => {
 
         setPrepaidId(prepaid.id)
-
-        prepaid.id = undefined
-
         setPrepaidData(prepaid)
         setIsPrepaidOpen(true)
 

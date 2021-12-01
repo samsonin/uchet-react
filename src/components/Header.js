@@ -79,9 +79,14 @@ const NavbarPage = props => {
             })
         }
 
-        let validStocks = props.app.stocks
-            .filter(stock => stock.is_valid)
-            .filter(stock => allowedStocks.includes(stock.id))
+        const validStocks = props.app.stocks
+            .filter(stock => stock.is_valid && allowedStocks.includes(stock.id))
+
+        const position = props.app.positions
+            ? props.app.positions.find(p => p.id === props.auth.position_id)
+            : null
+
+        const isSale = position && position.is_sale
 
         return validStocks
             ? props.app.stock_id
@@ -90,8 +95,8 @@ const NavbarPage = props => {
                         {validStocks.find(stock => +stock.id === props.app.stock_id).name}
                     </strong>
 
-                    {props.app.daily && props.auth.admin && !props.app.daily
-                        .find(d => d.employees.includes(props.auth.user_id))
+                    {(props.auth.admin || isSale) && props.app.daily &&
+                    !props.app.daily.find(d => d.employees.includes(props.auth.user_id))
                         ? <Button
                             variant="outlined"
                             style={{

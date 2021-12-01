@@ -71,7 +71,7 @@ const Daily = props => {
 
     const [stock, setStock] = useState(() => props.app.stock_id || props.app.stocks.find(s => s.is_valid).id)
     const [date, setDate] = useState(() => today)
-    const [localDaily, setLocalDaily] = useState([])
+    const [localDaily, setLocalDaily] = useState({})
 
     const [cashless, setCashless] = useState(0)
     const [handed, setHanded] = useState(0)
@@ -107,6 +107,8 @@ const Daily = props => {
 
                 if (res.status === 200) {
                     setLocalDaily(res.body)
+                } else {
+                    enqueueSnackbar(date + ' не работали', {variant: 'error'})
                 }
 
             })
@@ -173,9 +175,6 @@ const Daily = props => {
     }
 
     const handler = (modalType, row) => {
-
-        // console.log('modalType', modalType)
-        // console.log('row', row)
 
         setModalType(modalType)
         setRow(row)
@@ -383,251 +382,262 @@ const Daily = props => {
                 </Grid>
             </Grid>
 
-            <Grid item className="p-2">
-                <List dense>
-                    {daily && daily.employees && daily.employees.map(e => {
+            {date !== today && !localDaily.hasOwnProperty('id')
+                ? <div style={{
+                    margin: '1rem',
+                    fontSize: 20
+                }}>
+                    Нет Данных
+                </div>
+                : <>
+                    <Grid item className="p-2">
+                        <List dense>
+                            {daily && daily.employees && daily.employees.map(e => {
 
-                        let user = props.app.users.find(u => u.id === e)
+                                let user = props.app.users.find(u => u.id === e)
 
-                        return user && <ListItem
-                            key={'userindailylistitem' + user.id}
-                            component={Paper}
-                            className="m-1"
-                        >
-                            <ListItemText
-                                primary={user.name}
-                            />
-                            {canAdminChange && <ListItemSecondaryAction>
-                                <IconButton
-                                    onClick={() => employeeCheckout(user.id)}
+                                return user && <ListItem
+                                    key={'userindailylistitem' + user.id}
+                                    component={Paper}
+                                    className="m-1"
                                 >
-                                    <ExitToAppIcon/>
-                                </IconButton>
-                            </ListItemSecondaryAction>}
-                        </ListItem>
-                    })}
-                </List>
-            </Grid>
+                                    <ListItemText
+                                        primary={user.name}
+                                    />
+                                    {canAdminChange && <ListItemSecondaryAction>
+                                        <IconButton
+                                            onClick={() => employeeCheckout(user.id)}
+                                        >
+                                            <ExitToAppIcon/>
+                                        </IconButton>
+                                    </ListItemSecondaryAction>}
+                                </ListItem>
+                            })}
+                        </List>
+                    </Grid>
 
-            {[
-                {
-                    title: 'Предоплаты', addText: 'Внести предоплату',
-                    titles: ['Наименование', 'Сумма', 'Примечание'],
-                    rows: prepaids,
-                    rowsValues: ['item', 'sum', 'note'],
-                    sum: prepaidsSum,
-                },
-                {
-                    title: 'Товары', addText: 'Продать товар',
-                    titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
-                    rows: sales,
-                    rowsValues: ['action', 'item', 'sum', 'note'],
-                    sum: salesSum,
-                },
-                {
-                    title: 'Работы, услуги', addText: 'Продать услугу',
-                    titles: ['#', 'Что сделали', 'Сумма', 'Сотрудник'],
-                    rows: services,
-                    rowsValues: ['id', 'item', 'sum', 'ui_user_id'],
-                    sum: serviceSum,
-                },
-                {
-                    title: 'Расходы, зарплата', addText: 'Внести расход, зарплату',
-                    titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
-                    rows: costs,
-                    rowsValues: ['action', 'item', 'sum', 'note'],
-                    sum: costSum,
-                },
-                {
-                    title: 'Подотчеты', addText: 'Внести подотчет',
-                    titles: ['Наименование', 'Сотрудник', 'Сумма', 'Примечание'],
-                    rows: imprests,
-                    rowsValues: ['item', 'ui_user_id', 'sum', 'note'],
-                    sum: imprestsSum,
-                },
-            ]
-                .map(t => date !== today && t.rows === imprests
-                    ? ''
-                    : <div key={'tablecontindailykey' + t.title}
-                           style={{margin: '0 1rem 0 0'}}
-                    >
+                    {[
+                        {
+                            title: 'Предоплаты', addText: 'Внести предоплату',
+                            titles: ['Наименование', 'Сумма', 'Примечание'],
+                            rows: prepaids,
+                            rowsValues: ['item', 'sum', 'note'],
+                            sum: prepaidsSum,
+                        },
+                        {
+                            title: 'Товары', addText: 'Продать товар',
+                            titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
+                            rows: sales,
+                            rowsValues: ['action', 'item', 'sum', 'note'],
+                            sum: salesSum,
+                        },
+                        {
+                            title: 'Работы, услуги', addText: 'Продать услугу',
+                            titles: ['#', 'Что сделали', 'Сумма', 'Сотрудник'],
+                            rows: services,
+                            rowsValues: ['id', 'item', 'sum', 'ui_user_id'],
+                            sum: serviceSum,
+                        },
+                        {
+                            title: 'Расходы, зарплата', addText: 'Внести расход, зарплату',
+                            titles: ['Действие', 'Наименование', 'Сумма', 'Примечание'],
+                            rows: costs,
+                            rowsValues: ['action', 'item', 'sum', 'note'],
+                            sum: costSum,
+                        },
+                        {
+                            title: 'Подотчеты', addText: 'Внести подотчет',
+                            titles: ['Наименование', 'Сотрудник', 'Сумма', 'Примечание'],
+                            rows: imprests,
+                            rowsValues: ['item', 'ui_user_id', 'sum', 'note'],
+                            sum: imprestsSum,
+                        },
+                    ]
+                        .map(t => date !== today && t.rows === imprests
+                            ? ''
+                            : <div key={'tablecontindailykey' + t.title}
+                                   style={{margin: '0 1rem 0 0'}}
+                            >
+                                <TableContainer
+                                    className={classes.table}
+                                    component={Paper}
+                                >
+                                    <Table size="small">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell colSpan={t.titles.length - 1}>
+                                                    <Typography variant="h6">
+                                                        {t.title}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {canChange
+                                                        ? <Tooltip title={t.addText}>
+                                                            <IconButton className={classes.icon}
+                                                                        onClick={() => handler(t.title)}
+                                                            >
+                                                                <AddCircleIcon/>
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        : ''}
+                                                </TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableHead>
+                                            <TableRow>
+                                                {t.titles.map(t => <TableCell
+                                                    key={'rowsintabledaily' + t}
+                                                >{t}</TableCell>)}
+                                            </TableRow>
+                                        </TableHead>
+
+                                        <TableBody>
+                                            {t.rows.map(row => <TableRow
+                                                key={'tablerowindaily' + t.title + JSON.stringify(row)}
+                                                style={{
+                                                    cursor: 'pointer'
+                                                }}
+                                                onClick={() => handler(t.title, row)}
+                                            >
+                                                {t.rowsValues.map(v => {
+
+                                                    let value = row[v]
+
+                                                    if (v === 'ui_user_id') {
+
+                                                        let user = props.app.users.find(u => u.id === row.ui_user_id)
+
+                                                        value = user
+                                                            ? user.name
+                                                            : row.ui_user_id
+
+                                                    }
+
+                                                    if (row.action === 'зарплата' && v === 'note') {
+
+                                                        let user = props.app.users.find(u => u.id === row.ui_user_id)
+
+                                                        const userName = user
+                                                            ? user.name
+                                                            : row.ui_user_id
+
+                                                        return <TableCell
+                                                            key={'rowsintabledailysec' + v}
+                                                        >
+                                                            <span className="font-weight-bold pr-3">{userName}</span>
+                                                            <br/>
+                                                            {row.note}
+                                                        </TableCell>
+                                                    }
+
+                                                    return <TableCell
+                                                        key={'rowsintabledailysec' + v}
+                                                    >
+                                                        {row.work
+                                                            ? v === 'item'
+                                                                ? <>
+                                                                <span
+                                                                    className="font-weight-bold pr-3">{row.item}</span>
+                                                                    <br/>
+                                                                    {row.work}
+                                                                </>
+                                                                : value
+                                                            : v === 'id'
+                                                                ? ''
+                                                                : value}
+                                                    </TableCell>
+                                                })}
+                                            </TableRow>)}
+                                        </TableBody>
+
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell colSpan={t.titles.length - 2}>
+                                                    Итого:
+                                                </TableCell>
+                                                <TableCell>
+                                                    {t.sum}
+                                                </TableCell>
+                                            </TableRow>
+                                        </TableHead>
+
+                                    </Table>
+                                </TableContainer>
+                            </div>)}
+
+
+                    {daily && <div style={{margin: '0 1rem 0 0'}}>
                         <TableContainer
                             className={classes.table}
                             component={Paper}
                         >
                             <Table size="small">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell colSpan={t.titles.length - 1}>
-                                            <Typography variant="h6">
-                                                {t.title}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            {canChange
-                                                ? <Tooltip title={t.addText}>
-                                                    <IconButton className={classes.icon}
-                                                                onClick={() => handler(t.title)}
-                                                    >
-                                                        <AddCircleIcon/>
-                                                    </IconButton>
-                                                </Tooltip>
-                                                : ''}
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableHead>
-                                    <TableRow>
-                                        {t.titles.map(t => <TableCell
-                                            key={'rowsintabledaily' + t}
-                                        >{t}</TableCell>)}
-                                    </TableRow>
-                                </TableHead>
-
                                 <TableBody>
-                                    {t.rows.map(row => <TableRow
-                                        key={'tablerowindaily' + t.title + JSON.stringify(row)}
-                                        style={{
-                                            cursor: 'pointer'
-                                        }}
-                                        onClick={() => handler(t.title, row)}
+                                    {[
+                                        {text: 'Остаток на утро:', value: daily.morning},
+                                        {text: 'Выручка:', value: daily.proceeds},
+                                        {text: 'Подотчеты:', value: imprestsSum},
+                                        {
+                                            text: 'Безнал:', value: daily.cashless,
+                                            localValue: cashless,
+                                            change: e => setCashless(+e.target.value),
+                                            click: canChange && cashlessHandler,
+                                            clickAdd: canChange && cashlessHandlerAdd
+                                        },
+                                        {
+                                            text: 'Сдали:', value: daily.handed,
+                                            localValue: handed,
+                                            change: e => setHanded(+e.target.value),
+                                            click: canAdminChange && handedHandler,
+                                            clickAdd: canAdminChange && handedHandlerAdd
+                                        },
+                                        {text: 'Остаток:', value: daily.evening},
+                                    ].map(l => (date === today || l.text !== 'Подотчеты:') && <TableRow
+                                        key={'griditemkeyindailypertotals' + l.text}
                                     >
-                                        {t.rowsValues.map(v => {
 
-                                            let value = row[v]
+                                        <TableCell style={{
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {l.text}
+                                        </TableCell>
 
-                                            if (v === 'ui_user_id') {
+                                        <TableCell>
+                                            {l.value}
+                                        </TableCell>
 
-                                                let user = props.app.users.find(u => u.id === row.ui_user_id)
+                                        {l.click && <TableCell>
 
-                                                value = user
-                                                    ? user.name
-                                                    : row.ui_user_id
+                                            <TextField
+                                                value={l.localValue}
+                                                type="number"
+                                                onChange={l.change}
+                                            />
 
-                                            }
-
-                                            if (row.action === 'зарплата' && v === 'note') {
-
-                                                let user = props.app.users.find(u => u.id === row.ui_user_id)
-
-                                                const userName = user
-                                                    ? user.name
-                                                    : row.ui_user_id
-
-                                                return <TableCell
-                                                    key={'rowsintabledailysec' + v}
-                                                >
-                                                    <span className="font-weight-bold pr-3">{userName}</span>
-                                                    <br/>
-                                                    {row.note}
-                                                </TableCell>
-                                            }
-
-                                            return <TableCell
-                                                key={'rowsintabledailysec' + v}
+                                            <IconButton
+                                                className={classes.icon}
+                                                onClick={l.click}
+                                                disabled={l.value === l.localValue}
                                             >
-                                                {row.work
-                                                    ? v === 'item'
-                                                        ? <>
-                                                            <span className="font-weight-bold pr-3">{row.item}</span>
-                                                            <br/>
-                                                            {row.work}
-                                                        </>
-                                                        : value
-                                                    : v === 'id'
-                                                        ? ''
-                                                        : value}
-                                            </TableCell>
-                                        })}
+                                                <SaveOutlinedIcon/>
+                                            </IconButton>
+                                            <IconButton
+                                                className={classes.icon}
+                                                onClick={l.clickAdd}
+                                                disabled={l.localValue === 0}
+                                            >
+                                                <AddCircleIcon/>
+                                            </IconButton>
+
+                                        </TableCell>}
+
                                     </TableRow>)}
                                 </TableBody>
-
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell colSpan={t.titles.length - 2}>
-                                            Итого:
-                                        </TableCell>
-                                        <TableCell>
-                                            {t.sum}
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-
                             </Table>
                         </TableContainer>
-                    </div>)}
+                    </div>}
 
-            {daily && <div style={{margin: '0 1rem 0 0'}}>
-                <TableContainer
-                    className={classes.table}
-                    component={Paper}
-                >
-                    <Table size="small">
-                        <TableBody>
-                            {[
-                                {text: 'Остаток на утро:', value: daily.morning},
-                                {text: 'Выручка:', value: daily.proceeds},
-                                {text: 'Подотчеты:', value: imprestsSum},
-                                {
-                                    text: 'Безнал:', value: daily.cashless,
-                                    localValue: cashless,
-                                    change: e => setCashless(+e.target.value),
-                                    click: canChange && cashlessHandler,
-                                    clickAdd: canChange && cashlessHandlerAdd
-                                },
-                                {
-                                    text: 'Сдали:', value: daily.handed,
-                                    localValue: handed,
-                                    change: e => setHanded(+e.target.value),
-                                    click: canAdminChange && handedHandler,
-                                    clickAdd: canAdminChange && handedHandlerAdd
-                                },
-                                {text: 'Остаток:', value: daily.evening},
-                            ].map(l => (date === today || l.text !== 'Подотчеты:') && <TableRow
-                                key={'griditemkeyindailypertotals' + l.text}
-                            >
-
-                                <TableCell style={{
-                                    fontWeight: 'bold'
-                                }}>
-                                    {l.text}
-                                </TableCell>
-
-                                <TableCell>
-                                    {l.value}
-                                </TableCell>
-
-                                {l.click && <TableCell>
-
-                                    <TextField
-                                        value={l.localValue}
-                                        type="number"
-                                        onChange={l.change}
-                                    />
-
-                                    <IconButton
-                                        className={classes.icon}
-                                        onClick={l.click}
-                                        disabled={l.value === l.localValue}
-                                    >
-                                        <SaveOutlinedIcon/>
-                                    </IconButton>
-                                    <IconButton
-                                        className={classes.icon}
-                                        onClick={l.clickAdd}
-                                        disabled={l.localValue === 0}
-                                    >
-                                        <AddCircleIcon/>
-                                    </IconButton>
-
-                                </TableCell>}
-
-                            </TableRow>)}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </div>}
-
+                </>}
         </>
 
 }

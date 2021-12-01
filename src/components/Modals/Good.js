@@ -392,8 +392,8 @@ const Good = props => {
 
             <Grid container>
 
-                {treeOpen ?
-                    <>
+                {treeOpen
+                    ? <>
                         <Grid item xs={10} className="pt-1 pr-1">
                             <Tree initialId={good.category_id}
                                   categories={props.app.categories}

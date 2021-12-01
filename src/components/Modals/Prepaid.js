@@ -22,7 +22,7 @@ import CustomersSelect from "../common/CustomersSelect"
 import TextField from "@material-ui/core/TextField/TextField";
 import {connect} from "react-redux";
 
-import Print from "../common/Print"
+import {Print, createDate} from "../common/Print"
 
 const statuses = [
     'Новая',
@@ -52,20 +52,6 @@ const notEditableStatuses = {
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
-
-const monthes = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
-
-const createDate = created => {
-
-    if (created) {
-        return created.substr(8, 2) + ' ' + monthes[+created.substr(5, 2) - 1].toLowerCase() + ' ' + created.substr(0, 4) + 'г.'
-    } else {
-        const date = new Date();
-        return date.getDate() + ' ' + monthes[date.getMonth()].toLowerCase() + ' ' + date.getFullYear() + 'г.'
-    }
-
-}
-
 
 const useStyles = makeStyles((theme) => ({
     field: {
@@ -124,7 +110,6 @@ const Prepaid = props => {
 
     useEffect(() => {
 
-        // if (prepaid_id || (preData && preData.action === 'предоплата' && isOpen)) {
         if (props.preId && props.isOpen) {
 
             setDisabled(true)
