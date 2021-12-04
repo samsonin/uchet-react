@@ -101,7 +101,7 @@ const Order = props => {
     const create = () => {
 
         if (!props.app.stock_id) return enqueueSnackbar('Выберите точку', {variant: 'error'})
-        if (!(customer.id && customer.fio && customer.phone_number)) {
+        if (!(customer.id || customer.fio || customer.phone_number)) {
             return enqueueSnackbar('Нет заказчика', {variant: 'error'})
         }
         if (!model) return enqueueSnackbar('Не указана модель', {variant: 'error'})

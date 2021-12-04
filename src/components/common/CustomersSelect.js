@@ -82,6 +82,7 @@ export default function (props) {
             getOptionSelected={option => option.id === props.customer.id}
             renderInput={params => <TextField
                 {...params}
+                autoComplete = 'off'
                 label={f.label}
                 id={'customer-select-key-in-custselect' + f.name + f.label}
                 name={'customer-select-key-in-custselect' + f.name + f.label}

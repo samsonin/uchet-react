@@ -88,11 +88,13 @@ const NavbarPage = props => {
 
         const isSale = position && position.is_sale
 
+        const currentStock = validStocks.find(stock => +stock.id === props.app.stock_id)
+
         return validStocks
             ? props.app.stock_id
                 ? <>
                     <strong className="white-text">
-                        {validStocks.find(stock => +stock.id === props.app.stock_id).name}
+                        {currentStock ? currentStock.name : ''}
                     </strong>
 
                     {(props.auth.admin || isSale) && props.app.daily &&
