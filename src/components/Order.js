@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
 import TextField from "@material-ui/core/TextField/TextField";
 import CustomersSelect from "./common/CustomersSelect";
@@ -14,7 +14,6 @@ import Grid from "@material-ui/core/Grid";
 
 import {Print, createDate} from "./common/Print";
 import rest from "../components/Rest";
-import {enqueueSnackbar} from "../actions/actionCreator";
 import {useSnackbar} from "notistack";
 
 
@@ -35,7 +34,6 @@ const useStyles = makeStyles(() => ({
     }
 }))
 
-
 const Order = props => {
 
     const fields = props.app.fields.allElements.filter(f => f.index === 'order' && f.is_valid && !f.is_system)
@@ -55,10 +53,12 @@ const Order = props => {
     })
     const [categoryId, setCategoryId] = useState(5)
 
+    const needPrint = useRef(false)
+
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
 
-    const doc = props.app.docs.find(d => d.name === 'remont')
+    const doc = props.app.docs.find(d => d.name === 'order')
 
     const inputToText = elem => {
 
@@ -68,28 +68,49 @@ const Order = props => {
 
             let span = document.createElement('span')
 
+            const stock = props.app.stocks.find(s => s.id === props.app.stock_id)
+
             let value
             if (i.name === 'organization_organization') {
                 value = props.app.organization.organization
+            } else if (i.name === 'organization_legal_address') {
+                value = props.app.organization.legal_address
             } else if (i.name === 'organization_inn') {
                 value = props.app.organization.inn
+            } else if (i.name === 'organization_ogrn') {
+                value = props.app.organization.ogrn
+            } else if (i.name === 'access_point_address') {
+                value = stock ? stock.address : ''
+            } else if (i.name === 'access_point_phone_number') {
+                value = stock ? stock.phone_number : ''
+            } else if (i.name === 'id') {
+                value = id
+            } else if (i.name === 'group') {
+                const category = props.app.categories.find(c => c.id === categoryId)
+                value = category ? category.name : ''
             } else if (i.name === 'today') {
                 value = createDate()
             } else if (i.name === 'fio') {
-                value = customer.fio
+                value = customer.fio || 'ИНКОГНИТО'
+            } else if (i.name === 'phone_number') {
+                value = customer.phone_number ?? 'НЕ УКАЗАН'
             } else if (i.name === 'model') {
-                value = model
+                value = model || 'НЕИЗВЕСТНО'
             } else if (i.name === 'sum') {
-                value = sum
-            } else if (i.name === 'presum') {
-                value = presum
+                value = sum || 0
+            } else if (i.name === 'prepaid') {
+                value = presum || 0
+            } else if (i.name === 'broken_cost') {
+                value = props.app.config.rem_assessed_value
+            } else if (props.app.config[i.name]) {
+                value = props.app.config[i.name]
+            } else if (fields.find(f => f.name === i.name)) {
+                value = state[i.name]
             }
 
-            if (!value) {
-                console.log('i.name', i.name)
-            }
+            // if (!value) console.log('i.name', i.name)
 
-            span.innerHTML = value
+            span.innerHTML = value || ''
 
             i.parentNode.replaceChild(span, i)
 
@@ -98,6 +119,15 @@ const Order = props => {
         return elem
     }
 
+    useEffect(() => {
+
+        if (id) {
+            Print(doc, inputToText)
+            needPrint.current = false
+        }
+
+    }, [id])
+
     const create = () => {
 
         if (!props.app.stock_id) return enqueueSnackbar('Выберите точку', {variant: 'error'})
@@ -105,7 +135,6 @@ const Order = props => {
             return enqueueSnackbar('Нет заказчика', {variant: 'error'})
         }
         if (!model) return enqueueSnackbar('Не указана модель', {variant: 'error'})
-
 
         const data = {
             customer,
@@ -119,11 +148,14 @@ const Order = props => {
         rest('orders/' + props.app.stock_id, 'POST', data)
             .then(res => {
 
+                if (res.status === 200) {
 
+                    setId(res.body.orders[0].id)
+                    needPrint.current = true
 
+                }
             })
 
-        Print(doc, inputToText)
 
     }
 
@@ -174,12 +206,12 @@ const Order = props => {
             </Typography>
 
             {id
-            ? <IconButton className={classes.printButton}
-                                onClick={() => Print(doc, inputToText)}
-            >
-                <PrintIcon/>
-            </IconButton>
-            : null}
+                ? <IconButton className={classes.printButton}
+                              onClick={() => Print(doc, inputToText)}
+                >
+                    <PrintIcon/>
+                </IconButton>
+                : null}
         </Grid>
 
         <CustomersSelect

@@ -238,9 +238,10 @@ const App = props => {
                         <Route exact path="/customers" component={Customers}/>
                         <Route exact path="/customers/:id" component={Customer}/>
                         <Route exact path="/entities" component={Entities}/>
-                        {props.app.fields.allElements &&
-                        <Route exact path="/entities/:id" component={Entity}/>
-                        }
+                        {props.app.fields.allElements && <>
+                            <Route exact path="/entities/:id" component={Entity}/>
+                            <Route path="/order" component={Order}/>
+                        </>}
 
                         <Route path="/call_records" component={Records}/>
                         <Route path="/orders" render={props => <Orders
@@ -248,8 +249,6 @@ const App = props => {
                             {...props}
                         />}/>
                         {props.app.users[0] && <Route path="/queue" component={Queue}/>}
-
-                        <Route path="/order" component={Order}/>
 
                         {!props.app.stock_id || <>
                             <Route path="/arrival" render={props => <Consignment
