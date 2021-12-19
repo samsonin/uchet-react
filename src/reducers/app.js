@@ -29,6 +29,22 @@ const app = (state = JSON.parse(window.localStorage.getItem('app')) || initialSt
                     newState.providers = action.data[k]
 
 
+                } else if (k === 'order') {
+
+                    if (newState.orders) {
+
+                        let prevOrder = newState.orders
+                            .find(o => o.id === action.data.order.id && o.stock_id === action.data.order.stock_id)
+
+                        if (prevOrder) prevOrder = action.data.order
+                        else newState.orders.push(action.data.order)
+
+                    } else {
+
+                        newState.orders = [action.data.order]
+
+                    }
+
                 } else {
 
                     newState[k] = action.data[k]

@@ -15,6 +15,8 @@ import Grid from "@material-ui/core/Grid";
 import {Print, createDate} from "./common/Print";
 import rest from "../components/Rest";
 import {useSnackbar} from "notistack";
+import {upd_app,} from "../actions/actionCreator";
+import {bindActionCreators} from "redux";
 
 
 const initCustomer = {
@@ -33,6 +35,10 @@ const useStyles = makeStyles(() => ({
         right: '4rem',
     }
 }))
+
+const mapDispatchToProps = dispatch => bindActionCreators({
+    upd_app
+}, dispatch);
 
 const Order = props => {
 
@@ -118,6 +124,32 @@ const Order = props => {
 
         return elem
     }
+
+    useEffect(() => {
+
+        const path = props.location.pathname.split('/')
+        const stockId = path[2] || 1
+        const orderId = path[3] || 22222
+
+        const appOrder = props.app.orders
+            ? props.app.orders.find(or => or.id === orderId && or.stock_id === stockId)
+            : null
+
+        console.log('appOrder', appOrder)
+
+        if (!appOrder)
+
+            rest('orders/' + stockId + '/' + orderId)
+                .then(res => {
+
+                    if (res.status === 200) {
+
+                        props.upd_app({order: res.body})
+
+                    }
+                })
+
+    }, [])
 
     useEffect(() => {
 
@@ -276,4 +308,4 @@ const Order = props => {
     </div>
 }
 
-export default connect(state => state)(Order)
+export default connect(state => state, mapDispatchToProps)(Order)
