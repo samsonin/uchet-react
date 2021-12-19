@@ -44,7 +44,7 @@ const Order = props => {
 
     const fields = props.app.fields.allElements.filter(f => f.index === 'order' && f.is_valid && !f.is_system)
 
-    const [id, setId] = useState()
+    const [id, setId] = useState(+props.match.params.id || null)
     const [created, setCreated] = useState()
     const [customer, setCustomer] = useState(initCustomer)
     const [model, setModel] = useState('')
@@ -63,6 +63,17 @@ const Order = props => {
 
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
+
+    const updCurrentOrder = order => {
+
+        setId(order.id)
+        setCreated(order.time)
+        setCustomer(order.customer)
+        setModel(order.model)
+        setPresum(order.preSum)
+        setSum(order.sum)
+
+    }
 
     const doc = props.app.docs.find(d => d.name === 'order')
 
@@ -127,27 +138,37 @@ const Order = props => {
 
     useEffect(() => {
 
-        const path = props.location.pathname.split('/')
-        const stockId = path[2] || 1
-        const orderId = path[3] || 22222
+        const stockId = +props.match.params.stock_id
+        const orderId = +props.match.params.order_id
 
-        const appOrder = props.app.orders
-            ? props.app.orders.find(or => or.id === orderId && or.stock_id === stockId)
-            : null
+        if (stockId && orderId) {
 
-        console.log('appOrder', appOrder)
+            let appOrder = props.app.orders
+                ? props.app.orders.find(or => or.id === orderId && or.stock_id === stockId)
+                : null
 
-        if (!appOrder)
+            if (appOrder) {
 
-            rest('orders/' + stockId + '/' + orderId)
-                .then(res => {
+                updCurrentOrder(appOrder)
 
-                    if (res.status === 200) {
+            } else {
 
-                        props.upd_app({order: res.body})
+                rest('orders/' + stockId + '/' + orderId)
+                    .then(res => {
 
-                    }
-                })
+                        if (res.status === 200) {
+
+                            props.upd_app({order: res.body})
+
+                            return updCurrentOrder(res.body)
+
+                        }
+                    })
+
+            }
+
+
+        }
 
     }, [])
 

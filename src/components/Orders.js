@@ -126,7 +126,7 @@ const Orders = props => {
 
     const openOrder = (stock_id, id) => {
 
-        console.log('открыть заказ ' + id + ', stock_id = ' + stock_id)
+        props.history.push('/order/' + stock_id + '/' + id)
 
     }
 

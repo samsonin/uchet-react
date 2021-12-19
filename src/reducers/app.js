@@ -3,7 +3,6 @@ import {EXIT_APP} from "../constants";
 
 let initialState = {
     balance: 0,
-    // stock_id: 0,
     stocks: [],
     users: [],
     organization: [],
@@ -14,7 +13,19 @@ let initialState = {
     categories: [],
 }
 
-const app = (state = JSON.parse(window.localStorage.getItem('app')) || initialState, action) => {
+const getItems = () => {
+
+    const items = JSON.parse(window.localStorage.getItem('app'))
+
+    if (!items) return null
+
+    delete items.orders
+
+    return items
+
+}
+
+const app = (state = getItems() || initialState, action) => {
 
     if (action.type === UPD_APP) {
 
@@ -27,7 +38,6 @@ const app = (state = JSON.parse(window.localStorage.getItem('app')) || initialSt
                 if (k === 'entities') {
 
                     newState.providers = action.data[k]
-
 
                 } else if (k === 'order') {
 

@@ -240,7 +240,8 @@ const App = props => {
                         <Route exact path="/entities" component={Entities}/>
                         {props.app.fields.allElements && <>
                             <Route exact path="/entities/:id" component={Entity}/>
-                            <Route path="/order" component={Order}/>
+                            <Route exact path="/order" component={Order}/>
+                            <Route exact path="/order/:stock_id/:order_id" component={Order}/>
                         </>}
 
                         <Route path="/call_records" component={Records}/>

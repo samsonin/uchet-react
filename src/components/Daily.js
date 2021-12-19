@@ -214,7 +214,7 @@ const Daily = props => {
 
                     if (wf.rem_id) {
 
-                        return console.log('открыть заказ ' + wf.rem_id)
+                        return props.history.push('/order/' + stock + '/' + wf.rem_id)
 
                     }
 
