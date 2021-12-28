@@ -6,8 +6,8 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
+import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 
 import rest from "../components/Rest"
 import Button from "@material-ui/core/Button";
@@ -18,6 +18,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableBody from "@material-ui/core/TableBody";
 
 import CustomersSelect from "../components/common/CustomersSelect"
+import {useSnackbar} from "notistack";
 
 const initCustomer = {
     id: 0,
@@ -40,6 +41,8 @@ const Orders = props => {
 
     const [orders, setOrders] = useState()
 
+    const {enqueueSnackbar} = useSnackbar()
+
     const position = props.app.positions.find(p => p.id === props.auth.position_id)
 
     const handleStocks = (stockId, checked) => {
@@ -60,27 +63,24 @@ const Orders = props => {
         })
     }
 
+    const getUrl = () => position && position.is_sale && props.app.stock_id
+        ? 'orders?current_shift_only&stock_ids[]=' + props.app.stock_id
+        : 'allowedOrders'
+
     useEffect(() => {
 
-        if (position && position.is_sale && props.app.stock_id) {
+        console.log('stocks', stocks)
 
-            rest('orders?current_shift_only&stock_ids[]=' + props.app.stock_id)
-                .then(res => {
-                    if (res.status === 200) {
-                        setOrders(res.body)
-                    }
-                })
+    }, [stocks])
 
-        } else {
+    useEffect(() => {
 
-            rest('allowedOrders')
-                .then(res => {
-                    if (res.status === 200) {
-                        setOrders(res.body)
-                    }
-                })
-
-        }
+        rest(getUrl())
+            .then(res => {
+                if (res.status === 200) {
+                    setOrders(res.body)
+                }
+            })
 
     }, [])
 
@@ -96,16 +96,31 @@ const Orders = props => {
 
     const find = () => {
 
-        let url = 'orders'
+        let url = 'orders?'
 
-        if (id) url += '?id=' + id
-        else if (customer.id) url += '?customer_id=' + customer.id
+        if (stocks) stocks.map(v => {
+            if (v) url += 'stock_ids[]=' + v + '&'
+        })
+
+        if (id) url += 'id=' + id
+        else if (customer.id) url += 'customer_id=' + customer.id
+        else if (createdDate || createdDate2 || checkoutDate || checkoutDate2) {
+
+            ['createdDate', 'createdDate2', 'checkoutDate', 'checkoutDate2'].map(v => {
+                if (eval(v)) url += v + '=' + eval(v) + '&'
+            })
+
+        } else url = getUrl()
 
         rest(url)
             .then(res => {
                 if (res.status === 200) {
 
                     setOrders(res.body)
+
+                } else if (res.status === 204) {
+
+                    enqueueSnackbar('Заказов не найдено', {variant: 'error'})
 
                 }
             })
@@ -127,6 +142,19 @@ const Orders = props => {
     const openOrder = (stock_id, id) => {
 
         props.history.push('/order/' + stock_id + '/' + id)
+
+    }
+
+    const changeSearchParameters = () => {
+
+        setId(0)
+        setCustomer(initCustomer)
+        setCreatedDate()
+        setCreatedDate2()
+        setCheckoutDate()
+        setCheckoutDate2()
+
+        setOnlyMy(!onlyMy)
 
     }
 
@@ -161,17 +189,17 @@ const Orders = props => {
                 onChange={e => setId(+e.target.value)}
             />
 
-            {!id && <IconButton
-                onClick={() => setOnlyMy(!onlyMy)}
+            {<IconButton
+                onClick={() => changeSearchParameters()}
             >
                 {onlyMy
-                    ? <KeyboardArrowUpIcon/>
-                    : <KeyboardArrowDownIcon/>}
+                    ? <KeyboardArrowRightIcon/>
+                    : <KeyboardArrowLeftIcon/>}
             </IconButton>}
 
         </Grid>
 
-        {!id && <CustomersSelect
+        {!id && onlyMy && <CustomersSelect
             customer={customer}
             updateCustomer={updateCustomer}
             onlySearch={true}
