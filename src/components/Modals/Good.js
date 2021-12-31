@@ -339,11 +339,11 @@ const Good = props => {
                                     () => console.log('В брак'),
                                     <i className="fas fa-redo"/>)}
                             </>
-                            : good.stock_id === props.app.stock_id && isSale(good.wo)
-                                ? renderIcon('Вернуть',
-                                    () => setIsReasonOpen(!isReasonOpen),
-                                    <Restore/>)
-                                : null}
+                            // : good.stock_id === props.app.stock_id && isSale(good.wo)
+                            //     ? renderIcon('Вернуть',
+                            //         () => setIsReasonOpen(!isReasonOpen),
+                            //         <Restore/>)
+                            : null}
 
                     {props.auth.admin ?
                         good.wo === 'use' ?
@@ -371,20 +371,6 @@ const Good = props => {
                         onClick={() => props.close()}>
                 <CloseIcon/>
             </IconButton>
-            {isReasonOpen && <div style={{width: '100%'}}>
-                <TextField label="Причина возврата"
-                           className={classes.halfField}
-                           value={reason}
-                           onChange={e => setReason(e.target.value)}
-                />
-
-                <Button onClick={() => refund()}
-                        disabled={!reason}
-                        className={classes.button}
-                        color="secondary">
-                    Вернуть
-                </Button>
-            </div>}
 
         </DialogTitle>
 
@@ -559,6 +545,30 @@ const Good = props => {
                         : null
                     }
                 </>
+            }
+
+            {!editable && good.stock_id === props.app.stock_id && isSale(good.wo)
+                ? isReasonOpen
+                    ? <div style={{width: '100%'}}>
+                        <TextField label="Причина возврата"
+                                   className={classes.halfField}
+                                   value={reason}
+                                   onChange={e => setReason(e.target.value)}
+                        />
+
+                        <Button onClick={() => refund()}
+                                disabled={!reason}
+                                className={classes.button}
+                                color="secondary">
+                            Вернуть
+                        </Button>
+                    </div>
+                    : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
+                              className={classes.button}
+                              color="secondary">
+                        Отмена продажи
+                    </Button>
+                : null
             }
 
         </DialogContent>
