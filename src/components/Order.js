@@ -8,7 +8,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import {makeStyles} from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import PrintIcon from "@material-ui/icons/Print";
-import {Typography} from "@material-ui/core";
+import {Tab, Table, TableCell, TableRow, Tabs, Typography} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 
@@ -17,7 +17,41 @@ import rest from "../components/Rest";
 import {useSnackbar} from "notistack";
 import {upd_app,} from "../actions/actionCreator";
 import {bindActionCreators} from "redux";
+import StatusesSelect from "./common/StatusesSelect";
+import TableHead from "@material-ui/core/TableHead";
+import TableBody from "@material-ui/core/TableBody";
 
+const PAYMENTMETHODS = [
+    'наличные',
+    'безнал',
+    'онлайн Яндекс',
+    'онлайн Сбербанк',
+    'расчетный счет'
+]
+
+const monthes = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+
+const toStr = i => i > 9 ? i : '0' + i
+
+const toLocalTimeStr = unix => {
+
+    const time = new Date(isNaN(+unix) ? unix : unix * 1000)
+
+    return time.getDate() + ' ' + monthes[time.getMonth()] + ' ' + time.getFullYear() + 'г. ' +
+        toStr(time.getHours()) + ':' + toStr(time.getMinutes()) + ':' + toStr(time.getSeconds())
+
+}
+
+const totalSum = payments => {
+
+    let total = 0
+
+    payments.map(p => {
+        if (+p.sum !== 0) total += +p.sum
+    })
+
+    return total
+}
 
 const initCustomer = {
     id: 0,
@@ -44,12 +78,14 @@ const Order = props => {
 
     const fields = props.app.fields.allElements.filter(f => f.index === 'order' && f.is_valid && !f.is_system)
 
+    const [tabId, setTabId] = useState(0)
     const [id, setId] = useState(+props.match.params.id || null)
     const [created, setCreated] = useState()
     const [customer, setCustomer] = useState(initCustomer)
     const [model, setModel] = useState('')
     const [presum, setPresum] = useState(0)
     const [sum, setSum] = useState(0)
+    const [status, setStatus] = useState(0)
     const [state, setState] = useState(() => {
         let state = {}
         fields.map(f => {
@@ -58,6 +94,11 @@ const Order = props => {
         return state
     })
     const [categoryId, setCategoryId] = useState(5)
+    const [payments, setPayments] = useState([])
+    const [remarks, setRemarks] = useState([])
+    const [checkout, setCheckout] = useState()
+    const [addSum, setAddSum] = useState(0)
+    const [addRemark, setAddRemark] = useState('')
 
     const needPrint = useRef(false)
 
@@ -72,8 +113,16 @@ const Order = props => {
         setModel(order.model)
         setPresum(order.preSum)
         setSum(order.sum)
+        setStatus(order.status_id)
+        if (order.json) setPayments(order.json.payments)
+        setRemarks(order.remark)
+        setCheckout(order.checkout_date)
 
     }
+
+    const canEdit = status => status === 6
+        ? new Date() - new Date(checkout) < 43200000
+        : status < 6
 
     const doc = props.app.docs.find(d => d.name === 'order')
 
@@ -174,9 +223,9 @@ const Order = props => {
 
     useEffect(() => {
 
-        if (id) {
-            Print(doc, inputToText)
+        if (id && needPrint.current) {
             needPrint.current = false
+            Print(doc, inputToText)
         }
 
     }, [id])
@@ -203,8 +252,8 @@ const Order = props => {
 
                 if (res.status === 200) {
 
-                    setId(res.body.orders[0].id)
                     needPrint.current = true
+                    setId(res.body.orders[0].id)
 
                 }
             })
@@ -224,7 +273,19 @@ const Order = props => {
 
     }
 
-    const disabled = false
+    const warranty = () => {
+
+    }
+
+    const addSumHandler = () => {
+
+    }
+
+    const addRemarkHandler = () => {
+
+    }
+
+    const disabled = !!id
 
     const updateCustomer = (name, val) => {
 
@@ -258,73 +319,190 @@ const Order = props => {
                 {id ? '#' + id + ' от ' + createDate(created) : 'Новый заказ'}
             </Typography>
 
-            {id
-                ? <IconButton className={classes.printButton}
-                              onClick={() => Print(doc, inputToText)}
-                >
-                    <PrintIcon/>
-                </IconButton>
-                : null}
+            {disabled && <IconButton className={classes.printButton}
+                                     onClick={() => Print(doc, inputToText)}
+            >
+                <PrintIcon/>
+            </IconButton>}
         </Grid>
 
-        <CustomersSelect
-            customer={customer}
-            disabled={disabled}
-            updateCustomer={updateCustomer}
-        />
-
-        <Select
-            labelId="category-id-select-label"
-            value={categoryId}
-            onChange={e => setCategoryId(+e.target.value)}
-            style={fieldsStyle}
+        {disabled && <Tabs
+            value={tabId}
+            indicatorColor="primary"
+            textColor="primary"
+            onChange={(e, v) => setTabId(v)}
+            style={{
+                margin: '1rem'
+            }}
         >
-            {[5, 38, 41, 2].map(i => {
+            <Tab label="Информация"/>
+            <Tab label="Затраты"/>
+            <Tab label="Платежи"/>
+            <Tab label="Процесс"/>
+        </Tabs>}
 
-                const category = props.app.categories.find(c => c.id === i)
+        {tabId === 0 && <>
 
-                return <MenuItem
-                    key={'menu-category-key-' + i}
-                    value={i}>
-                    {category ? category.name : ''}
-                </MenuItem>
+            {disabled && <StatusesSelect
+                disabled={disabled}
+                status={status}
+                setStatus={setStatus}
+                statuses={props.app.statuses}
+            />}
 
-            })}
-        </Select>
+            <CustomersSelect
+                customer={customer}
+                disabled={disabled}
+                updateCustomer={updateCustomer}
+            />
 
-        <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
-                   style={fieldsStyle}
-                   value={model}
-                   onChange={e => setModel(e.target.value)}
-        />
+            <Select
+                labelId="category-id-select-label"
+                value={categoryId}
+                onChange={e => setCategoryId(+e.target.value)}
+                style={fieldsStyle}
+                disabled={disabled}
+            >
+                {[5, 38, 41, 2].map(i => {
 
-        <TextField label="Предварительная стоимость"
-                   disabled={disabled}
-                   style={fieldsStyle}
-                   value={sum}
-                   onChange={e => setSum(+e.target.value)}
-        />
+                    const category = props.app.categories.find(c => c.id === i)
 
-        <TextField label="Предоплата при оформлении заказа"
-                   disabled={disabled}
-                   style={fieldsStyle}
-                   value={presum}
-                   onChange={e => setPresum(+e.target.value)}
-        />
+                    return <MenuItem
+                        key={'menu-category-key-' + i}
+                        value={i}>
+                        {category ? category.name : ''}
+                    </MenuItem>
 
-        {fields.map(f => <TextField label={f.value}
-                                    key={'text-fields-in-new-order' + f.name}
-                                    disabled={disabled}
+                })}
+            </Select>
+
+            <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
+                       style={fieldsStyle}
+                       value={model}
+                       onChange={e => setModel(e.target.value)}
+                       disabled={disabled}
+            />
+
+            <TextField label="Предварительная стоимость"
+                       disabled={disabled}
+                       style={fieldsStyle}
+                       value={sum}
+                       onChange={e => setSum(+e.target.value)}
+            />
+
+            {disabled || <TextField label="Предоплата при оформлении заказа"
                                     style={fieldsStyle}
-                                    value={state[f.name]}
-                                    onChange={e => setField([f.name], e.target.value)}
-        />)}
+                                    value={presum}
+                                    onChange={e => setPresum(+e.target.value)}
+            />}
 
-        <Button variant='outlined'
-                onClick={() => create()}
-                color="primary">
-            {id ? 'Сохранить' : 'Внести'}
-        </Button>
+            {fields.map(f => <TextField label={f.value}
+                                        key={'text-fields-in-new-order' + f.name}
+                                        disabled={disabled}
+                                        style={fieldsStyle}
+                                        value={state[f.name]}
+                                        onChange={e => setField([f.name], e.target.value)}
+            />)}
+
+            {disabled || <Button variant='outlined'
+                                 onClick={() => create()}
+                                 color="primary">
+                Внести
+            </Button>}
+
+            {status === 6 && <Button variant='outlined'
+                                     onClick={() => warranty()}
+                                     color="primary">
+                Принять по гарантии
+            </Button>}
+
+        </>}
+
+        {tabId === 1 && <></>}
+
+        {tabId === 2 && <>
+
+            <Table size="small">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Дата, время</TableCell>
+                        <TableCell>Сумма</TableCell>
+                        <TableCell>Способ</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {payments.map(p => <TableRow key={'tablerowkeyforpaymentsinordes' + p.sum + p.created_at}>
+                        <TableCell>{toLocalTimeStr(p.created_at)}</TableCell>
+                        <TableCell>{+p.sum}</TableCell>
+                        <TableCell>{PAYMENTMETHODS[p.paymentsMethod]}</TableCell>
+                    </TableRow>)}
+                    <TableRow>
+                        <TableCell colSpan={3} style={{
+                            fontWeight: 'bold',
+                            textAlign: 'center'
+                        }}>
+                            всего: {totalSum(payments)}
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+
+            {canEdit() && <div style={{
+                margin: '1rem',
+            }}>
+                <TextField label="Сумма"
+                           className={'w-50'}
+                           value={addSum}
+                           onChange={e => {
+                               const newSum = +e.target.value
+                               if (!isNaN(newSum)) setAddSum(newSum)
+                               else if (e.target.value === '-') setAddSum(0)
+                           }}
+                />
+
+                <Button variant='outlined'
+                        onClick={() => addSumHandler()}
+                        color="primary">
+                    Добавить
+                </Button>
+            </div>}
+        </>}
+
+        {tabId === 3 && <>
+
+            <Table size="small">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Дата, время</TableCell>
+                        <TableCell>Сотрудник</TableCell>
+                        <TableCell>Событие</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {remarks.map(r => <TableRow key={'tablerowkeyforremarksinordes' + r.time + r.remark}>
+                        <TableCell>{toLocalTimeStr(r.time)}</TableCell>
+                        <TableCell>{props.app.users.find(u => u.id === r.user_id).name}</TableCell>
+                        <TableCell>{r.remark}</TableCell>
+                    </TableRow>)}
+                </TableBody>
+            </Table>
+
+            {canEdit() && <div style={{
+                margin: '1rem',
+            }}>
+                <TextField className={'w-50'}
+                           value={addRemark}
+                           onChange={e => setAddRemark(e.target.value)}
+                />
+
+                <Button variant='outlined'
+                        onClick={() => addRemarkHandler()}
+                        color="primary">
+                    Добавить
+                </Button>
+            </div>}
+
+        </>}
 
     </div>
 }

@@ -297,8 +297,8 @@ const Orders = props => {
                             backgroundColor: status ? '#' + status.color : '#fff',
                             cursor: 'pointer'
                         }}
-                        key={'ordertablerowkeyinorders' + o.stock_id + o.order_id}
-                        onClick={() => openOrder(o.stock_id, o.order_id || o.id)}
+                        key={'ordertablerowkeyinorders' + o.stock_id + o.id}
+                        onClick={() => openOrder(o.stock_id, o.id)}
                     >
                         <TableCell>
                             {o.created_at}

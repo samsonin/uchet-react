@@ -155,5 +155,8 @@
 
 @media print {
     .non-printable { display: none;}
-    .printable { display: block;}
+    .printable {
+        display: block;
+        font-size: 14px;
+    }
 }
