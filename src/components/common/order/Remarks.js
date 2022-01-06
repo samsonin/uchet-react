@@ -5,16 +5,30 @@ import TableHead from "@material-ui/core/TableHead";
 import TableBody from "@material-ui/core/TableBody";
 import TextField from "@material-ui/core/TextField/TextField";
 import Button from "@material-ui/core/Button";
+import {useSnackbar} from "notistack";
 
+import rest from "../../Rest"
 import {toLocalTimeStr} from "../Time";
 
 export const Remarks = ({order, isEditable, users}) => {
 
-    const [add, setAdd] = useState('')
+    const [remark, setRemark] = useState('')
 
-    const addHandler = () => {
+    const {enqueueSnackbar} = useSnackbar()
 
+    const handler = () => {
 
+        if (!remark) return
+
+        rest('order/remarks/' + order.stock_id + '/' + order.id, 'POST', {remark})
+            .then(res => {
+                if (res.status === 200) {
+                    setRemark('')
+                    enqueueSnackbar('Внесено', {variant: 'success'})
+                } else {
+                    enqueueSnackbar('Ошибка', {variant: 'error'})
+                }
+            })
 
     }
 
@@ -48,12 +62,13 @@ export const Remarks = ({order, isEditable, users}) => {
             margin: '1rem',
         }}>
             <TextField className={'w-50'}
-                       value={add}
-                       onChange={e => setAdd(e.target.value)}
+                       value={remark}
+                       onChange={e => setRemark(e.target.value)}
             />
 
             <Button variant='outlined'
-                    onClick={() => addHandler()}
+                    disabled={!remark}
+                    onClick={() => handler()}
                     color="primary">
                 Добавить
             </Button>
