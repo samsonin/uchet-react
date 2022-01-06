@@ -24,7 +24,6 @@ import {Remarks} from "./common/order/Remarks";
 import {Costs} from "./common/order/Costs"
 
 
-
 const initCustomer = {
     id: 0,
     phone_number: '',
@@ -94,6 +93,8 @@ const Order = props => {
         setSum(order.sum)
 
     }
+
+    const isSale = props.app.positions.find(p => p.id === props.auth.position_id).is_sale
 
     const doc = props.app.docs.find(d => d.name === 'order')
 
@@ -374,11 +375,14 @@ const Order = props => {
 
         </>}
 
-        {order && tabId === 1 && <Costs order={order} isEditable={canEdit()} />}
+        {order && tabId === 1 && <Costs order={order} isEditable={canEdit()}/>}
 
-        {order && tabId === 2 && <Payments order={order} isEditable={canEdit()} />}
+        {order && tabId === 2 &&
+        <Payments order={order}
+                  isEditable={canEdit() && isSale}
+        />}
 
-        {order && tabId === 3 && <Remarks order={order} isEditable={canEdit()} users={props.app.users} />}
+        {order && tabId === 3 && <Remarks order={order} isEditable={canEdit()} users={props.app.users}/>}
 
     </div>
 }
