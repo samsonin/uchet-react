@@ -18,40 +18,12 @@ import {useSnackbar} from "notistack";
 import {upd_app,} from "../actions/actionCreator";
 import {bindActionCreators} from "redux";
 import StatusesSelect from "./common/StatusesSelect";
-import TableHead from "@material-ui/core/TableHead";
-import TableBody from "@material-ui/core/TableBody";
 
-const PAYMENTMETHODS = [
-    'наличные',
-    'безнал',
-    'онлайн Яндекс',
-    'онлайн Сбербанк',
-    'расчетный счет'
-]
+import {Payments} from "./common/order/Payments";
+import {Remarks} from "./common/order/Remarks";
+import {Costs} from "./common/order/Costs"
 
-const monthes = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 
-const toStr = i => i > 9 ? i : '0' + i
-
-const toLocalTimeStr = unix => {
-
-    const time = new Date(isNaN(+unix) ? unix : unix * 1000)
-
-    return time.getDate() + ' ' + monthes[time.getMonth()] + ' ' + time.getFullYear() + 'г. ' +
-        toStr(time.getHours()) + ':' + toStr(time.getMinutes()) + ':' + toStr(time.getSeconds())
-
-}
-
-const totalSum = payments => {
-
-    let total = 0
-
-    payments.map(p => {
-        if (+p.sum !== 0) total += +p.sum
-    })
-
-    return total
-}
 
 const initCustomer = {
     id: 0,
@@ -94,16 +66,23 @@ const Order = props => {
         return state
     })
     const [categoryId, setCategoryId] = useState(5)
-    const [payments, setPayments] = useState([])
-    const [remarks, setRemarks] = useState([])
-    const [checkout, setCheckout] = useState()
-    const [addSum, setAddSum] = useState(0)
-    const [addRemark, setAddRemark] = useState('')
 
     const needPrint = useRef(false)
 
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
+
+    const stockId = +props.match.params.stock_id
+    const orderId = +props.match.params.order_id
+    const order = props.app.orders
+        ? props.app.orders.find(or => or.id === orderId && or.stock_id === stockId)
+        : null
+
+    const canEdit = () => order
+        ? order.status_id === 6
+            ? new Date() - new Date(order.checkout_date) < 43200000
+            : order.status_id < 6
+        : false
 
     const updCurrentOrder = order => {
 
@@ -113,16 +92,8 @@ const Order = props => {
         setModel(order.model)
         setPresum(order.preSum)
         setSum(order.sum)
-        setStatus(order.status_id)
-        if (order.json) setPayments(order.json.payments)
-        setRemarks(order.remark)
-        setCheckout(order.checkout_date)
 
     }
-
-    const canEdit = status => status === 6
-        ? new Date() - new Date(checkout) < 43200000
-        : status < 6
 
     const doc = props.app.docs.find(d => d.name === 'order')
 
@@ -187,18 +158,11 @@ const Order = props => {
 
     useEffect(() => {
 
-        const stockId = +props.match.params.stock_id
-        const orderId = +props.match.params.order_id
-
         if (stockId && orderId) {
 
-            let appOrder = props.app.orders
-                ? props.app.orders.find(or => or.id === orderId && or.stock_id === stockId)
-                : null
+            if (order) {
 
-            if (appOrder) {
-
-                updCurrentOrder(appOrder)
+                updCurrentOrder(order)
 
             } else {
 
@@ -274,14 +238,6 @@ const Order = props => {
     }
 
     const warranty = () => {
-
-    }
-
-    const addSumHandler = () => {
-
-    }
-
-    const addRemarkHandler = () => {
 
     }
 
@@ -418,91 +374,11 @@ const Order = props => {
 
         </>}
 
-        {tabId === 1 && <></>}
+        {order && tabId === 1 && <Costs order={order} isEditable={canEdit()} />}
 
-        {tabId === 2 && <>
+        {order && tabId === 2 && <Payments order={order} isEditable={canEdit()} />}
 
-            <Table size="small">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Дата, время</TableCell>
-                        <TableCell>Сумма</TableCell>
-                        <TableCell>Способ</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {payments.map(p => <TableRow key={'tablerowkeyforpaymentsinordes' + p.sum + p.created_at}>
-                        <TableCell>{toLocalTimeStr(p.created_at)}</TableCell>
-                        <TableCell>{+p.sum}</TableCell>
-                        <TableCell>{PAYMENTMETHODS[p.paymentsMethod]}</TableCell>
-                    </TableRow>)}
-                    <TableRow>
-                        <TableCell colSpan={3} style={{
-                            fontWeight: 'bold',
-                            textAlign: 'center'
-                        }}>
-                            всего: {totalSum(payments)}
-                        </TableCell>
-                    </TableRow>
-                </TableBody>
-            </Table>
-
-            {canEdit() && <div style={{
-                margin: '1rem',
-            }}>
-                <TextField label="Сумма"
-                           className={'w-50'}
-                           value={addSum}
-                           onChange={e => {
-                               const newSum = +e.target.value
-                               if (!isNaN(newSum)) setAddSum(newSum)
-                               else if (e.target.value === '-') setAddSum(0)
-                           }}
-                />
-
-                <Button variant='outlined'
-                        onClick={() => addSumHandler()}
-                        color="primary">
-                    Добавить
-                </Button>
-            </div>}
-        </>}
-
-        {tabId === 3 && <>
-
-            <Table size="small">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Дата, время</TableCell>
-                        <TableCell>Сотрудник</TableCell>
-                        <TableCell>Событие</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {remarks.map(r => <TableRow key={'tablerowkeyforremarksinordes' + r.time + r.remark}>
-                        <TableCell>{toLocalTimeStr(r.time)}</TableCell>
-                        <TableCell>{props.app.users.find(u => u.id === r.user_id).name}</TableCell>
-                        <TableCell>{r.remark}</TableCell>
-                    </TableRow>)}
-                </TableBody>
-            </Table>
-
-            {canEdit() && <div style={{
-                margin: '1rem',
-            }}>
-                <TextField className={'w-50'}
-                           value={addRemark}
-                           onChange={e => setAddRemark(e.target.value)}
-                />
-
-                <Button variant='outlined'
-                        onClick={() => addRemarkHandler()}
-                        color="primary">
-                    Добавить
-                </Button>
-            </div>}
-
-        </>}
+        {order && tabId === 3 && <Remarks order={order} isEditable={canEdit()} users={props.app.users} />}
 
     </div>
 }
