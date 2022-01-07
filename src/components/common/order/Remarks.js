@@ -48,7 +48,7 @@ export const Remarks = ({order, isEditable, users}) => {
                     const user = users.find(u => u.id === r.user_id)
 
                     return r.remark
-                        ? <TableRow key={'tablerowkeyforremarksinordes' + r.unix || r.time + r.remark}>
+                        ? <TableRow key={'tablerowkeyforremarksinordes' + (r.unix || r.time) + r.remark}>
                             <TableCell>{toLocalTimeStr(r.unix || r.time)}</TableCell>
                             <TableCell>{user ? user.name : ''}</TableCell>
                             <TableCell>{r.remark}</TableCell>

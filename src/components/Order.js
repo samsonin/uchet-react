@@ -8,7 +8,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import {makeStyles} from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import PrintIcon from "@material-ui/icons/Print";
-import {Tab, Table, TableCell, TableRow, Tabs, Typography} from "@material-ui/core";
+import {Tab, Tabs, Typography} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 
@@ -56,7 +56,6 @@ const Order = props => {
     const [model, setModel] = useState('')
     const [presum, setPresum] = useState(0)
     const [sum, setSum] = useState(0)
-    const [status, setStatus] = useState(0)
     const [state, setState] = useState(() => {
         let state = {}
         fields.map(f => {
@@ -302,8 +301,7 @@ const Order = props => {
 
             {disabled && <StatusesSelect
                 disabled={disabled}
-                status={status}
-                setStatus={setStatus}
+                status={order.status_id}
                 statuses={props.app.statuses}
             />}
 
@@ -367,22 +365,26 @@ const Order = props => {
                 Внести
             </Button>}
 
-            {status === 6 && <Button variant='outlined'
-                                     onClick={() => warranty()}
-                                     color="primary">
+            {order && order.status_id === 6 &&
+            <Button variant='outlined'
+                    onClick={() => warranty()}
+                    color="primary">
                 Принять по гарантии
             </Button>}
 
         </>}
 
-        {order && tabId === 1 && <Costs order={order} isEditable={canEdit()}/>}
+        {order && tabId === 1 &&
+        <Costs order={order} isEditable={canEdit()} users={props.app.users} providers={props.app.providers}/>
+        }
 
         {order && tabId === 2 &&
-        <Payments order={order}
-                  isEditable={canEdit() && isSale}
-        />}
+        <Payments order={order} isEditable={canEdit() && isSale}/>
+        }
 
-        {order && tabId === 3 && <Remarks order={order} isEditable={canEdit()} users={props.app.users}/>}
+        {order && tabId === 3 &&
+        <Remarks order={order} isEditable={canEdit()} users={props.app.users}/>
+        }
 
     </div>
 }

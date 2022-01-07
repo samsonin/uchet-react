@@ -9,6 +9,7 @@ import Button from "@material-ui/core/Button";
 import {useSnackbar} from "notistack";
 
 import rest from "../../Rest"
+import TwoLineInCell from "../TwoLineInCell";
 
 
 const PAYMENTMETHODS = [
@@ -62,17 +63,17 @@ export const Payments = ({order, isEditable}) => {
                 <TableRow>
                     <TableCell>Дата, время</TableCell>
                     <TableCell>Сумма</TableCell>
-                    <TableCell>Способ</TableCell>
                 </TableRow>
             </TableHead>
             <TableBody>
                 {order.json.payments.map(p => <TableRow key={'tablerowkeyforpaymentsinordes' + p.sum + p.created_at}>
                     <TableCell>{toLocalTimeStr(p.created_at)}</TableCell>
-                    <TableCell>{+p.sum}</TableCell>
-                    <TableCell>{PAYMENTMETHODS[p.paymentsMethod]}</TableCell>
+                    <TableCell>
+                        {TwoLineInCell(+p.sum, PAYMENTMETHODS[p.paymentsMethod])}
+                    </TableCell>
                 </TableRow>)}
                 <TableRow>
-                    <TableCell colSpan={3} style={{
+                    <TableCell colSpan={2} style={{
                         fontWeight: 'bold',
                         textAlign: 'center'
                     }}>
