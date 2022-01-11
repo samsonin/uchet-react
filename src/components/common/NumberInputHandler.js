@@ -1,7 +1,9 @@
 export const numberInputHandler = (value, setNumber) => {
 
-    const newSum = +value
-    if (!isNaN(newSum)) setNumber(newSum)
-    else if (value === '-') setNumber(0)
+    const minisCounter = value.split('-').length
+
+    const newSum = +value.replaceAll('-', '')
+
+    if (!isNaN(newSum)) setNumber(minisCounter % 2 ? newSum : -newSum)
 
 }
