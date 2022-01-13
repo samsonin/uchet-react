@@ -23,6 +23,7 @@ import TextField from "@material-ui/core/TextField/TextField";
 import {connect} from "react-redux";
 
 import {Print, createDate} from "../common/Print"
+import {intInputHandler} from "../common/InputHandlers";
 
 const statuses = [
     'Новая',
@@ -84,7 +85,6 @@ const Prepaid = props => {
     const classes = useStyles()
     const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
-    const [saleId, setSaleId] = useState(0)
     const [id, setId] = useState(0)
     const [created, setCreated] = useState('')
     const [item, setItem] = useState('')
@@ -97,7 +97,6 @@ const Prepaid = props => {
     const [disabled, setDisabled] = useState(false)
 
     const reset = () => {
-        setSaleId(0)
         setId(0)
         setCreated('')
         setItem('')
@@ -115,7 +114,6 @@ const Prepaid = props => {
             setDisabled(true)
 
             if (props.preData) {
-                setSaleId(props.preData.id)
                 setItem(props.preData.item)
                 setPresum(props.preData.sum)
                 setNote(props.preData.note)
@@ -155,7 +153,6 @@ const Prepaid = props => {
         const data = {item, presum, sum, customer, status, note}
 
         if (id) url += '/' + id
-        if (saleId) data.sale_id = saleId
 
         setDisabled(true)
 
@@ -329,19 +326,17 @@ const Prepaid = props => {
             />
 
             <TextField label="Предоплата"
-                       type="number"
                        disabled={disabled}
                        className={classes.field}
                        value={presum}
-                       onChange={e => setPresum(+e.target.value)}
+                       onChange={e => intInputHandler(e.target.value, setPresum)}
             />
 
             <TextField label="Окончательная стоимость"
-                       type="number"
                        disabled={disabled}
                        className={classes.field}
                        value={sum}
-                       onChange={e => setSum(+e.target.value)}
+                       onChange={e => intInputHandler(e.target.value, setSum)}
             />
 
             <CustomersSelect

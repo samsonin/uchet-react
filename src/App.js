@@ -106,6 +106,7 @@ const App = props => {
                 }
             })
 
+        return document.removeEventListener('keydown', handleKeyPress)
 
 // eslint-disable-next-line
     }, [])
@@ -129,18 +130,6 @@ const App = props => {
         }
 
     }, [ourBarcode])
-
-    useEffect(() => {
-
-        if (props.app.version && props.app.version !== 1) {
-
-            console.log('need reload')
-
-            // window.location.reload();
-
-        }
-
-    }, [props.app.version])
 
     const handleKeyPress = e => {
 

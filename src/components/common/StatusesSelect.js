@@ -4,7 +4,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 
-export default function ({statuses, status, setStatus, disabled}) {
+export default function ({statuses, status, setStatus, disabled, empty}) {
 
     return <FormControl variant="outlined" className={'w-100 p-1 m-1'}>
         <InputLabel id="funds-statuses-control-select-outlined-label">Статус</InputLabel>
@@ -15,8 +15,14 @@ export default function ({statuses, status, setStatus, disabled}) {
             onChange={e => setStatus(e.target.value)}
             label="Статус"
         >
+            {empty
+                ? <MenuItem key={'menustatusescontrolinfundskey-1'}
+                            value={-1}>
+                    <br/>
+                </MenuItem>
+                : null}
             {statuses.map(s => <MenuItem key={'menustatusescontrolinfundskey' + s.id}
-                                        value={s.id}>
+                                         value={s.id}>
                 {s.name}
             </MenuItem>)}
         </Select>

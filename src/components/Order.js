@@ -93,7 +93,8 @@ const Order = props => {
 
     }
 
-    const isSale = props.app.positions.find(p => p.id === props.auth.position_id).is_sale
+    const position = props.app.positions.find(p => p.id === props.auth.position_id)
+    const isSale = position ? position.is_sale : false
 
     const doc = props.app.docs.find(d => d.name === 'order')
 

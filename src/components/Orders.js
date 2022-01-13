@@ -8,17 +8,21 @@ import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
-
-import rest from "../components/Rest"
 import Button from "@material-ui/core/Button";
 import Table from "@material-ui/core/Table";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import TableBody from "@material-ui/core/TableBody";
-
-import CustomersSelect from "../components/common/CustomersSelect"
 import {useSnackbar} from "notistack";
+
+import rest from "../components/Rest"
+import CustomersSelect from "../components/common/CustomersSelect"
+import TwoLineInCell from "./common/TwoLineInCell";
+import {toLocalTimeStr} from "./common/Time"
+import {intInputHandler} from "./common/InputHandlers";
+import UsersSelect from "./common/UsersSelect";
+import StatusesSelect from "./common/StatusesSelect";
 
 const initCustomer = {
     id: 0,
@@ -38,6 +42,8 @@ const Orders = props => {
     const [createdDate2, setCreatedDate2] = useState()
     const [checkoutDate, setCheckoutDate] = useState()
     const [checkoutDate2, setCheckoutDate2] = useState()
+    const [masterId, setMasterId] = useState(0)
+    const [statusId, setStatusId] = useState(-1)
 
     const [orders, setOrders] = useState()
 
@@ -69,12 +75,6 @@ const Orders = props => {
 
     useEffect(() => {
 
-        console.log('stocks', stocks)
-
-    }, [stocks])
-
-    useEffect(() => {
-
         rest(getUrl())
             .then(res => {
                 if (res.status === 200) {
@@ -83,10 +83,6 @@ const Orders = props => {
             })
 
     }, [])
-
-    const handleOrder = (i, val) => {
-
-    }
 
     useEffect(() => {
 
@@ -98,9 +94,13 @@ const Orders = props => {
 
         let url = 'orders?'
 
-        if (stocks) stocks.map(v => {
-            if (v) url += 'stock_ids[]=' + v + '&'
+        if (stocks) stocks.map(s => {
+            if (s) url += 'stock_ids[]=' + s + '&'
         })
+
+        if (masterId) url += 'master_id=' + masterId + '&'
+
+        if (statusId >= 0) url += 'status_id=' + statusId + '&'
 
         if (id) url += 'id=' + id
         else if (customer.id) url += 'customer_id=' + customer.id
@@ -110,7 +110,9 @@ const Orders = props => {
                 if (eval(v)) url += v + '=' + eval(v) + '&'
             })
 
-        } else url = getUrl()
+        }
+
+        if (!url) url = getUrl()
 
         rest(url)
             .then(res => {
@@ -139,12 +141,6 @@ const Orders = props => {
 
     }
 
-    const openOrder = (stock_id, id) => {
-
-        props.history.push('/order/' + stock_id + '/' + id)
-
-    }
-
     const changeSearchParameters = () => {
 
         setId(0)
@@ -153,6 +149,7 @@ const Orders = props => {
         setCreatedDate2()
         setCheckoutDate()
         setCheckoutDate2()
+        setMasterId(0)
 
         setOnlyMy(!onlyMy)
 
@@ -181,21 +178,22 @@ const Orders = props => {
         <Grid container
               justify='space-between'
         >
-            <TextField
-                key={"idonordersseachr3"}
-                className={"m-2 p-2"}
-                label={"Заказ №"}
-                value={id ? id.toString() : ''}
-                onChange={e => setId(+e.target.value)}
-            />
+            {onlyMy
+                ? <TextField
+                    className={"m-2 p-2"}
+                    label={"Заказ №"}
+                    value={id ? id.toString() : ''}
+                    onChange={e => intInputHandler(e.target.value, setId)}
+                />
+                : null}
 
-            {<IconButton
+            <IconButton
                 onClick={() => changeSearchParameters()}
             >
                 {onlyMy
                     ? <KeyboardArrowRightIcon/>
                     : <KeyboardArrowLeftIcon/>}
-            </IconButton>}
+            </IconButton>
 
         </Grid>
 
@@ -254,9 +252,25 @@ const Orders = props => {
                     type="date"
                     className={"m-2 p-2"}
                     value={checkoutDate2}
-                    onChange={e => handleOrder('dateOfCheckout2', e.target.value)}
+                    onChange={e => setCheckoutDate2(e.target.value)}
                 />
             </Grid>
+
+            <UsersSelect
+                user={masterId}
+                users={props.app.users}
+                setUser={setMasterId}
+                onlyValid
+                classes={"w-100 p-1 m-1"}
+            />
+
+            <StatusesSelect
+                status={statusId}
+                statuses={props.app.statuses}
+                setStatus={setStatusId}
+                empty
+            />
+
         </>}
 
         <Grid container
@@ -279,8 +293,8 @@ const Orders = props => {
         <Table size="small">
             <TableHead>
                 <TableRow>
-                    <TableCell>Дата</TableCell>
                     <TableCell>#</TableCell>
+                    <TableCell>Дата, время</TableCell>
                     <TableCell>Устройство</TableCell>
                     <TableCell>Заказчик</TableCell>
                     <TableCell>Статус</TableCell>
@@ -292,39 +306,38 @@ const Orders = props => {
 
                     const status = props.app.statuses.find(s => s.id === o.status_id)
 
+                    const master = props.app.users.find(u => u.id === o.master_id)
+
                     return <TableRow
                         style={{
                             backgroundColor: status ? '#' + status.color : '#fff',
                             cursor: 'pointer'
                         }}
-                        key={'ordertablerowkeyinorders' + o.stock_id + o.id}
-                        onClick={() => openOrder(o.stock_id, o.id)}
+                        key={'ordertablerowkeyinorders' + o.stock_id + (o.id || o.order_id)}
+                        onClick={() => props.history.push('/order/' + o.stock_id + '/' + (o.id || o.order_id))}
                     >
-                        <TableCell>
-                            {o.created_at}
-                        </TableCell>
                         <TableCell>
                             {renderOrderText(o)}
                         </TableCell>
                         <TableCell>
+                            {toLocalTimeStr(o.created_at)}
+                        </TableCell>
+                        <TableCell>
                             {o.model}
                         </TableCell>
-                        {o.customer
-                            ? <TableCell>
-                                <span className="font-weight-bold">{o.customer.phone_number}</span>
-                                <br/>
-                                {o.customer.fio}
-                            </TableCell>
-                            : o.customer_id
-                                ? 'не идентифицирован'
+                        <TableCell>
+                            {o.customer
+                                ? TwoLineInCell(o.customer.phone_number, o.customer.fio)
                                 : 'не определен'}
+                        </TableCell>
                         <TableCell color={status.color}>
                             {status.name}
                         </TableCell>
                         {onlyMy || <TableCell>
-                            {o.master_id}
+                            {master ? master.name : 'не определен'}
                         </TableCell>}
                     </TableRow>
+
                 })}
             </TableBody>
         </Table>

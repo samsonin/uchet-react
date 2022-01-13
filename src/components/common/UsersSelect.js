@@ -15,12 +15,12 @@ export default function ({users, user, setUser, onlyValid, disabled, classes}) {
                 onChange={e => setUser(e.target.value)}
                 label="Сотрудник"
             >
-                <MenuItem key={'menuuserscontrolinfundskey0'}
+                <MenuItem key={'menuuserscontrolkey0'}
                           value={0}>
                     <br/>
                 </MenuItem>
                 {users.map(u => !onlyValid || u.is_valid
-                    ? <MenuItem key={'menuuserscontrolinfundskey' + u.id}
+                    ? <MenuItem key={'menuuserscontrolkey' + u.id}
                               value={u.id}>
                         {u.name}
                     </MenuItem>

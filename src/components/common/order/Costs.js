@@ -17,7 +17,7 @@ import {useSnackbar} from "notistack";
 
 import rest from "../../Rest"
 import UsersSelect from "../UsersSelect";
-import {numberInputHandler} from "../NumberInputHandler";
+import {intInputHandler} from "../InputHandlers";
 import {toLocalTimeStr} from "../Time";
 import TwoLineInCell from "../TwoLineInCell";
 
@@ -75,7 +75,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
         if (!canAddJob) return
 
-        rest('order/payments/' + order.stock_id + '/' + order.id, 'POST',
+        rest('order/costs/' + order.stock_id + '/' + order.id, 'POST',
             {
                 job,
                 sum,
@@ -131,7 +131,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
                 <TextField label="Сумма"
                            className={classes.field}
                            value={sum}
-                           onChange={e => numberInputHandler(e.target.value, setSum)}
+                           onChange={e => intInputHandler(e.target.value, setSum)}
                 />
 
                 <UsersSelect

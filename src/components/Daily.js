@@ -30,6 +30,7 @@ import SaleModal from './Modals/Sale'
 import PrepaidModal from './Modals/Prepaid'
 import Consignment from "./Consignment";
 import DailyModal from "./Modals/Daily";
+import {numberInputHandler} from "./common/InputHandlers";
 
 const useStyles = makeStyles((theme) => ({
     controls: {
@@ -580,14 +581,14 @@ const Daily = props => {
                                         {
                                             text: 'Безнал:', value: daily.cashless,
                                             localValue: cashless,
-                                            change: e => setCashless(+e.target.value),
+                                            change: e => numberInputHandler(e.target.value, setCashless),
                                             click: canChange && cashlessHandler,
                                             clickAdd: canChange && cashlessHandlerAdd
                                         },
                                         {
                                             text: 'Сдали:', value: daily.handed,
                                             localValue: handed,
-                                            change: e => setHanded(+e.target.value),
+                                            change: e => numberInputHandler(e.target.value, setHanded),
                                             click: canAdminChange && handedHandler,
                                             clickAdd: canAdminChange && handedHandlerAdd
                                         },
@@ -610,7 +611,6 @@ const Daily = props => {
 
                                             <TextField
                                                 value={l.localValue}
-                                                type="number"
                                                 onChange={l.change}
                                             />
 

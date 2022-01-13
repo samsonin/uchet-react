@@ -16,6 +16,7 @@ import {makeStyles} from '@material-ui/core/styles';
 import IconButton from "@material-ui/core/IconButton";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
+import {numberInputHandler} from "../common/InputHandlers";
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -241,7 +242,8 @@ const DailyModal = props => {
                                className={classes.field}
                                value={date2}
                                onChange={e => setDate2(e.target.value)}
-                    />                </>
+                    />
+                </>
                 : <TextField label="Наименование"
                              disabled={props.disabled}
                              className={classes.field}
@@ -250,11 +252,10 @@ const DailyModal = props => {
                 />}
 
             <TextField label="Сумма"
-                       // type="number"
                        disabled={props.disabled}
                        className={classes.field}
                        value={sum}
-                       onChange={e => setSum(e.target.value)}
+                       onChange={e => numberInputHandler(e.target.value, setSum)}
             />
 
             <UsersSelect
