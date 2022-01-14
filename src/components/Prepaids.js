@@ -51,6 +51,11 @@ const Prepaids = props => {
         getPrepaids()
     }, [props.app.stock_id])
 
+    useEffect(() => {
+
+
+    }, [search])
+
     const openPrepaid = prepaid => {
 
         setPrepaidId(prepaid.id)
@@ -89,23 +94,29 @@ const Prepaids = props => {
                             </Typography>
                         </TableCell>
                         <TableCell align="right">
-                            <TextField InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon/>
-                                    </InputAdornment>
-                                ),
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton onClick={() => setSearch('')}>
-                                            <CloseIcon/>
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                                       value={search}
-                                       onChange={e => setSearch(e.target.value)}
-                            />
+                            <form onSubmit={e => e.preventDefault()}>
+                                <TextField InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon/>
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setSearch('')}>
+                                                <CloseIcon/>
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                    form: {
+                                        autoComplete: 'off',
+                                    },
+                                    autoComplete: 'off'
+                                }}
+                                           value={search}
+                                           onChange={e => setSearch(e.target.value)}
+                                />
+                            </form>
                         </TableCell>
                         <TableCell align="right">
                             <Tooltip title={'Добавить предоплату'}>
@@ -143,21 +154,21 @@ const Prepaids = props => {
 
                             })
                             .map(p => <TableRow
-                            key={'tablerowinprepaids' + p.id + p.time}
-                            style={{
-                                cursor: 'pointer'
-                            }}
-                            onClick={() => openPrepaid(p)}
-                        >
-                            <TableCell>{p.time}</TableCell>
-                            <TableCell>{p.item}</TableCell>
-                            <TableCell>
-                                {p.customer
-                                    ? TwoLineInCell(p.customer.phone_number, p.customer.fio)
-                                    : null}
-                            </TableCell>
-                            <TableCell>{p.status}</TableCell>
-                        </TableRow>)
+                                key={'tablerowinprepaids' + p.id + p.time}
+                                style={{
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => openPrepaid(p)}
+                            >
+                                <TableCell>{p.time}</TableCell>
+                                <TableCell>{p.item}</TableCell>
+                                <TableCell>
+                                    {p.customer
+                                        ? TwoLineInCell(p.customer.phone_number, p.customer.fio)
+                                        : null}
+                                </TableCell>
+                                <TableCell>{p.status}</TableCell>
+                            </TableRow>)
                         : null}
                 </TableBody>
             </Table>

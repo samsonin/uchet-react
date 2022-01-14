@@ -84,13 +84,15 @@ const Orders = props => {
 
     }, [])
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        if (props.enterPress) find()
+    // if (props.enterPress) find()
 // eslint-disable-next-line
-    }, [props.enterPress])
+//     }, [props.enterPress])
 
-    const find = () => {
+    const find = e => {
+
+        e.preventDefault()
 
         let url = 'orders?'
 
@@ -175,120 +177,124 @@ const Orders = props => {
             padding: '1rem'
         }}
     >
-        <Grid container
-              justify='space-between'
-        >
-            {onlyMy
-                ? <TextField
-                    className={"m-2 p-2"}
-                    label={"Заказ №"}
-                    value={id ? id.toString() : ''}
-                    onChange={e => intInputHandler(e.target.value, setId)}
-                />
-                : null}
+        <form onSubmit={e => find(e)}>
 
-            <IconButton
-                onClick={() => changeSearchParameters()}
+            <Grid container
+                  justify='space-between'
             >
                 {onlyMy
-                    ? <KeyboardArrowRightIcon/>
-                    : <KeyboardArrowLeftIcon/>}
-            </IconButton>
-
-        </Grid>
-
-        {!id && onlyMy && <CustomersSelect
-            customer={customer}
-            updateCustomer={updateCustomer}
-            onlySearch={true}
-        />}
-
-        {onlyMy || <>
-            <Grid item className="w-100 m-2 p-2">
-
-                {props.app.stocks.map(s => s.is_valid
-                    ? <FormControlLabel
-                        key={'formcntrinordersstocks' + s.id}
-                        control={<Checkbox
-                            color="primary"
-                            key={'stocksonordersseach' + s.id}
-                            checked={stocks.includes(s.id)}
-                            onChange={e => handleStocks(s.id, e.target.checked)}
-                        />}
-                        label={s.name}
+                    ? <TextField
+                        className={"m-2 p-2"}
+                        label={"Заказ №"}
+                        value={id ? id.toString() : ''}
+                        onChange={e => intInputHandler(e.target.value, setId)}
                     />
-                    : null
-                )}
+                    : null}
+
+                <IconButton
+                    onClick={() => changeSearchParameters()}
+                >
+                    {onlyMy
+                        ? <KeyboardArrowRightIcon/>
+                        : <KeyboardArrowLeftIcon/>}
+                </IconButton>
 
             </Grid>
 
-            <Grid item className="w-100 m-2 p-2">
-                Заказ создан с
-                <TextField
-                    type="date"
-                    className={"m-2 p-2"}
-                    value={createdDate}
-                    onChange={e => setCreatedDate(e.target.value)}
+            {!id && onlyMy && <CustomersSelect
+                customer={customer}
+                updateCustomer={updateCustomer}
+                onlySearch={true}
+            />}
+
+            {onlyMy || <>
+                <Grid item className="w-100 m-2 p-2">
+
+                    {props.app.stocks.map(s => s.is_valid
+                        ? <FormControlLabel
+                            key={'formcntrinordersstocks' + s.id}
+                            control={<Checkbox
+                                color="primary"
+                                key={'stocksonordersseach' + s.id}
+                                checked={stocks.includes(s.id)}
+                                onChange={e => handleStocks(s.id, e.target.checked)}
+                            />}
+                            label={s.name}
+                        />
+                        : null
+                    )}
+
+                </Grid>
+
+                <Grid item className="w-100 m-2 p-2">
+                    Заказ создан с
+                    <TextField
+                        type="date"
+                        className={"m-2 p-2"}
+                        value={createdDate}
+                        onChange={e => setCreatedDate(e.target.value)}
+                    />
+                    по
+                    <TextField
+                        type="date"
+                        className={"m-2 p-2"}
+                        value={createdDate2}
+                        onChange={e => setCreatedDate2(e.target.value)}
+                    />
+                </Grid>
+
+                <Grid item className="w-100 m-2 p-2">
+                    Заказ закрыт с
+                    <TextField
+                        type="date"
+                        className={"m-2 p-2"}
+                        value={checkoutDate}
+                        onChange={e => setCheckoutDate(e.target.value)}
+                    />
+                    по
+                    <TextField
+                        type="date"
+                        className={"m-2 p-2"}
+                        value={checkoutDate2}
+                        onChange={e => setCheckoutDate2(e.target.value)}
+                    />
+                </Grid>
+
+                <UsersSelect
+                    user={masterId}
+                    users={props.app.users}
+                    setUser={setMasterId}
+                    onlyValid
+                    classes={"w-100 p-1 m-1"}
                 />
-                по
-                <TextField
-                    type="date"
-                    className={"m-2 p-2"}
-                    value={createdDate2}
-                    onChange={e => setCreatedDate2(e.target.value)}
+
+                <StatusesSelect
+                    status={statusId}
+                    statuses={props.app.statuses}
+                    setStatus={setStatusId}
+                    empty
                 />
-            </Grid>
 
-            <Grid item className="w-100 m-2 p-2">
-                Заказ закрыт с
-                <TextField
-                    type="date"
-                    className={"m-2 p-2"}
-                    value={checkoutDate}
-                    onChange={e => setCheckoutDate(e.target.value)}
-                />
-                по
-                <TextField
-                    type="date"
-                    className={"m-2 p-2"}
-                    value={checkoutDate2}
-                    onChange={e => setCheckoutDate2(e.target.value)}
-                />
-            </Grid>
+            </>}
 
-            <UsersSelect
-                user={masterId}
-                users={props.app.users}
-                setUser={setMasterId}
-                onlyValid
-                classes={"w-100 p-1 m-1"}
-            />
-
-            <StatusesSelect
-                status={statusId}
-                statuses={props.app.statuses}
-                setStatus={setStatusId}
-                empty
-            />
-
-        </>}
-
-        <Grid container
-              justify={'flex-end'}
-        >
-
-            <Button
-                style={{
-                    margin: '1rem'
-                }}
-                onClick={() => find()}
-                color={'primary'}
-                variant='outlined'
+            <Grid container
+                  justify={'flex-end'}
             >
-                Найти
-            </Button>
 
-        </Grid>
+                <Button
+                    style={{
+                        margin: '1rem'
+                    }}
+                    onClick={e => find(e)}
+                    color={'primary'}
+                    variant='outlined'
+                >
+                    Найти
+                </Button>
+
+            </Grid>
+
+        </form>
 
         <Table size="small">
             <TableHead>
