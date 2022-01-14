@@ -70,14 +70,14 @@ const DailyModal = props => {
     const [date1, setDate1] = useState(() => getDate1())
     const [date2, setDate2] = useState(() => getDate2())
     const [item, setItem] = useState('')
-    const [sum, setSum] = useState('0')
+    const [sum, setSum] = useState(0)
     const [employee, setEmployee] = useState(0)
     const [note, setNote] = useState('')
 
     const reset = () => {
 
         setItem('')
-        setSum('0')
+        setSum(0)
         setEmployee(0)
         setNote('')
 
