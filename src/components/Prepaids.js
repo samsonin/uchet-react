@@ -94,29 +94,27 @@ const Prepaids = props => {
                             </Typography>
                         </TableCell>
                         <TableCell align="right">
-                            <form onSubmit={e => e.preventDefault()}>
-                                <TextField InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon/>
-                                        </InputAdornment>
-                                    ),
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton onClick={() => setSearch('')}>
-                                                <CloseIcon/>
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                    form: {
-                                        autoComplete: 'off',
-                                    },
-                                    autoComplete: 'off'
-                                }}
-                                           value={search}
-                                           onChange={e => setSearch(e.target.value)}
-                                />
-                            </form>
+                            <TextField InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon/>
+                                    </InputAdornment>
+                                ),
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={() => setSearch('')}>
+                                            <CloseIcon/>
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                                form: {
+                                    autoComplete: 'off',
+                                },
+                                autoComplete: 'off'
+                            }}
+                                       value={search}
+                                       onChange={e => setSearch(e.target.value)}
+                            />
                         </TableCell>
                         <TableCell align="right">
                             <Tooltip title={'Добавить предоплату'}>

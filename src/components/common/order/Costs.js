@@ -1,5 +1,5 @@
 import React, {forwardRef, useState} from "react";
-import {Table, TableCell, TableRow} from "@material-ui/core";
+import {List, ListItem, ListItemText, Table, TableCell, TableRow} from "@material-ui/core";
 import TableHead from "@material-ui/core/TableHead";
 import TableBody from "@material-ui/core/TableBody";
 
@@ -13,6 +13,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Slide from "@material-ui/core/Slide";
 import {makeStyles} from "@material-ui/core/styles";
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import CancelIcon from '@material-ui/icons/Cancel';
 import {useSnackbar} from "notistack";
 
 import rest from "../../Rest"
@@ -52,8 +54,10 @@ const useStyles = makeStyles((theme) => ({
 
 export const Costs = ({order, isEditable, users, providers}) => {
 
-    const [open, setOpen] = useState(false)
+    const [code, setCode] = useState('')
+    const [search, setSearch] = useState([])
 
+    const [serviceOpen, setServiceOpen] = useState(false)
     const [job, setJob] = useState('')
     const [sum, setSum] = useState(0)
     const [user_id, setUserId] = useState(0)
@@ -70,6 +74,34 @@ export const Costs = ({order, isEditable, users, providers}) => {
         : null
 
     const canAddJob = job && sum > 0 && user_id
+
+    const searchGood = () => {
+
+        rest('goods?code=' + code)
+            .then(res => res.status === 200 && res.body.length
+                    ? setSearch(res.body)
+                    : enqueueSnackbar('Не найдено', {variant: 'error'})
+            )
+
+    }
+
+    const back = () => setSearch([])
+
+    const addGood = barcode => {
+
+        if (!barcode) return enqueueSnackbar('нет кода', {variant: "error"})
+
+        rest('orders/' + order.stock_id + '/' + order.id + '/' + barcode, 'POST')
+            .then(res => {
+                if (res.status === 200) {
+                    setSearch([])
+                    setCode('')
+                } else {
+                    enqueueSnackbar('ошибка ' + res.status, {variant: "error"})
+                }
+            })
+
+    }
 
     const addJob = () => {
 
@@ -88,7 +120,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
                     setJob('')
                     setSum(0)
                     setUserId(0)
-                    setOpen(false)
+                    setServiceOpen(false)
                     enqueueSnackbar('Добавлено', {variant: 'success'})
 
                 } else {
@@ -101,20 +133,33 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
     }
 
+    const delGood = barcode => {
+
+        if (!barcode) return enqueueSnackbar('нет кода', {variant: "error"})
+
+        rest('orders/' + order.stock_id + '/' + order.id + '/' + barcode, 'DELETE')
+            .then(res => {
+                if (res.status !== 200) {
+                    enqueueSnackbar('ошибка ' + res.status, {variant: "error"})
+                }
+            })
+
+    }
+
     return <>
 
         <Dialog
-            open={open}
+            open={serviceOpen}
             TransitionComponent={Transition}
             keepMounted
-            onClose={() => setOpen(false)}
+            onClose={() => setServiceOpen(false)}
         >
             <DialogTitle>
 
                 Добавление работы в заказ
 
                 <IconButton aria-label="close-add-job" className={classes.closeButton}
-                            onClick={() => setOpen(false)}>
+                            onClick={() => setServiceOpen(false)}>
                     <CloseIcon/>
                 </IconButton>
 
@@ -145,7 +190,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
             </DialogContent>
 
             <DialogActions>
-                <Button onClick={() => setOpen(false)}
+                <Button onClick={() => setServiceOpen(false)}
                         color="secondary">
                     Отмена
                 </Button>
@@ -158,25 +203,39 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
         </Dialog>
 
-        {goods
+        {goods && goods.length
             ? <Table size="small">
                 <TableHead>
                     <TableRow>
                         <TableCell>#</TableCell>
                         <TableCell>Наименование</TableCell>
                         <TableCell>Поставщик, время</TableCell>
-                        <TableCell>Себестоимость</TableCell>
+                        <TableCell colSpan="2">Себестоимость</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {goods.map(g => <TableRow key={'tablerowkeyforgoodsinordes' + g.sum + g.barcode}>
-                            <TableCell>{g.good.id}</TableCell>
-                            <TableCell>{g.good.model}</TableCell>
-                            <TableCell>
-                                {TwoLineInCell(providers.find(pr => pr.id === g.good.provider_id).name, toLocalTimeStr(g.good.time))}
-                            </TableCell>
-                            <TableCell>{g.good.remcost || g.good.cost}</TableCell>
-                        </TableRow>
+                    {goods.map(g => {
+
+                            const provider = providers.find(pr => pr.id === g.good.provider_id)
+
+                            return <TableRow key={'tablerowkeyforgoodsinordes' + g.sum + g.barcode}>
+                                <TableCell>{g.good.id}</TableCell>
+                                <TableCell>{g.good.model}</TableCell>
+                                <TableCell>
+                                    {provider
+                                        ? TwoLineInCell(provider.name, toLocalTimeStr(g.good.time))
+                                        : g.good.time}
+                                </TableCell>
+                                <TableCell>{g.good.remcost || g.good.cost}</TableCell>
+                                <TableCell>
+                                    <IconButton
+                                        onClick={() => delGood(g.barcode)}
+                                    >
+                                        <CancelIcon/>
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>
+                        }
                     )}
                     <TableRow>
                         <TableCell colSpan={3} style={{
@@ -190,7 +249,47 @@ export const Costs = ({order, isEditable, users, providers}) => {
             </Table>
             : null}
 
-        {services
+        {isEditable && <div style={{
+            margin: '1rem',
+            display: 'flex',
+            justifyContent: 'space-around',
+            alignItems: 'center'
+        }}>
+            {search.length
+                ? <>
+                    <List>
+                        {search.map(g => <ListItem key={'listitemkeyinordercost' + g.barcode}
+                                                   button
+                                                   onClick={() => addGood(g.barcode)}
+                            >
+                                <ListItemText
+                                    primary={g.model}
+                                    secondary={g.remcost}
+                                />
+                            </ListItem>
+                        )}
+                    </List>
+                    <Button style={{margin: '1rem'}}
+                            variant='outlined'
+                            onClick={() => back()}
+                            color="primary">
+                        <ArrowBackIcon/>
+                    </Button>
+                </>
+                : <>
+                    <TextField
+                        value={code}
+                        onChange={e => setCode(e.target.value)}
+                    />
+                    <Button variant='outlined'
+                            onClick={() => searchGood()}
+                            color="primary">
+                        Найти
+                    </Button>
+                </>}
+        </div>}
+
+        {services && services.length
             ? <Table size="small">
                 <TableHead>
                     <TableRow>
@@ -229,7 +328,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
             margin: '1rem',
         }}>
             <Button variant='outlined'
-                    onClick={() => setOpen(true)}
+                    onClick={() => setServiceOpen(true)}
                     color="primary">
                 Добавить работу
             </Button>

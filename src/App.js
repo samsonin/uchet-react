@@ -106,8 +106,6 @@ const App = props => {
                 }
             })
 
-        return document.removeEventListener('keydown', handleKeyPress)
-
 // eslint-disable-next-line
     }, [])
 
@@ -209,6 +207,8 @@ const App = props => {
                     ? <Subscribe/>
                     : <div className="m-2 p-2">
 
+                        <form onSubmit={e => e.preventDefault()}>
+
                         <Route exact path="/" component={Main}/>
                         <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
                         <Route exact path="/settings" component={Settings}/>
@@ -275,6 +275,8 @@ const App = props => {
                             />
                             <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
                         </>}
+
+                        </form>
 
                     </div>
                 : null
