@@ -79,8 +79,8 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
         rest('goods?code=' + code)
             .then(res => res.status === 200 && res.body.length
-                    ? setSearch(res.body)
-                    : enqueueSnackbar('Не найдено', {variant: 'error'})
+                ? setSearch(res.body)
+                : enqueueSnackbar('Не найдено', {variant: 'error'})
             )
 
     }
@@ -138,6 +138,17 @@ export const Costs = ({order, isEditable, users, providers}) => {
         if (!barcode) return enqueueSnackbar('нет кода', {variant: "error"})
 
         rest('orders/' + order.stock_id + '/' + order.id + '/' + barcode, 'DELETE')
+            .then(res => {
+                if (res.status !== 200) {
+                    enqueueSnackbar('ошибка ' + res.status, {variant: "error"})
+                }
+            })
+
+    }
+
+    const delJob = i => {
+
+        rest('order/jobs/' + order.stock_id + '/' + order.id + '/' + i, 'DELETE')
             .then(res => {
                 if (res.status !== 200) {
                     enqueueSnackbar('ошибка ' + res.status, {variant: "error"})
@@ -295,11 +306,11 @@ export const Costs = ({order, isEditable, users, providers}) => {
                     <TableRow>
                         <TableCell>Работа</TableCell>
                         <TableCell>Мастер</TableCell>
-                        <TableCell>Сумма</TableCell>
+                        <TableCell colSpan={2}>Сумма</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {services.map(s => {
+                    {services.map((s, i) => {
 
                             const user = users.find(u => u.id === s.user_id)
 
@@ -309,6 +320,13 @@ export const Costs = ({order, isEditable, users, providers}) => {
                                     {user ? user.name : ''}
                                 </TableCell>
                                 <TableCell>{s.sum}</TableCell>
+                                <TableCell>
+                                    <IconButton
+                                        onClick={() => delJob(i)}
+                                    >
+                                        <CancelIcon/>
+                                    </IconButton>
+                                </TableCell>
                             </TableRow>
                         }
                     )}
