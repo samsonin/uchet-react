@@ -160,11 +160,11 @@ const Daily = props => {
 
     const cashlessHandler = () => cashlessRest({cashless})
 
-    const cashlessHandlerAdd = () => cashlessRest({cashless: daily.cashless + cashless})
+    const cashlessHandlerAdd = () => cashlessRest({cashless: daily.cashless + +cashless})
 
     const handedHandler = () => handedRest(handed)
 
-    const handedHandlerAdd = () => handedRest(daily.handed + handed)
+    const handedHandlerAdd = () => handedRest(daily.handed + +handed)
 
     const employeeCheckout = employee_id => {
 
