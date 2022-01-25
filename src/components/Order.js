@@ -17,11 +17,11 @@ import rest from "../components/Rest";
 import {useSnackbar} from "notistack";
 import {upd_app,} from "../actions/actionCreator";
 import {bindActionCreators} from "redux";
-import StatusesSelect from "./common/StatusesSelect";
 
 import {Payments} from "./common/order/Payments";
 import {Remarks} from "./common/order/Remarks";
 import {Costs} from "./common/order/Costs"
+import {Info} from "./common/order/Info";
 
 
 const initCustomer = {
@@ -127,7 +127,7 @@ const Order = props => {
                 const category = props.app.categories.find(c => c.id === categoryId)
                 value = category ? category.name : ''
             } else if (i.name === 'today') {
-                value = createDate()
+                value = createDate(created)
             } else if (i.name === 'fio') {
                 value = customer.fio || 'ИНКОГНИТО'
             } else if (i.name === 'phone_number') {
@@ -238,10 +238,6 @@ const Order = props => {
 
     }
 
-    const warranty = () => {
-
-    }
-
     const disabled = !!id
 
     const updateCustomer = (name, val) => {
@@ -283,109 +279,105 @@ const Order = props => {
             </IconButton>}
         </Grid>
 
-        {disabled && <Tabs
-            value={tabId}
-            indicatorColor="primary"
-            textColor="primary"
-            onChange={(e, v) => setTabId(v)}
-            style={{
-                margin: '1rem'
-            }}
-        >
-            <Tab label="Информация"/>
-            <Tab label="Затраты"/>
-            <Tab label="Платежи"/>
-            <Tab label="Процесс"/>
-        </Tabs>}
+        {!id
+            ? <>
 
-        {tabId === 0 && <>
+                <CustomersSelect
+                    customer={customer}
+                    disabled={disabled}
+                    updateCustomer={updateCustomer}
+                />
 
-            {disabled && <StatusesSelect
-                disabled={disabled}
-                status={order.status_id}
-                statuses={props.app.statuses}
-            />}
+                <Select
+                    labelId="category-id-select-label"
+                    value={categoryId}
+                    onChange={e => setCategoryId(+e.target.value)}
+                    style={fieldsStyle}
+                    disabled={disabled}
+                >
+                    {[5, 38, 41, 2].map(i => {
 
-            <CustomersSelect
-                customer={customer}
-                disabled={disabled}
-                updateCustomer={updateCustomer}
-            />
+                        const category = props.app.categories.find(c => c.id === i)
 
-            <Select
-                labelId="category-id-select-label"
-                value={categoryId}
-                onChange={e => setCategoryId(+e.target.value)}
-                style={fieldsStyle}
-                disabled={disabled}
-            >
-                {[5, 38, 41, 2].map(i => {
+                        return <MenuItem
+                            key={'menu-category-key-' + i}
+                            value={i}>
+                            {category ? category.name : ''}
+                        </MenuItem>
 
-                    const category = props.app.categories.find(c => c.id === i)
+                    })}
+                </Select>
 
-                    return <MenuItem
-                        key={'menu-category-key-' + i}
-                        value={i}>
-                        {category ? category.name : ''}
-                    </MenuItem>
+                <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
+                           style={fieldsStyle}
+                           value={model}
+                           onChange={e => setModel(e.target.value)}
+                           disabled={disabled}
+                />
 
-                })}
-            </Select>
+                <TextField label="Предварительная стоимость"
+                           disabled={disabled}
+                           style={fieldsStyle}
+                           value={sum}
+                           onChange={e => setSum(+e.target.value)}
+                />
 
-            <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
-                       style={fieldsStyle}
-                       value={model}
-                       onChange={e => setModel(e.target.value)}
-                       disabled={disabled}
-            />
-
-            <TextField label="Предварительная стоимость"
-                       disabled={disabled}
-                       style={fieldsStyle}
-                       value={sum}
-                       onChange={e => setSum(+e.target.value)}
-            />
-
-            {disabled || <TextField label="Предоплата при оформлении заказа"
-                                    style={fieldsStyle}
-                                    value={presum}
-                                    onChange={e => setPresum(+e.target.value)}
-            />}
-
-            {fields.map(f => <TextField label={f.value}
-                                        key={'text-fields-in-new-order' + f.name}
-                                        disabled={disabled}
+                <TextField label="Предоплата при оформлении заказа"
                                         style={fieldsStyle}
-                                        value={state[f.name]}
-                                        onChange={e => setField([f.name], e.target.value)}
-            />)}
+                                        value={presum}
+                                        onChange={e => setPresum(+e.target.value)}
+                />
 
-            {disabled || <Button variant='outlined'
-                                 onClick={() => create()}
-                                 color="primary">
-                Внести
-            </Button>}
+                {fields.map(f => <TextField label={f.value}
+                                            key={'text-fields-in-new-order' + f.name}
+                                            disabled={disabled}
+                                            style={fieldsStyle}
+                                            value={state[f.name]}
+                                            onChange={e => setField([f.name], e.target.value)}
+                />)}
 
-            {order && order.status_id === 6 &&
-            <Button variant='outlined'
-                    onClick={() => warranty()}
-                    color="primary">
-                Принять по гарантии
-            </Button>}
+                {disabled || <Button variant='outlined'
+                                     onClick={() => create()}
+                                     color="primary">
+                    Внести
+                </Button>}
 
-        </>}
+            </>
+            : <>
 
-        {order && tabId === 1 &&
-        <Costs order={order} isEditable={canEdit()} users={props.app.users} providers={props.app.providers}/>
-        }
+                <Tabs
+                    value={tabId}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    onChange={(e, v) => setTabId(v)}
+                    style={{
+                        margin: '1rem'
+                    }}
+                >
+                    <Tab label="Информация"/>
+                    <Tab label="Затраты"/>
+                    <Tab label="Платежи"/>
+                    <Tab label="Процесс"/>
+                </Tabs>
 
-        {order && tabId === 2 &&
-        <Payments order={order} isEditable={canEdit() && isSale}/>
-        }
+                {order && tabId === 0 &&
+                    <Info order={order} isEditable={canEdit()} app={props.app} fields={fields}/>
+                }
 
-        {order && tabId === 3 &&
-        <Remarks order={order} isEditable={canEdit()} users={props.app.users}/>
-        }
+                {order && tabId === 1 &&
+                    <Costs order={order} isEditable={canEdit()} users={props.app.users}
+                           providers={props.app.providers}/>
+                }
+
+                {order && tabId === 2 &&
+                    <Payments order={order} isEditable={canEdit() && isSale}/>
+                }
+
+                {order && tabId === 3 &&
+                    <Remarks order={order} isEditable={canEdit()} users={props.app.users}/>
+                }
+
+            </>}
 
     </div>
 }

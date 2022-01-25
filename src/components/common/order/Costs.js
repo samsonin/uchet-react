@@ -312,7 +312,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
                 <TableBody>
                     {services.map((s, i) => {
 
-                            const user = users.find(u => u.id === s.user_id)
+                            const user = users.find(u => u.id === s.employee)
 
                             return <TableRow key={'tablerowkeyforservicesinordes' + JSON.stringify(s)}>
                                 <TableCell>{s.name}</TableCell>

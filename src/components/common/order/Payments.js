@@ -10,6 +10,7 @@ import {useSnackbar} from "notistack";
 
 import rest from "../../Rest"
 import TwoLineInCell from "../TwoLineInCell";
+import {numberInputHandler} from "../InputHandlers";
 
 
 const PAYMENTMETHODS = [
@@ -89,13 +90,8 @@ export const Payments = ({order, isEditable}) => {
             <TextField label="Сумма"
                        className={'w-50'}
                        value={sum}
-                       onChange={e => {
-                           const newSum = +e.target.value
-                           if (!isNaN(newSum)) setSum(newSum)
-                           else if (e.target.value === '-') setSum(0)
-                       }}
+                       onChange={e => numberInputHandler(e.target.value, setSum)}
             />
-
             <Button variant='outlined'
                     disabled={!sum}
                     onClick={() => addHandler()}
