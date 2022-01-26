@@ -67,7 +67,8 @@ export const Payments = ({order, isEditable}) => {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {order.json.payments.map(p => <TableRow key={'tablerowkeyforpaymentsinordes' + p.sum + p.created_at}>
+                {order.json.payments && order.json.payments.map(p => <TableRow
+                    key={'tablerowkeyforpaymentsinordes' + p.sum + p.created_at}>
                     <TableCell>{toLocalTimeStr(p.created_at)}</TableCell>
                     <TableCell>
                         {TwoLineInCell(+p.sum, PAYMENTMETHODS[p.paymentsMethod])}
@@ -78,7 +79,9 @@ export const Payments = ({order, isEditable}) => {
                         fontWeight: 'bold',
                         textAlign: 'center'
                     }}>
-                        всего: {totalSum(order.json.payments)}
+                        всего: {order.json.payments
+                        ? totalSum(order.json.payments)
+                        : 0}
                     </TableCell>
                 </TableRow>
             </TableBody>

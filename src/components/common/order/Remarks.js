@@ -43,7 +43,7 @@ export const Remarks = ({order, isEditable, users}) => {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {order.remark.map(r => {
+                {order.remark && order.remark.map(r => {
 
                     const user = users.find(u => u.id === r.user_id)
 

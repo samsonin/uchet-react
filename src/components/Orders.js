@@ -84,15 +84,13 @@ const Orders = props => {
 
     }, [])
 
-    // useEffect(() => {
+    useEffect(() => {
 
-    // if (props.enterPress) find()
+    if (props.enterPress) find()
 // eslint-disable-next-line
-//     }, [props.enterPress])
+    }, [props.enterPress])
 
-    const find = e => {
-
-        e.preventDefault()
+    const find = () => {
 
         let url = 'orders?'
 
@@ -177,8 +175,6 @@ const Orders = props => {
             padding: '1rem'
         }}
     >
-        <form onSubmit={e => find(e)}>
-
             <Grid container
                   justify='space-between'
             >
@@ -285,7 +281,7 @@ const Orders = props => {
                     style={{
                         margin: '1rem'
                     }}
-                    onClick={e => find(e)}
+                    onClick={() => find()}
                     color={'primary'}
                     variant='outlined'
                 >
@@ -293,8 +289,6 @@ const Orders = props => {
                 </Button>
 
             </Grid>
-
-        </form>
 
         <Table size="small">
             <TableHead>
@@ -343,7 +337,6 @@ const Orders = props => {
                             {master ? master.name : 'не определен'}
                         </TableCell>}
                     </TableRow>
-
                 })}
             </TableBody>
         </Table>
