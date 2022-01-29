@@ -5,6 +5,9 @@ import rest from "../Rest";
 
 const fields = ['id', 'fio', 'phone_number']
 
+let outCount = 0
+let inCount = 0
+
 export default function (props) {
 
     const request = useRef(false)
@@ -25,16 +28,18 @@ export default function (props) {
 
         props.updateCustomer(name, val)
 
-        if (val.length < 4 || request.current) return
+        if (val.length < 4) return
 
         request.current = true;
+        outCount++
 
         rest('customers?all=' + val)
             .then(res => {
-                if (res.ok) {
+                request.current = false;
+                inCount++
+                if (res.ok && outCount === inCount) {
                     setCustomers(res.body ? res.body : [])
                 }
-                request.current = false;
             })
 
     }
@@ -82,7 +87,7 @@ export default function (props) {
             getOptionSelected={option => option.id === props.customer.id}
             renderInput={params => <TextField
                 {...params}
-                autoComplete = 'off'
+                autoComplete='off'
                 label={f.label}
                 id={'customer-select-key-in-custselect' + f.name + f.label}
                 name={'customer-select-key-in-custselect' + f.name + f.label}

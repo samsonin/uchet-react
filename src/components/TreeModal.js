@@ -14,7 +14,6 @@ export default connect(state => (state), mapDispatchToProps)(function Controlled
 
     const [currentId, setCurrentId] = useState(() => props.initialCategoryId)
 
-
     return <MDBContainer>
         <MDBModal isOpen={props.isOpen} toggle={() => props.onClose(0)}>
             <MDBModalHeader toggle={() => props.onClose(0)}>

@@ -67,9 +67,9 @@ export default function ControlledTreeView({categories, initialId, onSelected, f
                                  nodeId={cat.id.toString()}
                                  label={cat.name}
                 >
-                    {childs.length > 0
+                    {childs.length
                         ? childs
-                        : ''}
+                        : null}
                 </TreeItem>
 
             })

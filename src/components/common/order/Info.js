@@ -13,7 +13,7 @@ const fieldsStyle = {
     width: '100%'
 }
 
-export const Info = ({order, isEditable, app, fields, isAdmin, setId, needPrint}) => {
+export const Info = ({order, isEditable, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const {enqueueSnackbar} = useSnackbar()
 
@@ -90,7 +90,7 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setId, needPrint}
                 if (res.status === 200) {
 
                     needPrint.current = true
-                    setId(res.body.orders[0].id)
+                    setOrder(res.body.orders[0])
 
                 }
             })
@@ -137,7 +137,7 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setId, needPrint}
 
     }, [order])
 
-    const category = order ? app.categories.find(c => c.id === order.category_id) : 0
+    const category = app.categories.find(c => c.id === category_id)
 
     return <>
 
@@ -165,7 +165,8 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setId, needPrint}
                     onSelected={id => setCategory_id(+id)}
                     finished={id => handleTree(id)}
                 />
-                <Button size="small" onClick={() => setTreeOpen(false)}
+                <Button size="small"
+                        onClick={() => setTreeOpen(false)}
                         variant="outlined"
                 >
                     Ок

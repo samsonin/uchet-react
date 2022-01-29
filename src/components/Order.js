@@ -34,17 +34,16 @@ const Order = props => {
 
     const [tabId, setTabId] = useState(0)
 
-    const [id, setId] = useState(+props.match.params.id || null)
+    const [id, setId] = useState(+props.match.params.order_id || null)
+    const [stockId, setStockId] = useState(+props.match.params.stock_id || null)
     const [created, setCreated] = useState()
 
     const needPrint = useRef(false)
 
     const classes = useStyles()
 
-    const stockId = +props.match.params.stock_id
-    const orderId = +props.match.params.order_id
     const order = props.app.orders
-        ? props.app.orders.find(or => or.id === orderId && or.stock_id === stockId)
+        ? props.app.orders.find(or => or.id === id && or.stock_id === stockId)
         : null
 
     const canEdit = () => order
@@ -66,7 +65,7 @@ const Order = props => {
 
             let span = document.createElement('span')
 
-            const stock = props.app.stocks.find(s => s.id === order ? order.stock_id : props.app.stock_id)
+            const stock = props.app.stocks.find(s => s.id === order.stock_id)
 
             let value
             if (i.name === 'organization_organization') {
@@ -119,11 +118,9 @@ const Order = props => {
 
     useEffect(() => {
 
-        if (stockId && orderId) {
+        if (stockId && id && !order) {
 
-            if (!order) {
-
-                rest('orders/' + stockId + '/' + orderId)
+                rest('orders/' + stockId + '/' + id)
                     .then(res => {
 
                         if (res.status === 200) {
@@ -133,27 +130,21 @@ const Order = props => {
                         }
                     })
 
-            }
-
         }
 
     }, [])
 
-    useEffect(() => {
-
-        if (id && needPrint.current) {
-            needPrint.current = false
-            Print(doc, inputToText)
-        }
-
-    }, [id])
+    const setOrder = order => {
+        setId(order.id)
+        setStockId(order.stock_id)
+        setCreated(order.created_at)
+    }
 
     useEffect(() => {
 
-        if (order) {
-
-            setId(order.id)
-            setCreated(order.created_at)
+        if (order && needPrint.current) {
+                needPrint.current = false
+                Print(doc, inputToText)
         }
 
     }, [order])
@@ -205,24 +196,24 @@ const Order = props => {
             : null}
 
         {tabId === 0 &&
-            <Info order={order} isEditable={canEdit()} app={props.app} fields={fields}
-                  isAdmin={props.auth.admin}
-                  setId={setId}
-                  needPrint={needPrint}
-            />
+        <Info order={order} isEditable={canEdit()} app={props.app} fields={fields}
+              isAdmin={props.auth.admin}
+              setOrder={setOrder}
+              needPrint={needPrint}
+        />
         }
 
         {order && tabId === 1 &&
-            <Costs order={order} isEditable={canEdit()} users={props.app.users}
-                   providers={props.app.providers}/>
+        <Costs order={order} isEditable={canEdit()} users={props.app.users}
+               providers={props.app.providers}/>
         }
 
         {order && tabId === 2 &&
-            <Payments order={order} isEditable={canEdit() && isSale}/>
+        <Payments order={order} isEditable={canEdit() && isSale}/>
         }
 
         {order && tabId === 3 &&
-            <Remarks order={order} isEditable={canEdit()} users={props.app.users}/>
+        <Remarks order={order} isEditable={canEdit()} users={props.app.users}/>
         }
 
     </div>
