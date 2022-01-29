@@ -251,6 +251,7 @@ const Prepaid = props => {
         })
 
     }
+
     const inputToText = elem => {
 
         const inputs = elem.querySelectorAll('input')

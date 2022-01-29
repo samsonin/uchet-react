@@ -69,13 +69,9 @@ const Orders = props => {
         })
     }
 
-    const getUrl = () => position && position.is_sale && props.app.stock_id
-        ? 'orders?current_shift_only&stock_ids[]=' + props.app.stock_id
-        : 'allowedOrders'
-
     useEffect(() => {
 
-        rest(getUrl())
+        rest('orders/all')
             .then(res => {
                 if (res.status === 200) {
                     setOrders(res.body)
@@ -112,7 +108,9 @@ const Orders = props => {
 
         }
 
-        if (!url) url = getUrl()
+        if (!url) url = position && position.is_sale && props.app.stock_id
+            ? 'orders?current_shift_only&stock_ids[]=' + props.app.stock_id
+            : 'allowedOrders'
 
         rest(url)
             .then(res => {

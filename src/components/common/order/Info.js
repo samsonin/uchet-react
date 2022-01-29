@@ -1,24 +1,107 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import StatusesSelect from "../StatusesSelect";
 import Button from "@material-ui/core/Button";
-import {Table, TableBody, TableCell, TableRow, TextField} from "@material-ui/core";
+import {TextField} from "@material-ui/core";
 import {useSnackbar} from "notistack";
 
-import TwoLineInCell from "../TwoLineInCell";
 import rest from "../../Rest"
+import CustomersSelect from "../CustomersSelect";
+import Tree from "../../Tree";
 
-export const Info = ({order, isEditable, app, fields, isAdmin}) => {
+const fieldsStyle = {
+    margin: '1rem .3rem',
+    width: '100%'
+}
 
-    const [isRest, setIsRest] = useState(false)
+export const Info = ({order, isEditable, app, fields, isAdmin, setId, needPrint}) => {
+
     const {enqueueSnackbar} = useSnackbar()
 
-    const setStatus = id => {
+    const [isRest, setIsRest] = useState(false)
+    const [treeOpen, setTreeOpen] = useState(false)
 
-        if (id === order.status_id) return
+    const [status_id, setStatus_id] = useState(order ? order.status_id : 0)
+    const [category_id, setCategory_id] = useState(order ? order.category_id : 5)
+    const [customer, setCustomer] = useState(order ? order.customer : {
+        id: 0,
+        phone_number: '',
+        fio: '',
+    })
+    const [model, setModel] = useState('')
+    const [presum, setPresum] = useState(0)
+    const [sum, setSum] = useState(order ? order.sum : 0)
+    const [state, setState] = useState(() => {
+        let state = {}
+        fields.map(f => {
+            state[f.name] = order ? order[f.name] : ''
+        })
+        return state
+    })
 
-        const data = {status_id: id}
+    const setField = (name, value) => {
 
-        setIsRest(true)
+        setState(prev => {
+
+            const newState = {...prev}
+            newState[name] = value
+            return newState
+
+        })
+
+    }
+
+    const updateCustomer = (name, val) => {
+
+        setCustomer(prev => {
+
+            const newState = {...prev}
+            newState[name] = val
+            return newState
+
+        })
+
+    }
+
+    const create = () => {
+
+        if (!app.stock_id) return enqueueSnackbar('Выберите точку', {variant: 'error'})
+        if (!(customer.id || customer.fio || customer.phone_number)) {
+            return enqueueSnackbar('Нет заказчика', {variant: 'error'})
+        }
+        if (!model) return enqueueSnackbar('Не указана модель', {variant: 'error'})
+
+        const data = {
+            customer,
+            category_id,
+            model,
+            presum,
+            sum,
+            ...state
+        }
+
+        rest('orders/' + app.stock_id, 'POST', data)
+            .then(res => {
+
+                if (res.status === 200) {
+
+                    needPrint.current = true
+                    setId(res.body.orders[0].id)
+
+                }
+            })
+
+
+    }
+
+    const save = () => {
+
+        const data = {
+            customer,
+            status_id,
+            category_id,
+            model,
+            ...state
+        }
 
         rest('order/' + order.stock_id + '/' + order.id, 'PATCH', data)
             .then(res => {
@@ -32,66 +115,117 @@ export const Info = ({order, isEditable, app, fields, isAdmin}) => {
 
     }
 
-    const getUser = user_id => {
+    useEffect(() => {
 
-        const user = app.users.find(u => u.id === user_id)
+        if (order) {
 
-        return user ? user.name : 'Не определен'
+            setStatus_id(order.status_id)
+            setCustomer(order.customer)
+            setCategory_id(order.category_id)
+            setModel(order.model)
+            setSum(order.sum)
 
-    }
+            fields.map(f => {
+                setField(f.name, order[f.name])
+            })
+        }
 
-    const getModel = () => order.category_id
-        ? TwoLineInCell(app.categories.find(c => c.id === order.category_id).name, order.model)
-        : order.model
+    }, [order])
 
-    const disabled = !isEditable || isRest
+
+    const category = order ? app.categories.find(c => c.id === order.category_id) : 0
 
     return <>
 
-        <StatusesSelect
-            disabled={disabled}
-            status={order.status_id}
-            setStatus={setStatus}
-            statuses={app.statuses}
+        {order
+            ? <StatusesSelect
+                status={status_id}
+                setStatus={setStatus_id}
+                statuses={app.statuses}
+            />
+            : null}
+
+        <CustomersSelect
+            customer={customer}
+            updateCustomer={updateCustomer}
+            disabled={!!order}
         />
 
-        <Table>
-            <TableBody>
-                {
-                    [
-                        ['Заказчик', order.customer
-                            ? TwoLineInCell(order.customer.fio, order.customer.phone_number)
-                            : 'Не указан'],
-                        ['Устройство', getModel()],
-                        ['Сумма', order.sum2],
-                        ['Мастер', getUser(order.master_id)],
-                        order.imei && ['imei', order.imei],
-                        order.password && ['Пароль', order.password],
-                    ].concat(fields.map(f => order[f.name]
-                        ? [f.value, order[f.name]]
-                        : null
-                    ))
-                        .map((r, n) => r
-                            ? <TableRow key={'nablerowkeyinorderinfo' + n}>
-                                <TableCell>
-                                    {r[0]}
-                                </TableCell>
-                                <TableCell>
-                                    {r[1]}
-                                </TableCell>
-                            </TableRow>
-                            : null)}
-            </TableBody>
-        </Table>
+        {treeOpen
+            ? <div style={{
+                margin: '1rem'
+            }}>
+                <Tree
+                    initialId={category_id}
+                    categories={app.categories}
+                    onSelected={id => setCategory_id(+id)}
+                    finished={id => setCategory_id(+id)}
+                />
+                <Button size="small" onClick={() => setTreeOpen(false)}
+                        variant="outlined"
+                >
+                    Ок
+                </Button>
+            </div>
+            : <div style={{
+                margin: '1rem'
+            }}>
+                <Button size="small" className="w-100" onClick={() => setTreeOpen(true)}>
+                    {category ? category.name : "Выбрать категорию..."}
+                </Button>
+            </div>
+        }
 
-        {order.status_id === 6 && isAdmin &&
+        <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
+                   style={fieldsStyle}
+                   value={model}
+                   onChange={e => setModel(e.target.value)}
+                   disabled={isRest}
+        />
+
+        <TextField label="Предварительная стоимость"
+                   disabled={isRest || !!order}
+                   style={fieldsStyle}
+                   value={sum}
+                   onChange={e => setSum(+e.target.value)}
+        />
+
+        {!order
+            ? <TextField label="Предоплата при оформлении заказа"
+                         style={fieldsStyle}
+                         value={presum}
+                         onChange={e => setPresum(+e.target.value)}
+            />
+            : null}
+
+        {fields.map(f => <TextField label={f.value}
+                                    key={'text-fields-in-new-order' + f.name}
+                                    disabled={isRest}
+                                    style={fieldsStyle}
+                                    value={state[f.name]}
+                                    onChange={e => setField([f.name], e.target.value)}
+        />)}
+
+        {order
+            ? <Button variant='outlined'
+                      onClick={() => save()}
+                      color="primary">
+                сохранить
+            </Button>
+            : <Button variant='outlined'
+                      onClick={() => create()}
+                      color="primary">
+                создать
+            </Button>}
+
+        {order && order.status_id === 6 && isAdmin &&
             <Button variant='outlined'
-                    onClick={() => setStatus(0)}
+                    onClick={() => setStatus_id(0)}
                     color="primary">
                 Открыть заказ
             </Button>}
 
-        {order.status_id === 6 &&
+        {order && order.status_id === 6 &&
             <Button variant='outlined'
                     onClick={() => warranty()}
                     color="primary">

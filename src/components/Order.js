@@ -1,20 +1,14 @@
 import React, {useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
-import TextField from "@material-ui/core/TextField/TextField";
-import CustomersSelect from "./common/CustomersSelect";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
 
 import {makeStyles} from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import PrintIcon from "@material-ui/icons/Print";
 import {Tab, Tabs, Typography} from "@material-ui/core";
-import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 
 import {Print, createDate} from "./common/Print";
 import rest from "../components/Rest";
-import {useSnackbar} from "notistack";
 import {upd_app,} from "../actions/actionCreator";
 import {bindActionCreators} from "redux";
 
@@ -23,17 +17,6 @@ import {Remarks} from "./common/order/Remarks";
 import {Costs} from "./common/order/Costs"
 import {Info} from "./common/order/Info";
 
-
-const initCustomer = {
-    id: 0,
-    phone_number: '',
-    fio: '',
-}
-
-const fieldsStyle = {
-    margin: '1rem .3rem',
-    width: '100%'
-}
 
 const useStyles = makeStyles(() => ({
     printButton: {
@@ -50,25 +33,13 @@ const Order = props => {
     const fields = props.app.fields.allElements.filter(f => f.index === 'order' && f.is_valid && !f.is_system)
 
     const [tabId, setTabId] = useState(0)
+
     const [id, setId] = useState(+props.match.params.id || null)
     const [created, setCreated] = useState()
-    const [customer, setCustomer] = useState(initCustomer)
-    const [model, setModel] = useState('')
-    const [presum, setPresum] = useState(0)
-    const [sum, setSum] = useState(0)
-    const [state, setState] = useState(() => {
-        let state = {}
-        fields.map(f => {
-            state[f.name] = ''
-        })
-        return state
-    })
-    const [categoryId, setCategoryId] = useState(5)
 
     const needPrint = useRef(false)
 
     const classes = useStyles()
-    const {enqueueSnackbar} = useSnackbar()
 
     const stockId = +props.match.params.stock_id
     const orderId = +props.match.params.order_id
@@ -81,17 +52,6 @@ const Order = props => {
             ? new Date() - new Date(order.checkout_date) < 43200000
             : order.status_id < 6
         : false
-
-    const updCurrentOrder = order => {
-
-        setId(order.id)
-        setCreated(order.time)
-        setCustomer(order.customer)
-        setModel(order.model)
-        setPresum(order.preSum)
-        setSum(order.sum)
-
-    }
 
     const position = props.app.positions.find(p => p.id === props.auth.position_id)
     const isSale = position ? position.is_sale : false
@@ -106,7 +66,7 @@ const Order = props => {
 
             let span = document.createElement('span')
 
-            const stock = props.app.stocks.find(s => s.id === props.app.stock_id)
+            const stock = props.app.stocks.find(s => s.id === order.stock_id)
 
             let value
             if (i.name === 'organization_organization') {
@@ -124,26 +84,26 @@ const Order = props => {
             } else if (i.name === 'id') {
                 value = id
             } else if (i.name === 'group') {
-                const category = props.app.categories.find(c => c.id === categoryId)
+                const category = props.app.categories.find(c => c.id === order.category_id)
                 value = category ? category.name : ''
             } else if (i.name === 'today') {
                 value = createDate(created)
             } else if (i.name === 'fio') {
-                value = customer.fio || 'ИНКОГНИТО'
+                value = order.customer.fio || 'ИНКОГНИТО'
             } else if (i.name === 'phone_number') {
-                value = customer.phone_number ?? 'НЕ УКАЗАН'
+                value = order.customer.phone_number ?? 'НЕ УКАЗАН'
             } else if (i.name === 'model') {
-                value = model || 'НЕИЗВЕСТНО'
+                value = order.model || 'НЕИЗВЕСТНО'
             } else if (i.name === 'sum') {
-                value = sum || 0
+                value = order.sum || 0
             } else if (i.name === 'prepaid') {
-                value = presum || 0
+                value = order.json.payments[0].sum || 0
             } else if (i.name === 'broken_cost') {
                 value = props.app.config.rem_assessed_value
             } else if (props.app.config[i.name]) {
                 value = props.app.config[i.name]
             } else if (fields.find(f => f.name === i.name)) {
-                value = state[i.name]
+                value = order[i.name]
             }
 
             // if (!value) console.log('i.name', i.name)
@@ -161,11 +121,7 @@ const Order = props => {
 
         if (stockId && orderId) {
 
-            if (order) {
-
-                updCurrentOrder(order)
-
-            } else {
+            if (!order) {
 
                 rest('orders/' + stockId + '/' + orderId)
                     .then(res => {
@@ -174,13 +130,10 @@ const Order = props => {
 
                             props.upd_app({order: res.body})
 
-                            return updCurrentOrder(res.body)
-
                         }
                     })
 
             }
-
 
         }
 
@@ -195,62 +148,17 @@ const Order = props => {
 
     }, [id])
 
-    const create = () => {
+    useEffect(() => {
 
-        if (!props.app.stock_id) return enqueueSnackbar('Выберите точку', {variant: 'error'})
-        if (!(customer.id || customer.fio || customer.phone_number)) {
-            return enqueueSnackbar('Нет заказчика', {variant: 'error'})
-        }
-        if (!model) return enqueueSnackbar('Не указана модель', {variant: 'error'})
+        if (order) {
 
-        const data = {
-            customer,
-            category_id: categoryId,
-            model,
-            presum,
-            sum,
-            ...state
+            setId(order.id)
+            setCreated(order.created_at)
         }
 
-        rest('orders/' + props.app.stock_id, 'POST', data)
-            .then(res => {
-
-                if (res.status === 200) {
-
-                    needPrint.current = true
-                    setId(res.body.orders[0].id)
-
-                }
-            })
-
-
-    }
-
-    const setField = (name, value) => {
-
-        setState(prev => {
-
-            const newState = {...prev}
-            newState[name] = value
-            return newState
-
-        })
-
-    }
+    }, [order])
 
     const disabled = !!id
-
-    const updateCustomer = (name, val) => {
-
-        setCustomer(prev => {
-
-            const newState = {...prev}
-            newState[name] = val
-            return newState
-
-        })
-
-    }
 
     return <div
         style={{
@@ -279,107 +187,43 @@ const Order = props => {
             </IconButton>}
         </Grid>
 
-        {!id
-            ? <>
+        {order
+            ? <Tabs
+                value={tabId}
+                indicatorColor="primary"
+                textColor="primary"
+                onChange={(e, v) => setTabId(v)}
+                style={{
+                    margin: '1rem'
+                }}
+            >
+                <Tab label="Информация"/>
+                <Tab label="Затраты"/>
+                <Tab label="Платежи"/>
+                <Tab label="Процесс"/>
+            </Tabs>
+            : null}
 
-                <CustomersSelect
-                    customer={customer}
-                    disabled={disabled}
-                    updateCustomer={updateCustomer}
-                />
+        {tabId === 0 &&
+            <Info order={order} isEditable={canEdit()} app={props.app} fields={fields}
+                  isAdmin={props.auth.admin}
+                  setId={setId}
+                  needPrint={needPrint}
+            />
+        }
 
-                <Select
-                    labelId="category-id-select-label"
-                    value={categoryId}
-                    onChange={e => setCategoryId(+e.target.value)}
-                    style={fieldsStyle}
-                    disabled={disabled}
-                >
-                    {[5, 38, 41, 2].map(i => {
+        {order && tabId === 1 &&
+            <Costs order={order} isEditable={canEdit()} users={props.app.users}
+                   providers={props.app.providers}/>
+        }
 
-                        const category = props.app.categories.find(c => c.id === i)
+        {order && tabId === 2 &&
+            <Payments order={order} isEditable={canEdit() && isSale}/>
+        }
 
-                        return <MenuItem
-                            key={'menu-category-key-' + i}
-                            value={i}>
-                            {category ? category.name : ''}
-                        </MenuItem>
-
-                    })}
-                </Select>
-
-                <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
-                           style={fieldsStyle}
-                           value={model}
-                           onChange={e => setModel(e.target.value)}
-                           disabled={disabled}
-                />
-
-                <TextField label="Предварительная стоимость"
-                           disabled={disabled}
-                           style={fieldsStyle}
-                           value={sum}
-                           onChange={e => setSum(+e.target.value)}
-                />
-
-                <TextField label="Предоплата при оформлении заказа"
-                                        style={fieldsStyle}
-                                        value={presum}
-                                        onChange={e => setPresum(+e.target.value)}
-                />
-
-                {fields.map(f => <TextField label={f.value}
-                                            key={'text-fields-in-new-order' + f.name}
-                                            disabled={disabled}
-                                            style={fieldsStyle}
-                                            value={state[f.name]}
-                                            onChange={e => setField([f.name], e.target.value)}
-                />)}
-
-                {disabled || <Button variant='outlined'
-                                     onClick={() => create()}
-                                     color="primary">
-                    Внести
-                </Button>}
-
-            </>
-            : <>
-
-                <Tabs
-                    value={tabId}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    onChange={(e, v) => setTabId(v)}
-                    style={{
-                        margin: '1rem'
-                    }}
-                >
-                    <Tab label="Информация"/>
-                    <Tab label="Затраты"/>
-                    <Tab label="Платежи"/>
-                    <Tab label="Процесс"/>
-                </Tabs>
-
-                {order && tabId === 0 &&
-                    <Info order={order} isEditable={canEdit()} app={props.app} fields={fields}
-                          isAdmin={props.auth.admin}
-                    />
-                }
-
-                {order && tabId === 1 &&
-                    <Costs order={order} isEditable={canEdit()} users={props.app.users}
-                           providers={props.app.providers}/>
-                }
-
-                {order && tabId === 2 &&
-                    <Payments order={order} isEditable={canEdit() && isSale}/>
-                }
-
-                {order && tabId === 3 &&
-                    <Remarks order={order} isEditable={canEdit()} users={props.app.users}/>
-                }
-
-            </>}
+        {order && tabId === 3 &&
+            <Remarks order={order} isEditable={canEdit()} users={props.app.users}/>
+        }
 
     </div>
 }
