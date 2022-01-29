@@ -66,7 +66,7 @@ const Order = props => {
 
             let span = document.createElement('span')
 
-            const stock = props.app.stocks.find(s => s.id === order.stock_id)
+            const stock = props.app.stocks.find(s => s.id === order ? order.stock_id : props.app.stock_id)
 
             let value
             if (i.name === 'organization_organization') {

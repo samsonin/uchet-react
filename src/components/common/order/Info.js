@@ -62,6 +62,11 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setId, needPrint}
 
     }
 
+    const handleTree = category_id => {
+        setCategory_id(+category_id)
+        setTreeOpen(false)
+    }
+
     const create = () => {
 
         if (!app.stock_id) return enqueueSnackbar('Выберите точку', {variant: 'error'})
@@ -132,7 +137,6 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setId, needPrint}
 
     }, [order])
 
-
     const category = order ? app.categories.find(c => c.id === order.category_id) : 0
 
     return <>
@@ -159,7 +163,7 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setId, needPrint}
                     initialId={category_id}
                     categories={app.categories}
                     onSelected={id => setCategory_id(+id)}
-                    finished={id => setCategory_id(+id)}
+                    finished={id => handleTree(id)}
                 />
                 <Button size="small" onClick={() => setTreeOpen(false)}
                         variant="outlined"
