@@ -34,6 +34,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
     const [sum, setSum] = useState(order ? order.sum : 0)
     const [sum2, setSum2] = useState(order ? order.sum : 0)
     const [master_id, setMaster_id] = useState(order ? order.master_id : 0)
+    const [for_client, setFor_client] = useState(order ? order.for_client : '')
     const [state, setState] = useState(() => {
         let state = {}
         fields.map(f => {
@@ -117,6 +118,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             category_id,
             model,
             sum2,
+            for_client,
             ...state
         }
 
@@ -144,6 +146,8 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             setCategory_id(order.category_id)
             setModel(order.model)
             setSum(order.sum)
+            setSum2(order.sum2)
+            setFor_client(order.for_client)
 
             fields.map(f => {
                 setField(f.name, order[f.name])
@@ -182,7 +186,6 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             disabled={!!order || !isEditable}
         />
 
-
         {treeOpen
             ? <div style={{
                 margin: '1rem'
@@ -200,10 +203,9 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                     Ок
                 </Button>
             </div>
-            : !isEditable && category && <div style={{
+            : isEditable && category && <div style={{
             margin: '1rem'
-        }}>
-            <Button size="small"
+        }}>            <Button size="small"
                     className="w-100"
                     disabled={!isEditable}
                     onClick={() => setTreeOpen(true)}
@@ -248,6 +250,15 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                                     value={state[f.name]}
                                     onChange={e => setField([f.name], e.target.value)}
         />)}
+
+        {order
+        ? <TextField label="В чек для заказчика"
+                     disabled={!isEditable}
+                     style={fieldsStyle}
+                     value={for_client}
+                     onChange={e => setFor_client(e.target.value)}
+            />
+        : null}
 
         {order
             ? order.status_id === 6
