@@ -7,13 +7,15 @@ import {useSnackbar} from "notistack";
 import rest from "../../Rest"
 import CustomersSelect from "../CustomersSelect";
 import Tree from "../../Tree";
+import UsersSelect from "../UsersSelect";
+import {intInputHandler, numberInputHandler} from "../InputHandlers";
 
 const fieldsStyle = {
     margin: '1rem .3rem',
     width: '100%'
 }
 
-export const Info = ({order, isEditable, app, fields, isAdmin, setOrder, needPrint}) => {
+export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const {enqueueSnackbar} = useSnackbar()
 
@@ -30,6 +32,8 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setOrder, needPri
     const [model, setModel] = useState('')
     const [presum, setPresum] = useState(0)
     const [sum, setSum] = useState(order ? order.sum : 0)
+    const [sum2, setSum2] = useState(order ? order.sum : 0)
+    const [master_id, setMaster_id] = useState(order ? order.master_id : 0)
     const [state, setState] = useState(() => {
         let state = {}
         fields.map(f => {
@@ -49,6 +53,13 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setOrder, needPri
         })
 
     }
+
+    // TODO уточнить в течении смены или нет
+    const isToday = time => 0.5 > (new Date() - new Date(time)) / 86400000
+
+    const isWarranty = time => app.config.remont_warranty > (new Date() - new Date(time)) / 86400000
+
+    const isEditable = !isRest && !order || (isAdmin || order.status_id < 6 || isToday(order.checkout_date))
 
     const updateCustomer = (name, val) => {
 
@@ -95,7 +106,6 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setOrder, needPri
                 }
             })
 
-
     }
 
     const save = () => {
@@ -103,10 +113,14 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setOrder, needPri
         const data = {
             customer,
             status_id,
+            master_id,
             category_id,
             model,
+            sum2,
             ...state
         }
+
+        setIsRest(true)
 
         rest('order/' + order.stock_id + '/' + order.id, 'PATCH', data)
             .then(res => {
@@ -125,6 +139,7 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setOrder, needPri
         if (order) {
 
             setStatus_id(order.status_id)
+            setMaster_id(order.master_id)
             setCustomer(order.customer)
             setCategory_id(order.category_id)
             setModel(order.model)
@@ -142,18 +157,31 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setOrder, needPri
     return <>
 
         {order
-            ? <StatusesSelect
-                status={status_id}
-                setStatus={setStatus_id}
-                statuses={app.statuses}
-            />
+            ? <>
+                <StatusesSelect
+                    status={status_id}
+                    setStatus={setStatus_id}
+                    statuses={app.statuses}
+                    disabled={!isEditable}
+                />
+                <UsersSelect
+                    disabled={!isEditable && (master_id > 0 && !isAdmin)}
+                    user={master_id}
+                    users={app.users}
+                    setUser={setMaster_id}
+                    onlyValid
+                    classes={"w-100 p-1 m-1"}
+                    label="Мастер"
+                />
+            </>
             : null}
 
         <CustomersSelect
             customer={customer}
             updateCustomer={updateCustomer}
-            disabled={!!order}
+            disabled={!!order || !isEditable}
         />
+
 
         {treeOpen
             ? <div style={{
@@ -172,69 +200,78 @@ export const Info = ({order, isEditable, app, fields, isAdmin, setOrder, needPri
                     Ок
                 </Button>
             </div>
-            : <div style={{
-                margin: '1rem'
-            }}>
-                <Button size="small" className="w-100" onClick={() => setTreeOpen(true)}>
-                    {category ? category.name : "Выбрать категорию..."}
-                </Button>
-            </div>
+            : !isEditable && category && <div style={{
+            margin: '1rem'
+        }}>
+            <Button size="small"
+                    className="w-100"
+                    disabled={!isEditable}
+                    onClick={() => setTreeOpen(true)}
+            >
+                {category ? category.name : "Выбрать категорию..."}
+            </Button>
+        </div>
         }
 
         <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
                    style={fieldsStyle}
                    value={model}
                    onChange={e => setModel(e.target.value)}
-                   disabled={isRest}
+                   disabled={!isEditable}
         />
 
         <TextField label="Предварительная стоимость"
                    disabled={isRest || !!order}
                    style={fieldsStyle}
                    value={sum}
-                   onChange={e => setSum(+e.target.value)}
+                   onChange={e => intInputHandler(e.target.value, setSum)}
         />
 
-        {!order
-            ? <TextField label="Предоплата при оформлении заказа"
+        {order
+            ? <TextField label="Итого сумма заказа"
+                         disabled={!isEditable}
+                         style={fieldsStyle}
+                         value={sum2}
+                         onChange={e => numberInputHandler(e.target.value, setSum2)}
+            />
+            : <TextField label="Предоплата при оформлении заказа"
+                         disabled={isRest || !!order}
                          style={fieldsStyle}
                          value={presum}
-                         onChange={e => setPresum(+e.target.value)}
-            />
-            : null}
+                         onChange={e => intInputHandler(e.target.value, setPresum)}
+            />}
 
         {fields.map(f => <TextField label={f.value}
                                     key={'text-fields-in-new-order' + f.name}
-                                    disabled={isRest}
+                                    disabled={!isEditable}
                                     style={fieldsStyle}
                                     value={state[f.name]}
                                     onChange={e => setField([f.name], e.target.value)}
         />)}
 
         {order
-            ? <Button variant='outlined'
-                      onClick={() => save()}
-                      color="primary">
-                сохранить
-            </Button>
+            ? order.status_id === 6
+                ? <>
+                    {isWarranty(order.checkout_date) && <Button variant='outlined'
+                                                                onClick={() => warranty()}
+                                                                color="primary">
+                        Принять по гарантии
+                    </Button>}
+                    {(isAdmin || isToday(order.checkout_date)) && <Button variant='outlined'
+                                                                          onClick={() => setStatus_id(0)}
+                                                                          color="primary">
+                        Открыть заказ
+                    </Button>}
+                </>
+                : <Button variant='outlined'
+                          onClick={() => save()}
+                          color="primary">
+                    сохранить
+                </Button>
             : <Button variant='outlined'
                       onClick={() => create()}
                       color="primary">
                 создать
-            </Button>}
-
-        {order && order.status_id === 6 && isAdmin &&
-            <Button variant='outlined'
-                    onClick={() => setStatus_id(0)}
-                    color="primary">
-                Открыть заказ
-            </Button>}
-
-        {order && order.status_id === 6 &&
-            <Button variant='outlined'
-                    onClick={() => warranty()}
-                    color="primary">
-                Принять по гарантии
             </Button>}
 
     </>

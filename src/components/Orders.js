@@ -260,6 +260,7 @@ const Orders = props => {
                     setUser={setMasterId}
                     onlyValid
                     classes={"w-100 p-1 m-1"}
+                    label={"Мастер"}
                 />
 
                 <StatusesSelect

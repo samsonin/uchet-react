@@ -175,6 +175,14 @@ const Consignment = props => {
 // eslint-disable-next-line
     }, [product])
 
+    const getError = res => res.body && res.body.error === 'consignment already exists'
+        ? 'Такая накладная уже существует'
+        : res.body.error === 'stock not allowed'
+            ? 'Доступ для пользователя запрещен'
+            : res.body.error === 'already spent'
+                ? 'Продуция уже использована'
+                : 'Ошибка: ' + res.body.error
+
     const addConsignment = () => {
 
         let error;
@@ -214,15 +222,7 @@ const Consignment = props => {
 
                 }
 
-                let message = res.body && res.body.error === 'consignment already exists'
-                    ? 'Такая накладная уже существует'
-                    : res.body.error === 'stock not allowed'
-                        ? 'Доступ для пользователя запрещен'
-                        : res.body.error === 'already spent'
-                            ? 'Продуция уже использована'
-                            : 'Ошибка: ' + res.body.error
-
-                return enqueueSnackbar(res.status + ' ' + message, {
+                return enqueueSnackbar(res.status + ' ' + getError(res), {
                     variant: 'error'
                 })
 
@@ -272,7 +272,9 @@ const Consignment = props => {
 
                     } else {
 
-                        enqueueSnackbar('Ошибка: ' + res.error[0], {variant: 'error'})
+                        return enqueueSnackbar(res.status + ' ' + getError(res), {
+                            variant: 'error'
+                        })
 
                     }
 

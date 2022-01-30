@@ -4,16 +4,17 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 
-export default function ({users, user, setUser, onlyValid, disabled, classes}) {
+export default function ({users, user, setUser, onlyValid, disabled, classes, label}) {
 
     return <FormControl variant="outlined" className={classes}>
-            <InputLabel id="funds-users-control-select-outlined-label">Сотрудник</InputLabel>
+            <InputLabel id="funds-users-control-select-outlined-label">
+                {label || "Сотрудник"}
+            </InputLabel>
             <Select
                 labelId="funds-users-control-select-outlined-label"
                 disabled={disabled}
                 value={user}
                 onChange={e => setUser(e.target.value)}
-                label="Сотрудник"
             >
                 <MenuItem key={'menuuserscontrolkey0'}
                           value={0}>
