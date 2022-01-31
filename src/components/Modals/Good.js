@@ -2,11 +2,13 @@ import React, {forwardRef, useEffect, useState} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import {upd_app} from "../../actions/actionCreator";
+
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import DeleteIcon from '@material-ui/icons/Delete';
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash';
 import LineWeightIcon from '@material-ui/icons/LineWeight';
+import BuildIcon from '@material-ui/icons/Build';
 
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -23,6 +25,8 @@ import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
 import {makeStyles} from "@material-ui/core/styles";
 import DialogContent from "@material-ui/core/DialogContent";
+import {intInputHandler} from "../common/InputHandlers";
+import {GoodSearch} from "../common/GoodSearch";
 // import {Barcodes} from '../Barcodes'
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -76,12 +80,8 @@ const Good = props => {
     const [sum, setSum] = useState(0)
     const [reason, setReason] = useState('')
     const [isReasonOpen, setIsReasonOpen] = useState(false)
-
-    useEffect(() => {
-
-        setSum(props.good.sum)
-
-    }, [props.good.sum])
+    const [isRepair, setIsRepair] = useState(false)
+    const [goodsForRepair, setGoodsForRepair] = useState([])
 
     useEffect(() => {
 
@@ -124,15 +124,9 @@ const Good = props => {
 
     const toOrder = () => {
 
-        console.log(orderId)
-
-        if (+orderId < 1) {
-
-            enqueueSnackbar('Некорректный номер заказа', {
+        if (+orderId < 1) return enqueueSnackbar('Некорректный номер заказа', {
                 variant: 'error',
             })
-
-        }
 
         rest('orders/' + props.app.stock_id + '/' + orderId + '/' + props.good.barcode,
             'POST')
@@ -155,9 +149,7 @@ const Good = props => {
 
     const toSale = () => {
 
-        let url = 'sales/' + props.app.stock_id + '/' + good.barcode + '/' + sum
-
-        rest(url, 'POST')
+        rest('sales/' + props.app.stock_id + '/' + good.barcode + '/' + sum, 'POST')
             .then(res => {
                 if (res.status === 200) {
 
@@ -176,9 +168,7 @@ const Good = props => {
 
     const refund = () => {
 
-        if (good.barcode) {
-
-            if (reason) {
+        if (good.barcode && reason) {
 
                 rest('sales/' + props.app.stock_id + '/' + good.barcode + '/' + reason, 'DELETE')
                     .then(res => {
@@ -195,11 +185,23 @@ const Good = props => {
                     })
             }
 
-        } else {
+    }
 
-            console.error('нет штрихкода')
+    const restore = () => {
 
-        }
+        // rest('goods/')
+
+    }
+
+    const addJob = () => {
+
+        setIsRepair(true)
+
+    }
+
+    const onSelected = (barcode, afterRes) => {
+
+
 
     }
 
@@ -207,7 +209,6 @@ const Good = props => {
         good.category_id = +category_id
         setTreeOpen(false)
     }
-
 
     let good = props.good
 
@@ -256,21 +257,15 @@ const Good = props => {
 
     }
 
-    let providerObj = props.app.providers.find(v => +v.id === +good.provider_id);
-    let provider = providerObj
-        ? providerObj.name
-        : ''
+    const provider = props.app.providers.find(v => +v.id === +good.provider_id);
 
-    let userObj = props.app.users.find(v => v.id === +good.responsible_id)
-    let responsibleName = userObj
-        ? userObj.name
-        : ''
+    const responsible = props.app.users.find(v => v.id === +good.responsible_id)
 
     let time = good.time;
 
-    let isPublic = typeof (good.public) === "boolean" ?
-        good.public :
-        +good.public > 0;
+    let isPublic = typeof (good.public) === "boolean"
+        ? good.public
+        : +good.public > 0
 
     let categoryName = good.category_id > 0
         ? props.app.categories.find(v => v.id === good.category_id).name
@@ -279,9 +274,7 @@ const Good = props => {
     const editable = !good.wo && good.stock_id === props.app.stock_id
 
     const renderIcon = (title, onClick, elem) => <Tooltip title={title}>
-        <IconButton
-            onClick={onClick}
-        >
+        <IconButton onClick={onClick}>
             {elem}
         </IconButton>
     </Tooltip>
@@ -337,6 +330,9 @@ const Good = props => {
                                 {renderIcon('В брак',
                                     () => console.log('В брак'),
                                     <i className="fas fa-redo"/>)}
+                                {renderIcon('Починить',
+                                    () => setIsRepair(!isRepair),
+                                    <BuildIcon/>)}
                             </>
                             // : good.stock_id === props.app.stock_id && isSale(good.wo)
                             //     ? renderIcon('Вернуть',
@@ -344,25 +340,25 @@ const Good = props => {
                             //         <Restore/>)
                             : null}
 
-                    {props.auth.admin ?
-                        good.wo === 'use' ?
-                            <Tooltip title="Восстановить">
-                                <IconButton
-                                    // onClick={() => goodRequest(good.barcode, 'restore')}
-                                >
-                                    <RestoreFromTrashIcon/>
-                                </IconButton>
-                            </Tooltip> :
-                            good.wo === '' ?
-                                <Tooltip title="Списать">
+                    {props.auth.admin
+                        ? good.wo
+                            ? good.wo === 'use'
+                                ? <Tooltip title="Восстановить">
                                     <IconButton
-                                        // onClick={() => goodRequest(good.barcode, 'deduct')}
+                                        // onClick={() => goodRequest(good.barcode, 'restore')}
                                     >
-                                        <DeleteIcon/>
+                                        <RestoreFromTrashIcon/>
                                     </IconButton>
-                                </Tooltip> :
-                                '' :
-                        ''}
+                                </Tooltip>
+                                : null
+                            : <Tooltip title="Списать">
+                                <IconButton
+                                    // onClick={() => goodRequest(good.barcode, 'deduct')}
+                                >
+                                    <DeleteIcon/>
+                                </IconButton>
+                            </Tooltip>
+                        : null}
             </span>
                 : ''}
 
@@ -373,204 +369,191 @@ const Good = props => {
 
         </DialogTitle>
 
-        <DialogContent>
+        {isRepair
+            ? <DialogContent>
 
-            <Grid container>
+                <GoodSearch onSelected={onSelected}/>
 
-                {treeOpen
-                    ? <>
-                        <Grid item xs={10} className="pt-1 pr-1">
-                            <Tree initialId={good.category_id}
-                                  categories={props.app.categories}
-                                  onSelected={id => good.category_id = +id}
-                                  finished={id => handleTree(id)}
-                            />
-                        </Grid>
-                        <Grid item xs={2}>
-                            <Button size="small" onClick={() => setTreeOpen(false)}
-                                    variant="outlined"
-                            >
-                                Ок
+            </DialogContent>
+
+        : <DialogContent>
+
+                <Grid container>
+
+                    {treeOpen
+                        ? <>
+                            <Grid item xs={10} className="pt-1 pr-1">
+                                <Tree initialId={good.category_id}
+                                      categories={props.app.categories}
+                                      onSelected={id => good.category_id = +id}
+                                      finished={id => handleTree(id)}
+                                />
+                            </Grid>
+                            <Grid item xs={2}>
+                                <Button size="small" onClick={() => setTreeOpen(false)}
+                                        variant="outlined"
+                                >
+                                    Ок
+                                </Button>
+                            </Grid>
+                        </>
+                        : <Grid item xs={12}>
+                            <Button size="small" className="w-100" onClick={() => setTreeOpen(true)}>
+                                {categoryName}
                             </Button>
                         </Grid>
+                    }
+
+                </Grid>
+
+                <TextField label="Наименование"
+                           className={classes.field}
+                           value={good.model}
+                           disabled={!editable}
+                />
+
+                {good.imei
+                    ? <TextField label="imei"
+                                 className={classes.field}
+                                 value={good.imei}
+                                 disabled={!editable}
+                    />
+                    : ''}
+
+                {editable
+                    ? <>
+
+                        <div style={{width: '100%'}}>
+
+                            <TextField label="Номер заказа"
+                                       className={classes.halfField}
+                                       disabled={!editable}
+                                       value={orderId}
+                                       onChange={e => intInputHandler(e.target.value, setOrderId)}
+                            />
+
+                            <Button onClick={() => toOrder()}
+                                    className={classes.button}
+                                    color="primary">
+                                Внести в заказ
+                            </Button>
+
+                        </div>
+
+                        <div style={{width: '100%'}}>
+
+                            <TextField label="Цена"
+                                       className={classes.halfField}
+                                       disabled={!editable}
+                                       value={sum}
+                                       onChange={e => intInputHandler(e.target.value, setSum)}
+                            />
+
+                            <Button onClick={() => toSale()}
+                                    className={classes.button}
+                                    color="primary">
+                                Продать
+                            </Button>
+
+                        </div>
+
                     </>
-                    : <Grid item xs={12}>
-                        <Button size="small" className="w-100" onClick={() => setTreeOpen(true)}>
-                            {categoryName}
-                        </Button>
-                    </Grid>
+
+                    : ''}
+
+                <TextField label="Себестоимость"
+                           className={classes.field}
+                           value={good.remcost ?? good.cost ?? 0}
+                />
+                <TextField label="Оприходовали"
+                           className={classes.field}
+                           value={time}
+                />
+                {provider
+                    ? <TextField label="Поставщик"
+                                 className={classes.field}
+                                 value={provider.name}
+                    />
+                    : null}
+
+                {consignment
+                    ? <TextField
+                        className={classes.field}
+                        label="Накладная"
+                        value={consignment}
+                    />
+                    : null}
+
+                <TextField label="Точка"
+                           className={classes.field}
+                           value={getStockName(good.stock_id)}
+                />
+
+                {editable ? <>
+                        <TextField label="Хранение"
+                                   className={classes.field}
+                                   value={good.storage_place}
+                                   onChange={() => console.log('Хранение')}
+                        />
+
+                        <FormControlLabel
+                            className="m-2 p-2"
+                            control={
+                                <Checkbox
+                                    defaultChecked={!!good.public}
+                                    // checked={isPublic}
+                                    // onChange={handleChange}
+                                    // name="checkedB"
+                                    color="primary"
+                                />
+                            }
+                            label="Опубликовать в интернете"
+                        />
+                    </>
+                    : <>
+                        {good.wo
+                            ? <TextField label="Израсходованна"
+                                         value={ui_wo}
+                                         className={classes.field}
+                            />
+                            : null
+                        }
+                        {good.outtime
+                            ? <TextField label="Время расхода"
+                                         className={classes.field}
+                                         value={good.outtime}
+                            />
+                            : null
+                        }
+                    </>
                 }
 
-            </Grid>
-
-            <TextField label="Наименование"
-                       className={classes.field}
-                       value={good.model}
-                       disabled={!editable}
-            />
-
-            {good.imei
-                ? <TextField label="imei"
-                             className={classes.field}
-                             value={good.imei}
-                             disabled={!editable}
-                />
-                : ''
-            }
-
-            {editable
-                ? <>
-
-                    <div style={{width: '100%'}}>
-                        <TextField label="Номер заказа"
-                                   className={classes.halfField}
-                                   type="number"
-                                   disabled={!editable}
-                                   value={orderId}
-                                   onChange={e => setOrderId(+e.target.value)}
-                        />
-
-                        <Button onClick={() => toOrder()}
-                                className={classes.button}
-                                color="primary">
-                            Внести в заказ
-                        </Button>
-                    </div>
-
-                    <div style={{width: '100%'}}>
-                        <TextField label="Цена"
-                                   className={classes.halfField}
-                                   type="number"
-                                   disabled={!editable}
-                                   value={sum}
-                                   onChange={e => setSum(+e.target.value)}
-                        />
-
-                        <Button onClick={() => toSale()}
-                                className={classes.button}
-                                color="primary">
-                            Продать
-                        </Button>
-                    </div>
-
-                </>
-                : ''}
-
-            <TextField label="Себестоимость"
-                       className={classes.field}
-                       value={good.remcost ?? good.cost ?? '0'}
-            />
-            <TextField label="Оприходовали"
-                       className={classes.field}
-                       value={time}
-            />
-            {provider
-                ? <TextField label="Поставщик"
-                             className={classes.field}
-                             value={provider}
-                />
-                : null}
-
-            {consignment
-                ? <TextField
-                    className={classes.field}
-                    label="Накладная"
-                    value={consignment}
-                />
-                : null}
-
-
-            <TextField label="Точка"
-                       className={classes.field}
-                       value={getStockName(good.stock_id)}
-            />
-
-            {editable ? <>
-                    <TextField label="Хранение"
-                               className={classes.field}
-                               value={good.storage_place}
-                               onChange={() => console.log('Хранение')}
-                    />
-
-                    {/*{(+good.responsible_id > 0 && typeof (responsibleName) === 'string')*/}
-                    {/*    ? <MDBInput label="Ответственный" value={responsibleName}/>*/}
-                    {/*    : <FormControl className="m-2 w-100">*/}
-                    {/*        <InputLabel>*/}
-                    {/*            Ответственный*/}
-                    {/*        </InputLabel>*/}
-                    {/*        <Select*/}
-                    {/*            value={+good.responsible_id}*/}
-                    {/*            onChange={(e) => console.log(e.target.value)}*/}
-                    {/*        >*/}
-                    {/*            <MenuItem value={0} key={"goodmodaluserseklerjger" + 0}><br/></MenuItem>*/}
-                    {/*            {props.app.users.map(v => v.is_valid ?*/}
-                    {/*                <MenuItem value={v.id} key={"goodmodaluserseklerjger" + v.id}*/}
-                    {/*                          selected={+good.responsible_id === v.id}*/}
-                    {/*                >*/}
-                    {/*                    {v.name}*/}
-                    {/*                </MenuItem> : ''*/}
-                    {/*            )}*/}
-                    {/*        </Select>*/}
-                    {/*    </FormControl>*/}
-                    {/*}*/}
-
-                    <FormControlLabel
-                        className="m-2 p-2"
-                        control={
-                            <Checkbox
-                                defaultChecked={isPublic}
-                                // checked={isPublic}
-                                // onChange={handleChange}
-                                // name="checkedB"
-                                color="primary"
+                {!editable && good.stock_id === props.app.stock_id && isSale(good.wo)
+                    ? isReasonOpen
+                        ? <div style={{width: '100%'}}>
+                            <TextField label="Причина возврата"
+                                       className={classes.halfField}
+                                       value={reason}
+                                       onChange={e => setReason(e.target.value)}
                             />
-                        }
-                        label="Опубликовать в интернете"
-                    />
-                </>
-                : <>
-                    {good.wo
-                        ? <TextField label="Израсходованна"
-                                     value={ui_wo}
-                                     className={classes.field}
-                        />
-                        : null
-                    }
-                    {good.outtime
-                        ? <TextField label="Время расхода"
-                                     className={classes.field}
-                                     value={good.outtime}
-                        />
-                        : null
-                    }
-                </>
-            }
 
-            {!editable && good.stock_id === props.app.stock_id && isSale(good.wo)
-                ? isReasonOpen
-                    ? <div style={{width: '100%'}}>
-                        <TextField label="Причина возврата"
-                                   className={classes.halfField}
-                                   value={reason}
-                                   onChange={e => setReason(e.target.value)}
-                        />
-
-                        <Button onClick={() => refund()}
-                                disabled={!reason}
-                                className={classes.button}
-                                color="secondary">
-                            Вернуть
+                            <Button onClick={() => refund()}
+                                    disabled={!reason}
+                                    className={classes.button}
+                                    color="secondary">
+                                Вернуть
+                            </Button>
+                        </div>
+                        : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
+                                  className={classes.button}
+                                  color="secondary">
+                            Отмена продажи
                         </Button>
-                    </div>
-                    : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
-                              className={classes.button}
-                              color="secondary">
-                        Отмена продажи
-                    </Button>
-                : null
-            }
+                    : null
+                }
 
-        </DialogContent>
+            </DialogContent>}
+
     </Dialog>
 
 }

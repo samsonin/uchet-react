@@ -1,5 +1,5 @@
 import React, {forwardRef, useState} from "react";
-import {List, ListItem, ListItemText, Table, TableCell, TableRow} from "@material-ui/core";
+import {Table, TableCell, TableRow} from "@material-ui/core";
 import TableHead from "@material-ui/core/TableHead";
 import TableBody from "@material-ui/core/TableBody";
 
@@ -13,7 +13,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Slide from "@material-ui/core/Slide";
 import {makeStyles} from "@material-ui/core/styles";
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import CancelIcon from '@material-ui/icons/Cancel';
 import {useSnackbar} from "notistack";
 
@@ -22,6 +21,7 @@ import UsersSelect from "../UsersSelect";
 import {intInputHandler} from "../InputHandlers";
 import {toLocalTimeStr} from "../Time";
 import TwoLineInCell from "../TwoLineInCell";
+import {GoodSearch} from "../GoodSearch";
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -54,9 +54,6 @@ const useStyles = makeStyles((theme) => ({
 
 export const Costs = ({order, isEditable, users, providers}) => {
 
-    const [code, setCode] = useState('')
-    const [search, setSearch] = useState([])
-
     const [serviceOpen, setServiceOpen] = useState(false)
     const [job, setJob] = useState('')
     const [sum, setSum] = useState(0)
@@ -75,31 +72,12 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
     const canAddJob = job && sum > 0 && user_id
 
-    const searchGood = () => {
-
-        rest('goods?code=' + code)
-            .then(res => res.status === 200 && res.body.length
-                ? setSearch(res.body)
-                : enqueueSnackbar('Не найдено', {variant: 'error'})
-            )
-
-    }
-
-    const back = () => setSearch([])
-
-    const addGood = barcode => {
+    const addGood = (barcode, afterRes) => {
 
         if (!barcode) return enqueueSnackbar('нет кода', {variant: "error"})
 
         rest('orders/' + order.stock_id + '/' + order.id + '/' + barcode, 'POST')
-            .then(res => {
-                if (res.status === 200) {
-                    setSearch([])
-                    setCode('')
-                } else {
-                    enqueueSnackbar('ошибка ' + res.status, {variant: "error"})
-                }
-            })
+            .then(res => afterRes(res))
 
     }
 
@@ -260,45 +238,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
             </Table>
             : null}
 
-        {isEditable && <div style={{
-            margin: '1rem',
-            display: 'flex',
-            justifyContent: 'space-around',
-            alignItems: 'center'
-        }}>
-            {search.length
-                ? <>
-                    <List>
-                        {search.map(g => <ListItem key={'listitemkeyinordercost' + g.barcode}
-                                                   button
-                                                   onClick={() => addGood(g.barcode)}
-                            >
-                                <ListItemText
-                                    primary={g.model}
-                                    secondary={g.remcost}
-                                />
-                            </ListItem>
-                        )}
-                    </List>
-                    <Button style={{margin: '1rem'}}
-                            variant='outlined'
-                            onClick={() => back()}
-                            color="primary">
-                        <ArrowBackIcon/>
-                    </Button>
-                </>
-                : <>
-                    <TextField
-                        value={code}
-                        onChange={e => setCode(e.target.value)}
-                    />
-                    <Button variant='outlined'
-                            onClick={() => searchGood()}
-                            color="primary">
-                        Найти
-                    </Button>
-                </>}
-        </div>}
+        {isEditable && <GoodSearch onSelected={addGood} />}
 
         {services && services.length
             ? <Table size="small">
