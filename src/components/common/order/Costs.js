@@ -72,12 +72,14 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
     const canAddJob = job && sum > 0 && user_id
 
-    const addGood = (barcode, afterRes) => {
+    const addGood = (good, afterRes) => {
+
+        const barcode = good.barcode
 
         if (!barcode) return enqueueSnackbar('нет кода', {variant: "error"})
 
         rest('orders/' + order.stock_id + '/' + order.id + '/' + barcode, 'POST')
-            .then(res => afterRes(res))
+            .then(res => afterRes(res.status === 200))
 
     }
 

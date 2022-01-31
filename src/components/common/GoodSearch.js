@@ -25,8 +25,8 @@ export const GoodSearch = ({onSelected}) => {
 
     }
 
-    const afterRes = res => {
-        if (res.status === 200) {
+    const afterRes = isOk => {
+        if (isOk) {
             setGoods([])
             setCode('')
         } else {
@@ -35,6 +35,7 @@ export const GoodSearch = ({onSelected}) => {
     }
 
     return <div style={{
+        weight: '100%',
         margin: '1rem',
         display: 'flex',
         justifyContent: 'space-around',
@@ -45,7 +46,7 @@ export const GoodSearch = ({onSelected}) => {
                 <List>
                     {goods.map(g => <ListItem key={'listitemkeyinordercost' + g.barcode}
                                                button
-                                               onClick={() => onSelected(g.barcode, afterRes)}
+                                               onClick={() => onSelected(g, afterRes)}
                         >
                             <ListItemText
                                 primary={g.model}

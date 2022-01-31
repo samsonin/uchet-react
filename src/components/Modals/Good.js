@@ -18,7 +18,7 @@ import {useSnackbar} from "notistack";
 
 import rest from '../Rest'
 import Tree from "../Tree";
-import {TextField} from "@material-ui/core";
+import {List, ListItem, ListItemText, ListSubheader, TextField} from "@material-ui/core";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
@@ -81,7 +81,10 @@ const Good = props => {
     const [reason, setReason] = useState('')
     const [isReasonOpen, setIsReasonOpen] = useState(false)
     const [isRepair, setIsRepair] = useState(false)
+    const [repairSum, setRepairSum] = useState(0)
     const [goodsForRepair, setGoodsForRepair] = useState([])
+    const [repairJob, setRepairJob] = useState('')
+    const [repairMasterId, setRepairMasterId] = useState(0)
 
     useEffect(() => {
 
@@ -125,8 +128,8 @@ const Good = props => {
     const toOrder = () => {
 
         if (+orderId < 1) return enqueueSnackbar('Некорректный номер заказа', {
-                variant: 'error',
-            })
+            variant: 'error',
+        })
 
         rest('orders/' + props.app.stock_id + '/' + orderId + '/' + props.good.barcode,
             'POST')
@@ -170,20 +173,20 @@ const Good = props => {
 
         if (good.barcode && reason) {
 
-                rest('sales/' + props.app.stock_id + '/' + good.barcode + '/' + reason, 'DELETE')
-                    .then(res => {
+            rest('sales/' + props.app.stock_id + '/' + good.barcode + '/' + reason, 'DELETE')
+                .then(res => {
 
-                        if (res.status === 200) {
-                            enqueueSnackbar('возврат записан', {variant: 'success'})
-                            setReason('')
-                            setIsReasonOpen(false)
-                            props.close()
-                        } else {
-                            enqueueSnackbar('не удалось вернуть', {variant: 'error'})
-                        }
+                    if (res.status === 200) {
+                        enqueueSnackbar('возврат записан', {variant: 'success'})
+                        setReason('')
+                        setIsReasonOpen(false)
+                        props.close()
+                    } else {
+                        enqueueSnackbar('не удалось вернуть', {variant: 'error'})
+                    }
 
-                    })
-            }
+                })
+        }
 
     }
 
@@ -199,9 +202,14 @@ const Good = props => {
 
     }
 
-    const onSelected = (barcode, afterRes) => {
+    const onSelected = (good, afterRes) => {
 
-
+        console.log(good)
+        setGoodsForRepair(prev => {
+            prev.push(good)
+            return prev
+        })
+        afterRes()
 
     }
 
@@ -372,11 +380,35 @@ const Good = props => {
         {isRepair
             ? <DialogContent>
 
+                <TextField label="Общая стоимость работ"
+                           className={classes.field}
+                           value={repairSum}
+                           onChange={e => intInputHandler(e.target.value, setRepairSum)}
+                />
+
+                <TextField label="Выполненная работа"
+                           className={classes.field}
+                           value={repairJob}
+                           onChange={e => setRepairJob(e.target.value)}
+                />
+
+                {goodsForRepair && goodsForRepair.length
+                    ? <List subheader={
+                        <ListSubheader component="div" id="nested-list-subheader">
+                            Список используемых запчастей
+                        </ListSubheader>
+                    }>
+                        {goodsForRepair.map(g => <ListItem>
+                            <ListItemText primary={g.model} secondary={g.cost}/>
+                        </ListItem>)}
+                    </List>
+                    : null}
+
                 <GoodSearch onSelected={onSelected}/>
 
             </DialogContent>
 
-        : <DialogContent>
+            : <DialogContent>
 
                 <Grid container>
 
