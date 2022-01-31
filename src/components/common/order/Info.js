@@ -134,6 +134,14 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const warranty = () => {
 
+        console.log('warranty')
+
+    }
+
+    const open = () => {
+
+        console.log('open')
+
     }
 
     useEffect(() => {
@@ -157,6 +165,13 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
     }, [order])
 
     const category = app.categories.find(c => c.id === category_id)
+
+    const actionButton = (label, onClick) => <Button variant='outlined'
+                                                     className="m-1"
+                                                     onClick={onClick}
+                                                     color="primary">
+        {label}
+    </Button>
 
     return <>
 
@@ -205,13 +220,13 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             </div>
             : isEditable && category && <div style={{
             margin: '1rem'
-        }}>            <Button size="small"
-                    className="w-100"
-                    disabled={!isEditable}
-                    onClick={() => setTreeOpen(true)}
-            >
-                {category ? category.name : "Выбрать категорию..."}
-            </Button>
+        }}><Button size="small"
+                   className="w-100"
+                   disabled={!isEditable}
+                   onClick={() => setTreeOpen(true)}
+        >
+            {category ? category.name : "Выбрать категорию..."}
+        </Button>
         </div>
         }
 
@@ -252,38 +267,22 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         />)}
 
         {order
-        ? <TextField label="В чек для заказчика"
-                     disabled={!isEditable}
-                     style={fieldsStyle}
-                     value={for_client}
-                     onChange={e => setFor_client(e.target.value)}
+            ? <TextField label="В чек для заказчика"
+                         disabled={!isEditable}
+                         style={fieldsStyle}
+                         value={for_client}
+                         onChange={e => setFor_client(e.target.value)}
             />
-        : null}
+            : null}
 
         {order
             ? order.status_id === 6
                 ? <>
-                    {isWarranty(order.checkout_date) && <Button variant='outlined'
-                                                                onClick={() => warranty()}
-                                                                color="primary">
-                        Принять по гарантии
-                    </Button>}
-                    {(isAdmin || isToday(order.checkout_date)) && <Button variant='outlined'
-                                                                          onClick={() => setStatus_id(0)}
-                                                                          color="primary">
-                        Открыть заказ
-                    </Button>}
+                    {isWarranty(order.checkout_date) && actionButton('Принять по гарантии', warranty)}
+                    {(isAdmin || isToday(order.checkout_date)) && actionButton('Открыть заказ', open)}
                 </>
-                : <Button variant='outlined'
-                          onClick={() => save()}
-                          color="primary">
-                    сохранить
-                </Button>
-            : <Button variant='outlined'
-                      onClick={() => create()}
-                      color="primary">
-                создать
-            </Button>}
+                : actionButton('сохранить', save)
+            : actionButton('создать', create)}
 
     </>
 }

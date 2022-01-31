@@ -38,6 +38,7 @@ import LoginModal from "./components/LoginModal";
 import Prepaids from "./components/Prepaids";
 import {bindActionCreators} from "redux";
 import {init_user, upd_app} from "./actions/actionCreator";
+import Showcase from "./components/Showcase";
 
 
 const parseJwt = token => {
@@ -224,6 +225,7 @@ const App = props => {
                         </>}
 
                         <Route exact path="/prepaids" component={Prepaids}/>
+                        <Route exact path="/showcase" component={Showcase}/>
                         <Route exact path="/customers" component={Customers}/>
                         <Route exact path="/customers/:id" component={Customer}/>
                         <Route exact path="/entities" component={Entities}/>

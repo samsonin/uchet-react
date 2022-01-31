@@ -6,7 +6,6 @@ import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import DeleteIcon from '@material-ui/icons/Delete';
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash';
-import {Restore} from "@material-ui/icons";
 import LineWeightIcon from '@material-ui/icons/LineWeight';
 
 import FormControlLabel from "@material-ui/core/FormControlLabel";
