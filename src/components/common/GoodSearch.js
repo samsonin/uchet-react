@@ -25,12 +25,12 @@ export const GoodSearch = ({onSelected}) => {
 
     }
 
-    const afterRes = isOk => {
+    const afterRes = (isOk, error) => {
         if (isOk) {
             setGoods([])
             setCode('')
         } else {
-            enqueueSnackbar('ошибка ' + res.status, {variant: "error"})
+            enqueueSnackbar('ошибка ' + error, {variant: "error"})
         }
     }
 

@@ -79,7 +79,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
         if (!barcode) return enqueueSnackbar('нет кода', {variant: "error"})
 
         rest('orders/' + order.stock_id + '/' + order.id + '/' + barcode, 'POST')
-            .then(res => afterRes(res.status === 200))
+            .then(res => afterRes(res.status === 200, res.status))
 
     }
 

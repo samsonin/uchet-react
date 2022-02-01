@@ -18,7 +18,7 @@ import {useSnackbar} from "notistack";
 
 import rest from '../Rest'
 import Tree from "../Tree";
-import {List, ListItem, ListItemText, ListSubheader, TextField} from "@material-ui/core";
+import {List, ListItem, ListItemIcon, ListItemText, ListSubheader, TextField} from "@material-ui/core";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
@@ -204,14 +204,19 @@ const Good = props => {
 
     const onSelected = (good, afterRes) => {
 
-        console.log(good)
         setGoodsForRepair(prev => {
-            prev.push(good)
-            return prev
+
+            const next = [...prev]
+            next.push(good)
+            return next
+
         })
-        afterRes()
+
+        afterRes(true)
 
     }
+
+    const remove = barcode => setGoodsForRepair(prev => prev.filter(g => g.barcode !== barcode))
 
     const handleTree = category_id => {
         good.category_id = +category_id
@@ -398,8 +403,15 @@ const Good = props => {
                             Список используемых запчастей
                         </ListSubheader>
                     }>
-                        {goodsForRepair.map(g => <ListItem>
-                            <ListItemText primary={g.model} secondary={g.cost}/>
+                        {goodsForRepair.map(g => <ListItem
+                            key={'listitemkeyingoodmodalsforrepair' + g.barcode}
+                        >
+                            <ListItemText primary={g.model} secondary={g.remcost}/>
+                            <IconButton
+                                onClick={() => remove(g.barcode)}
+                            >
+                                <DeleteIcon/>
+                            </IconButton>
                         </ListItem>)}
                     </List>
                     : null}
