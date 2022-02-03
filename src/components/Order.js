@@ -16,6 +16,7 @@ import {Payments} from "./common/order/Payments";
 import {Remarks} from "./common/order/Remarks";
 import {Costs} from "./common/order/Costs"
 import {Info} from "./common/order/Info";
+import {OrderText} from "./common/OrderText"
 
 
 const useStyles = makeStyles(() => ({
@@ -86,6 +87,8 @@ const Order = props => {
                 const category = props.app.categories.find(c => c.id === order.category_id)
                 value = category ? category.name : ''
             } else if (i.name === 'today') {
+                value = createDate(created)
+            } else if (i.name === 'created_date') {
                 value = createDate(created)
             } else if (i.name === 'fio') {
                 value = order.customer.fio || 'ИНКОГНИТО'
@@ -168,7 +171,9 @@ const Order = props => {
                             margin: '.8rem',
                         }}
             >
-                {id ? '#' + id + ' от ' + createDate(created) : 'Новый заказ'}
+                {order
+                    ? OrderText(order, props.app) + ' от ' + createDate(created)
+                    : 'Новый заказ'}
             </Typography>
 
             {disabled && <IconButton className={classes.printButton}

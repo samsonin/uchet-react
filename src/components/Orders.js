@@ -23,6 +23,7 @@ import {toLocalTimeStr} from "./common/Time"
 import {intInputHandler} from "./common/InputHandlers";
 import UsersSelect from "./common/UsersSelect";
 import StatusesSelect from "./common/StatusesSelect";
+import {OrderText} from "./common/OrderText"
 
 const initCustomer = {
     id: 0,
@@ -151,19 +152,6 @@ const Orders = props => {
 
         setOnlyMy(!onlyMy)
 
-    }
-
-    const renderOrderText = ({id, order_id, stock_id}) => {
-
-        const i = order_id || id
-
-        const stock = props.app && props.app.stocks.find(s => s.id === stock_id)
-
-        return props.app.stock_id === stock_id
-            ? i
-            : stock
-                ? stock.name + ', ' + i
-                : 'точка не определена, ' + i
     }
 
     return <div
@@ -316,10 +304,10 @@ const Orders = props => {
                         onClick={() => props.history.push('/order/' + o.stock_id + '/' + (o.id || o.order_id))}
                     >
                         <TableCell>
-                            {renderOrderText(o)}
+                            {OrderText(o, props.app)}
                         </TableCell>
                         <TableCell>
-                            {toLocalTimeStr(o.created_at)}
+                            {toLocalTimeStr(o.unix || o.created_at)}
                         </TableCell>
                         <TableCell>
                             {o.model}

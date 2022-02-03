@@ -49,7 +49,9 @@ export const Remarks = ({order, isEditable, users}) => {
 
                     return r.remark
                         ? <TableRow key={'tablerowkeyforremarksinordes' + (r.unix || r.time) + r.remark}>
-                            <TableCell>{toLocalTimeStr(r.unix || r.time)}</TableCell>
+                            <TableCell>
+                                {toLocalTimeStr(r.unix || r.time)}
+                            </TableCell>
                             <TableCell>{user ? user.name : ''}</TableCell>
                             <TableCell>{r.remark}</TableCell>
                         </TableRow>
