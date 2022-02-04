@@ -18,7 +18,7 @@ import {useSnackbar} from "notistack";
 
 import rest from '../Rest'
 import Tree from "../Tree";
-import {List, ListItem, ListItemIcon, ListItemText, ListSubheader, TextField} from "@material-ui/core";
+import {List, ListItem, ListItemText, ListSubheader, TextField} from "@material-ui/core";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
@@ -27,6 +27,7 @@ import {makeStyles} from "@material-ui/core/styles";
 import DialogContent from "@material-ui/core/DialogContent";
 import {intInputHandler} from "../common/InputHandlers";
 import {GoodSearch} from "../common/GoodSearch";
+import UsersSelect from "../common/UsersSelect";
 // import {Barcodes} from '../Barcodes'
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -190,15 +191,39 @@ const Good = props => {
 
     }
 
-    const restore = () => {
+    const repair = () => {
 
-        // rest('goods/')
+        const barcode = good.barcode || good.imei
 
-    }
+        if (!barcode) enqueueSnackbar('нет кода или S/N', {variant: 'error'})
 
-    const addJob = () => {
+        rest('goods/repair/' +barcode, 'PATCH', {
+            sum: repairSum,
+            job: repairJob,
+            master_id: repairMasterId,
+            barcodes: goodsForRepair.map(g => g.barcode)
+        })
+            .then(res => {
 
-        setIsRepair(true)
+                if (res.status < 300) {
+
+                    setRepairSum(0)
+                    setRepairJob('')
+                    setRepairMasterId(0)
+                    setGoodsForRepair([])
+                    setIsRepair(false)
+
+                    enqueueSnackbar('Работа добавлена!', {variant: 'success'})
+
+                    if (res.status === 200) props.setGood(res.body)
+
+                } else {
+
+                    enqueueSnackbar('ошибка ' + res.status, {variant: 'error'})
+
+                }
+
+            })
 
     }
 
@@ -234,9 +259,9 @@ const Good = props => {
     if (!ui_wo) {
 
         if (good.wo.substr(0, 4) === 'sale') {
-
             ui_wo = 'Продан'
-
+        } else if (good.wo === 'reject') {
+            ui_wo = 'В браке'
         } else {
 
             try {
@@ -417,6 +442,21 @@ const Good = props => {
                     : null}
 
                 <GoodSearch onSelected={onSelected}/>
+
+                <UsersSelect
+                    classes={classes.field}
+                    users={props.app.users}
+                    user={repairMasterId}
+                    setUser={setRepairMasterId}
+                    onlyValid={true}
+                />
+
+                <Button
+                    variant="outlined"
+                    onClick={() => repair()}
+                >
+                    Добавить работу
+                </Button>
 
             </DialogContent>
 

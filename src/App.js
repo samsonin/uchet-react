@@ -198,6 +198,7 @@ const App = props => {
 
             <GoodModal
                 good={good}
+                setGood={setGood}
                 close={closeGoodModal}
             />
 

@@ -9,7 +9,6 @@ import TwoLineInCell from "./common/TwoLineInCell";
 
 const Showcase = props => {
 
-    const [open, setOpen] = useState(false)
     const [good, setGood] = useState({})
     const [showcase, setShowcase] = useState([])
 
@@ -28,6 +27,7 @@ const Showcase = props => {
     return <>
         <GoodModal
             good={good}
+            setGood={setGood}
             close={() => setGood({})}
         />
 
