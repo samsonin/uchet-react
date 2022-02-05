@@ -100,32 +100,6 @@ const Good = props => {
             : ''
     }
 
-    const transit = (barcode, isTo) => {
-
-        rest('transit/' + props.app.stock_id + '/' + barcode,
-            isTo
-                ? 'POST'
-                : 'DELETE')
-            .then(res => {
-
-                if (res.status === 200) {
-
-                    props.upd_app(res.body)
-
-                    enqueueSnackbar(isTo
-                        ? 'Передали в транзит'
-                        : 'Приняли из транзита', {
-                        variant: 'success',
-                    });
-
-                    props.close()
-
-                }
-
-            })
-
-    }
-
     const toOrder = () => {
 
         if (+orderId < 1) return enqueueSnackbar('Некорректный номер заказа', {
@@ -191,6 +165,42 @@ const Good = props => {
 
     }
 
+    const goodRest = (url, method, success) => {
+
+        const barcode = good.barcode || good.imei
+        if (!barcode) enqueueSnackbar('нет кода или S/N', {variant: 'error'})
+
+        rest (url + barcode, method)
+            .then(res => {
+
+                if (res.status === 200) {
+
+                    props.upd_app(res.body)
+
+                    if (props.close) props.close()
+
+                    enqueueSnackbar(success, {variant: 'success'})
+
+                    if (res.body.goods) props.setGood(res.body.goods)
+
+                } else {
+
+                    enqueueSnackbar('ошибка ' + res.status, {variant: 'error'})
+
+                }
+            })
+    }
+
+    const transit = isTo => goodRest('transit/' + props.app.stock_id + '/',
+        isTo ? 'POST' : 'DELETE',
+        isTo ? 'Передано в транзит' : 'Принято из транзита')
+
+    const use = () => goodRest('goods/', 'DELETE', 'Списано в пользование')
+
+    const restore = () => goodRest('goods/restore/', 'POST', 'Восстановлено')
+
+    const reject = () => goodRest('goods/reject/', 'DELETE', 'Списано в брак')
+
     const repair = () => {
 
         const barcode = good.barcode || good.imei
@@ -215,7 +225,7 @@ const Good = props => {
 
                     enqueueSnackbar('Работа добавлена!', {variant: 'success'})
 
-                    if (res.status === 200) props.setGood(res.body)
+                    if (res.status === 200 && res.body.goods) props.setGood(res.body.goods)
 
                 } else {
 
@@ -353,7 +363,7 @@ const Good = props => {
                 }}>
                     {good.wo === 't'
                         ? renderIcon('Из транзита',
-                            () => transit(good.barcode, false),
+                            () => transit(false),
                             <i className="fas fa-truck"/>)
                         : editable
                             ? <>
@@ -363,10 +373,10 @@ const Good = props => {
                                         <LineWeightIcon/>)
                                     : ''}
                                 {renderIcon('В транзит',
-                                    () => transit(good.barcode, true),
+                                    () => transit(true),
                                     <i className="fas fa-truck"/>)}
                                 {renderIcon('В брак',
-                                    () => console.log('В брак'),
+                                    () => reject(),
                                     <i className="fas fa-redo"/>)}
                                 {renderIcon('Починить',
                                     () => setIsRepair(!isRepair),
@@ -383,7 +393,7 @@ const Good = props => {
                             ? good.wo === 'use'
                                 ? <Tooltip title="Восстановить">
                                     <IconButton
-                                        // onClick={() => goodRequest(good.barcode, 'restore')}
+                                        onClick={() => restore()}
                                     >
                                         <RestoreFromTrashIcon/>
                                     </IconButton>
@@ -391,7 +401,7 @@ const Good = props => {
                                 : null
                             : <Tooltip title="Списать">
                                 <IconButton
-                                    // onClick={() => goodRequest(good.barcode, 'deduct')}
+                                    onClick={() => use()}
                                 >
                                     <DeleteIcon/>
                                 </IconButton>

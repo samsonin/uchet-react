@@ -107,10 +107,6 @@ const Prepaids = props => {
                                         </IconButton>
                                     </InputAdornment>
                                 ),
-                                form: {
-                                    autoComplete: 'off',
-                                },
-                                autoComplete: 'off'
                             }}
                                        value={search}
                                        onChange={e => setSearch(e.target.value)}

@@ -51,7 +51,7 @@ const parseJwt = token => {
         }).join(''))
         return JSON.parse(jsonPayload)
     } catch (e) {
-        console.log('parseJwt error', e)
+        // console.log('parseJwt error', e)
         return false
     }
 
@@ -192,7 +192,7 @@ const App = props => {
 
             <LoginModal
                 isOpen={!+props.auth.user_id}
-                close={() => console.log('close')}
+                close={() => {}}
                 parseJwt={parseJwt}
             />
 
