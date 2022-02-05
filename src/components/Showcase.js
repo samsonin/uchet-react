@@ -128,8 +128,14 @@ const Showcase = props => {
                             ? props.app.stock_id === s.stock_id
                             : true)
                         .filter(s => !status || s.parts === status)
-                        .filter(s => !search || s.model.indexOf(search) > -1 ||
-                            s.imei.indexOf(search) > -1 || s.sum == search || s.id == search)
+                        .filter(s => {
+
+                            if (!search || s.sum == search || s.id == search) return true
+
+                            // сделать регистронезависимым
+                            return s.model.indexOf(search) > -1 || s.imei.indexOf(search) > -1
+
+                        })
                         .map(s => <TableRow key={'tablerowinshowcase' + s.id}
                                             style={{
                                                 cursor: 'pointer'
