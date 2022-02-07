@@ -17,14 +17,14 @@ const statuses = {
     parts: 'На запчасти'
 }
 
-let all
+let isAllShowcaseInUI
 
 const Showcase = props => {
 
     const [good, setGood] = useState({})
     const [showcase, setShowcase] = useState([])
     const [search, setSearch] = useState('')
-    const [status, setStatus] = useState('')
+    const [status, setStatus] = useState('sale')
 
     useEffect(() => {
 
@@ -35,7 +35,7 @@ const Showcase = props => {
                 }
             })
 
-        all = false
+        isAllShowcaseInUI = false
 
     }, [])
 
@@ -47,12 +47,12 @@ const Showcase = props => {
 
     useEffect(() => {
 
-        if (all || !status || status === 'sale') return
+        if (isAllShowcaseInUI || status === 'sale') return
 
         rest('goods/showcase/all')
             .then(res => {
                 if (res.status === 200) {
-                    all = true
+                    isAllShowcaseInUI = true
                     setShowcase(res.body)
                 }
             })
@@ -84,7 +84,7 @@ const Showcase = props => {
             >
                 <MenuItem key={'menuiteminshowcasestatuseskey0'}
                           value="">
-                    <br/>
+                    Вся
                 </MenuItem>
                 {Object.entries(statuses)
                     .map(([index, name]) => <MenuItem key={'menuiteminshowcasestatuseskey' + index}

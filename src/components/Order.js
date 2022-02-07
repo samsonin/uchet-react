@@ -123,15 +123,15 @@ const Order = props => {
 
         if (stockId && id && !order) {
 
-                rest('orders/' + stockId + '/' + id)
-                    .then(res => {
+            rest('orders/' + stockId + '/' + id)
+                .then(res => {
 
-                        if (res.status === 200) {
+                    if (res.status === 200) {
 
-                            props.upd_app({order: res.body})
+                        props.upd_app({order: res.body})
 
-                        }
-                    })
+                    }
+                })
 
         }
 
@@ -146,8 +146,8 @@ const Order = props => {
     useEffect(() => {
 
         if (order && needPrint.current) {
-                needPrint.current = false
-                Print(doc, inputToText)
+            needPrint.current = false
+            Print(doc, inputToText)
         }
 
     }, [order])
