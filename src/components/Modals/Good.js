@@ -207,12 +207,15 @@ const Good = props => {
 
         if (!barcode) enqueueSnackbar('нет кода или S/N', {variant: 'error'})
 
-        rest('goods/repair/' +barcode, 'PATCH', {
+        const data = {
             sum: repairSum,
             job: repairJob,
             master_id: repairMasterId,
-            barcodes: goodsForRepair.map(g => g.barcode)
-        })
+        }
+
+        if (goodsForRepair.length) data.barcodes = goodsForRepair.map(g => g.barcode)
+
+        rest('goods/repair/' +barcode, 'PATCH', data)
             .then(res => {
 
                 if (res.status < 300) {

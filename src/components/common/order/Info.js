@@ -195,11 +195,13 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             </>
             : null}
 
-        <CustomersSelect
-            customer={customer}
-            updateCustomer={updateCustomer}
-            disabled={!!order || !isEditable}
-        />
+        {customer
+            ? <CustomersSelect
+                customer={customer}
+                updateCustomer={updateCustomer}
+                disabled={!!order || !isEditable}
+            />
+            : null}
 
         {treeOpen
             ? <div style={{

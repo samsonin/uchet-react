@@ -62,11 +62,11 @@ export const Costs = ({order, isEditable, users, providers}) => {
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
 
-    const goods = order.provider
+    const goods = order.provider && Array.isArray(order.provider)
         ? order.provider.filter(p => p.good)
         : null
 
-    const services = order.provider
+    const services = order.provider && Array.isArray(order.provider)
         ? order.provider.filter(p => p.action === 'add_service')
         : null
 

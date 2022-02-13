@@ -1,11 +1,12 @@
 import React, {useState} from "react";
-import {List, ListItem, ListItemText} from "@material-ui/core";
+import {InputAdornment, List, ListItem, ListItemText} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import TextField from "@material-ui/core/TextField/TextField";
 import {useSnackbar} from "notistack";
 
 import rest from "../Rest";
+import SearchIcon from "@material-ui/icons/Search";
 
 
 export const GoodSearch = ({onSelected}) => {
@@ -64,6 +65,14 @@ export const GoodSearch = ({onSelected}) => {
             </>
             : <>
                 <TextField
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon/>
+                            </InputAdornment>
+                        ),
+                    }}
+                    label="код или штрихкод"
                     value={code}
                     onChange={e => setCode(e.target.value)}
                 />

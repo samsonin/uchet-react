@@ -12,6 +12,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 
 
 const statuses = {
+    all: 'Вся',
     sale: 'На витрине',
     check: 'На проверке',
     parts: 'На запчасти'
@@ -67,7 +68,6 @@ const Showcase = props => {
             close={() => setGood({})}
         />
 
-
         <div style={{
             display: 'flex',
             justifyContent: 'space-between'
@@ -82,10 +82,6 @@ const Showcase = props => {
                 onChange={e => setStatus(e.target.value)}
                 label="статус"
             >
-                <MenuItem key={'menuiteminshowcasestatuseskey0'}
-                          value="">
-                    Вся
-                </MenuItem>
                 {Object.entries(statuses)
                     .map(([index, name]) => <MenuItem key={'menuiteminshowcasestatuseskey' + index}
                                                       value={index}>
@@ -127,13 +123,16 @@ const Showcase = props => {
                         .filter(s => props.app.stock_id
                             ? props.app.stock_id === s.stock_id
                             : true)
-                        .filter(s => !status || s.parts === status)
+                        .filter(s => ['all', s.parts].includes(status))
                         .filter(s => {
 
                             if (!search || s.sum == search || s.id == search) return true
 
-                            // сделать регистронезависимым
-                            return s.model.indexOf(search) > -1 || s.imei.indexOf(search) > -1
+                            const model = s.model.toLowerCase()
+                            const imei = s.imei.toLowerCase()
+                            const lSearch = search.toLowerCase()
+
+                            return model.indexOf(lSearch) > -1 || imei.indexOf(lSearch) > -1
 
                         })
                         .map(s => <TableRow key={'tablerowinshowcase' + s.id}
