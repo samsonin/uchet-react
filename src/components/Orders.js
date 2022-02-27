@@ -99,7 +99,7 @@ const Orders = props => {
 
         if (statusId >= 0) url += 'status_id=' + statusId + '&'
 
-        if (id) url += 'id=' + id
+        if (id) url = 'orders?id=' + id
         else if (customer.id) url += 'customer_id=' + customer.id
         else if (createdDate || createdDate2 || checkoutDate || checkoutDate2) {
 
