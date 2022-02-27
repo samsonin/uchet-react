@@ -203,42 +203,6 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             />
             : null}
 
-        {treeOpen
-            ? <div style={{
-                margin: '1rem'
-            }}>
-                <Tree
-                    initialId={category_id}
-                    categories={app.categories}
-                    onSelected={id => setCategory_id(+id)}
-                    finished={id => handleTree(id)}
-                />
-                <Button size="small"
-                        onClick={() => setTreeOpen(false)}
-                        variant="outlined"
-                >
-                    Ок
-                </Button>
-            </div>
-            : isEditable && category && <div style={{
-            margin: '1rem'
-        }}><Button size="small"
-                   className="w-100"
-                   disabled={!isEditable}
-                   onClick={() => setTreeOpen(true)}
-        >
-            {category ? category.name : "Выбрать категорию..."}
-        </Button>
-        </div>
-        }
-
-        <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
-                   style={fieldsStyle}
-                   value={model}
-                   onChange={e => setModel(e.target.value)}
-                   disabled={!isEditable}
-        />
-
         <TextField label="Предварительная стоимость"
                    disabled={isRest || !!order}
                    style={fieldsStyle}
@@ -259,6 +223,43 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                          value={presum}
                          onChange={e => intInputHandler(e.target.value, setPresum)}
             />}
+
+        {treeOpen
+            ? <div style={{
+                margin: '1rem'
+            }}>
+                <Tree
+                    initialId={category_id}
+                    categories={app.categories}
+                    onSelected={id => setCategory_id(+id)}
+                    finished={id => handleTree(id)}
+                />
+                <Button size="small"
+                        onClick={() => setTreeOpen(false)}
+                        variant="outlined"
+                >
+                    Ок
+                </Button>
+            </div>
+            : isEditable && category && <div style={{
+            margin: '1rem'
+        }}>
+            <Button size="small"
+                    className="w-100"
+                    disabled={!isEditable}
+                    onClick={() => setTreeOpen(true)}
+            >
+                {category ? category.name : "Выбрать категорию..."}
+            </Button>
+        </div>
+        }
+
+        <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
+                   style={fieldsStyle}
+                   value={model}
+                   onChange={e => setModel(e.target.value)}
+                   disabled={!isEditable}
+        />
 
         {fields.map(f => <TextField label={f.value}
                                     key={'text-fields-in-new-order' + f.name}
