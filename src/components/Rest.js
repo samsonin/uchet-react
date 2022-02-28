@@ -30,6 +30,17 @@ export default function fetchPost(url, method = 'GET', data = '') {
 
     return fetch(server + '/' + url, init)
         .then(res => {
+
+            if (res.status === 401) {
+
+                // TODO перенаправить на главную страницу и окно авторизации
+
+                // window.localStorage.setItem('auth', null)
+
+                // window.history.pushState("prev state", null, "/");
+
+            }
+
             response = {
                 status: res.status,
                 ok: res.ok

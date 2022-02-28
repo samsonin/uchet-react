@@ -17,7 +17,7 @@ const fieldsStyle = {
 
 export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
-    const {enqueueSnackbar} = useSnackbar()
+    const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
     const [isRest, setIsRest] = useState(false)
     const [treeOpen, setTreeOpen] = useState(false)
@@ -109,18 +109,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     }
 
-    const save = () => {
-
-        const data = {
-            customer,
-            status_id,
-            master_id,
-            category_id,
-            model,
-            sum2,
-            for_client,
-            ...state
-        }
+    const orderRest = data => {
 
         setIsRest(true)
 
@@ -132,6 +121,60 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     }
 
+    const save = () => orderRest({
+        customer,
+        status_id,
+        master_id,
+        category_id,
+        model,
+        sum2,
+        for_client,
+        ...state
+    })
+
+    const checkout = () => {
+
+        let payments = 0
+
+        order.json.payments.map(p => payments += p.sum)
+
+        if (order.sum2 !== payments) {
+
+            let message = 'Общая сумма за заказ ' + order.sum2 + ', оплачено всего ' + payments + ', '
+
+            message += order.sum2 > payments
+                ? 'необходимо доплатить ' + (order.sum2 - payments)
+                : 'необходимо вернуть ' + (payments - order.sum2)
+
+            const buttonMessage = order.sum2 > payments
+            ? 'Доплатить и закрыть заказ?'
+                : 'Вернуть и закрыть заказ?'
+
+            const action = key => (
+                <>
+                    <Button onClick={() => orderRest({status_id: 6,})}>
+                        {buttonMessage}
+                    </Button>
+                    <Button onClick={() => closeSnackbar(key)}>
+                        Отмена
+                    </Button>
+                </>
+            );
+
+            enqueueSnackbar(message, {
+                variant: 'warning',
+                autoHideDuration: 3000,
+                action,
+            });
+
+        } else {
+
+            orderRest({status_id: 6,})
+
+        }
+
+    }
+
     const warranty = () => {
 
         console.log('warranty')
@@ -140,7 +183,13 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const open = () => {
 
-        console.log('open')
+        setIsRest(true)
+
+        rest('order/' + order.stock_id + '/' + order.id, 'PATCH', {status_id: 0})
+            .then(res => {
+                setIsRest(false)
+                if (res.status !== 200) enqueueSnackbar('ошибка', {variant: 'error'})
+            })
 
     }
 
@@ -284,7 +333,10 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                     {isWarranty(order.checkout_date) && actionButton('Принять по гарантии', warranty)}
                     {(isAdmin || isToday(order.checkout_date)) && actionButton('Открыть заказ', open)}
                 </>
-                : actionButton('сохранить', save)
+                : <>
+                    {actionButton('сохранить', save)}
+                    {actionButton('закрыть', checkout)}
+                </>
             : actionButton('создать', create)}
 
     </>
