@@ -36,11 +36,15 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
     const [master_id, setMaster_id] = useState(order ? order.master_id : 0)
     const [for_client, setFor_client] = useState(order ? order.for_client : '')
     const [state, setState] = useState(() => {
-        let state = {}
-        fields.map(f => {
-            state[f.name] = order ? order[f.name] : ''
+        const fl = fields.map(f => {
+
+            console.log(fields
+            )
+
+            return f.name
         })
-        return state
+
+        return fl
     })
 
     const setField = (name, value) => {
@@ -54,6 +58,12 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         })
 
     }
+
+    useEffect(() => {
+
+        console.log(state)
+
+    }, [state])
 
     // TODO уточнить в течении смены или нет
     const isToday = time => 0.5 > (new Date() - new Date(time)) / 86400000
@@ -136,7 +146,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         let payments = 0
 
-        order.json.payments.map(p => payments += p.sum)
+        if (order.json && order.json.payments.count) order.json.payments.map(p => payments += p.sum)
 
         if (order.sum2 !== payments) {
 
@@ -314,7 +324,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                                     key={'text-fields-in-new-order' + f.name}
                                     disabled={!isEditable}
                                     style={fieldsStyle}
-                                    value={state[f.name]}
+                                    value={state[f.name] || ''}
                                     onChange={e => setField([f.name], e.target.value)}
         />)}
 

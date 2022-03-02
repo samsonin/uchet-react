@@ -18,18 +18,29 @@ import registerServiceWorker from './registerServiceWorker';
 
 require('dotenv').config();
 
-ReactDOM.render((
-    <Provider store={store} className={'d-print-none'}>
-        <BrowserRouter>
-            <div id="circularln"
-                 style={{display: 'none'}}
-            >
-                <Circularln/>
-            </div>
-            <SnackbarProvider>
-                <App />
-            </SnackbarProvider>
-        </BrowserRouter>
-    </Provider>
-), document.getElementById('root'));
-registerServiceWorker();
+try {
+
+    ReactDOM.render((
+        <Provider store={store} className={'d-print-none'}>
+            <BrowserRouter>
+                <div id="circularln"
+                     style={{display: 'none'}}
+                >
+                    <Circularln/>
+                </div>
+                <SnackbarProvider>
+                    <App/>
+                </SnackbarProvider>
+            </BrowserRouter>
+        </Provider>
+    ), document.getElementById('root'));
+
+} catch (e) {
+
+    console.error(e)
+
+    window.location.href = '/'
+
+}
+
+// registerServiceWorker();
