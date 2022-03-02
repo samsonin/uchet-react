@@ -211,73 +211,73 @@ const App = props => {
 
                         <form onSubmit={e => e.preventDefault()}>
 
-                        <Route exact path="/" component={Main}/>
-                        <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
-                        <Route exact path="/settings" component={Settings}/>
-                        <Route path="/subscribe" component={Subscribe}/>
+                            <Route exact path="/" component={Main}/>
+                            <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
+                            <Route exact path="/settings" component={Settings}/>
+                            <Route path="/subscribe" component={Subscribe}/>
 
-                        {props.app.stocks[0] && <>
-                            <Route path="/daily"
-                                   render={props => <Daily
-                                       setOurBarcode={setOurBarcode}
-                                       {...props}
-                                   />}
-                            />
-                        </>}
+                            {props.app.stocks[0] && <>
+                                <Route path="/daily"
+                                       render={props => <Daily
+                                           setOurBarcode={setOurBarcode}
+                                           {...props}
+                                       />}
+                                />
+                            </>}
 
-                        <Route exact path="/prepaids" component={Prepaids}/>
-                        <Route exact path="/showcase" component={Showcase}/>
-                        <Route exact path="/customers" component={Customers}/>
-                        <Route exact path="/customers/:id" component={Customer}/>
-                        <Route exact path="/entities" component={Entities}/>
-                        {props.app.fields.allElements && <>
-                            <Route exact path="/entities/:id" component={Entity}/>
-                            <Route exact path="/order" component={Order}/>
-                            <Route exact path="/order/:stock_id/:order_id" component={Order}/>
-                        </>}
+                            <Route exact path="/prepaids" component={Prepaids}/>
+                            <Route exact path="/showcase" component={Showcase}/>
+                            <Route exact path="/customers" component={Customers}/>
+                            <Route exact path="/customers/:id" component={Customer}/>
+                            <Route exact path="/entities" component={Entities}/>
+                            {props.app.fields.allElements && <>
+                                <Route exact path="/entities/:id" component={Entity}/>
+                                <Route exact path="/order" component={Order}/>
+                                <Route exact path="/order/:stock_id/:order_id" component={Order}/>
+                                <Route path="/orders" render={props => <Orders
+                                    enterPress={enterPress}
+                                    {...props}
+                                />}
+                                />                            </>}
 
-                        <Route path="/call_records" component={Records}/>
-                        <Route path="/orders" render={props => <Orders
-                            enterPress={enterPress}
-                            {...props}
-                        />}/>
-                        {props.app.users[0] && <Route path="/queue" component={Queue}/>}
+                            <Route path="/call_records" component={Records}/>
+                            {props.app.users[0] && <Route path="/queue" component={Queue}/>}
 
-                        {!props.app.stock_id || <>
-                            <Route path="/arrival" render={props => <Consignment
-                                newScan={globalBarcode}
-                                enterPress={enterPress}
-                                {...props}
-                            />}/>
-                            <Route path="/consignments" component={Consignments}/>
-                        </>}
+                            {!props.app.stock_id || <>
+                                <Route path="/arrival" render={props => <Consignment
+                                    newScan={globalBarcode}
+                                    enterPress={enterPress}
+                                    {...props}
+                                />}/>
+                                <Route path="/consignments" component={Consignments}/>
+                            </>}
 
-                        <Route path="/transit" render={props => <Transit newScan={ourBarcode} {...props} />}/>
+                            <Route path="/transit" render={props => <Transit newScan={ourBarcode} {...props} />}/>
 
-                        {props.auth.admin && <>
-                            <Route path="/funds" component={FundsFlow}/>
+                            {props.auth.admin && <>
+                                <Route path="/funds" component={FundsFlow}/>
 
-                            <Route path="/settings/organization" component={Organization}/>
-                            <Route path="/settings/employees" component={Employees}/>
-                            <Route exact path="/settings/stocks" component={Stocks}/>
-                            {props.app.users && props.app.stocks && props.app.stockusers
-                                ? <Route exact path="/settings/stocks/:id" component={Stock}/>
-                                : null
-                            }
-                            <Route path="/settings/config" component={Config}/>
-                            <Route path="/settings/fields" component={Fields}/>
-                            {/*<Route path="/settings/docs" component={Docs}/>*/}
-                            <Route path="/integration/mango"
-                                   component={() => <IntegrationMango
-                                       org_id={props.auth.organization_id}
-                                       vpbx_api_key={'секретный ключ'}
-                                       vpbx_api_salt={'секретная соль'}
-                                       // keyHandle={keyHandle}
-                                       // saltHandle={saltHandle}
-                                   />}
-                            />
-                            <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
-                        </>}
+                                <Route path="/settings/organization" component={Organization}/>
+                                <Route path="/settings/employees" component={Employees}/>
+                                <Route exact path="/settings/stocks" component={Stocks}/>
+                                {props.app.users && props.app.stocks && props.app.stockusers
+                                    ? <Route exact path="/settings/stocks/:id" component={Stock}/>
+                                    : null
+                                }
+                                <Route path="/settings/config" component={Config}/>
+                                <Route path="/settings/fields" component={Fields}/>
+                                {/*<Route path="/settings/docs" component={Docs}/>*/}
+                                <Route path="/integration/mango"
+                                       component={() => <IntegrationMango
+                                           org_id={props.auth.organization_id}
+                                           vpbx_api_key={'секретный ключ'}
+                                           vpbx_api_salt={'секретная соль'}
+                                           // keyHandle={keyHandle}
+                                           // saltHandle={saltHandle}
+                                       />}
+                                />
+                                <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
+                            </>}
 
                         </form>
 
