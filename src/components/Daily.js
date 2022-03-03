@@ -32,7 +32,7 @@ import Consignment from "./Consignment";
 import DailyModal from "./Modals/Daily";
 import {numberInputHandler} from "./common/InputHandlers";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     controls: {
         margin: 15,
         minWidth: 120,
@@ -109,6 +109,7 @@ const Daily = props => {
                 if (res.status === 200) {
                     setLocalDaily(res.body)
                 } else {
+                    setLocalDaily(null)
                     enqueueSnackbar(date + ' не работали', {variant: 'error'})
                 }
 
@@ -383,7 +384,7 @@ const Daily = props => {
                 </Grid>
             </Grid>
 
-            {date !== today && !localDaily.hasOwnProperty('id')
+            {date !== today && (!localDaily || !localDaily.hasOwnProperty('id') )
                 ? <div style={{
                     margin: '1rem',
                     fontSize: 20
