@@ -36,14 +36,8 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
     const [master_id, setMaster_id] = useState(order ? order.master_id : 0)
     const [for_client, setFor_client] = useState(order ? order.for_client : '')
     const [state, setState] = useState(() => {
-        const fl = fields.map(f => {
-
-            console.log(fields
-            )
-
-            return f.name
-        })
-
+        const fl = {}
+        fields.map(f => fl[f.name] = '')
         return fl
     })
 
@@ -52,25 +46,11 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         setState(prev => {
 
             const newState = {...prev}
-            newState[name] = value
+            newState[name] = value || ''
             return newState
 
         })
-
     }
-
-    useEffect(() => {
-
-        console.log(state)
-
-    }, [state])
-
-    // TODO уточнить в течении смены или нет
-    const isToday = time => 0.5 > (new Date() - new Date(time)) / 86400000
-
-    const isWarranty = time => app.config.remont_warranty > (new Date() - new Date(time)) / 86400000
-
-    const isEditable = !isRest && !order || (isAdmin || order.status_id < 6 || isToday(order.checkout_date))
 
     const updateCustomer = (name, val) => {
 
@@ -81,8 +61,14 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             return newState
 
         })
-
     }
+
+    // TODO уточнить в течении смены или нет
+    const isToday = time => 0.5 > (new Date() - new Date(time)) / 86400000
+
+    const isWarranty = time => app.config.remont_warranty > (new Date() - new Date(time)) / 86400000
+
+    const isEditable = !isRest && !order || (isAdmin || order.status_id < 6 || isToday(order.checkout_date))
 
     const handleTree = category_id => {
         setCategory_id(+category_id)
