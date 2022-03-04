@@ -9,6 +9,7 @@ import CustomersSelect from "../CustomersSelect";
 import Tree from "../../Tree";
 import UsersSelect from "../UsersSelect";
 import {intInputHandler, numberInputHandler} from "../InputHandlers";
+import {totalSum} from "./functions";
 
 const fieldsStyle = {
     margin: '1rem .3rem',
@@ -130,9 +131,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const checkout = () => {
 
-        let payments = 0
-
-        if (order.json && order.json.payments.count) order.json.payments.map(p => payments += p.sum)
+        const payments = totalSum(order)
 
         if (order.sum2 !== payments) {
 
@@ -159,7 +158,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
             enqueueSnackbar(message, {
                 variant: 'warning',
-                autoHideDuration: 3000,
+                autoHideDuration: 5000,
                 action,
             });
 

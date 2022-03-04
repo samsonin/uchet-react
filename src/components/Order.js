@@ -17,6 +17,7 @@ import {Remarks} from "./common/order/Remarks";
 import {Costs} from "./common/order/Costs"
 import {Info} from "./common/order/Info";
 import {OrderText} from "./common/OrderText"
+import {totalSum} from "./common/order/functions";
 
 
 const useStyles = makeStyles(() => ({
@@ -56,7 +57,7 @@ const Order = props => {
     const position = props.app.positions.find(p => p.id === props.auth.position_id)
     const isSale = position ? position.is_sale : false
 
-    const doc = props.app.docs.find(d => d.name === 'order')
+    const doc = props.app.docs.find(d => d.name === (order && order.status_id < 6 ? 'order' : 'order_checkout'))
 
     const inputToText = elem => {
 
@@ -98,6 +99,12 @@ const Order = props => {
                 value = order.model || 'НЕИЗВЕСТНО'
             } else if (i.name === 'sum') {
                 value = order.sum || 0
+            } else if (i.name === 'sum2') {
+                value = totalSum(order)
+            } else if (i.name === 'imei') {
+                value = order.imei || ''
+            } else if (i.name === 'for_client') {
+                value = order.for_client || ''
             } else if (i.name === 'prepaid') {
                 value = order.json.payments[0].sum || 0
             } else if (i.name === 'broken_cost') {
@@ -172,7 +179,7 @@ const Order = props => {
                         }}
             >
                 {order
-                    ? OrderText(order, props.app) + ' от ' + createDate(created)
+                    ? OrderText(order, props.app) + ' от ' + createDate(order.time)
                     : 'Новый заказ'}
             </Typography>
 
