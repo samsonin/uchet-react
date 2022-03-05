@@ -208,9 +208,12 @@ const Order = props => {
             : null}
 
         {tabId === 0 &&
-        <Info order={order} isEditable={canEdit()} app={props.app} fields={fields}
-              isAdmin={props.auth.admin}
+        <Info order={order}
+              isEditable={canEdit()}
               setOrder={setOrder}
+              app={props.app}
+              fields={fields}
+              isAdmin={props.auth.admin}
               needPrint={needPrint}
         />
         }

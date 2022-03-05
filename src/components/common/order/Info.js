@@ -53,6 +53,8 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         })
     }
 
+    const [isNewWarranty, setIsNewWarranty] = useState(false)
+
     const updateCustomer = (name, val) => {
 
         setCustomer(prev => {
@@ -92,6 +94,8 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             sum,
             ...state
         }
+
+        if (isNewWarranty) data.warranty = true
 
         rest('orders/' + app.stock_id, 'POST', data)
             .then(res => {
@@ -133,21 +137,24 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         const payments = totalSum(order)
 
-        if (order.sum2 !== payments) {
+        if (sum2 !== payments) {
 
-            let message = 'Общая сумма за заказ ' + order.sum2 + ', оплачено всего ' + payments + ', '
+            let message = 'Общая сумма за заказ ' + sum2 + ', оплачено всего ' + payments + ', '
 
-            message += order.sum2 > payments
-                ? 'необходимо доплатить ' + (order.sum2 - payments)
-                : 'необходимо вернуть ' + (payments - order.sum2)
+            message += sum2 > payments
+                ? 'необходимо доплатить ' + (sum2 - payments)
+                : 'необходимо вернуть ' + (payments - sum2)
 
-            const buttonMessage = order.sum2 > payments
+            const buttonMessage = sum2 > payments
             ? 'Доплатить и закрыть заказ?'
                 : 'Вернуть и закрыть заказ?'
 
             const action = key => (
                 <>
-                    <Button onClick={() => orderRest({status_id: 6,})}>
+                    <Button onClick={() => {
+                        closeSnackbar(key)
+                        save()
+                    }}>
                         {buttonMessage}
                     </Button>
                     <Button onClick={() => closeSnackbar(key)}>
@@ -164,7 +171,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         } else {
 
-            orderRest({status_id: 6,})
+            save()
 
         }
 
@@ -172,7 +179,11 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const warranty = () => {
 
-        console.log('warranty')
+        setOrder({stock_id: order.stock_id,})
+        setSum(0)
+        setSum2(0)
+
+        create()
 
     }
 
