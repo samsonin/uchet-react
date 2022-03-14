@@ -78,7 +78,7 @@ const Good = props => {
 
     const [treeOpen, setTreeOpen] = useState(false)
     const [orderId, setOrderId] = useState()
-    const [sum, setSum] = useState(0)
+    const [sum, setSum] = useState(props.good ? props.good.sum : 0)
     const [reason, setReason] = useState('')
     const [isReasonOpen, setIsReasonOpen] = useState(false)
     const [isRepair, setIsRepair] = useState(false)
