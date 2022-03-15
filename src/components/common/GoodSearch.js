@@ -19,9 +19,16 @@ export const GoodSearch = ({onSelected}) => {
     const searchGood = () => {
 
         rest('goods?code=' + code)
-            .then(res => res.status === 200 && res.body.length
-                ? setGoods(res.body)
-                : enqueueSnackbar('Не найдено', {variant: 'error'})
+            .then(res => {
+                    if (res.status === 200 && res.body.length) {
+
+                        if (res.body.length === 1) onSelected(res.body[0], afterRes)
+                        else setGoods(res.body)
+
+                    } else {
+                        enqueueSnackbar('Не найдено', {variant: 'error'})
+                    }
+                }
             )
 
     }
@@ -46,8 +53,8 @@ export const GoodSearch = ({onSelected}) => {
             ? <>
                 <List>
                     {goods.map(g => <ListItem key={'listitemkeyinordercost' + g.barcode}
-                                               button
-                                               onClick={() => onSelected(g, afterRes)}
+                                              button
+                                              onClick={() => onSelected(g, afterRes)}
                         >
                             <ListItemText
                                 primary={g.model}
