@@ -78,6 +78,22 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         setTreeOpen(false)
     }
 
+    const afterRest = res => {
+
+        setIsRest(false)
+        if (res.status === 200) {
+
+            setOrder(res.body.orders[0])
+
+        } else {
+
+            needPrint.current = false
+            enqueueSnackbar('ошибка', {variant: 'error'})
+
+        }
+
+    }
+
     const create = () => {
 
         if (!app.stock_id) return enqueueSnackbar('Выберите точку', {variant: 'error'})
@@ -97,16 +113,10 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         if (isNewWarranty) data.warranty = true
 
+        needPrint.current = true
+
         rest('orders/' + app.stock_id, 'POST', data)
-            .then(res => {
-
-                if (res.status === 200) {
-
-                    needPrint.current = true
-                    setOrder(res.body.orders[0])
-
-                }
-            })
+            .then(res => afterRest(res))
 
     }
 
@@ -115,11 +125,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         setIsRest(true)
 
         rest('order/' + order.stock_id + '/' + order.id, 'PATCH', data)
-            .then(res => {
-                setIsRest(false)
-                if (res.status !== 200) enqueueSnackbar('ошибка', {variant: 'error'})
-            })
-
+            .then(res => afterRest(res))
     }
 
     const save = () => orderRest({
@@ -132,6 +138,23 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         for_client,
         ...state
     })
+
+    const checkoutRest = () => {
+
+        needPrint.current = true
+
+        orderRest({
+            customer,
+            status_id: 6,
+            master_id,
+            category_id,
+            model,
+            sum2,
+            for_client,
+            ...state
+        })
+
+    }
 
     const checkout = () => {
 
@@ -146,14 +169,14 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                 : 'необходимо вернуть ' + (payments - sum2)
 
             const buttonMessage = sum2 > payments
-            ? 'Доплатить и закрыть заказ?'
+                ? 'Доплатить и закрыть заказ?'
                 : 'Вернуть и закрыть заказ?'
 
             const action = key => (
                 <>
                     <Button onClick={() => {
                         closeSnackbar(key)
-                        save()
+                        checkoutRest()
                     }}>
                         {buttonMessage}
                     </Button>
@@ -171,7 +194,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         } else {
 
-            save()
+            checkoutRest()
 
         }
 
@@ -222,6 +245,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
     const category = app.categories.find(c => c.id === category_id)
 
     const actionButton = (label, onClick) => <Button variant='outlined'
+                                                     disabled={isRest}
                                                      className="m-1"
                                                      onClick={onClick}
                                                      color="primary">
