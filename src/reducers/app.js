@@ -44,11 +44,12 @@ const app = (state = getItems() || initialState, action) => {
 
                     if (newState.orders) {
 
-                        let prevOrder = newState.orders
-                            .find(o => o.id === action.data.order.id && o.stock_id === action.data.order.stock_id)
+                        const nextOrders = newState.orders
+                            .filter(o => !(o.id === action.data.order.id && o.stock_id === action.data.order.stock_id))
 
-                        if (prevOrder) prevOrder = action.data.order
-                        else newState.orders.push(action.data.order)
+                        nextOrders.push(action.data.order)
+
+                        newState.orders = nextOrders
 
                     } else {
 
