@@ -5,6 +5,7 @@ let initialState = {
     balance: 0,
     stocks: [],
     users: [],
+    orders: [],
     organization: [],
     config: [],
     docs: [],

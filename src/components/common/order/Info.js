@@ -83,7 +83,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         setIsRest(false)
         if (res.status === 200) {
 
-            setOrder(res.body.orders[0])
+            setOrder(res.body.order)
 
         } else {
 

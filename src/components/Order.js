@@ -57,7 +57,9 @@ const Order = props => {
     const position = props.app.positions.find(p => p.id === props.auth.position_id)
     const isSale = position ? position.is_sale : false
 
-    const doc = props.app.docs.find(d => d.name === (order && order.status_id < 6 ? 'order' : 'order_checkout'))
+    const docName = order && order.status_id === 6 ? 'order_checkout' : 'order'
+
+    const doc = props.app.docs.find(d => d.name === docName)
 
     const inputToText = elem => {
 
@@ -148,6 +150,7 @@ const Order = props => {
         setId(order.id)
         setStockId(order.stock_id)
         setCreated(order.created_at)
+        props.history.push('/order/' + order.stock_id + '/' + order.id)
     }
 
     useEffect(() => {
