@@ -33,7 +33,8 @@ const initCustomer = {
 
 const Orders = props => {
 
-    const [onlyMy, setOnlyMy] = useState(true)
+    const [idAndCustomer, setIdAndCustomer] = useState(true)
+    const [parameters, setParameters] = useState(false)
 
     const [stocks, setStocks] = useState(() => [props.app.stock_id])
 
@@ -72,7 +73,11 @@ const Orders = props => {
 
     useEffect(() => {
 
-        rest('orders/all')
+        let url = 'orders/all'
+
+        if (props.auth.organization_id === 1 && props.app.stock_id) url += '/' + props.app.stock_id
+
+        rest(url)
             .then(res => {
                 if (res.status === 200) {
                     setOrders(res.body)
@@ -83,7 +88,7 @@ const Orders = props => {
 
     useEffect(() => {
 
-    if (props.enterPress) find()
+        if (props.enterPress) find()
 // eslint-disable-next-line
     }, [props.enterPress])
 
@@ -117,6 +122,7 @@ const Orders = props => {
             .then(res => {
                 if (res.status === 200) {
 
+                    setParameters(false)
                     setOrders(res.body)
 
                 } else if (res.status === 204) {
@@ -150,7 +156,7 @@ const Orders = props => {
         setCheckoutDate2()
         setMasterId(0)
 
-        setOnlyMy(!onlyMy)
+        setIdAndCustomer(!idAndCustomer)
 
     }
 
@@ -161,121 +167,133 @@ const Orders = props => {
             padding: '1rem'
         }}
     >
-            <Grid container
-                  justify='space-between'
-            >
-                {onlyMy
-                    ? <TextField
-                        className={"m-2 p-2"}
-                        label={"Заказ №"}
-                        value={id ? id.toString() : ''}
-                        onChange={e => intInputHandler(e.target.value, setId)}
-                    />
-                    : null}
-
-                <IconButton
-                    onClick={() => changeSearchParameters()}
+        {parameters
+            ? <>
+                <Grid container
+                      justify='space-between'
                 >
-                    {onlyMy
-                        ? <KeyboardArrowRightIcon/>
-                        : <KeyboardArrowLeftIcon/>}
-                </IconButton>
-
-            </Grid>
-
-            {!id && onlyMy && <CustomersSelect
-                customer={customer}
-                updateCustomer={updateCustomer}
-                onlySearch={true}
-            />}
-
-            {onlyMy || <>
-                <Grid item className="w-100 m-2 p-2">
-
-                    {props.app.stocks.map(s => s.is_valid
-                        ? <FormControlLabel
-                            key={'formcntrinordersstocks' + s.id}
-                            control={<Checkbox
-                                color="primary"
-                                key={'stocksonordersseach' + s.id}
-                                checked={stocks.includes(s.id)}
-                                onChange={e => handleStocks(s.id, e.target.checked)}
-                            />}
-                            label={s.name}
+                    {idAndCustomer
+                        ? <TextField
+                            className={"m-2 p-2"}
+                            label={"Заказ №"}
+                            value={id ? id.toString() : ''}
+                            onChange={e => intInputHandler(e.target.value, setId)}
                         />
-                        : null
-                    )}
+                        : null}
+
+                    <IconButton
+                        onClick={() => changeSearchParameters()}
+                    >
+                        {idAndCustomer
+                            ? <KeyboardArrowRightIcon/>
+                            : <KeyboardArrowLeftIcon/>}
+                    </IconButton>
 
                 </Grid>
 
-                <Grid item className="w-100 m-2 p-2">
-                    Заказ создан с
-                    <TextField
-                        type="date"
-                        className={"m-2 p-2"}
-                        value={createdDate}
-                        onChange={e => setCreatedDate(e.target.value)}
+                {!id && idAndCustomer && <CustomersSelect
+                    customer={customer}
+                    updateCustomer={updateCustomer}
+                    onlySearch={true}
+                />}
+
+                {idAndCustomer || <>
+                    <Grid item className="w-100 m-2 p-2">
+
+                        {props.app.stocks.map(s => s.is_valid
+                            ? <FormControlLabel
+                                key={'formcntrinordersstocks' + s.id}
+                                control={<Checkbox
+                                    color="primary"
+                                    key={'stocksonordersseach' + s.id}
+                                    checked={stocks.includes(s.id)}
+                                    onChange={e => handleStocks(s.id, e.target.checked)}
+                                />}
+                                label={s.name}
+                            />
+                            : null
+                        )}
+
+                    </Grid>
+
+                    <Grid item className="w-100 m-2 p-2">
+                        Заказ создан с
+                        <TextField
+                            type="date"
+                            className={"m-2 p-2"}
+                            value={createdDate}
+                            onChange={e => setCreatedDate(e.target.value)}
+                        />
+                        по
+                        <TextField
+                            type="date"
+                            className={"m-2 p-2"}
+                            value={createdDate2}
+                            onChange={e => setCreatedDate2(e.target.value)}
+                        />
+                    </Grid>
+
+                    <Grid item className="w-100 m-2 p-2">
+                        Заказ закрыт с
+                        <TextField
+                            type="date"
+                            className={"m-2 p-2"}
+                            value={checkoutDate}
+                            onChange={e => setCheckoutDate(e.target.value)}
+                        />
+                        по
+                        <TextField
+                            type="date"
+                            className={"m-2 p-2"}
+                            value={checkoutDate2}
+                            onChange={e => setCheckoutDate2(e.target.value)}
+                        />
+                    </Grid>
+
+                    <UsersSelect
+                        user={masterId}
+                        users={props.app.users}
+                        setUser={setMasterId}
+                        onlyValid
+                        classes={"w-100 p-1 m-1"}
+                        label={"Мастер"}
                     />
-                    по
-                    <TextField
-                        type="date"
-                        className={"m-2 p-2"}
-                        value={createdDate2}
-                        onChange={e => setCreatedDate2(e.target.value)}
+
+                    <StatusesSelect
+                        status={statusId}
+                        statuses={props.app.statuses}
+                        setStatus={setStatusId}
+                        empty
                     />
-                </Grid>
 
-                <Grid item className="w-100 m-2 p-2">
-                    Заказ закрыт с
-                    <TextField
-                        type="date"
-                        className={"m-2 p-2"}
-                        value={checkoutDate}
-                        onChange={e => setCheckoutDate(e.target.value)}
-                    />
-                    по
-                    <TextField
-                        type="date"
-                        className={"m-2 p-2"}
-                        value={checkoutDate2}
-                        onChange={e => setCheckoutDate2(e.target.value)}
-                    />
-                </Grid>
+                </>}
 
-                <UsersSelect
-                    user={masterId}
-                    users={props.app.users}
-                    setUser={setMasterId}
-                    onlyValid
-                    classes={"w-100 p-1 m-1"}
-                    label={"Мастер"}
-                />
-
-                <StatusesSelect
-                    status={statusId}
-                    statuses={props.app.statuses}
-                    setStatus={setStatusId}
-                    empty
-                />
-
-            </>}
-
-            <Grid container
-                  justify={'flex-end'}
-            >
-
-                <Button
-                    style={{
-                        margin: '1rem'
-                    }}
-                    onClick={() => find()}
-                    color={'primary'}
-                    variant='outlined'
+                <Grid container
+                      justify={'flex-end'}
                 >
-                    Найти
-                </Button>
 
-            </Grid>
+                    <Button
+                        style={{
+                            margin: '1rem'
+                        }}
+                        onClick={() => find()}
+                        color={'primary'}
+                        variant='outlined'
+                    >
+                        Найти
+                    </Button>
+
+                </Grid>
+            </>
+            : <Button style={{
+                padding: '1rem'
+            }}
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setParameters(true)}
+            >
+                Параметры поиска
+            </Button>}
 
         <Table size="small">
             <TableHead>
@@ -285,7 +303,7 @@ const Orders = props => {
                     <TableCell>Устройство</TableCell>
                     <TableCell>Заказчик</TableCell>
                     <TableCell>Статус</TableCell>
-                    {onlyMy ? null : <TableCell>Мастер</TableCell>}
+                    <TableCell>Мастер</TableCell>
                 </TableRow>
             </TableHead>
             <TableBody>
@@ -320,9 +338,9 @@ const Orders = props => {
                         <TableCell color={status.color}>
                             {status.name}
                         </TableCell>
-                        {onlyMy || <TableCell>
+                        <TableCell>
                             {master ? master.name : 'не определен'}
-                        </TableCell>}
+                        </TableCell>
                     </TableRow>
                 })}
             </TableBody>

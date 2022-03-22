@@ -364,6 +364,7 @@ const Daily = props => {
                         setStock={setStock}
                         disabled={false}
                         classes={classes.controls}
+                        onlyValid={true}
                     />
 
                 </Grid>
