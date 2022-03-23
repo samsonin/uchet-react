@@ -5,9 +5,6 @@ import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
-import IconButton from "@material-ui/core/IconButton";
-import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import Button from "@material-ui/core/Button";
 import Table from "@material-ui/core/Table";
 import TableHead from "@material-ui/core/TableHead";
@@ -33,7 +30,6 @@ const initCustomer = {
 
 const Orders = props => {
 
-    const [idAndCustomer, setIdAndCustomer] = useState(true)
     const [parameters, setParameters] = useState(false)
 
     const [stocks, setStocks] = useState(() => [props.app.stock_id])
@@ -156,8 +152,6 @@ const Orders = props => {
         setCheckoutDate2()
         setMasterId(0)
 
-        setIdAndCustomer(!idAndCustomer)
-
     }
 
     return <div
@@ -167,37 +161,38 @@ const Orders = props => {
             padding: '1rem'
         }}
     >
-        {parameters
-            ? <>
+
+        <Button style={{
+            padding: '1rem',
+            margin: '1rem'
+        }}
+                variant="outlined"
+                size="small"
+                onClick={() => setParameters(!parameters)}
+        >
+            Параметры поиска
+        </Button>
+
+        {parameters && <>
                 <Grid container
                       justify='space-between'
                 >
-                    {idAndCustomer
-                        ? <TextField
+                    <TextField
                             className={"m-2 p-2"}
                             label={"Заказ №"}
                             value={id ? id.toString() : ''}
                             onChange={e => intInputHandler(e.target.value, setId)}
                         />
-                        : null}
-
-                    <IconButton
-                        onClick={() => changeSearchParameters()}
-                    >
-                        {idAndCustomer
-                            ? <KeyboardArrowRightIcon/>
-                            : <KeyboardArrowLeftIcon/>}
-                    </IconButton>
 
                 </Grid>
 
-                {!id && idAndCustomer && <CustomersSelect
+                {!id && <CustomersSelect
                     customer={customer}
                     updateCustomer={updateCustomer}
                     onlySearch={true}
                 />}
 
-                {idAndCustomer || <>
+                <>
                     <Grid item className="w-100 m-2 p-2">
 
                         {props.app.stocks.map(s => s.is_valid
@@ -266,7 +261,7 @@ const Orders = props => {
                         empty
                     />
 
-                </>}
+                </>
 
                 <Grid container
                       justify={'flex-end'}
@@ -284,16 +279,7 @@ const Orders = props => {
                     </Button>
 
                 </Grid>
-            </>
-            : <Button style={{
-                padding: '1rem'
-            }}
-                      variant="outlined"
-                      size="small"
-                      onClick={() => setParameters(true)}
-            >
-                Параметры поиска
-            </Button>}
+            </>}
 
         <Table size="small">
             <TableHead>
