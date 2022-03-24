@@ -39,8 +39,6 @@ export const Payments = ({order, isEditable}) => {
 
     const {enqueueSnackbar} = useSnackbar()
 
-    if (!(order.json)) return <></>
-
     const addHandler = () => {
 
         if (!sum) return
@@ -59,33 +57,35 @@ export const Payments = ({order, isEditable}) => {
 
     return <>
 
-        <Table size="small">
-            <TableHead>
-                <TableRow>
-                    <TableCell>Дата, время</TableCell>
-                    <TableCell>Сумма</TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {order.json.payments && order.json.payments.map(p => <TableRow
-                    key={'tablerowkeyforpaymentsinordes' + p.sum + p.created_at}>
-                    <TableCell>{toLocalTimeStr(p.created_at)}</TableCell>
-                    <TableCell>
-                        {TwoLineInCell(+p.sum, PAYMENTMETHODS[p.paymentsMethod])}
-                    </TableCell>
-                </TableRow>)}
-                <TableRow>
-                    <TableCell colSpan={2} style={{
-                        fontWeight: 'bold',
-                        textAlign: 'center'
-                    }}>
-                        всего: {order.json.payments
-                        ? totalSum(order.json.payments)
-                        : 0}
-                    </TableCell>
-                </TableRow>
-            </TableBody>
-        </Table>
+        {order.json && order.json.payments
+            ? <Table size="small">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Дата, время</TableCell>
+                        <TableCell>Сумма</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {order.json.payments && order.json.payments.map(p => <TableRow
+                        key={'tablerowkeyforpaymentsinordes' + p.sum + p.created_at}>
+                        <TableCell>{toLocalTimeStr(p.created_at)}</TableCell>
+                        <TableCell>
+                            {TwoLineInCell(+p.sum, PAYMENTMETHODS[p.paymentsMethod])}
+                        </TableCell>
+                    </TableRow>)}
+                    <TableRow>
+                        <TableCell colSpan={2} style={{
+                            fontWeight: 'bold',
+                            textAlign: 'center'
+                        }}>
+                            всего: {order.json.payments
+                            ? totalSum(order.json.payments)
+                            : 0}
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+            : null}
 
         {isEditable && <div style={{
             margin: '1rem',
