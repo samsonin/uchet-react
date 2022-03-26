@@ -154,7 +154,7 @@ const Orders = props => {
 
     }
 
-    const renderStatusButton = (stock_id, order_id, status_id) => {
+    const renderStatus = (stock_id, order_id, status_id) => {
 
         const status = props.app.statuses.find(s => s.id === status_id)
 
@@ -163,6 +163,7 @@ const Orders = props => {
                 backgroundColor: status ? '#' + status.color : '#fff',
                 borderRadius: 5,
                 padding: '.5rem',
+                textAlign: 'center'
             }}
             >
                 {status.name}
@@ -325,7 +326,7 @@ const Orders = props => {
                             {OrderText(o, props.app)}
                         </TableCell>
                         <TableCell>
-                            {toLocalTimeStr(o.unix || o.created_at)}
+                            {toLocalTimeStr(o.unix || o.created_at, true)}
                         </TableCell>
                         <TableCell>
                             {o.model}
@@ -336,7 +337,7 @@ const Orders = props => {
                                 : ''}
                         </TableCell>
                         <TableCell>
-                            {renderStatusButton(o.stock_id, o.id, o.status_id)}
+                            {renderStatus(o.stock_id, o.id, o.status_id)}
                         </TableCell>
                         <TableCell>
                             {master ? master.name : ''}
