@@ -261,20 +261,19 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         {order
             ? <>
-                <StatusesSelect
-                    status={status_id}
-                    setStatus={setStatus_id}
-                    statuses={app.statuses}
-                    disabled={!isEditable}
-                />
                 {status_id > 5 && order.checkout_date
-                    ? <TextField label="Дата закрытия"
+                    ? <TextField label="Статус"
                                  variant="outlined"
                                  style={fieldsStyle}
                                  disabled={!isEditable}
-                                 value={order.checkout_date}
+                                 value={app.statuses.find(s => s.id === order.status_id).name + ' ' + order.checkout_date}
                     />
-                    : null}
+                    : <StatusesSelect
+                        status={status_id}
+                        setStatus={setStatus_id}
+                        statuses={app.statuses}
+                        disabled={!isEditable}
+                    />}
                 <UsersSelect
                     disabled={!isEditable && (master_id > 0 && !isAdmin)}
                     user={master_id}
