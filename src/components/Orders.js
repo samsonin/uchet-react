@@ -315,31 +315,35 @@ const Orders = props => {
 
                     const master = props.app.users.find(u => u.id === o.master_id)
 
+                    const color = o.defect.indexOf('Технический осмотр') === 0
+                        ? 'blue'
+                        : 'black'
+
                     return <TableRow
                         style={{
-                            cursor: 'pointer'
+                            cursor: 'pointer',
                         }}
                         key={'ordertablerowkeyinorders' + o.stock_id + (o.id || o.order_id)}
                         onClick={() => props.history.push('/order/' + o.stock_id + '/' + (o.id || o.order_id))}
                     >
-                        <TableCell>
+                        <TableCell style={{color}}>
                             {OrderText(o, props.app)}
                         </TableCell>
-                        <TableCell>
+                        <TableCell style={{color}}>
                             {toLocalTimeStr(o.unix || o.created_at, true)}
                         </TableCell>
-                        <TableCell>
+                        <TableCell style={{color}}>
                             {o.model}
                         </TableCell>
-                        <TableCell>
+                        <TableCell style={{color}}>
                             {o.customer
                                 ? TwoLineInCell(o.customer.phone_number, o.customer.fio)
                                 : ''}
                         </TableCell>
-                        <TableCell>
+                        <TableCell style={{color}}>
                             {renderStatus(o.stock_id, o.id, o.status_id)}
                         </TableCell>
-                        <TableCell>
+                        <TableCell style={{color}}>
                             {master ? master.name : ''}
                         </TableCell>
                     </TableRow>

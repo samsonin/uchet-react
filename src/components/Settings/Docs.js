@@ -54,14 +54,12 @@ const Docs = props => {
 
     useEffect(() => {
 
-        console.log('useEffect')
-
         if (props.app.stock_id) {
 
             rest('docs/' + props.app.stock_id)
                 .then(data => {
 
-                    console.log(data)
+                    // console.log(data)
 
                 })
 
@@ -74,7 +72,7 @@ const Docs = props => {
         rest('orders/' + props.app.stock_id + '/' + orderId)
             .then(data => {
 
-                console.log(data)
+                // console.log(data)
 
             })
     }

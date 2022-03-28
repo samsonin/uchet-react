@@ -150,10 +150,16 @@ const Order = props => {
         setId(order.id)
         setStockId(order.stock_id)
         setCreated(order.created_at)
-        props.history.push('/order/' + order.stock_id + '/' + order.id)
+
+        let url = '/order'
+        if (order.stock_id && order.id) url += '/' + order.stock_id + '/' + order.id
+
+        props.history.push(url)
     }
 
     useEffect(() => {
+
+        // console.log(order)
 
         if (order && needPrint.current) {
             needPrint.current = false
@@ -182,7 +188,9 @@ const Order = props => {
                         }}
             >
                 {order
-                    ? OrderText(order, props.app) + ' от ' + createDate(order.time)
+                    ? order.id && order.stock_id
+                        ? OrderText(order, props.app) + ' от ' + createDate(order.time)
+                        : 'Гарантийный заказ'
                     : 'Новый заказ'}
             </Typography>
 
@@ -211,27 +219,27 @@ const Order = props => {
             : null}
 
         {tabId === 0 &&
-        <Info order={order}
-              isEditable={canEdit()}
-              setOrder={setOrder}
-              app={props.app}
-              fields={fields}
-              isAdmin={props.auth.admin}
-              needPrint={needPrint}
-        />
+            <Info order={order}
+                  isEditable={canEdit()}
+                  setOrder={setOrder}
+                  app={props.app}
+                  fields={fields}
+                  isAdmin={props.auth.admin}
+                  needPrint={needPrint}
+            />
         }
 
         {order && tabId === 1 &&
-        <Costs order={order} isEditable={canEdit()} users={props.app.users}
-               providers={props.app.providers}/>
+            <Costs order={order} isEditable={canEdit()} users={props.app.users}
+                   providers={props.app.providers}/>
         }
 
         {order && tabId === 2 &&
-        <Payments order={order} isEditable={canEdit() && isSale}/>
+            <Payments order={order} isEditable={canEdit() && isSale}/>
         }
 
         {order && tabId === 3 &&
-        <Remarks order={order} isEditable={canEdit()} users={props.app.users}/>
+            <Remarks order={order} users={props.app.users}/>
         }
 
     </div>

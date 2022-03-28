@@ -26,6 +26,9 @@ export default function (props) {
 
         if (reason !== 'input') return
 
+        if (name === 'phone_number') val = val.replace(/[^0-9]/g,"")
+        if (name === 'fio') val = val.replace(/[^a-zA-Zа-яёА-ЯЁ ]/g,"")
+
         props.updateCustomer(name, val)
 
         if (val.length < 4) return

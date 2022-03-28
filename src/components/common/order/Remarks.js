@@ -10,7 +10,7 @@ import {useSnackbar} from "notistack";
 import rest from "../../Rest"
 import {toLocalTimeStr} from "../Time";
 
-export const Remarks = ({order, isEditable, users}) => {
+export const Remarks = ({order, users}) => {
 
     const [remark, setRemark] = useState('')
 
@@ -60,21 +60,22 @@ export const Remarks = ({order, isEditable, users}) => {
             </TableBody>
         </Table>
 
-        {isEditable && <div style={{
+        <div style={{
             margin: '1rem',
         }}>
-            <TextField className={'w-50'}
+            <TextField className={'w-75 m-1'}
                        value={remark}
                        onChange={e => setRemark(e.target.value)}
             />
 
             <Button variant='outlined'
+                    className={'m-1'}
                     disabled={!remark}
                     onClick={() => handler()}
                     color="primary">
                 Добавить
             </Button>
-        </div>}
+        </div>
 
     </>
 }

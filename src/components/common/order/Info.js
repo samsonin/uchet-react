@@ -41,6 +41,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         fields.map(f => fl[f.name] = '')
         return fl
     })
+    const [isNewWarranty, setIsNewWarranty] = useState(false)
 
     const setField = (name, value) => {
 
@@ -52,8 +53,6 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         })
     }
-
-    const [isNewWarranty, setIsNewWarranty] = useState(false)
 
     const updateCustomer = (name, val) => {
 
@@ -202,11 +201,17 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const warranty = () => {
 
-        setOrder({stock_id: order.stock_id,})
-        setSum(0)
-        setSum2(0)
+        setIsNewWarranty(true)
 
-        create()
+        // order.id = null
+        // order.stock_id = null
+        // order.sum = 0
+        // order.sum2 = 0
+        // delete (order.status_id)
+
+        setOrder(null)
+
+        // create()
 
     }
 
@@ -262,6 +267,14 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                     statuses={app.statuses}
                     disabled={!isEditable}
                 />
+                {status_id > 5 && order.checkout_date
+                    ? <TextField label="Дата закрытия"
+                                 variant="outlined"
+                                 style={fieldsStyle}
+                                 disabled={!isEditable}
+                                 value={order.checkout_date}
+                    />
+                    : null}
                 <UsersSelect
                     disabled={!isEditable && (master_id > 0 && !isAdmin)}
                     user={master_id}
