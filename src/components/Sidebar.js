@@ -50,7 +50,7 @@ const Sidebar = props => {
                 {name: 'Контрагенты', arr: [21, 22, 24]},
                 {name: 'Аналитика', arr: [31, 32]},
                 {name: 'Настройки', arr: [41, 42, 43, 46, 47, 48]},
-                {name: 'Интеграции', arr: [51, 52]},
+                {name: 'Интеграции', arr: [51, 52, 53]},
             ].map(v => siteMap(props.admin).find(sm => v.arr.includes(sm.id))
                 ? <div key={'sidebararrkey' + v.name}>
                     <Button

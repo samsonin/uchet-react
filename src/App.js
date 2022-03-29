@@ -39,6 +39,7 @@ import Prepaids from "./components/Prepaids";
 import {bindActionCreators} from "redux";
 import {init_user, upd_app} from "./actions/actionCreator";
 import Showcase from "./components/Showcase";
+import Prices from "./components/Prices";
 
 
 const parseJwt = token => {
@@ -278,6 +279,8 @@ const App = props => {
                                 />
                                 <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
                             </>}
+
+                            <Route path="/integration/prices" component={Prices}/>
 
                         </form>
 

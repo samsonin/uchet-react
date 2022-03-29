@@ -26,7 +26,7 @@ const Main = ({admin}) => {
         [18, 17, 27],
         [34, 35],
         [41, 42, 43, 46, 47, 48],
-        [51, 52],
+        [51, 52, 53],
     ].map(arr => <Grid container
                        key={arr.toString()}
         >

@@ -63,6 +63,8 @@ export const siteMap = isAdmin => {
 
         {id: 31, path: "daily", text: "Ежедневный отчет"},
 
+        {id: 53, path: "integration/prices", text: "Прайс-листы"},
+
     ]
 
     return isAdmin
@@ -78,8 +80,8 @@ export const siteMap = isAdmin => {
             {id: 47, path: "settings/fields", text: "Поля"},
             {id: 48, path: "settings/docs", text: "Документы"},
 
-            {id: 51, path: "integration/mango", text: "mango-office.ru"},
-            {id: 52, path: "integration/sms_ru", text: "sms.ru"},
+            {id: 51, path: "integration/mango", text: "Mango-office.ru"},
+            {id: 52, path: "integration/sms_ru", text: "Sms.ru"},
 
         ])
 
