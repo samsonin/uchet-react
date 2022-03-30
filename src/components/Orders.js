@@ -377,7 +377,7 @@ const Orders = props => {
 
                         const master = props.app.users.find(u => u.id === o.master_id)
 
-                        const color = o.defect.indexOf('Технический осмотр') === 0
+                        const color = o.defect && o.defect.indexOf('Технический осмотр') === 0
                             ? 'blue'
                             : 'black'
 
