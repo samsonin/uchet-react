@@ -21,6 +21,8 @@ import {intInputHandler} from "./common/InputHandlers";
 import UsersSelect from "./common/UsersSelect";
 import StatusesSelect from "./common/StatusesSelect";
 import {OrderText} from "./common/OrderText"
+import {InputAdornment} from "@material-ui/core";
+import SearchIcon from "@material-ui/icons/Search";
 
 const initCustomer = {
     id: 0,
@@ -42,6 +44,9 @@ const Orders = props => {
     const [checkoutDate2, setCheckoutDate2] = useState()
     const [masterId, setMasterId] = useState(0)
     const [statusId, setStatusId] = useState(-1)
+
+    const [search, setSearch] = useState('')
+    const [hideFinished, setHideFinished] = useState(false)
 
     const [orders, setOrders] = useState()
 
@@ -101,7 +106,7 @@ const Orders = props => {
         if (statusId >= 0) url += 'status_id=' + statusId + '&'
 
         if (id) url = 'orders?id=' + id
-        else if (customer.id) url += 'customer_id=' + customer.id
+        else if (customer.id) url = 'orders?customer_id=' + customer.id
         else if (createdDate || createdDate2 || checkoutDate || checkoutDate2) {
 
             ['createdDate', 'createdDate2', 'checkoutDate', 'checkoutDate2'].map(v => {
@@ -210,7 +215,7 @@ const Orders = props => {
                 onlySearch={true}
             />}
 
-            <>
+            {!id && !customer.id && <>
                 <Grid item className="w-100 m-2 p-2">
 
                     {props.app.stocks.map(s => s.is_valid
@@ -279,7 +284,7 @@ const Orders = props => {
                     empty
                 />
 
-            </>
+            </>}
 
             <Grid container
                   justify={'flex-end'}
@@ -299,6 +304,39 @@ const Orders = props => {
             </Grid>
         </>}
 
+        <div style={{
+            display: 'flex',
+            justifyContent: 'space-between'
+        }}>
+
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={hideFinished}
+                        onChange={() => setHideFinished(!hideFinished)}
+                        color="primary"
+                    />
+                }
+                label="скрыть завершенные"
+            />
+
+            <TextField style={{
+                margin: '1rem',
+            }}
+                       InputProps={{
+                           startAdornment: (
+                               <InputAdornment position="start">
+                                   <SearchIcon/>
+                               </InputAdornment>
+                           ),
+                       }}
+                       value={search}
+                       onChange={e => setSearch(e.target.value)}
+            />
+
+
+        </div>
+
         <Table size="small">
             <TableHead>
                 <TableRow>
@@ -311,43 +349,67 @@ const Orders = props => {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {orders && orders.map(o => {
+                {orders && orders.filter(o => !hideFinished || o.status_id < 6)
+                    .filter(o => {
 
-                    const master = props.app.users.find(u => u.id === o.master_id)
+                        if (!search) return true
 
-                    const color = o.defect.indexOf('Технический осмотр') === 0
-                        ? 'blue'
-                        : 'black'
+                        const fio = o.customer.fio.toLowerCase()
+                        const pn = o.customer.phone_number.toLowerCase()
+                        const model = o.model.toLowerCase()
 
-                    return <TableRow
-                        style={{
-                            cursor: 'pointer',
-                        }}
-                        key={'ordertablerowkeyinorders' + o.stock_id + (o.id || o.order_id)}
-                        onClick={() => props.history.push('/order/' + o.stock_id + '/' + (o.id || o.order_id))}
-                    >
-                        <TableCell style={{color}}>
-                            {OrderText(o, props.app)}
-                        </TableCell>
-                        <TableCell style={{color}}>
-                            {toLocalTimeStr(o.unix || o.created_at, true)}
-                        </TableCell>
-                        <TableCell style={{color}}>
-                            {o.model}
-                        </TableCell>
-                        <TableCell style={{color}}>
-                            {o.customer
-                                ? TwoLineInCell(o.customer.phone_number, o.customer.fio)
-                                : ''}
-                        </TableCell>
-                        <TableCell style={{color}}>
-                            {renderStatus(o.stock_id, o.id, o.status_id)}
-                        </TableCell>
-                        <TableCell style={{color}}>
-                            {master ? master.name : ''}
-                        </TableCell>
-                    </TableRow>
-                })}
+                        let r = true
+
+                        search.toLowerCase()
+                            .split(' ')
+                            .map(s => {
+
+                            if (fio.indexOf(s) < 0 && pn.indexOf(s) < 0 && model.indexOf(s) < 0) {
+                                r = false
+                            }
+
+                        })
+
+                        return r
+
+                    })
+                    .map(o => {
+
+                        const master = props.app.users.find(u => u.id === o.master_id)
+
+                        const color = o.defect.indexOf('Технический осмотр') === 0
+                            ? 'blue'
+                            : 'black'
+
+                        return <TableRow
+                            style={{
+                                cursor: 'pointer',
+                            }}
+                            key={'ordertablerowkeyinorders' + o.stock_id + (o.id || o.order_id)}
+                            onClick={() => props.history.push('/order/' + o.stock_id + '/' + (o.id || o.order_id))}
+                        >
+                            <TableCell style={{color}}>
+                                {OrderText(o, props.app)}
+                            </TableCell>
+                            <TableCell style={{color}}>
+                                {toLocalTimeStr(o.unix || o.created_at, true)}
+                            </TableCell>
+                            <TableCell style={{color}}>
+                                {o.model}
+                            </TableCell>
+                            <TableCell style={{color}}>
+                                {o.customer
+                                    ? TwoLineInCell(o.customer.phone_number, o.customer.fio)
+                                    : ''}
+                            </TableCell>
+                            <TableCell style={{color}}>
+                                {renderStatus(o.stock_id, o.id, o.status_id)}
+                            </TableCell>
+                            <TableCell style={{color}}>
+                                {master ? master.name : ''}
+                            </TableCell>
+                        </TableRow>
+                    })}
             </TableBody>
         </Table>
 

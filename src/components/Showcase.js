@@ -130,9 +130,21 @@ const Showcase = props => {
 
                             const model = s.model.toLowerCase()
                             const imei = s.imei.toLowerCase()
-                            const lSearch = search.toLowerCase()
 
-                            return model.indexOf(lSearch) > -1 || imei.indexOf(lSearch) > -1
+                            let r = true
+
+                            search.toLowerCase()
+                                .split(' ')
+                                .map(s => {
+
+                                    if (model.indexOf(s) < 0 && imei.indexOf(s) < 0) {
+                                        r = false
+                                    }
+
+                                })
+
+                            return r
+
 
                         })
                         .map(s => <TableRow key={'tablerowinshowcase' + s.id}
