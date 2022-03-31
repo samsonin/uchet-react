@@ -61,7 +61,8 @@ export default function (props) {
     return <div
         style={{
             backgroundColor: '#e2f6e2',
-            padding: '1rem',
+            padding: '.5rem',
+            margin: '.3rem 0',
             width: '100%'
         }}
     >
@@ -74,12 +75,12 @@ export default function (props) {
             }
         </div>}
         {[
-            {name: 'phone_number', label: 'Телефон', margin: '1rem .3rem 3rem .3rem'},
-            {name: 'fio', label: 'ФИО', margin: '1rem .3rem 2rem .3rem'},
+            {name: 'phone_number', label: 'Телефон'},
+            {name: 'fio', label: 'ФИО'},
         ].map(f => <Autocomplete
             key={'customerselectkeyincustselect' + f.name + f.label}
             disabled={props.disabled}
-            style={{margin: f.margin}}
+            style={{margin: '.5rem .3rem'}}
             fullWidth
             value={value}
             options={customers}

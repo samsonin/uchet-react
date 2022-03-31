@@ -54,10 +54,29 @@ export default function (props) {
 
     const renderBody = () => customers
 
-        ? customers.map(c => !search ||
-        (c.fio.indexOf(search) > -1) ||
-        (c.phone_number.indexOf(search) > -1)
-            ? <TableRow
+        ? customers.filter(c => {
+
+                if (!search) return true
+
+                const fio = c.fio.toLowerCase()
+                const pn = c.phone_number.toLowerCase()
+
+                let r = true
+
+                search.toLowerCase()
+                    .split(' ')
+                    .map(s => {
+
+                        if (fio.indexOf(s) < 0 && pn.indexOf(s) < 0) {
+                            r = false
+                        }
+
+                    })
+
+                return r
+
+            })
+            .map(c => <TableRow
                 key={'teblerowcust' + c.id}
                 onClick={() => props.history.push('/customers/' + c.id)}
                 style={{
@@ -66,8 +85,7 @@ export default function (props) {
             >
                 <TableCell>{c.fio}</TableCell>
                 <TableCell>{c.phone_number}</TableCell>
-            </TableRow>
-            : null)
+            </TableRow>)
 
         : <TableRow>
             <TableCell colSpan={3}>

@@ -140,11 +140,26 @@ const Prepaids = props => {
                         ? prepaids
                             .filter(p => {
 
-                                if (!search || !p.customer) return true
+                                if (!search) return true
 
-                                const row = (p.time + p.item + p.customer.phone_number + p.customer.fio).toLowerCase()
+                                const fio = p.customer.fio.toLowerCase()
+                                const pn = p.customer.phone_number.toLowerCase()
+                                const time = p.time.toLowerCase()
+                                const item = p.item.toLowerCase()
 
-                                return row.indexOf(search.toLowerCase()) > -1
+                                let r = true
+
+                                search.toLowerCase()
+                                    .split(' ')
+                                    .map(s => {
+
+                                        if (fio.indexOf(s) < 0 && pn.indexOf(s) < 0 && time.indexOf(s) < 0 && item.indexOf(s) < 0) {
+                                            r = false
+                                        }
+
+                                    })
+
+                                return r
 
                             })
                             .map(p => <TableRow
@@ -154,7 +169,9 @@ const Prepaids = props => {
                                 }}
                                 onClick={() => openPrepaid(p)}
                             >
-                                <TableCell>{p.time}</TableCell>
+                                <TableCell>
+                                    {TwoLineInCell(p.time.substring(0, 10), p.time.substring(11))}
+                                </TableCell>
                                 <TableCell>{p.item}</TableCell>
                                 <TableCell>
                                     {p.customer

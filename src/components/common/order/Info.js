@@ -1,18 +1,20 @@
 import React, {useEffect, useState} from "react";
 import StatusesSelect from "../StatusesSelect";
 import Button from "@material-ui/core/Button";
-import {TextField} from "@material-ui/core";
+import {FormControl, InputLabel, TextField} from "@material-ui/core";
 import {useSnackbar} from "notistack";
 
 import rest from "../../Rest"
 import CustomersSelect from "../CustomersSelect";
-import Tree from "../../Tree";
+// import Tree from "../../Tree";
 import UsersSelect from "../UsersSelect";
 import {intInputHandler, numberInputHandler} from "../InputHandlers";
 import {totalSum} from "./functions";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
 
 const fieldsStyle = {
-    margin: '1rem .3rem',
+    margin: '.4rem',
     width: '100%'
 }
 
@@ -21,10 +23,12 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
     const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
     const [isRest, setIsRest] = useState(false)
-    const [treeOpen, setTreeOpen] = useState(false)
+    // const [treeOpen, setTreeOpen] = useState(false)
 
+    // const [group_id, setGroup_id] = useState(0)
     const [status_id, setStatus_id] = useState(order ? order.status_id : 0)
-    const [category_id, setCategory_id] = useState(order ? order.category_id : 5)
+    const [category_id, setCategory_id] = useState(order ? order.category_id : 0)
+    const [otherCategory, setOtherCategory] = useState('')
     const [customer, setCustomer] = useState(order ? order.customer : {
         id: 0,
         phone_number: '',
@@ -72,10 +76,10 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const isEditable = !isRest && !order || (isAdmin || order.status_id < 6 || isToday(order.checkout_date))
 
-    const handleTree = category_id => {
-        setCategory_id(+category_id)
-        setTreeOpen(false)
-    }
+    // const handleTree = category_id => {
+    //     setCategory_id(+category_id)
+    //     setTreeOpen(false)
+    // }
 
     const afterRest = res => {
 
@@ -99,12 +103,15 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         if (!(customer.id || customer.fio || customer.phone_number)) {
             return enqueueSnackbar('Нет заказчика', {variant: 'error'})
         }
+        if (!category_id) return enqueueSnackbar('Выберите категорию', {variant: 'error'})
+        if (category_id === 1000 && !otherCategory) return enqueueSnackbar('Впишите другую категорию',
+            {variant: 'error'})
         if (!model) return enqueueSnackbar('Не указана модель', {variant: 'error'})
 
         const data = {
             customer,
-            category_id,
-            model,
+            category_id: category_id === 1000 ? 0 : category_id,
+            model: category_id === 1000 ? otherCategory + ' ' + model : model,
             presum,
             sum,
             ...state
@@ -203,15 +210,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         setIsNewWarranty(true)
 
-        // order.id = null
-        // order.stock_id = null
-        // order.sum = 0
-        // order.sum2 = 0
-        // delete (order.status_id)
-
         setOrder(null)
-
-        // create()
 
     }
 
@@ -247,7 +246,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     }, [order])
 
-    const category = app.categories.find(c => c.id === category_id)
+    // const category = app.categories.find(c => c.id === category_id)
 
     const actionButton = (label, onClick) => <Button variant='outlined'
                                                      disabled={isRest}
@@ -256,6 +255,12 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                                                      color="primary">
         {label}
     </Button>
+
+    let categories = [0, 5, 41, 38]
+
+    if (!categories.includes(category_id)) {
+
+    }
 
     return <>
 
@@ -315,35 +320,70 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                          onChange={e => intInputHandler(e.target.value, setPresum)}
             />}
 
-        {treeOpen
-            ? <div style={{
-                margin: '1rem'
-            }}>
-                <Tree
-                    initialId={category_id}
-                    categories={app.categories}
-                    onSelected={id => setCategory_id(+id)}
-                    finished={id => handleTree(id)}
-                />
-                <Button size="small"
-                        onClick={() => setTreeOpen(false)}
-                        variant="outlined"
+        {/*{treeOpen*/}
+        {/*    ? <div style={{*/}
+        {/*        margin: '1rem'*/}
+        {/*    }}>*/}
+        {/*        <Tree*/}
+        {/*            initialId={category_id}*/}
+        {/*            categories={app.categories}*/}
+        {/*            onSelected={id => setCategory_id(+id)}*/}
+        {/*            finished={id => handleTree(id)}*/}
+        {/*        />*/}
+        {/*        <Button size="small"*/}
+        {/*                onClick={() => setTreeOpen(false)}*/}
+        {/*                variant="outlined"*/}
+        {/*        >*/}
+        {/*            Ок*/}
+        {/*        </Button>*/}
+        {/*    </div>*/}
+        {/*    : isEditable && category && <div style={{*/}
+        {/*    margin: '1rem'*/}
+        {/*}}>*/}
+        {/*    <Button size="small"*/}
+        {/*            className="w-100"*/}
+        {/*            disabled={!isEditable}*/}
+        {/*            onClick={() => setTreeOpen(true)}*/}
+        {/*    >*/}
+        {/*        {category ? category.name : "Выбрать категорию..."}*/}
+        {/*    </Button>*/}
+        {/*</div>*/}
+        {/*}*/}
+
+        {order
+            ? null
+            : <FormControl style={fieldsStyle}>
+
+                <InputLabel id="order-info-select-label">Категоррия</InputLabel>
+
+                <Select value={category_id}
+                        onChange={e => setCategory_id(e.target.value)}
+                        labelId="order-info-select-label"
                 >
-                    Ок
-                </Button>
-            </div>
-            : isEditable && category && <div style={{
-            margin: '1rem'
-        }}>
-            <Button size="small"
-                    className="w-100"
-                    disabled={!isEditable}
-                    onClick={() => setTreeOpen(true)}
-            >
-                {category ? category.name : "Выбрать категорию..."}
-            </Button>
-        </div>
-        }
+                    {categories.map(g => {
+
+                        const category = app.categories.find(c => c.id === g)
+
+                        return <MenuItem key={'menuitemininfoordergroup' + g}
+                                         value={g}>
+                            {category ? category.name : <br/>}
+                        </MenuItem>
+                    })}
+
+                    <MenuItem key={'menuitemininfoordergroup' + 1000}
+                              value={1000}>
+                        Другая категория...
+                    </MenuItem>
+                </Select>
+
+            </FormControl>}
+
+        {category_id === 1000 && <TextField label="Другая категория"
+                                            style={fieldsStyle}
+                                            value={otherCategory}
+                                            onChange={e => setOtherCategory(e.target.value)}
+                                            disabled={!isEditable}
+        />}
 
         <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
                    style={fieldsStyle}

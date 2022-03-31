@@ -62,38 +62,58 @@ const Entities = ({providers}) => {
                         </TableCell>
                     </TableRow>
 
-                    {providers.filter(p => p.name.toLowerCase().indexOf(search.toLowerCase()) >= 0)
+                    {providers.filter(p => {
+
+                        if (!search) return true
+
+                        const name = p.name.toLowerCase()
+
+                        let r = true
+
+                        search.toLowerCase()
+                            .split(' ')
+                            .map(s => {
+
+                                if (name.indexOf(s) < 0) {
+                                    r = false
+                                }
+
+                            })
+
+                        return r
+
+                    })
                         .map(p => p.is_valid
-                        ? <TableRow
-                            key={'entitiesrowkey' + p.id}
-                        >
-                            <TableCell>
-                                {p.name}
-                            </TableCell>
-                            <TableCell>
-                                {p.inn}
-                            </TableCell>
-                            <TableCell>
-                                <Tooltip title="Редактировать">
-                                    <Link to={"/entities/" + p.id}>
+                            ? <TableRow
+                                key={'entitiesrowkey' + p.id}
+                            >
+                                <TableCell>
+                                    {p.name}
+                                </TableCell>
+                                <TableCell>
+                                    {p.inn}
+                                </TableCell>
+                                <TableCell>
+                                    <Tooltip title="Редактировать">
+                                        <Link to={"/entities/" + p.id}>
+                                            <IconButton>
+                                                <EditIcon/>
+                                            </IconButton>
+                                        </Link>
+                                    </Tooltip>
+                                </TableCell>
+                                <TableCell>
+                                    <Tooltip title="Взаиморасчеты">
+                                        {/*<Link to={"/entities/" + p.id}>*/}
                                         <IconButton>
-                                            <EditIcon/>
+                                            <ReceiptIcon/>
                                         </IconButton>
-                                    </Link>
-                                </Tooltip>
-                            </TableCell>
-                            <TableCell>
-                                <Tooltip title="Взаиморасчеты">
-                                    {/*<Link to={"/entities/" + p.id}>*/}
-                                    <IconButton>
-                                        <ReceiptIcon/>
-                                    </IconButton>
-                                    {/*</Link>*/}
-                                </Tooltip>
-                            </TableCell>
-                        </TableRow>
-                        : null
-                    )}
+                                        {/*</Link>*/}
+                                    </Tooltip>
+                                </TableCell>
+                            </TableRow>
+                            : null
+                        )}
                 </TableBody>
             </Table>
         </TableContainer>
