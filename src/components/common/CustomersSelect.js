@@ -47,15 +47,12 @@ export default function (props) {
 
     }
 
-    const handler = val => {
+    const handler = (val, r) => {
+
         setValue(val)
-        if (!val) val = {
-            id: 0,
-            fio: '',
-            phone_number: ''
-        }
-        fields.map(f => props.updateCustomer(f, val[f]))
+        if (val) fields.map(f => props.updateCustomer(f, val[f]))
         setCustomers([])
+
     }
 
     return <div

@@ -412,7 +412,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         {order
             ? order.status_id === 6
                 ? <>
-                    {isWarranty(order.checkout_date) && actionButton('Принять по гарантии', warranty)}
+                    {/*{isWarranty(order.checkout_date) && actionButton('Принять по гарантии', warranty)}*/}
                     {(isAdmin || isToday(order.checkout_date)) && actionButton('Открыть заказ', open)}
                 </>
                 : <>
