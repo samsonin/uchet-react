@@ -26,8 +26,11 @@ export default function (props) {
 
         if (reason !== 'input') return
 
-        if (name === 'phone_number') val = val.replace(/[^0-9]/g,"")
-        if (name === 'fio') val = val.replace(/[^a-zA-Zа-яёА-ЯЁ ]/g,"")
+        if (name === 'phone_number') val = val.replace(/[^0-9]/g, "")
+        if (name === 'fio') val = val.replace(/[^a-zA-Zа-яёА-ЯЁ ]/g, "")
+            .split(' ')
+            .map(w => w.substring(0, 1).toUpperCase() + w.substring(1).toLowerCase())
+            .join(' ')
 
         props.updateCustomer(name, val)
 
@@ -41,7 +44,7 @@ export default function (props) {
                 request.current = false;
                 inCount++
                 if (res.ok && outCount === inCount) {
-                    setCustomers(res.body ? res.body : [])
+                    setCustomers(res.body || [])
                 }
             })
 
