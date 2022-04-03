@@ -1,4 +1,4 @@
-import {useEffect} from "react";
+import React, {useEffect} from "react";
 import {upd_app} from "../actions/actionCreator";
 import {connect} from "react-redux";
 import {bindActionCreators} from 'redux';
@@ -6,6 +6,7 @@ import {bindActionCreators} from 'redux';
 import {useSnackbar} from 'notistack';
 
 import rest from "./Rest";
+import Button from "@material-ui/core/Button";
 
 const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
@@ -28,8 +29,9 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
         else if (Notification.permission !== "denied") {
             Notification.requestPermission().then(permission => {
                 // If the user accepts, let's create a notification
-                return permission === "granted" ?
-                    new Notification(text) : false;
+                return permission === "granted"
+                    ? new Notification(text)
+                    : false;
 
             });
         }
@@ -77,7 +79,22 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
 
                         }
 
-                    } else if (data.type === 'check_zp') {
+                    } else if (data.type === "incoming_call_order" && data.order_id && data.stock_id) {
+
+                        const url = 'orders/' + data.stock_id + '/' + data.order_id
+
+                        const action = () => <Button onClick={() => {
+                            window.open(url, "_blank")
+                        }}>
+                            Открыть
+                        </Button>
+
+                        enqueueSnackbar('Входящий звонок по заказу ' + data.order_id, {
+                            variant: 'success',
+                            autoHideDuration: 5000,
+                            action,
+                        });
+
                     } else if (data.type === 'testConnection') {
                         ws.send('test')
                     }
