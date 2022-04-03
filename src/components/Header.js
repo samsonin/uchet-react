@@ -64,7 +64,7 @@ const NavbarPage = props => {
             }
         })
 
-    const acess_point = () => {
+    const accessPoints = () => {
 
         if (!props.app) return '';
 
@@ -197,7 +197,7 @@ const NavbarPage = props => {
         </button>
         <MDBNavbarNav left>
             <MDBNavItem className={"mx-3"}>
-                {acess_point()}
+                {accessPoints()}
             </MDBNavItem>
         </MDBNavbarNav>
         <MDBNavbarToggler onClick={toggleCollapse}/>
