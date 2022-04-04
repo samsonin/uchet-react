@@ -41,7 +41,6 @@ import {init_user, upd_app} from "./actions/actionCreator";
 import Showcase from "./components/Showcase";
 import Prices from "./components/Prices";
 import Pledges from "./components/Pledges";
-import Pledge from "./components/Pledge";
 
 
 const parseJwt = token => {
@@ -231,7 +230,6 @@ const App = props => {
                             <Route exact path="/prepaids" component={Prepaids}/>
                             <Route exact path="/showcase" component={Showcase}/>
                             <Route exact path="/pledges" component={Pledges}/>
-                            <Route exact path="/pledges/:id" component={Pledge}/>
                             <Route exact path="/customers" component={Customers}/>
                             <Route exact path="/customers/:id" component={Customer}/>
                             <Route exact path="/entities" component={Entities}/>
