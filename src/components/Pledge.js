@@ -4,6 +4,7 @@ import {Button, TextField} from "@material-ui/core";
 import {intInputHandler} from "./common/InputHandlers";
 import IconButton from "@material-ui/core/IconButton";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import CustomersSelect from "./common/CustomersSelect";
 
 
 const Pledge = props => {
@@ -15,11 +16,28 @@ const Pledge = props => {
     const full = d => d < 10 ? '0' + d : d
     const nextDay = date.getFullYear() + '-' + full(1 + date.getMonth()) + '-' + full(date.getDate())
 
+    const [customer, setCustomer] = useState(pledge.id ? pledge.customer : {
+        id: 0,
+        phone_number: '',
+        fio: '',
+    })
     const [model, setModel] = useState(pledge.model ?? '')
     const [imei, setImei] = useState(pledge.imei ?? '')
     const [sum, setSum] = useState(pledge.sum ?? 0)
     const [sum2, setSum2] = useState(pledge.sum2 ?? 0)
     const [ransomdate, setRansomdate] = useState(pledge.ransomdate ?? nextDay)
+    const [note, setNote] = useState(pledge.note ?? '')
+
+    const updateCustomer = (name, val) => {
+
+        setCustomer(prev => {
+
+            const newState = {...prev}
+            newState[name] = val
+            return newState
+
+        })
+    }
 
     const stock = props.app.stocks.find(s => s.id === pledge.stock)
     const timeZone = stock ? stock.timezone_offset : 0
@@ -33,7 +51,7 @@ const Pledge = props => {
 
     useEffect(() => {
 
-        if (pledge.id) return
+        if (pledge.id && pledge.sum2) return
 
         const r = Date.parse(ransomdate)
         const n = Date.now()
@@ -82,6 +100,12 @@ const Pledge = props => {
 
         </div>
 
+        <CustomersSelect
+            customer={customer}
+            updateCustomer={updateCustomer}
+            disabled={pledge.id}
+        />
+
         <TextField label="Наименование"
                    style={fieldsStyle}
                    value={model}
@@ -110,25 +134,28 @@ const Pledge = props => {
                    style={fieldsStyle}
                    type="date"
                    value={ransomdate}
+                   error={isDelay}
                    onChange={e => pledge.id ? {} : setRansomdate(e.target.value)}
         />
 
         <TextField label="Сумма выкупа"
                    style={fieldsStyle}
                    value={sum2}
+                   error={isDelay}
                    onChange={e => pledge.id ? {} : intInputHandler(e.target.value, setSum2)}
         />
 
-        {isDelay && <TextField label="в том числе просрочка"
-                               style={fieldsStyle}
-                               error
-                               value={sum2}
-        />}
+        <TextField label="Примечание"
+                   style={fieldsStyle}
+                   value={note}
+                   onChange={e => setNote(e.target.value)}
+        />
 
         {props.app.stock_id
-            ? pledge
+            ? pledge.id
                 ? pledge.stock === props.app.stock_id
                     ? <div style={{
+                        padding: '.3rem',
                         display: "flex",
                         justifyContent: 'space-around'
                     }}>
