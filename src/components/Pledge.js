@@ -4,23 +4,36 @@ import {Button, TextField} from "@material-ui/core";
 import {intInputHandler} from "./common/InputHandlers";
 import IconButton from "@material-ui/core/IconButton";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import CustomersSelect from "./common/CustomersSelect";
+import {useSnackbar} from "notistack";
+import Fields from "./customer/Fields";
 
 
 const Pledge = props => {
 
     const pledge = props.current
 
+    const stock = props.app.stocks.find(s => s.id === pledge.stock)
+    const timeZone = stock ? stock.timezone_offset : 0
+    const isDelay = pledge.ransomdate
+        ? (Date.now() - Date.parse(pledge.ransomdate)) / 3600000 + timeZone > 24
+        : false
+
+    // три состояния:
+    // Оформление нового залога     pledge = {}
+    // Действующий залог            isDelay = false
+    // Просроченный залог           isDelay = true
+
+    console.log(pledge)
+    console.log(isDelay)
+
+    const {enqueueSnackbar} = useSnackbar()
+
     const date = new Date();
     date.setDate(date.getDate() + 1);
     const full = d => d < 10 ? '0' + d : d
     const nextDay = date.getFullYear() + '-' + full(1 + date.getMonth()) + '-' + full(date.getDate())
 
-    const [customer, setCustomer] = useState(pledge.id ? pledge.customer : {
-        id: 0,
-        phone_number: '',
-        fio: '',
-    })
+    const [customer, setCustomer] = useState({})
     const [model, setModel] = useState(pledge.model ?? '')
     const [imei, setImei] = useState(pledge.imei ?? '')
     const [sum, setSum] = useState(pledge.sum ?? 0)
@@ -28,25 +41,25 @@ const Pledge = props => {
     const [ransomdate, setRansomdate] = useState(pledge.ransomdate ?? nextDay)
     const [note, setNote] = useState(pledge.note ?? '')
 
-    const updateCustomer = (name, val) => {
-
-        setCustomer(prev => {
-
-            const newState = {...prev}
-            newState[name] = val
-            return newState
-
-        })
-    }
-
-    const stock = props.app.stocks.find(s => s.id === pledge.stock)
-    const timeZone = stock ? stock.timezone_offset : 0
-
-    const isDelay = (Date.now() - Date.parse(pledge.ransomdate)) / 3600000 + timeZone > 24
-
     const fieldsStyle = {
         margin: '.4rem',
         width: '100%',
+    }
+
+    const create = () => {
+
+        if (!customer.fio) enqueueSnackbar('введите ФИО', {
+            variant: 'error'
+        })
+
+    }
+
+    const handleChange = (name, value) => {
+
+        const newCustomer = {...customer}
+        newCustomer[name] = value
+        setCustomer(newCustomer)
+
     }
 
     useEffect(() => {
@@ -63,11 +76,27 @@ const Pledge = props => {
         const daily = sum * percent / 100
         const prof = daily * days
 
-        const rs = 50 * Math.round((sum + (min < prof ? prof : min) )/ 50)
+        const rs = 50 * Math.round((sum + (min < prof ? prof : min)) / 50)
 
         setSum2(rs)
 
     }, [sum, ransomdate])
+
+    const ransomSumHandler = sum => {
+
+        if (pledge.id) return
+
+        intInputHandler(sum, setSum2)
+
+    }
+
+    const ransomDateHandler = date => {
+
+        if (pledge.id || date < nextDay) return
+
+        setRansomdate(date)
+
+    }
 
     return <div style={{
         padding: '0 1rem 0 0',
@@ -100,10 +129,10 @@ const Pledge = props => {
 
         </div>
 
-        <CustomersSelect
+        <Fields
             customer={customer}
-            updateCustomer={updateCustomer}
-            disabled={pledge.id}
+            handleChange={handleChange}
+            fieldsStyle={fieldsStyle}
         />
 
         <TextField label="Наименование"
@@ -119,15 +148,15 @@ const Pledge = props => {
         />
 
         {pledge.time && <TextField label="Дата залога"
-                                             style={fieldsStyle}
-                                             type="date"
-                                             value={pledge.time.substring(0, 10)}
+                                   style={fieldsStyle}
+                                   type="date"
+                                   value={pledge.time.substring(0, 10)}
         />}
 
         <TextField label="Сумма залога"
                    style={fieldsStyle}
                    value={sum}
-                   onChange={e => pledge.id ? {} : intInputHandler(e.target.value, setSum)}
+                   onChange={e => ransomSumHandler(e.target.value)}
         />
 
         <TextField label="Дата выкупа"
@@ -135,7 +164,7 @@ const Pledge = props => {
                    type="date"
                    value={ransomdate}
                    error={isDelay}
-                   onChange={e => pledge.id ? {} : setRansomdate(e.target.value)}
+                   onChange={e => ransomDateHandler(e.target.value)}
         />
 
         <TextField label="Сумма выкупа"
@@ -165,15 +194,7 @@ const Pledge = props => {
                                 variant="contained"
                                 onClick={() => {
                                 }}>
-                            Сохранить
-                        </Button>
-
-                        <Button size="small"
-                                color="primary"
-                                variant="contained"
-                                onClick={() => {
-                                }}>
-                            Выдать
+                            Выкупают
                         </Button>
 
                         <Button size="small"
@@ -187,10 +208,12 @@ const Pledge = props => {
                     : null
                 : <Button size="small"
                           color="primary"
-
+                          style={{
+                              margin: '.5rem',
+                              padding: '.5rem',
+                          }}
                           variant="contained"
-                          onClick={() => {
-                          }}>
+                          onClick={() => create()}>
                     Принять в залог
                 </Button>
             : null}
