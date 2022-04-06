@@ -6,6 +6,7 @@ import IconButton from "@material-ui/core/IconButton";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import {useSnackbar} from "notistack";
 import Fields from "./customer/Fields";
+import rest from "./Rest";
 
 
 const Pledge = props => {
@@ -33,9 +34,10 @@ const Pledge = props => {
     const full = d => d < 10 ? '0' + d : d
     const nextDay = date.getFullYear() + '-' + full(1 + date.getMonth()) + '-' + full(date.getDate())
 
-    const [customer, setCustomer] = useState({})
+    const [customer, setCustomer] = useState(pledge.customer ? pledge.customer : {})
     const [model, setModel] = useState(pledge.model ?? '')
     const [imei, setImei] = useState(pledge.imei ?? '')
+    const [password, setPassword] = useState(pledge.password ?? '')
     const [sum, setSum] = useState(pledge.sum ?? 0)
     const [sum2, setSum2] = useState(pledge.sum2 ?? 0)
     const [ransomdate, setRansomdate] = useState(pledge.ransomdate ?? nextDay)
@@ -48,13 +50,42 @@ const Pledge = props => {
 
     const create = () => {
 
-        if (!customer.fio) enqueueSnackbar('введите ФИО', {
+        let error = ''
+        if (!customer.fio) error = 'ФИО'
+        else if (!model) error = 'наменование'
+        else if (!imei) error = 'imei или S/N'
+        else if (!sum) error = 'сумму залога'
+
+        if (error) return enqueueSnackbar('введите ' + error, {
             variant: 'error'
         })
+
+        const data = {
+            customer,
+            model,
+            imei,
+            password,
+            sum,
+            sum2,
+            ransomdate,
+            note
+        }
+
+        rest('pledges/' + props.app.stock_id, 'POST', data)
+            .then(res => {
+
+                if (res.status === 200) {
+
+                }
+
+            })
+
 
     }
 
     const handleChange = (name, value) => {
+
+        if (customer.id) return
 
         const newCustomer = {...customer}
         newCustomer[name] = value
@@ -86,7 +117,7 @@ const Pledge = props => {
 
         if (pledge.id) return
 
-        intInputHandler(sum, setSum2)
+        intInputHandler(sum, setSum)
 
     }
 
@@ -118,13 +149,13 @@ const Pledge = props => {
             <span style={{
                 fontSize: 25, fontWeight: 'bold',
             }}>
-        Залог
+                Залог
             </span>
 
             <span style={{
                 fontSize: 25, fontWeight: 'bold',
             }}>
-        {pledge.id ? '#' + pledge.id : null}
+                {pledge.id ? '#' + pledge.id : null}
             </span>
 
         </div>
@@ -145,6 +176,12 @@ const Pledge = props => {
                    style={fieldsStyle}
                    value={imei}
                    onChange={e => pledge.id ? {} : setImei(e.target.value)}
+        />
+
+        <TextField label="Пароль"
+                   style={fieldsStyle}
+                   value={password}
+                   onChange={e => pledge.id ? {} : setPassword(e.target.value)}
         />
 
         {pledge.time && <TextField label="Дата залога"
