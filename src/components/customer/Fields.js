@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import {connect} from "react-redux";
 import {Link} from "react-router-dom";
 
@@ -14,6 +14,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import ReferalSelect from "../ReferalSelect";
 import {BottomButtons} from "../common/BottomButtons";
 import TextField from "@material-ui/core/TextField/TextField";
+import {Autocomplete} from "@material-ui/lab";
 
 const types = {
     birthday: 'date',
@@ -24,7 +25,10 @@ const Fields = props => {
 
     console.log(props.customer)
 
+    const request = useRef(false)
+
     const [isDetails, setIsDetails] = useState(!props.customer.id)
+    const [customers, setCustomers] = useState([])
 
     const handler = (name, val) => {
 
@@ -35,6 +39,12 @@ const Fields = props => {
             .join(' ')
 
         props.handleChange(name, val)
+
+    }
+
+    const handlerInput = (v, r, name) => {
+
+        console.log(v, r, name)
 
     }
 
@@ -53,7 +63,7 @@ const Fields = props => {
                 margin: '1rem',
                 fontWeight: 'bold'
             }}>
-                Клиент
+                {props.customer.id ? 'Клиент из базы' : 'Новый клиент'}
             </span>
 
             <Tooltip title={isDetails ? 'Короче' : 'Подробнее'}>
@@ -70,14 +80,34 @@ const Fields = props => {
         {props.allElements
             .filter(field => field.index === 'customer' && field.is_valid)
             .filter(field => isDetails || ['fio', 'phone_number'].includes(field.name))
-            .map(field => <TextField
-                style={props.fieldsStyle}
-                key={'customer-fields-key' + field.name + field.index + field.value}
-                type={types[field.name] || 'text'}
-                label={field.value}
-                value={props.customer[field.name] || ''}
-                onChange={e => handler(field.name, e.target.value)}
-            />)}
+            .map(field => ['fio', 'phone_number'].includes(field.name)
+                ? <Autocomplete
+                    key={'customer-fields-key' + field.name + field.index + field.value}
+                    style={props.fieldsStyle}
+                    fullWidth
+                    value={props.customer[field.name] || ''}
+                    options={customers}
+                    loading={request.current}
+                    onInputChange={(e, v, r) => handlerInput(v, r, field.name)}
+                    onChange={(e, v) => handler(v)}
+                    getOptionLabel={option => option ? option[field.name] || '' : ''}
+                    getOptionSelected={option => option.id === props.customer.id}
+                    renderInput={params => <TextField
+                        {...params}
+                        autoComplete='off'
+                        label={field.value}
+                        id={'customer-select-key-in-custselect' + field.name + field.label}
+                        name={'customer-select-key-in-custselect' + field.name + field.label}
+                    />}
+                />
+                : <TextField
+                    style={props.fieldsStyle}
+                    key={'customer-fields-key' + field.name + field.index + field.value}
+                    type={types[field.name] || 'text'}
+                    label={field.value}
+                    value={props.customer[field.name] || ''}
+                    onChange={e => handler(field.name, e.target.value)}
+                />)}
 
     </div>
 

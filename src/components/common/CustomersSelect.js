@@ -34,7 +34,7 @@ export default function (props) {
 
         props.updateCustomer(name, val)
 
-        if (val.length < 4) return
+        if (val.length < 6) return
 
         request.current = true;
         outCount++
