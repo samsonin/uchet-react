@@ -35,10 +35,30 @@ const Pledges = props => {
 
     }, [])
 
+    const addPledge = pledge => {
+
+        const arr = [...pledges]
+        arr.unshift(pledge)
+
+        setPledges(arr)
+        setCurrentPledge(pledge)
+
+    }
+
+    const delPledge = id => {
+
+        setPledges(pledges.filter(p => p.id !== id))
+
+        setCurrentPledge()
+
+    }
+
     return currentPledge
         ? <Pledge
             current={currentPledge}
             setCurrent={setCurrentPledge}
+            addPledge={addPledge}
+            delPledge={delPledge}
         />
         : <div style={{
             backgroundColor: '#fff',

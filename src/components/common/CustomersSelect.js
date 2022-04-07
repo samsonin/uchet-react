@@ -50,7 +50,7 @@ export default function (props) {
 
     }
 
-    const handler = (val, r) => {
+    const handler = val => {
 
         setValue(val)
         if (val) fields.map(f => props.updateCustomer(f, val[f]))

@@ -24,11 +24,11 @@ const monthes = ['Января', 'Февраля', 'Марта', 'Апреля',
 
 export const createDate = created => {
 
-    if (created) {
-        return created.substr(8, 2) + ' ' + monthes[+created.substr(5, 2) - 1].toLowerCase() + ' ' + created.substr(0, 4) + 'г.'
-    } else {
-        const date = new Date();
-        return date.getDate() + ' ' + monthes[date.getMonth()].toLowerCase() + ' ' + date.getFullYear() + 'г.'
-    }
+    const date = new Date(created)
 
+    const month = monthes[date.getMonth()]
+
+    return month
+        ? date.getDate() + ' ' + monthes[date.getMonth()].toLowerCase() + ' ' + date.getFullYear() + 'г.'
+        : ''
 }

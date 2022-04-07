@@ -1,29 +1,24 @@
 import React, {useRef, useState} from "react";
 import {connect} from "react-redux";
-import {Link} from "react-router-dom";
 
-import {Grid, Paper} from "@material-ui/core";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import DeleteIcon from "@material-ui/icons/Delete";
-
-import ReferalSelect from "../ReferalSelect";
-import {BottomButtons} from "../common/BottomButtons";
 import TextField from "@material-ui/core/TextField/TextField";
 import {Autocomplete} from "@material-ui/lab";
+import rest from "../Rest";
 
 const types = {
     birthday: 'date',
     doc_date: 'date',
 }
 
-const Fields = props => {
+let outCount = 0
+let inCount = 0
 
-    console.log(props.customer)
+const Fields = props => {
 
     const request = useRef(false)
 
@@ -42,9 +37,38 @@ const Fields = props => {
 
     }
 
-    const handlerInput = (v, r, name) => {
+    const onInputChangeAutocomplete = (value, reason, name) => {
 
-        console.log(v, r, name)
+        if (reason !== 'input') return
+
+        handler(name, value)
+
+        if (value.length < 6) return
+
+        request.current = true;
+        outCount++
+
+        rest('customers?details=1&all=' + value)
+            .then(res => {
+                request.current = false;
+                inCount++
+                if (res.ok && outCount === inCount) {
+                    setCustomers(res.body || [])
+                }
+            })
+
+
+    }
+
+    const onChangeAutocomplete = (value, reason, name) => {
+
+        if (reason === 'clear') {
+            props.setCustomer({})
+        }
+
+        if (reason !== 'select-option') return
+
+        props.setCustomer(value)
 
     }
 
@@ -59,6 +83,7 @@ const Fields = props => {
             display: "flex",
             justifyContent: 'space-between',
         }}>
+
             <span style={{
                 margin: '1rem',
                 fontWeight: 'bold'
@@ -74,40 +99,44 @@ const Fields = props => {
                 </IconButton>
             </Tooltip>
 
-
         </div>
 
         {props.allElements
             .filter(field => field.index === 'customer' && field.is_valid)
             .filter(field => isDetails || ['fio', 'phone_number'].includes(field.name))
             .map(field => ['fio', 'phone_number'].includes(field.name)
-                ? <Autocomplete
-                    key={'customer-fields-key' + field.name + field.index + field.value}
-                    style={props.fieldsStyle}
-                    fullWidth
-                    value={props.customer[field.name] || ''}
-                    options={customers}
-                    loading={request.current}
-                    onInputChange={(e, v, r) => handlerInput(v, r, field.name)}
-                    onChange={(e, v) => handler(v)}
-                    getOptionLabel={option => option ? option[field.name] || '' : ''}
-                    getOptionSelected={option => option.id === props.customer.id}
-                    renderInput={params => <TextField
-                        {...params}
-                        autoComplete='off'
-                        label={field.value}
-                        id={'customer-select-key-in-custselect' + field.name + field.label}
-                        name={'customer-select-key-in-custselect' + field.name + field.label}
-                    />}
-                />
+
+                    ? <Autocomplete
+                        key={'customer-fields-key' + field.name + field.index + field.value}
+                        style={props.fieldsStyle}
+                        fullWidth
+                        inputValue={props.customer[field.name] ?? ''}
+                        options={customers}
+                        loading={request.current}
+                        onInputChange={(e, v, r) => {
+                            onInputChangeAutocomplete(v, r, field.name)
+                        }}
+                        onChange={(e, v, r) => {
+                            onChangeAutocomplete(v, r, field.name)
+                        }}
+                        getOptionLabel={option => option ? option[field.name] : ''}
+                        getOptionSelected={option => option.id === props.customer.id}
+                        renderInput={params => <TextField
+                            {...params}
+                            label={field.value}
+                        />}
+                    />
+
                 : <TextField
-                    style={props.fieldsStyle}
-                    key={'customer-fields-key' + field.name + field.index + field.value}
-                    type={types[field.name] || 'text'}
-                    label={field.value}
-                    value={props.customer[field.name] || ''}
-                    onChange={e => handler(field.name, e.target.value)}
-                />)}
+                        style={props.fieldsStyle}
+                        key={'customer-fields-key' + field.name + field.index + field.value}
+                        type={types[field.name] || 'text'}
+                        label={field.value}
+                        value={props.customer[field.name] || ''}
+                        onChange={e => handler(field.name, e.target.value)}
+                    />
+
+            )}
 
     </div>
 
