@@ -132,12 +132,12 @@ const Pledge = props => {
 
     }
 
-    const checkout = () => {
+    const checkout = isToSale => {
 
-        rest('pledges/'+ props.app.stock_id + '/' + pledge.id + '/' + sum2, 'DELETE')
+        rest('pledges/'+ props.app.stock_id + '/' + pledge.id + '/' + (isToSale ? 'toSale' : sum2), 'DELETE')
             .then(res => {
 
-                if (res.status === 200) {
+                if (res.status === 200 || res.status === 201) {
                     props.delPledge(pledge.id)
                 }
 
@@ -321,10 +321,10 @@ const Pledge = props => {
                         <Button size="small"
                                 color="primary"
                                 variant="contained"
-                                disabled={true}
-                                onClick={() => {}}>
+                                onClick={() => checkout(true)}>
                             На продажу
                         </Button>
+
                     </div>
                     : null
                 : <Button size="small"
@@ -341,7 +341,6 @@ const Pledge = props => {
 
 
     </div>
-
 
 }
 

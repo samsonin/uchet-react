@@ -24,7 +24,9 @@ const monthes = ['Января', 'Февраля', 'Марта', 'Апреля',
 
 export const createDate = created => {
 
-    const date = new Date(created)
+    const date = created
+        ? new Date(created)
+        : new Date()
 
     const month = monthes[date.getMonth()]
 
