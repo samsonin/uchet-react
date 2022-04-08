@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {forwardRef, useEffect, useRef, useState} from 'react';
 import {connect} from "react-redux";
 import {Button, TextField} from "@material-ui/core";
 import {intInputHandler} from "./common/InputHandlers";
@@ -9,11 +9,28 @@ import {useSnackbar} from "notistack";
 import Fields from "./customer/Fields";
 import rest from "./Rest";
 import {createDate, Print} from "./common/Print";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import Dialog from "@material-ui/core/Dialog";
+import {makeStyles} from "@material-ui/core/styles";
+import Slide from "@material-ui/core/Slide";
 
+
+const Transition = forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
+
+const useStyles = makeStyles((theme) => ({
+    field: {
+        margin: '1rem .3rem',
+        width: '100%'
+    },
+}));
 
 const Pledge = props => {
 
     const pledge = props.current
+    const classes = useStyles()
 
     const stock = props.app.stocks.find(s => s.id === pledge.stock)
     const timeZone = stock ? stock.timezone_offset : 0
@@ -24,6 +41,8 @@ const Pledge = props => {
     const {enqueueSnackbar} = useSnackbar()
 
     const needPrint = useRef(false)
+
+    const [isOpen, setIsOpen] = useState(false)
 
     const date = new Date();
     date.setDate(date.getDate() + 1);
@@ -39,6 +58,9 @@ const Pledge = props => {
     const [ransomdate, setRansomdate] = useState(pledge.ransomdate ?? nextDay)
     const [note, setNote] = useState(pledge.note ?? '')
 
+    const [prolongDate, setProlongDate] = useState(nextDay)
+    const [prolongSum, setProlongSum] = useState(sum2)
+
     const fieldsStyle = {
         margin: '.4rem',
         width: '100%',
@@ -53,13 +75,15 @@ const Pledge = props => {
             organization_inn: props.app.organization.inn,
             today: createDate(pledge.time),
             fio: pledge.customer.fio,
+            phone_number: pledge.customer.phone_number,
             birthday: pledge.customer.birthday ? createDate(pledge.customer.birthday) : '',
             doc_sn: pledge.customer.doc_sn,
-            doc_date: pledge.customer.doc_date ? createDate(pledge.customer.doc_date): '',
+            doc_date: pledge.customer.doc_date ? createDate(pledge.customer.doc_date) : '',
             doc_division_name: pledge.customer.doc_division_name,
             address: pledge.customer.address,
             model: pledge.model,
             imei: pledge.imei,
+            password: pledge.password,
             sum: pledge.sum,
             sum2: pledge.sum2,
             ransomdate: createDate(pledge.ransomdate),
@@ -132,9 +156,27 @@ const Pledge = props => {
 
     }
 
+    const save = () => {
+
+        rest('pledges/' + props.app.stock_id + '/' + pledge.id, 'PATCH', {note})
+            .then(res => {
+
+                if (res.status === 200) {
+                    props.updPledge(res.body.pledge)
+                }
+
+            })
+
+    }
+
+    const prolong = () => {
+
+
+    }
+
     const checkout = isToSale => {
 
-        rest('pledges/'+ props.app.stock_id + '/' + pledge.id + '/' + (isToSale ? 'toSale' : sum2), 'DELETE')
+        rest('pledges/' + props.app.stock_id + '/' + pledge.id + '/' + (isToSale ? 'toSale' : sum2), 'DELETE')
             .then(res => {
 
                 if (res.status === 200 || res.status === 201) {
@@ -188,16 +230,18 @@ const Pledge = props => {
         intInputHandler(sum, setSum)
 
     }
-
-    const ransomDateHandler = date => {
+// TODO исправить
+    const dateHandler = (date, setFunction) => {
 
         if (pledge.id || date < nextDay) return
 
-        setRansomdate(date)
+        setFunction(date)
 
     }
 
-    const delaySum2 = () => {
+    const checkoutSum = () => {
+
+        if (!isDelay) return sum2
 
         const date1 = Date.parse(pledge.time)
         const date2 = Date.now()
@@ -206,142 +250,174 @@ const Pledge = props => {
 
     }
 
-    return <div style={{
-        padding: '0 1rem 0 0',
-        background: '#fff',
-        borderRadius: 3
-    }}>
+    const mb = (value, onClick) => <Button size="small"
+                                           color="primary"
+                                           variant="contained"
+                                           onClick={onClick}>
+        {value}
+    </Button>
+
+    return <>
+
+        <Dialog
+            open={isOpen}
+            TransitionComponent={Transition}
+            keepMounted
+            onClose={() => setIsOpen(false)}
+            className='non-printable'
+        >
+
+            <DialogContent>
+
+                <div style={{
+                    margin: '.5rem',
+                    padding: '.5rem',
+                }}>
+                    Для продления необходимо оплатить {checkoutSum() - pledge.sum}
+                </div>
+
+                <TextField label="Продлить до"
+                           className={classes.field}
+                           type="date"
+                           value={prolongDate}
+                           onChange={e => dateHandler(e.target.value, setProlongDate)}
+                />
+
+                <TextField label="Новая сумма выкупа"
+                           className={classes.field}
+                           value={prolongSum}
+                           onChange={e => intInputHandler(e.target.value, setProlongSum)}
+                />
+
+            </DialogContent>
+
+            <DialogActions>
+                <Button onClick={() => setIsOpen(false)}
+                        color="secondary">
+                    Отмена
+                </Button>
+                <Button onClick={() => prolong()}
+                        color="primary">
+                    Оплатить
+                </Button>
+            </DialogActions>
+
+        </Dialog>
 
         <div style={{
-            margin: '.1rem',
-            padding: '.1rem',
-            display: "flex",
-            justifyContent: 'space-between',
+            padding: '0 1rem 0 0',
+            background: '#fff',
+            borderRadius: 3
         }}>
 
-            <IconButton onClick={() => props.setCurrent(false)}>
-                <ArrowBackIcon/>
-            </IconButton>
-
-            <span style={{
-                fontSize: 25, fontWeight: 'bold',
+            <div style={{
+                margin: '.1rem',
+                padding: '.1rem',
+                display: "flex",
+                justifyContent: 'space-between',
             }}>
+
+                <IconButton onClick={() => props.setCurrent(false)}>
+                    <ArrowBackIcon/>
+                </IconButton>
+
+                <span style={{
+                    fontSize: 25, fontWeight: 'bold',
+                }}>
                 Залог
             </span>
 
-            <span style={{
-                fontSize: 25, fontWeight: 'bold',
-            }}>
+                <span style={{
+                    fontSize: 25, fontWeight: 'bold',
+                }}>
                 {pledge.id ? '#' + pledge.id : null}
             </span>
 
-            {pledge.id && pledge.status === 'new' && pledge.stock === props.app.stock_id &&
+                {pledge.id && pledge.status === 'new' && pledge.stock === props.app.stock_id &&
                 <IconButton
                     onClick={() => Print(doc, inputToText)}
                 >
                     <PrintIcon/>
                 </IconButton>}
 
+            </div>
+
+            <Fields
+                customer={customer}
+                setCustomer={setCustomer}
+                handleChange={handleChange}
+                fieldsStyle={fieldsStyle}
+            />
+
+            <TextField label="Наименование"
+                       style={fieldsStyle}
+                       value={model}
+                       onChange={e => pledge.id ? {} : setModel(e.target.value)}
+            />
+
+            <TextField label="Imei или S/N"
+                       style={fieldsStyle}
+                       value={imei}
+                       onChange={e => pledge.id ? {} : setImei(e.target.value)}
+            />
+
+            <TextField label="Пароль"
+                       style={fieldsStyle}
+                       value={password}
+                       onChange={e => pledge.id ? {} : setPassword(e.target.value)}
+            />
+
+            {pledge.time && <TextField label="Дата залога"
+                                       style={fieldsStyle}
+                                       type="date"
+                                       value={pledge.time.substring(0, 10)}
+            />}
+
+            <TextField label="Сумма залога"
+                       style={fieldsStyle}
+                       value={sum}
+                       onChange={e => ransomSumHandler(e.target.value)}
+            />
+
+            <TextField label="Дата выкупа"
+                       style={fieldsStyle}
+                       type="date"
+                       value={ransomdate}
+                       error={isDelay}
+                       onChange={e => dateHandler(e.target.value, setRansomdate)}
+            />
+
+            <TextField label="Сумма выкупа"
+                       style={fieldsStyle}
+                       value={checkoutSum()}
+                       error={isDelay}
+                       onChange={e => pledge.id ? {} : intInputHandler(e.target.value, setSum2)}
+            />
+
+            <TextField label="Примечание"
+                       style={fieldsStyle}
+                       value={note}
+                       onChange={e => setNote(e.target.value)}
+            />
+
+            {props.app.stock_id && <div style={{
+                padding: '.3rem',
+                display: "flex",
+                justifyContent: 'space-around'
+            }}>
+                {pledge.stock === props.app.stock_id
+                    ? <>
+                        {note === pledge.note || mb('Сохранить', () => save())}
+                        {mb('Выкупают', () => checkout())}
+                        {mb('Продлить', () => setIsOpen(true))}
+                        {isDelay && mb('На продажу', () => checkout(true))}
+                    </>
+                    : mb('Принять в залог', () => create())}
+            </div>}
+
         </div>
 
-        <Fields
-            customer={customer}
-            setCustomer={setCustomer}
-            handleChange={handleChange}
-            fieldsStyle={fieldsStyle}
-        />
-
-        <TextField label="Наименование"
-                   style={fieldsStyle}
-                   value={model}
-                   onChange={e => pledge.id ? {} : setModel(e.target.value)}
-        />
-
-        <TextField label="Imei или S/N"
-                   style={fieldsStyle}
-                   value={imei}
-                   onChange={e => pledge.id ? {} : setImei(e.target.value)}
-        />
-
-        <TextField label="Пароль"
-                   style={fieldsStyle}
-                   value={password}
-                   onChange={e => pledge.id ? {} : setPassword(e.target.value)}
-        />
-
-        {pledge.time && <TextField label="Дата залога"
-                                   style={fieldsStyle}
-                                   type="date"
-                                   value={pledge.time.substring(0, 10)}
-        />}
-
-        <TextField label="Сумма залога"
-                   style={fieldsStyle}
-                   value={sum}
-                   onChange={e => ransomSumHandler(e.target.value)}
-        />
-
-        <TextField label="Дата выкупа"
-                   style={fieldsStyle}
-                   type="date"
-                   value={ransomdate}
-                   error={isDelay}
-                   onChange={e => ransomDateHandler(e.target.value)}
-        />
-
-        <TextField label="Сумма выкупа"
-                   style={fieldsStyle}
-                   value={isDelay ? delaySum2() : sum2}
-                   error={isDelay}
-                   onChange={e => pledge.id ? {} : intInputHandler(e.target.value, setSum2)}
-        />
-
-        <TextField label="Примечание"
-                   style={fieldsStyle}
-                   value={note}
-                   onChange={e => setNote(e.target.value)}
-        />
-
-        {props.app.stock_id
-            ? pledge.id
-                ? pledge.stock === props.app.stock_id
-                    ? <div style={{
-                        padding: '.3rem',
-                        display: "flex",
-                        justifyContent: 'space-around'
-                    }}>
-
-                        <Button size="small"
-                                color="primary"
-                                variant="contained"
-                                onClick={() => checkout()}>
-                            Выкупают
-                        </Button>
-
-                        <Button size="small"
-                                color="primary"
-                                variant="contained"
-                                onClick={() => checkout(true)}>
-                            На продажу
-                        </Button>
-
-                    </div>
-                    : null
-                : <Button size="small"
-                          color="primary"
-                          style={{
-                              margin: '.5rem',
-                              padding: '.5rem',
-                          }}
-                          variant="contained"
-                          onClick={() => create()}>
-                    Принять в залог
-                </Button>
-            : null}
-
-
-    </div>
-
+    </>
 }
 
 export default connect(state => state)(Pledge)

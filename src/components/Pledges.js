@@ -45,6 +45,10 @@ const Pledges = props => {
 
     }
 
+    const updPledge = pledge => {
+
+    }
+
     const delPledge = id => {
 
         setPledges(pledges.filter(p => p.id !== id))
@@ -58,6 +62,7 @@ const Pledges = props => {
             current={currentPledge}
             setCurrent={setCurrentPledge}
             addPledge={addPledge}
+            updPledge={updPledge}
             delPledge={delPledge}
         />
         : <div style={{
