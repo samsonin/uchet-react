@@ -165,16 +165,18 @@ const Prepaid = props => {
 
                         if (props.setPrepaids && res.body.prepaids) props.setPrepaids(res.body.prepaids)
 
-                        if (!id) Print(doc, inputToText)
+                        if (!id) Print(doc, alias)
 
                         exit()
 
                     } else {
+
                         enqueueSnackbar((res.status || '') + ' ' + (res.body
                             ? Object.keys(res.body)[0].toString() + ' ' + res.body[Object.keys(res.body)[0]]
                             : 'error'),
                             {variant: 'error'}
                         )
+
                     }
 
                 }
@@ -252,38 +254,15 @@ const Prepaid = props => {
 
     }
 
-    const inputToText = elem => {
-
-        const inputs = elem.querySelectorAll('input')
-
-        for (let i of inputs) {
-
-            let span = document.createElement('span')
-
-            let value
-            if (i.name === 'organization_organization') {
-                value = props.app.organization.organization
-            } else if (i.name === 'organization_inn') {
-                value = props.app.organization.inn
-            } else if (i.name === 'today') {
-                value = createDate(created)
-            } else if (i.name === 'fio') {
-                value = customer.fio
-            } else if (i.name === 'model') {
-                value = item
-            } else if (i.name === 'sum') {
-                value = sum
-            } else if (i.name === 'presum') {
-                value = presum
-            }
-
-            span.innerHTML = value
-
-            i.parentNode.replaceChild(span, i)
-
-        }
-
-        return elem
+    const alias = {
+        organization_organization: props.app.organization.organization,
+        organization_legal_address: props.app.organization.legal_address,
+        organization_inn: props.app.organization.inn,
+        today: createDate(created),
+        fio: customer.fio,
+        model: item,
+        sum: sum,
+        presum: presum
     }
 
     return <Dialog
@@ -299,7 +278,7 @@ const Prepaid = props => {
 
             <IconButton className={classes.printButton}
                         disabled={!id}
-                        onClick={() => Print(doc, inputToText)}
+                        onClick={() => Print(doc, alias)}
             >
                 <PrintIcon/>
             </IconButton>

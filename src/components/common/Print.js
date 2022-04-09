@@ -1,4 +1,4 @@
-export function Print(doc, inputToText) {
+export function Print(doc, alias, aliasFunction) {
 
     const html = doc
         ? doc.text
@@ -14,7 +14,21 @@ export function Print(doc, inputToText) {
     div.className = 'printable'
     div.innerHTML = html
 
-    document.body.append(inputToText(div))
+    const inputs = div.querySelectorAll('input')
+
+    for (let i of inputs) {
+
+        let span = document.createElement('span')
+
+        span.innerHTML = alias[i.name] || typeof (aliasFunction) === "function"
+            ? aliasFunction(i.name)
+            : ''
+
+        i.parentNode.replaceChild(span, i)
+
+    }
+
+    document.body.append(div)
 
     window.print()
 

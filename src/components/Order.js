@@ -61,71 +61,46 @@ const Order = props => {
 
     const doc = props.app.docs.find(d => d.name === docName)
 
-    const inputToText = elem => {
+    const category = order ? props.app.categories.find(c => c.id === order.category_id) : null
 
-        const inputs = elem.querySelectorAll('input')
+    const stock = order ? props.app.stocks.find(s => s.id === order.stock_id) : null
 
-        for (let i of inputs) {
+    const alias = order
+        ? {
+            organization_organization: props.app.organization.organization,
+            organization_legal_address: props.app.organization.legal_address,
+            organization_inn: props.app.organization.inn,
+            organization_ogrn: props.app.organization.ogrn,
+            access_point_address: stock.address,
+            access_point_phone_number: stock.phone_number,
+            id: id,
+            group: category ? category.name : '',
+            fio: order.customer.fio || 'ИНКОГНИТО',
+            phone_number: order.customer.phone_number ?? 'НЕ УКАЗАН',
+            model: order.model || 'НЕИЗВЕСТНО',
+            sum: order.sum || 0,
+            sum2: totalSum(order),
+            imei: order.imei || '',
+            for_client: order.for_client || '',
+            prepaid: order.json.payments[0].sum || 0,
+            broken_cost: props.app.config.rem_assessed_value,
 
-            let span = document.createElement('span')
-
-            const stock = props.app.stocks.find(s => s.id === order.stock_id)
-
-            let value
-            if (i.name === 'organization_organization') {
-                value = props.app.organization.organization
-            } else if (i.name === 'organization_legal_address') {
-                value = props.app.organization.legal_address
-            } else if (i.name === 'organization_inn') {
-                value = props.app.organization.inn
-            } else if (i.name === 'organization_ogrn') {
-                value = props.app.organization.ogrn
-            } else if (i.name === 'access_point_address') {
-                value = stock ? stock.address : ''
-            } else if (i.name === 'access_point_phone_number') {
-                value = stock ? stock.phone_number : ''
-            } else if (i.name === 'id') {
-                value = id
-            } else if (i.name === 'group') {
-                const category = props.app.categories.find(c => c.id === order.category_id)
-                value = category ? category.name : ''
-            } else if (i.name === 'today') {
-                value = createDate(created)
-            } else if (i.name === 'created_date') {
-                value = createDate(created)
-            } else if (i.name === 'fio') {
-                value = order.customer.fio || 'ИНКОГНИТО'
-            } else if (i.name === 'phone_number') {
-                value = order.customer.phone_number ?? 'НЕ УКАЗАН'
-            } else if (i.name === 'model') {
-                value = order.model || 'НЕИЗВЕСТНО'
-            } else if (i.name === 'sum') {
-                value = order.sum || 0
-            } else if (i.name === 'sum2') {
-                value = totalSum(order)
-            } else if (i.name === 'imei') {
-                value = order.imei || ''
-            } else if (i.name === 'for_client') {
-                value = order.for_client || ''
-            } else if (i.name === 'prepaid') {
-                value = order.json.payments[0].sum || 0
-            } else if (i.name === 'broken_cost') {
-                value = props.app.config.rem_assessed_value
-            } else if (props.app.config[i.name]) {
-                value = props.app.config[i.name]
-            } else if (fields.find(f => f.name === i.name)) {
-                value = order[i.name]
-            }
-
-            // if (!value) console.log('i.name', i.name)
-
-            span.innerHTML = value || ''
-
-            i.parentNode.replaceChild(span, i)
+            today: createDate(created),
+            created_date: createDate(created),
 
         }
+        : {}
 
-        return elem
+    const aliasFunction = name => {
+
+        let value
+        if (props.app.config[name]) {
+            value = props.app.config[name]
+        } else if (fields.find(f => f.name === name)) {
+            value = order[name]
+        }
+
+        return value
     }
 
     useEffect(() => {
@@ -159,11 +134,9 @@ const Order = props => {
 
     useEffect(() => {
 
-        // console.log(order)
-
         if (order && needPrint.current) {
             needPrint.current = false
-            Print(doc, inputToText)
+            Print(doc, alias, aliasFunction)
         }
 
     }, [order])
@@ -195,7 +168,7 @@ const Order = props => {
             </Typography>
 
             {disabled && <IconButton className={classes.printButton}
-                                     onClick={() => Print(doc, inputToText)}
+                                     onClick={() => Print(doc, alias, aliasFunction)}
             >
                 <PrintIcon/>
             </IconButton>}
@@ -219,27 +192,27 @@ const Order = props => {
             : null}
 
         {tabId === 0 &&
-            <Info order={order}
-                  isEditable={canEdit()}
-                  setOrder={setOrder}
-                  app={props.app}
-                  fields={fields}
-                  isAdmin={props.auth.admin}
-                  needPrint={needPrint}
-            />
+        <Info order={order}
+              isEditable={canEdit()}
+              setOrder={setOrder}
+              app={props.app}
+              fields={fields}
+              isAdmin={props.auth.admin}
+              needPrint={needPrint}
+        />
         }
 
         {order && tabId === 1 &&
-            <Costs order={order} isEditable={canEdit()} users={props.app.users}
-                   providers={props.app.providers}/>
+        <Costs order={order} isEditable={canEdit()} users={props.app.users}
+               providers={props.app.providers}/>
         }
 
         {order && tabId === 2 &&
-            <Payments order={order} isEditable={canEdit() && isSale}/>
+        <Payments order={order} isEditable={canEdit() && isSale}/>
         }
 
         {order && tabId === 3 &&
-            <Remarks order={order} users={props.app.users}/>
+        <Remarks order={order} users={props.app.users}/>
         }
 
     </div>

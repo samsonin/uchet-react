@@ -90,29 +90,11 @@ const Pledge = props => {
         }
         : {}
 
-    const inputToText = elem => {
-
-        const inputs = elem.querySelectorAll('input')
-
-        for (let i of inputs) {
-
-            let span = document.createElement('span')
-
-            span.innerHTML = alias[i.name] || ''
-
-            i.parentNode.replaceChild(span, i)
-
-        }
-
-        return elem
-
-    }
-
     useEffect(() => {
 
         if (pledge.id && needPrint.current) {
             needPrint.current = false
-            Print(doc, inputToText)
+            Print(doc, alias)
         }
 
     }, [pledge.id])
@@ -335,7 +317,7 @@ const Pledge = props => {
 
                 {pledge.id && pledge.status === 'new' && pledge.stock === props.app.stock_id &&
                 <IconButton
-                    onClick={() => Print(doc, inputToText)}
+                    onClick={() => Print(doc, alias)}
                 >
                     <PrintIcon/>
                 </IconButton>}
