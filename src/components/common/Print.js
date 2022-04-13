@@ -20,9 +20,9 @@ export function Print(doc, alias, aliasFunction) {
 
         let span = document.createElement('span')
 
-        span.innerHTML = alias[i.name] || typeof (aliasFunction) === "function"
-            ? aliasFunction(i.name)
-            : ''
+        span.innerHTML = alias[i.name]
+            || (typeof (aliasFunction) === "function" && aliasFunction(i.name))
+            || ''
 
         i.parentNode.replaceChild(span, i)
 

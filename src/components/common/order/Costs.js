@@ -290,7 +290,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
             <Button variant='outlined'
                     onClick={() => setServiceOpen(true)}
                     color="primary">
-                Добавить работу
+                Добавить другого мастера
             </Button>
         </div>}
 
