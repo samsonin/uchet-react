@@ -82,7 +82,7 @@ const Order = props => {
             sum2: totalSum(order),
             imei: order.imei || '',
             for_client: order.for_client || '',
-            prepaid: order.json.payments[0].sum || 0,
+            prepaid: order.json && order.json.payments[0] ? order.json.payments[0].sum || 0 : 0,
             broken_cost: props.app.config.rem_assessed_value,
 
             today: createDate(created),
