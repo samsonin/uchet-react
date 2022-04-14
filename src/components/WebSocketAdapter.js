@@ -71,17 +71,17 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
 
                     } else if (data.type === "notification") {
 
-                        if (!notifyMe(data.text)) {
+                        // if (!notifyMe(data.text)) {
 
                             enqueueSnackbar(data.text, {
                                 variant: 'success',
                             });
 
-                        }
+                        // }
 
                     } else if (data.type === "incoming_call_order" && data.order_id && data.stock_id) {
 
-                        const url = 'orders/' + data.stock_id + '/' + data.order_id
+                        const url = 'order/' + data.stock_id + '/' + data.order_id
 
                         const action = () => <Button onClick={() => {
                             window.open(url, "_blank")
