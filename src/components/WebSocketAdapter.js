@@ -52,8 +52,8 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
 
         try {
 
-            let ws = new WebSocket('wss://appblog.ru:3333/' + jwt);
-            // let ws = new WebSocket('ws://localhost:3333/'  + jwt);
+            const ws = new WebSocket('wss://appblog.ru:3333/' + jwt);
+            // const ws = new WebSocket('ws://localhost:3333/'  + jwt);
 
             ws.onmessage = response => {
 
@@ -73,15 +73,16 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
 
                         // if (!notifyMe(data.text)) {
 
-                            enqueueSnackbar(data.text, {
-                                variant: 'success',
-                            });
+                        enqueueSnackbar(data.text, {
+                            variant: 'success',
+                        });
 
                         // }
 
                     } else if (data.type === "incoming_call_order" && data.order_id && data.stock_id) {
 
-                        const url = 'order/' + data.stock_id + '/' + data.order_id
+                        const url = document.location.protocol + '//' + document.location.host
+                            + '/order/' + data.stock_id + '/' + data.order_id
 
                         const action = () => <Button onClick={() => {
                             window.open(url, "_blank")
@@ -118,6 +119,20 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
 
             // rest('initial', 'PUT')
             //     .then(res => upd_app(res.body))
+
+            const sendIsFocus = isFocus => {
+                if (ws && ws.readyState === ws.OPEN) {
+                    ws.send(JSON.stringify({
+                        isFocus,
+                        pathname: window.location.pathname
+                    }))
+                }
+            }
+
+            window.onfocus = () => sendIsFocus(true);
+            window.onblur = () => sendIsFocus(false);
+
+            sendIsFocus(true)
 
         } catch (e) {
             // console.error("ws " + e)
