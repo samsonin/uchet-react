@@ -106,6 +106,7 @@ const Pledge = props => {
         else if (!model) error = 'наменование'
         else if (!imei) error = 'imei или S/N'
         else if (!sum) error = 'сумму залога'
+        else if (!password) error = 'пароль'
 
         if (error) return enqueueSnackbar('введите ' + error, {
             variant: 'error'
