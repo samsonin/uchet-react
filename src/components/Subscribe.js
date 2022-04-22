@@ -51,9 +51,17 @@ const subscribes = [
 
 let dollar = 0;
 
-fetch("https://www.cbr-xml-daily.ru/daily_json.js")
-    .then(response => response.json())
-    .then(response => dollar = response.Valute.USD.Value);
+try {
+
+    fetch("https://www.cbr-xml-daily.ru/daily_json.js")
+        .then(response => response.json())
+        .then(response => dollar = response.Valute.USD.Value);
+
+} catch (e) {
+
+    console.error(e)
+
+}
 
 function yandex(org_id, month, cost) {
 
@@ -102,12 +110,12 @@ function SpacingGrid(props) {
                                 className={classes.cardHeader}
                             />
                             <CardContent className={classes.cardBody}>
-                                    <Typography component="h2" variant="h3" color="textPrimary">
-                                        ${v.cost}
-                                    </Typography>
-                                    <Typography variant="h6" color="textSecondary">
-                                        / месяц
-                                    </Typography>
+                                <Typography component="h2" variant="h3" color="textPrimary">
+                                    ${v.cost}
+                                </Typography>
+                                <Typography variant="h6" color="textSecondary">
+                                    / месяц
+                                </Typography>
                             </CardContent>
                             <CardActions className={classes.cardBody}>
                                 <Button variant="outlined"

@@ -240,6 +240,17 @@ const Pledge = props => {
         {value}
     </Button>
 
+    const renderId = () => {
+
+        const st = props.app.stocks.find(s => s.id === props.app.stock_id)
+
+        return pledge.id
+            ? !st || pledge.stock !== st.id
+                ? stock.name + ' #' + pledge.id
+                : '#' + pledge.id
+            : null
+    }
+
     return <>
 
         <Dialog
@@ -305,23 +316,23 @@ const Pledge = props => {
                 </IconButton>
 
                 <span style={{
-                    fontSize: 25, fontWeight: 'bold',
+                    fontSize: 20, fontWeight: 'bold',
                 }}>
                 Залог
             </span>
 
                 <span style={{
-                    fontSize: 25, fontWeight: 'bold',
+                    fontSize: 20, fontWeight: 'bold',
                 }}>
-                {pledge.id ? '#' + pledge.id : null}
+                    {renderId()}
             </span>
 
                 {pledge.id && pledge.status === 'new' && pledge.stock === props.app.stock_id &&
-                <IconButton
-                    onClick={() => Print(doc, alias)}
-                >
-                    <PrintIcon/>
-                </IconButton>}
+                    <IconButton
+                        onClick={() => Print(doc, alias)}
+                    >
+                        <PrintIcon/>
+                    </IconButton>}
 
             </div>
 

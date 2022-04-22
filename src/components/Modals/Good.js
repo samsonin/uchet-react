@@ -9,6 +9,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash';
 import LineWeightIcon from '@material-ui/icons/LineWeight';
 import BuildIcon from '@material-ui/icons/Build';
+import PrintIcon from '@material-ui/icons/Print';
 
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -28,6 +29,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import {intInputHandler} from "../common/InputHandlers";
 import {GoodSearch} from "../common/GoodSearch";
 import UsersSelect from "../common/UsersSelect";
+import {createDate, Print} from "../common/Print";
 // import {Barcodes} from '../Barcodes'
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -170,7 +172,7 @@ const Good = props => {
         const barcode = good.barcode || good.imei
         if (!barcode) enqueueSnackbar('нет кода или S/N', {variant: 'error'})
 
-        rest (url + barcode, method)
+        rest(url + barcode, method)
             .then(res => {
 
                 if (res.status === 200) {
@@ -215,7 +217,7 @@ const Good = props => {
 
         if (goodsForRepair.length) data.barcodes = goodsForRepair.map(g => g.barcode)
 
-        rest('goods/repair/' +barcode, 'PATCH', data)
+        rest('goods/repair/' + barcode, 'PATCH', data)
             .then(res => {
 
                 if (res.status < 300) {
@@ -348,6 +350,19 @@ const Good = props => {
 
     }
 
+    const doc = props.app.docs.find(d => d.name === 'sale_showcase')
+
+    const alias = {
+        organization_organization: props.app.organization.organization,
+        organization_legal_address: props.app.organization.legal_address,
+        organization_inn: props.app.organization.inn,
+        today: createDate(good.outtime),
+        model: good.item,
+        imei: good.imei,
+        sum: sum,
+    }
+
+
     return <Dialog
         open={!!(good ?? good.id)}
         TransitionComponent={Transition}
@@ -385,11 +400,9 @@ const Good = props => {
                                     () => setIsRepair(!isRepair),
                                     <BuildIcon/>)}
                             </>
-                            // : good.stock_id === props.app.stock_id && isSale(good.wo)
-                            //     ? renderIcon('Вернуть',
-                            //         () => setIsReasonOpen(!isReasonOpen),
-                            //         <Restore/>)
-                            : null}
+                            : good.wo.indexOf('sale') > -1 && renderIcon('Печать',
+                            () => Print(doc, alias),
+                            <PrintIcon/>)}
 
                     {props.auth.admin
                         ? good.wo
