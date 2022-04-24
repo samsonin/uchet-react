@@ -57,6 +57,22 @@ const Pledges = props => {
 
     }
 
+    const dateNow = Date.now()
+
+    const getSum2 = (date1, date2, sum) => {
+
+        const days = Math.ceil((date2 - date1) / 86400000)
+
+        const min = +props.app.config.zalog_min_sum ?? 500
+        const percent = +props.app.config.zalog_day_percent ?? 3
+
+        const daily = sum * percent / 100
+        const prof = daily * days
+
+        return 50 * Math.round((sum + (min < prof ? prof : min)) / 50)
+
+    }
+
     return currentPledge
         ? <Pledge
             current={currentPledge}
@@ -64,6 +80,7 @@ const Pledges = props => {
             addPledge={addPledge}
             updPledge={updPledge}
             delPledge={delPledge}
+            getSum2={getSum2}
         />
         : <div style={{
             backgroundColor: '#fff',
@@ -117,6 +134,9 @@ const Pledges = props => {
 
                 <TableHead>
                     <TableRow>
+                        {props.app.stock_id
+                            ? null
+                            : <TableCell>Точка</TableCell>}
                         <TableCell>Устройство</TableCell>
                         <TableCell>Дата выкупа</TableCell>
                         <TableCell>Сумма выкупа</TableCell>
@@ -160,8 +180,11 @@ const Pledges = props => {
                                              key={'table-row-key-in-pledges-' + p.id}
                                              onClick={() => setCurrentPledge(p)}
                             >
-                                {[TwoLineInCell(p.model, p.imei), p.ransomdate, p.sum2]
-                                    .map(c => <TableCell key={'cell-key-in-pledges-' + p.id + c}
+                                {[props.app.stock_id ? null : stock.name,
+                                    TwoLineInCell(p.model, p.imei),
+                                    p.ransomdate,
+                                    isDelay ? getSum2(Date.parse(p.time), dateNow, p.sum) : p.sum2]
+                                    .map(c => c && <TableCell key={'cell-key-in-pledges-' + p.id + c}
                                                          style={{color: isDelay ? 'red' : 'black'}}>
                                         {c}
                                     </TableCell>)}

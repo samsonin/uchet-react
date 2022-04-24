@@ -154,6 +154,18 @@ const Pledge = props => {
 
     const prolong = () => {
 
+        rest('pledges/' + props.app.stock_id + '/' + pledge.id + '/prolong', 'PATCH', {
+            date: prolongDate,
+            sum: checkoutSum() - pledge.sum,
+            sum2: prolongSum
+        })
+            .then(res => {
+
+                if (res.status === 200) {
+                    props.updPledge(res.body.pledge)
+                }
+
+            })
 
     }
 
@@ -180,47 +192,31 @@ const Pledge = props => {
 
     }
 
-    const getSum2 = (date1, date2, sum) => {
-
-        const days = Math.ceil((date2 - date1) / 86400000)
-
-        const min = +props.app.config.zalog_min_sum ?? 500
-        const percent = +props.app.config.zalog_day_percent ?? 3
-
-        const daily = sum * percent / 100
-        const prof = daily * days
-
-        return 50 * Math.round((sum + (min < prof ? prof : min)) / 50)
-
-    }
-
     useEffect(() => {
 
         if (pledge.id && pledge.sum2) return
 
         const r = Date.parse(ransomdate)
         const n = Date.now()
-        const sum2 = getSum2(n, r, sum)
+        const sum2 = props.getSum2(n, r, sum)
 
         setSum2(sum2)
 
     }, [sum, ransomdate])
 
-    const ransomSumHandler = sum => {
+    useEffect(() => {
 
-        if (pledge.id) return
+        if (!pledge.id) return
 
-        intInputHandler(sum, setSum)
+        const r = Date.parse(prolongDate)
+        const n = Date.now()
+        const prolongSum = props.getSum2(n, r, sum)
 
-    }
-// TODO исправить
-    const dateHandler = (date, setFunction) => {
+        setProlongSum(prolongSum)
 
-        if (pledge.id || date < nextDay) return
+    }, [prolongDate])
 
-        setFunction(date)
-
-    }
+    const dateHandler = (date, setFunction) => date < nextDay || setFunction(date)
 
     const checkoutSum = () => {
 
@@ -229,7 +225,7 @@ const Pledge = props => {
         const date1 = Date.parse(pledge.time)
         const date2 = Date.now()
 
-        return getSum2(date1, date2, sum)
+        return props.getSum2(date1, date2, sum)
 
     }
 
@@ -370,7 +366,7 @@ const Pledge = props => {
             <TextField label="Сумма залога"
                        style={fieldsStyle}
                        value={sum}
-                       onChange={e => ransomSumHandler(e.target.value)}
+                       onChange={e => pledge.id || intInputHandler(e.target.value, setSum)}
             />
 
             <TextField label="Дата выкупа"
@@ -378,7 +374,7 @@ const Pledge = props => {
                        type="date"
                        value={ransomdate}
                        error={isDelay}
-                       onChange={e => dateHandler(e.target.value, setRansomdate)}
+                       onChange={e => pledge.id || dateHandler(e.target.value, setRansomdate)}
             />
 
             <TextField label="Сумма выкупа"
