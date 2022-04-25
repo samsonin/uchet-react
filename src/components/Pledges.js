@@ -37,15 +37,20 @@ const Pledges = props => {
 
     const addPledge = pledge => {
 
-        const arr = [...pledges]
-        arr.unshift(pledge)
+        const newPledges = [...pledges]
+        newPledges.unshift(pledge)
 
-        setPledges(arr)
+        setPledges(newPledges)
         setCurrentPledge(pledge)
 
     }
 
     const updPledge = pledge => {
+
+        const newPledges = pledges.map(p => p.id === pledge.id ? pledge : p)
+
+        setPledges(newPledges)
+        setCurrentPledge(pledge)
 
     }
 

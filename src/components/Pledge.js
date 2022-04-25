@@ -97,7 +97,7 @@ const Pledge = props => {
             Print(doc, alias)
         }
 
-    }, [pledge.id])
+    }, [pledge.id, pledge.ransomdate])
 
     const create = () => {
 
@@ -162,7 +162,17 @@ const Pledge = props => {
             .then(res => {
 
                 if (res.status === 200) {
-                    props.updPledge(res.body.pledge)
+
+                    const newPledge = res.body.pledge
+
+                    setIsOpen(false)
+                    props.updPledge(newPledge)
+
+                    needPrint.current = true
+
+                    setRansomdate(newPledge.ransomdate)
+                    setSum2(newPledge.sum2)
+
                 }
 
             })
