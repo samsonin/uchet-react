@@ -44,6 +44,7 @@ const Orders = props => {
     const [checkoutDate2, setCheckoutDate2] = useState()
     const [masterId, setMasterId] = useState(0)
     const [statusId, setStatusId] = useState(-1)
+    const [model, setModel] = useState()
 
     const [search, setSearch] = useState('')
     const [hideFinished, setHideFinished] = useState(false)
@@ -104,6 +105,8 @@ const Orders = props => {
         if (masterId) url += 'master_id=' + masterId + '&'
 
         if (statusId >= 0) url += 'status_id=' + statusId + '&'
+
+        if (model) url += 'model=' + model + '&'
 
         if (id) url = 'orders?id=' + id
         else if (customer.id) url = 'orders?customer_id=' + customer.id
@@ -284,6 +287,11 @@ const Orders = props => {
                     empty
                 />
 
+                <TextField
+                    value={model}
+                    onChange={e => setModel(e.target.value)}
+                />
+
             </>}
 
             <Grid container
@@ -364,11 +372,11 @@ const Orders = props => {
                             .split(' ')
                             .map(s => {
 
-                            if (fio.indexOf(s) < 0 && pn.indexOf(s) < 0 && model.indexOf(s) < 0) {
-                                r = false
-                            }
+                                if (fio.indexOf(s) < 0 && pn.indexOf(s) < 0 && model.indexOf(s) < 0) {
+                                    r = false
+                                }
 
-                        })
+                            })
 
                         return r
 

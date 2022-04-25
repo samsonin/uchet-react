@@ -230,6 +230,7 @@ const App = props => {
                             <Route exact path="/prepaids" component={Prepaids}/>
                             <Route exact path="/showcase" component={Showcase}/>
                             <Route exact path="/pledges" component={Pledges}/>
+                            <Route exact path="/pledges/:id" component={Pledges}/>
                             <Route exact path="/customers" component={Customers}/>
                             <Route exact path="/customers/:id" component={Customer}/>
                             <Route exact path="/entities" component={Entities}/>

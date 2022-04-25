@@ -254,9 +254,7 @@ const Daily = props => {
 
                     const wf = JSON.parse(row.wf)
 
-                    if (wf.zalog_id) {
-                        console.log('открыть залог #', wf.zalog_id)
-                    }
+                    if (wf.zalog_id) props.history.push('pledges/' + wf.zalog_id)
 
                 } catch (e) {
                     console.log(e)

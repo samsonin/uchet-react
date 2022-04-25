@@ -28,7 +28,18 @@ const Pledges = props => {
             .then(res => {
 
                 if (res.status === 200) {
+
                     setPledges(res.body)
+
+                    const id = +props.match.params.id
+
+                    if (id) {
+
+                        const pledge = res.body.find(p => p.id === id)
+                        if (pledge) setCurrentPledge(pledge)
+
+                    }
+
                 }
 
             })
