@@ -67,12 +67,6 @@
         transform: scale(1.02);
     }
 
-    #sidebaredivider {
-        border-width: 0 0 0 2px;
-        border-style: solid;
-        color: #ff8cb0;
-    }
-
     .circular_progress {
         position: fixed;
         z-index: 2000;
@@ -95,28 +89,6 @@
         font-size: 1rem !important;
     }
 
-    .imgdiv {
-        margin-left: 10em;
-    }
-
-    .point-name {
-        font-size: 45px;
-    }
-
-    .addfab {
-        position: fixed !important;
-        z-index: 2000;
-        margin-left: 45% !important;
-        bottom: 5% !important;
-    }
-
-    .addfab2 {
-        position: fixed !important;
-        z-index: 2000;
-        margin-left: 35% !important;
-        bottom: 5% !important;
-    }
-
     tr:hover {
         background-color: rgba(32, 252, 178, 0.11);
     }
@@ -129,6 +101,9 @@
         opacity: 0;
         transition: 2s opacity;
     }
+
+    .printable { display: none;}
+    .non-printable { display: block;}
 
 }
 
@@ -148,15 +123,12 @@
     }
 }
 
-@media screen {
-    .printable { display: none;}
-    .non-printable { display: block;}
-}
-
 @media print {
     .non-printable { display: none;}
     .printable {
         display: block;
+        margin: 0;
+        padding: 0;
         font-size: 14px;
     }
 }

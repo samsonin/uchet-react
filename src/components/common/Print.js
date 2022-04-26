@@ -10,7 +10,7 @@ export function Print(doc, alias, aliasFunction) {
         printables[i].remove()
     }
 
-    let div = document.createElement('div')
+    const div = document.createElement('div')
     div.className = 'printable'
     div.innerHTML = html
 
@@ -18,11 +18,15 @@ export function Print(doc, alias, aliasFunction) {
 
     for (let i of inputs) {
 
-        let span = document.createElement('span')
+        const span = document.createElement('span')
 
-        span.innerHTML = alias[i.name]
+        const html = alias[i.name]
             || (typeof (aliasFunction) === "function" && aliasFunction(i.name))
             || ''
+
+        span.innerHTML = html
+
+        if (!html) console.error(i.name)
 
         i.parentNode.replaceChild(span, i)
 
@@ -31,6 +35,8 @@ export function Print(doc, alias, aliasFunction) {
     document.body.append(div)
 
     window.print()
+
+    div.remove()
 
 }
 

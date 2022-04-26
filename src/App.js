@@ -190,7 +190,12 @@ const App = props => {
 
         <div className="d-flex d-print-none" id="wrapper">
             <Sidebar/>
-            <div id="sidebaredivider"/>
+
+            <div style={{
+                borderWidth: '0 0 0 2px',
+                borderStyle: 'solid',
+                color: '#ff8cb0'
+            }}/>
 
             <LoginModal
                 isOpen={!+props.auth.user_id}
