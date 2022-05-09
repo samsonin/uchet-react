@@ -167,7 +167,7 @@ const Order = props => {
                     : 'Новый заказ'}
             </Typography>
 
-            {disabled && <IconButton className={classes.printButton}
+            {disabled && order && <IconButton className={classes.printButton}
                                      onClick={() => Print(doc, alias, aliasFunction)}
             >
                 <PrintIcon/>

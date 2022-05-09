@@ -357,11 +357,15 @@ const Good = props => {
 
     const doc = props.app.docs.find(d => d.name === 'sale_showcase')
 
+    const stock = props.app.stocks.find(s => s.id === good.stock_id)
+
     const alias = {
         organization_organization: props.app.organization.organization,
         organization_name: props.app.organization.name,
         organization_legal_address: props.app.organization.legal_address,
         organization_inn: props.app.organization.inn,
+        access_point_address: stock.address || '',
+        access_point_phone_number: stock.phone_number || '',
         today: createDate(good.outtime),
         model: good.model,
         imei: good.imei,

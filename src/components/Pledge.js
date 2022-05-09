@@ -73,6 +73,8 @@ const Pledge = props => {
             organization_organization: props.app.organization.organization,
             organization_legal_address: props.app.organization.legal_address,
             organization_inn: props.app.organization.inn,
+            access_point_address: stock.address || '',
+            access_point_phone_number: stock.phone_number || '',
             today: createDate(pledge.time),
             fio: pledge.customer.fio,
             phone_number: pledge.customer.phone_number,
