@@ -1,5 +1,5 @@
 import React, {forwardRef, useState} from "react";
-import {Table, TableCell, TableRow} from "@material-ui/core";
+import {Checkbox, FormControlLabel, Table, TableCell, TableRow} from "@material-ui/core";
 import TableHead from "@material-ui/core/TableHead";
 import TableBody from "@material-ui/core/TableBody";
 
@@ -58,6 +58,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
     const [job, setJob] = useState('')
     const [sum, setSum] = useState(0)
     const [user_id, setUserId] = useState(0)
+    const [cash, setCash] = useState(false) // учесть в кассе
 
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
@@ -70,7 +71,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
         ? order.provider.filter(p => p.action === 'add_service')
         : null
 
-    const canAddJob = job && sum > 0 && user_id
+    const canAddJob = job && sum > 0 && (user_id || cash)
 
     const addGood = (good, afterRes) => {
 
@@ -87,12 +88,12 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
         if (!canAddJob) return
 
-        rest('order/costs/' + order.stock_id + '/' + order.id, 'POST',
-            {
-                job,
-                sum,
-                user_id
-            })
+        const data = {job, sum}
+
+        if (cash) data.cash = true
+        else data.user_id = user_id
+
+        rest('order/costs/' + order.stock_id + '/' + order.id, 'POST', data)
             .then(res => {
 
                 if (res.status === 200) {
@@ -170,13 +171,21 @@ export const Costs = ({order, isEditable, users, providers}) => {
                            onChange={e => intInputHandler(e.target.value, setSum)}
                 />
 
-                <UsersSelect
+                {cash || <UsersSelect
                     classes={classes.field}
                     users={users}
                     user={user_id}
                     setUser={setUserId}
                     onlyValid={true}
-                />
+                />}
+
+                {!user_id && <FormControlLabel
+                    classes={classes.field}
+                    control={<Checkbox checked={cash}
+                                       onChange={() => setCash(!cash)}
+                    />}
+                    label="списать с кассы"
+                />}
 
             </DialogContent>
 
