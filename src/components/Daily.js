@@ -31,6 +31,7 @@ import PrepaidModal from './Modals/Prepaid'
 import Consignment from "./Consignment";
 import DailyModal from "./Modals/Daily";
 import {numberInputHandler} from "./common/InputHandlers";
+import TwoLineInCell from "./common/TwoLineInCell";
 
 const useStyles = makeStyles(() => ({
     controls: {
@@ -395,7 +396,7 @@ const Daily = props => {
                         <List dense>
                             {daily && daily.employees && daily.employees.map(e => {
 
-                                let user = props.app.users.find(u => u.id === e)
+                                const user = props.app.users.find(u => u.id === e)
 
                                 return user && <ListItem
                                     key={'userindailylistitem' + user.id}
@@ -504,49 +505,30 @@ const Daily = props => {
 
                                                     let value = row[v]
 
-                                                    if (v === 'ui_user_id') {
+                                                    const user = props.app.users.find(u => u.id === row.ui_user_id)
 
-                                                        let user = props.app.users.find(u => u.id === row.ui_user_id)
+                                                    const userName = user ? user.name : row.ui_user_id
 
-                                                        value = user
-                                                            ? user.name
-                                                            : row.ui_user_id
-
-                                                    }
+                                                    if (v === 'ui_user_id') value = userName
 
                                                     if (row.action === 'зарплата' && v === 'note') {
 
-                                                        let user = props.app.users.find(u => u.id === row.ui_user_id)
+                                                        return TwoLineInCell(userName, row.note)
 
-                                                        const userName = user
-                                                            ? user.name
-                                                            : row.ui_user_id
-
-                                                        return <TableCell
-                                                            key={'rowsintabledailysec' + v}
-                                                        >
-                                                            <span className="font-weight-bold pr-3">{userName}</span>
-                                                            <br/>
-                                                            {row.note}
-                                                        </TableCell>
                                                     }
 
                                                     return <TableCell
                                                         key={'rowsintabledailysec' + v}
                                                     >
-                                                        {row.work
+                                                        {row.work && row.action !== 'расход'
                                                             ? v === 'item'
-                                                                ? <>
-                                                                <span
-                                                                    className="font-weight-bold pr-3">{row.item}</span>
-                                                                    <br/>
-                                                                    {row.work}
-                                                                </>
+                                                                ? TwoLineInCell(row.item, row.work)
                                                                 : value
                                                             : v === 'id'
                                                                 ? ''
                                                                 : value}
                                                     </TableCell>
+
                                                 })}
                                             </TableRow>)}
                                         </TableBody>

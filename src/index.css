@@ -129,9 +129,8 @@
 
     .printable {
         display: block;
-        margin: 1rem;
         padding: 0;
-        font-size: 14px;
+        font-size: 13px;
         font-family: Verdana, Arial, Helvetica, sans-serif;
     }
 
