@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-export const Costs = ({order, isEditable, users, providers}) => {
+export const Costs = ({order, isEditable, users, providers, updApp}) => {
 
     const [serviceOpen, setServiceOpen] = useState(false)
     const [job, setJob] = useState('')
@@ -104,6 +104,8 @@ export const Costs = ({order, isEditable, users, providers}) => {
                     setServiceOpen(false)
                     enqueueSnackbar('Добавлено', {variant: 'success'})
 
+                    updApp(res.body)
+
                 } else {
 
                     enqueueSnackbar('Ошибка', {variant: 'error'})
@@ -119,23 +121,25 @@ export const Costs = ({order, isEditable, users, providers}) => {
         if (!barcode) return enqueueSnackbar('нет кода', {variant: "error"})
 
         rest('orders/' + order.stock_id + '/' + order.id + '/' + barcode, 'DELETE')
-            .then(res => {
-                if (res.status !== 200) {
-                    enqueueSnackbar('ошибка ' + res.status, {variant: "error"})
-                }
-            })
-
+            .then(res => res.status === 200
+                ? updApp(res.body)
+                : enqueueSnackbar('ошибка ' + res.status, {variant: "error"}))
     }
 
     const delJob = i => {
 
         rest('order/jobs/' + order.stock_id + '/' + order.id + '/' + i, 'DELETE')
-            .then(res => {
-                if (res.status !== 200) {
-                    enqueueSnackbar('ошибка ' + res.status, {variant: "error"})
-                }
-            })
+            .then(res => res.status === 200
+                ? updApp(res.body)
+                : enqueueSnackbar('ошибка ' + res.status, {variant: "error"}))
+    }
 
+    const delSale = id => {
+
+        rest('sales/' + order.stock_id + '/' + id, 'DELETE')
+            .then(res => res.status === 200
+                ? updApp(res.body)
+                : enqueueSnackbar('ошибка ' + res.status, {variant: "error"}))
     }
 
     return <>
@@ -180,7 +184,9 @@ export const Costs = ({order, isEditable, users, providers}) => {
                 />}
 
                 {!user_id && <FormControlLabel
-                    classes={classes.field}
+                    style={{
+
+                    }}
                     control={<Checkbox checked={cash}
                                        onChange={() => setCash(!cash)}
                     />}
@@ -249,7 +255,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
             </Table>
             : null}
 
-        {isEditable && <GoodSearch onSelected={addGood} />}
+        {isEditable && <GoodSearch onSelected={addGood}/>}
 
         {services && services.length
             ? <Table size="small">
@@ -273,7 +279,9 @@ export const Costs = ({order, isEditable, users, providers}) => {
                                 <TableCell>{s.sum}</TableCell>
                                 <TableCell>
                                     <IconButton
-                                        onClick={() => delJob(i)}
+                                        onClick={() => s.hasOwnProperty('sale_id')
+                                            ? delSale(s.sale_id)
+                                            : delJob(i)}
                                     >
                                         <CancelIcon/>
                                     </IconButton>

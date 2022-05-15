@@ -55,7 +55,8 @@ try {
 
     fetch("https://www.cbr-xml-daily.ru/daily_json.js")
         .then(response => response.json())
-        .then(response => dollar = response.Valute.USD.Value);
+        .then(response => dollar = response.Valute.USD.Value)
+        .catch(res => console.error(res))
 
 } catch (e) {
 

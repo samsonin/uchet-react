@@ -181,7 +181,6 @@ const DailyModal = props => {
 
             data.action = actions[actionId]
 
-
         }
 
         rest(url, props.row ? 'PATCH' : 'POST', data)

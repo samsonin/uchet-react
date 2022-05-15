@@ -196,11 +196,9 @@ const Daily = props => {
 
                 try {
 
-                    const wf = JSON.parse(row.wf)
+                    if (date !== today) row.wf.date = date
 
-                    if (date !== today) wf.date = date
-
-                    setConsignment(wf)
+                    setConsignment(row.wf)
                     setIsConsignmentOpen(true)
 
                 } catch (e) {
@@ -213,11 +211,9 @@ const Daily = props => {
 
                 try {
 
-                    const wf = JSON.parse(row.wf)
+                    if (row.wf.rem_id) {
 
-                    if (wf.rem_id) {
-
-                        return props.history.push('/order/' + stock + '/' + wf.rem_id)
+                        return props.history.push('/order/' + stock + '/' + row.wf.rem_id)
 
                     }
 
@@ -234,7 +230,7 @@ const Daily = props => {
 
                     try {
 
-                        const wf = JSON.parse(row.wf)
+                        const wf = row.wf
 
                         if (wf.barcode) props.setOurBarcode(wf.barcode)
                         else if (wf.showcase) props.setOurBarcode(115104000000 + +wf.showcase)
@@ -253,9 +249,7 @@ const Daily = props => {
 
                 try {
 
-                    const wf = JSON.parse(row.wf)
-
-                    if (wf.zalog_id) props.history.push('pledges/' + wf.zalog_id)
+                    if (row.wf.zalog_id) props.history.push('pledges/' + row.wf.zalog_id)
 
                 } catch (e) {
                     console.log(e)
@@ -307,8 +301,7 @@ const Daily = props => {
     let prepaidId
     if (row && row.wf) {
         try {
-            const wf = JSON.parse(row.wf)
-            prepaidId = wf.zakaz
+            prepaidId = row.wf.zakaz
         } catch (e) {
             console.log('JSON.parse.error', e)
         }
@@ -513,7 +506,9 @@ const Daily = props => {
 
                                                     if (row.action === 'зарплата' && v === 'note') {
 
-                                                        return TwoLineInCell(userName, row.note)
+                                                        return <TableCell>
+                                                            {TwoLineInCell(userName, row.note)}
+                                                        </TableCell>
 
                                                     }
 

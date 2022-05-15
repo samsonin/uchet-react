@@ -168,7 +168,7 @@ const Order = props => {
             </Typography>
 
             {disabled && order && <IconButton className={classes.printButton}
-                                     onClick={() => Print(doc, alias, aliasFunction)}
+                                              onClick={() => Print(doc, alias, aliasFunction)}
             >
                 <PrintIcon/>
             </IconButton>}
@@ -192,27 +192,31 @@ const Order = props => {
             : null}
 
         {tabId === 0 &&
-        <Info order={order}
-              isEditable={canEdit()}
-              setOrder={setOrder}
-              app={props.app}
-              fields={fields}
-              isAdmin={props.auth.admin}
-              needPrint={needPrint}
-        />
+            <Info order={order}
+                  isEditable={canEdit()}
+                  setOrder={setOrder}
+                  app={props.app}
+                  fields={fields}
+                  isAdmin={props.auth.admin}
+                  needPrint={needPrint}
+            />
         }
 
         {order && tabId === 1 &&
-        <Costs order={order} isEditable={canEdit()} users={props.app.users}
-               providers={props.app.providers}/>
+            <Costs order={order}
+                   isEditable={canEdit()}
+                   users={props.app.users}
+                   providers={props.app.providers}
+                   updApp={props.upd_app}
+            />
         }
 
         {order && tabId === 2 &&
-        <Payments order={order} isEditable={canEdit() && isSale}/>
+            <Payments order={order} isEditable={canEdit() && isSale}/>
         }
 
         {order && tabId === 3 &&
-        <Remarks order={order} users={props.app.users}/>
+            <Remarks order={order} users={props.app.users}/>
         }
 
     </div>
