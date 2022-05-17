@@ -14,6 +14,8 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
 import {makeStyles} from "@material-ui/core/styles";
 import Slide from "@material-ui/core/Slide";
+import {bindActionCreators} from "redux";
+import {upd_app} from "../actions/actionCreator";
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -26,6 +28,10 @@ const useStyles = makeStyles((theme) => ({
         width: '100%'
     },
 }));
+
+const mapDispatchToProps = dispatch => bindActionCreators({
+    upd_app
+}, dispatch);
 
 const Pledge = props => {
 
@@ -132,6 +138,8 @@ const Pledge = props => {
 
                     props.addPledge(res.body.pledge)
 
+                    props.upd_app(res.body.daily)
+
                     needPrint.current = true
 
                 }
@@ -170,6 +178,8 @@ const Pledge = props => {
                     setIsOpen(false)
                     props.updPledge(newPledge)
 
+                    props.upd_app(res.body.daily)
+
                     needPrint.current = true
 
                     setRansomdate(newPledge.ransomdate)
@@ -183,11 +193,16 @@ const Pledge = props => {
 
     const checkout = isToSale => {
 
-        rest('pledges/' + props.app.stock_id + '/' + pledge.id + '/' + (isToSale ? 'toSale' : sum2), 'DELETE')
+        rest('pledges/' + props.app.stock_id + '/' + pledge.id + '/' + (isToSale ? 'toSale' : checkoutSum()),
+            'DELETE')
             .then(res => {
 
                 if (res.status === 200 || res.status === 201) {
+
                     props.delPledge(pledge.id)
+
+                    props.upd_app(res.body.daily)
+
                 }
 
             })
@@ -274,8 +289,15 @@ const Pledge = props => {
                 <div style={{
                     margin: '.5rem',
                     padding: '.5rem',
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    alignItems: 'center'
                 }}>
-                    Для продления необходимо оплатить {checkoutSum() - pledge.sum}
+                    Необходимо оплатить: <span style={{
+                    fontWeight: 'bold',
+                }}>
+                    {checkoutSum() - pledge.sum}
+                </span>
                 </div>
 
                 <TextField label="Продлить до"
@@ -402,7 +424,8 @@ const Pledge = props => {
                        onChange={e => setNote(e.target.value)}
             />
 
-            {props.app.stock_id && <div style={{
+            {props.app.stock_id
+                ? <div style={{
                 padding: '.3rem',
                 display: "flex",
                 justifyContent: 'space-around'
@@ -415,11 +438,12 @@ const Pledge = props => {
                         {isDelay && mb('На продажу', () => checkout(true))}
                     </>
                     : mb('Принять в залог', () => create())}
-            </div>}
+            </div>
+            : null}
 
         </div>
 
     </>
 }
 
-export default connect(state => state)(Pledge)
+export default connect(state => state, mapDispatchToProps)(Pledge)
