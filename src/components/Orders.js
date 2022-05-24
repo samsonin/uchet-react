@@ -45,6 +45,7 @@ const Orders = props => {
     const [masterId, setMasterId] = useState(0)
     const [statusId, setStatusId] = useState(-1)
     const [model, setModel] = useState()
+    const [imei, setImei] = useState()
 
     const [search, setSearch] = useState('')
     const [hideFinished, setHideFinished] = useState(false)
@@ -107,6 +108,7 @@ const Orders = props => {
         if (statusId >= 0) url += 'status_id=' + statusId + '&'
 
         if (model) url += 'model=' + model + '&'
+        if (imei) url += 'imei=' + imei + '&'
 
         if (id) url = 'orders?id=' + id
         else if (customer.id) url = 'orders?customer_id=' + customer.id
@@ -276,8 +278,8 @@ const Orders = props => {
                     users={props.app.users}
                     setUser={setMasterId}
                     onlyValid
-                    classes={"w-100 p-1 m-1"}
-                    label={"Мастер"}
+                    classes="w-100 p-1 m-1"
+                    label="Мастер"
                 />
 
                 <StatusesSelect
@@ -290,6 +292,15 @@ const Orders = props => {
                 <TextField
                     value={model}
                     onChange={e => setModel(e.target.value)}
+                    className="w-100 p-1 m-1"
+                    label="Модель устройства"
+                />
+
+                <TextField
+                    value={imei}
+                    onChange={e => setImei(e.target.value)}
+                    className="w-100 p-1 m-1"
+                    label="Серийный номер, imei"
                 />
 
             </>}

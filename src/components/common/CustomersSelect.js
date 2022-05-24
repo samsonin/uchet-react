@@ -29,9 +29,10 @@ export default function (props) {
         if (name === 'phone_number') {
 
             val = val.replace(/[^0-9]/g, "")
-            if (val === '89') val = '9'
+            if (val.substring(0, 2) === '89') val = '9' + val.substring(2)
 
         }
+
         if (name === 'fio') val = val.replace(/[^a-zA-Zа-яёА-ЯЁ ]/g, "")
             .split(' ')
             .map(w => w.substring(0, 1).toUpperCase() + w.substring(1).toLowerCase())

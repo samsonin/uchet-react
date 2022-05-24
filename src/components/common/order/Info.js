@@ -99,14 +99,16 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const create = () => {
 
-        if (!app.stock_id) return enqueueSnackbar('Выберите точку', {variant: 'error'})
-        if (!(customer.id || customer.fio || customer.phone_number)) {
-            return enqueueSnackbar('Нет заказчика', {variant: 'error'})
-        }
-        if (!category_id) return enqueueSnackbar('Выберите категорию', {variant: 'error'})
-        if (category_id === 1000 && !otherCategory) return enqueueSnackbar('Впишите другую категорию',
-            {variant: 'error'})
-        if (!model) return enqueueSnackbar('Не указана модель', {variant: 'error'})
+        let error = ''
+
+        if (!app.stock_id) error = 'Выберите точку'
+        if (!(customer.id || customer.fio || customer.phone_number)) error = 'Нет заказчика'
+        if (customer.phone_number && customer.phone_number.length !== 10) error = 'неправильный номер телефона'
+        if (!category_id) error = 'Выберите категорию'
+        if (category_id === 1000 && !otherCategory) error = 'Впишите другую категорию'
+        if (!model) error = 'Не указана модель'
+
+        if (error) return enqueueSnackbar(error, {variant: 'error'})
 
         const data = {
             customer,
@@ -132,6 +134,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         rest('order/' + order.stock_id + '/' + order.id, 'PATCH', data)
             .then(res => afterRest(res))
+
     }
 
     const save = () => orderRest({
