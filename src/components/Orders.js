@@ -339,19 +339,19 @@ const Orders = props => {
                 label="скрыть завершенные"
             />
 
-            <TextField style={{
-                margin: '1rem',
-            }}
-                       InputProps={{
-                           startAdornment: (
-                               <InputAdornment position="start">
-                                   <SearchIcon/>
-                               </InputAdornment>
-                           ),
-                       }}
-                       value={search}
-                       onChange={e => setSearch(e.target.value)}
-            />
+            {/*<TextField style={{*/}
+            {/*    margin: '1rem',*/}
+            {/*}}*/}
+            {/*           InputProps={{*/}
+            {/*               startAdornment: (*/}
+            {/*                   <InputAdornment position="start">*/}
+            {/*                       <SearchIcon/>*/}
+            {/*                   </InputAdornment>*/}
+            {/*               ),*/}
+            {/*           }}*/}
+            {/*           value={search}*/}
+            {/*           onChange={e => setSearch(e.target.value)}*/}
+            {/*/>*/}
 
 
         </div>

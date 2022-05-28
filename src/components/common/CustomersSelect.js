@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react'
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import TextField from "@material-ui/core/TextField/TextField";
 import rest from "../Rest";
+import {fioHandler, phoneNumberHandler} from "./InputHandlers";
 
 const fields = ['id', 'fio', 'phone_number']
 
@@ -26,17 +27,8 @@ export default function (props) {
 
         if (reason !== 'input') return
 
-        if (name === 'phone_number') {
-
-            val = val.replace(/[^0-9]/g, "")
-            if (val.substring(0, 2) === '89') val = '9' + val.substring(2)
-
-        }
-
-        if (name === 'fio') val = val.replace(/[^a-zA-Zа-яёА-ЯЁ ]/g, "")
-            .split(' ')
-            .map(w => w.substring(0, 1).toUpperCase() + w.substring(1).toLowerCase())
-            .join(' ')
+        if (name === 'phone_number') val = phoneNumberHandler(val)
+        if (name === 'fio') val = fioHandler(val)
 
         props.updateCustomer(name, val)
 

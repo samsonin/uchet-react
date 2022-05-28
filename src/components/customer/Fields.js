@@ -9,6 +9,7 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import TextField from "@material-ui/core/TextField/TextField";
 import {Autocomplete} from "@material-ui/lab";
 import rest from "../Rest";
+import {fioHandler, phoneNumberHandler} from "../common/InputHandlers";
 
 const types = {
     birthday: 'date',
@@ -27,11 +28,8 @@ const Fields = props => {
 
     const handler = (name, val) => {
 
-        if (name === 'phone_number') val = val.replace(/[^0-9]/g, "")
-        if (name === 'fio') val = val.replace(/[^a-zA-Zа-яёА-ЯЁ ]/g, "")
-            .split(' ')
-            .map(w => w.substring(0, 1).toUpperCase() + w.substring(1).toLowerCase())
-            .join(' ')
+        if (name === 'phone_number') val = phoneNumberHandler(val)
+        if (name === 'fio') val = fioHandler(val)
 
         props.handleChange(name, val)
 

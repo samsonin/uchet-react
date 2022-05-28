@@ -75,14 +75,20 @@ const Order = props => {
             access_point_phone_number: stock.phone_number,
             id: id,
             group: category ? category.name : '',
-            fio: order.customer.fio || 'ИНКОГНИТО',
-            phone_number: order.customer.phone_number ?? 'НЕ УКАЗАН',
+            fio: order.customer
+                ? order.customer.fio || 'ИНКОГНИТО'
+                : '',
+            phone_number: order.customer
+                ? order.customer.phone_number || 'НЕ УКАЗАН'
+                : '',
             model: order.model || 'НЕИЗВЕСТНО',
             sum: order.sum || 0,
             sum2: totalSum(order),
             imei: order.imei || '',
             for_client: order.for_client || '',
-            prepaid: order.json && order.json.payments[0] ? order.json.payments[0].sum || 0 : 0,
+            prepaid: order.json && order.json.payments && order.json.payments[0]
+                ? order.json.payments[0].sum || 0
+                : 0,
             broken_cost: props.app.config.rem_assessed_value,
 
             today: createDate(created),
@@ -101,6 +107,7 @@ const Order = props => {
         }
 
         return value
+
     }
 
     useEffect(() => {
@@ -125,6 +132,8 @@ const Order = props => {
         setId(order.id)
         setStockId(order.stock_id)
         setCreated(order.created_at)
+
+        props.upd_app({order})
 
         let url = '/order'
         if (order.stock_id && order.id) url += '/' + order.stock_id + '/' + order.id

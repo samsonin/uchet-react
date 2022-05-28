@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from "react";
+import React, {forwardRef, useEffect, useState} from "react";
 import StatusesSelect from "../StatusesSelect";
 import Button from "@material-ui/core/Button";
-import {FormControl, InputLabel, TextField} from "@material-ui/core";
+import {DialogTitle, FormControl, InputLabel, TextField} from "@material-ui/core";
 import {useSnackbar} from "notistack";
 
 import rest from "../../Rest"
@@ -12,11 +12,19 @@ import {intInputHandler, numberInputHandler} from "../InputHandlers";
 import {totalSum} from "./functions";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
+import Dialog from "@material-ui/core/Dialog";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import Slide from "@material-ui/core/Slide";
 
 const fieldsStyle = {
     margin: '.4rem',
     width: '100%'
 }
+
+const Transition = forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
 
 export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
@@ -45,7 +53,8 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         fields.map(f => fl[f.name] = '')
         return fl
     })
-    const [isNewWarranty, setIsNewWarranty] = useState(false)
+    const [isReasonOpen, setIsReasonOpen] = useState(false)
+    const [reason, setReason] = useState('')
 
     const setField = (name, value) => {
 
@@ -118,8 +127,6 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             sum,
             ...state
         }
-
-        if (isNewWarranty) data.warranty = true
 
         needPrint.current = true
 
@@ -209,14 +216,6 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     }
 
-    const warranty = () => {
-
-        setIsNewWarranty(true)
-
-        setOrder(null)
-
-    }
-
     const open = () => {
 
         setIsRest(true)
@@ -249,6 +248,22 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     }, [order])
 
+    const warranty = () => {
+
+        needPrint.current = true
+
+        rest('orders/' + app.stock_id + '/' + order.id + '/warranty', 'POST', {reason})
+            .then(res => {
+                if (res.status === 200) {
+                    setIsReasonOpen(false)
+                    setReason('')
+                }
+                return res
+            })
+            .then(res => afterRest(res))
+
+    }
+
     // const category = app.categories.find(c => c.id === category_id)
 
     const actionButton = (label, onClick) => <Button variant='outlined'
@@ -266,6 +281,42 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
     }
 
     return <>
+
+        <Dialog
+            open={isReasonOpen}
+            TransitionComponent={Transition}
+            keepMounted
+            onClose={() => setIsReasonOpen(false)}
+            className='non-printable'
+        >
+
+            <DialogTitle>
+                Причина приемки по гарантии
+            </DialogTitle>
+
+            <DialogContent>
+
+                <TextField label="Неисправность"
+                           style={{width: '100%'}}
+                           value={reason}
+                           onChange={e => setReason(e.target.value)}
+                />
+
+            </DialogContent>
+
+            <DialogActions>
+                <Button onClick={() => setIsReasonOpen(false)}
+                        color="secondary">
+                    Отмена
+                </Button>
+                <Button onClick={() => warranty()}
+                        color="primary">
+                    Принять
+                </Button>
+            </DialogActions>
+
+        </Dialog>
+
 
         {order
             ? <>
@@ -415,7 +466,8 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         {order
             ? order.status_id === 6
                 ? <>
-                    {/*{isWarranty(order.checkout_date) && actionButton('Принять по гарантии', warranty)}*/}
+                    {isWarranty(order.checkout_date) &&
+                        actionButton('Принять по гарантии', () => setIsReasonOpen(true))}
                     {(isAdmin || isToday(order.checkout_date)) && actionButton('Открыть заказ', open)}
                 </>
                 : <>

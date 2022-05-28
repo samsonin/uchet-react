@@ -12,3 +12,16 @@ export const numberInputHandler = (value, setNumber) => {
     if (!isNaN(newSum)) setNumber(minisCounter % 2 ? newSum : '-' + newSum)
 
 }
+
+export const phoneNumberHandler = value => {
+
+    let val = value.replace(/[^0-9]/g, "")
+    if (val.substring(0, 2) === '89') val = '9' + val.substring(2)
+    return val
+
+}
+
+export const fioHandler = fio => fio.replace(/[^a-zA-Zа-яёА-ЯЁ ]/g, "")
+        .split(' ')
+        .map(w => w.substring(0, 1).toUpperCase() + w.substring(1).toLowerCase())
+        .join(' ')
