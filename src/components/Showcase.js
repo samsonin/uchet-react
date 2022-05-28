@@ -9,6 +9,9 @@ import TwoLineInCell from "./common/TwoLineInCell";
 import SearchIcon from "@material-ui/icons/Search";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
+import Tooltip from "@material-ui/core/Tooltip/Tooltip";
+import IconButton from "@material-ui/core/IconButton";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 
 const statuses = {
@@ -74,10 +77,7 @@ const Showcase = props => {
         }}
         >
 
-            <Select style={{
-                margin: '1rem',
-                width: '50%'
-            }}
+            <Select style={{margin: '1rem'}}
                 value={status}
                 onChange={e => setStatus(e.target.value)}
                 label="статус"
@@ -102,6 +102,13 @@ const Showcase = props => {
                        value={search}
                        onChange={e => setSearch(e.target.value)}
             />
+
+            <Tooltip title={'Купить'}>
+                <IconButton onClick={() => props.history.push('showcase/buy')}>
+                    <AddCircleIcon/>
+                </IconButton>
+            </Tooltip>
+
         </div>
 
         {showcase.length
