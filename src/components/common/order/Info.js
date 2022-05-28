@@ -276,10 +276,6 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     let categories = [0, 5, 41, 38]
 
-    if (!categories.includes(category_id)) {
-
-    }
-
     return <>
 
         <Dialog

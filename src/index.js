@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import './index.css';
 import App from './App';
 import {BrowserRouter} from 'react-router-dom';
@@ -14,14 +14,16 @@ import "./index.css";
 
 import Circularln from './components/CircularIndeterminate';
 
-import registerServiceWorker from './registerServiceWorker';
+// import registerServiceWorker from './registerServiceWorker';
 
 require('dotenv').config();
 
+
+const root = createRoot(document.getElementById('root'));
+
 try {
 
-    ReactDOM.render((
-        <Provider store={store} className={'d-print-none'}>
+    root.render(<Provider store={store} className={'d-print-none'}>
             <BrowserRouter>
                 <div id="circularln"
                      style={{display: 'none'}}
@@ -33,7 +35,7 @@ try {
                 </SnackbarProvider>
             </BrowserRouter>
         </Provider>
-    ), document.getElementById('root'));
+    );
 
 } catch (e) {
 

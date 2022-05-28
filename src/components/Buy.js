@@ -8,8 +8,8 @@ import {bindActionCreators} from "redux";
 import {upd_app} from "../actions/actionCreator";
 import {
     Button,
-    Checkbox,
-    FormControlLabel,
+    Checkbox, FormControl,
+    FormControlLabel, InputLabel,
     Paper,
     Table,
     TableBody,
@@ -24,6 +24,8 @@ import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {intInputHandler} from "./common/InputHandlers";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
 
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -103,6 +105,15 @@ const Buy = props => {
 
     }
 
+    const categories = [
+        {id: 0, name: ''},
+        {id: 5, name: 'Телефон'},
+        {id: 41, name: 'Планшет'},
+        {id: 38, name: 'Ноутбук'},
+    ]
+
+    let total = 0
+
     return <>
 
 
@@ -154,41 +165,65 @@ const Buy = props => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {showcase.map((s, si) => <TableRow key={'item-key-in-showcase-buy' + si}>
-                        {[
-                            '',
-                            <TextField
-                                value={s.model}
-                                onChange={e => handler(si, e.target.value, 'model')}
-                            />,
-                            <TextField
-                                value={s.imei}
-                                onChange={e => handler(si, e.target.value, 'imei')}
-                            />,
-                            <TextField
-                                value={s.sum}
-                                onChange={e => handler(si, e.target.value, 'sum')}
-                            />,
-                            <Button variant="contained"
-                                    size='small'
-                                    color={s.isSale ? 'primary' : 'secondary'}
-                                    onClick={() => destinationHandler(si)}
-                            >
-                                {s.isSale ? 'Продажа' : 'Проверка'}
-                            </Button>,
-                            <Tooltip title={'Удалить'}>
-                                <IconButton onClick={() => sub(si)}>
-                                    <DeleteIcon/>
-                                </IconButton>
-                            </Tooltip>
-                        ].map((c, ci) => <TableCell key={'item-key-in-showcase-buy' + ci}>
-                            {c}
-                        </TableCell>)}
-                    </TableRow>)}
+                    {showcase.map((s, si) => {
+
+                        total += s.sum
+
+                        return <TableRow key={'item-key-in-showcase-buy' + si}>
+                            {[
+                                <Select value={s.categoryId}
+                                        onChange={e => handler(si, e.target.value, 'categoryId')}
+                                >
+                                    {categories.map(c => {
+
+                                        return <MenuItem key={'menu-item-in-buy' + c.id}
+                                                         value={c.id}>
+                                            {c.name || <br />}
+                                        </MenuItem>
+                                    })}
+
+                                    <MenuItem key={'menu-item-in-buy1000'}
+                                              value={1000}>
+                                        Другая категория...
+                                    </MenuItem>
+                                </Select>,
+                                <TextField
+                                    value={s.model}
+                                    onChange={e => handler(si, e.target.value, 'model')}
+                                />,
+                                <TextField
+                                    value={s.imei}
+                                    onChange={e => handler(si, e.target.value, 'imei')}
+                                />,
+                                <TextField
+                                    value={s.sum}
+                                    onChange={e => handler(si, e.target.value, 'sum')}
+                                />,
+                                <Button variant="contained"
+                                        size='small'
+                                        color={s.isSale ? 'primary' : 'secondary'}
+                                        onClick={() => destinationHandler(si)}
+                                >
+                                    {s.isSale ? 'Продажа' : 'Проверка'}
+                                </Button>,
+                                <Tooltip title={'Удалить'}>
+                                    <IconButton onClick={() => sub(si)}>
+                                        <DeleteIcon/>
+                                    </IconButton>
+                                </Tooltip>
+                            ].map((c, ci) => <TableCell key={'item-key-in-showcase-buy' + ci}>
+                                {c}
+                            </TableCell>)}
+                        </TableRow>
+                    })}
+                    <TableRow>
+                        <TableCell colSpan={5}>
+                            Всего: {total}
+                        </TableCell>
+                    </TableRow>
                 </TableBody>
             </Table>
         </TableContainer>
-
     </>
 }
 
