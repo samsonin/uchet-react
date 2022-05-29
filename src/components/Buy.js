@@ -3,13 +3,12 @@ import {connect} from "react-redux";
 import {useSnackbar} from "notistack";
 import Fields from "./customer/Fields";
 import rest from "./Rest";
-import {makeStyles} from "@material-ui/core/styles";
 import {bindActionCreators} from "redux";
 import {upd_app} from "../actions/actionCreator";
 import {
     Button,
-    Checkbox, FormControl,
-    FormControlLabel, InputLabel,
+    Checkbox,
+    FormControlLabel,
     Paper,
     Table,
     TableBody,
@@ -56,6 +55,20 @@ const Buy = props => {
     const [showcase, setShowcase] = useState([{...pic}])
 
     const doc = props.app.docs.find(d => d.name === 'buy')
+
+    const save = () => {
+
+        rest('showcase', 'POST', {
+            customer,
+            showcase
+        })
+            .then(res => {
+                if (res.status === 200) {
+
+                }
+            })
+
+    }
 
     const handleChange = (name, value) => {
 
@@ -217,8 +230,16 @@ const Buy = props => {
                         </TableRow>
                     })}
                     <TableRow>
-                        <TableCell colSpan={5}>
+                        <TableCell colSpan={4}>
                             Всего: {total}
+                        </TableCell>
+                        <TableCell colSpan={2}>
+                            <Button onClick={() => save()}
+                                    size="small"
+                                    variant="contained"
+                                    color="primary">
+                                Внести
+                            </Button>
                         </TableCell>
                     </TableRow>
                 </TableBody>
