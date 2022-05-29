@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {connect} from "react-redux";
 import {useSnackbar} from "notistack";
 import Fields from "./customer/Fields";
@@ -25,6 +25,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import {intInputHandler} from "./common/InputHandlers";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
+import {createDate, Print} from "./common/Print";
 
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -43,29 +44,72 @@ const Buy = props => {
 
     const {enqueueSnackbar} = useSnackbar()
 
-    const needPrint = useRef(false)
-
-    const date = new Date();
-    date.setDate(date.getDate() + 1);
-    const full = d => d < 10 ? '0' + d : d
-
+    const [isRequesting, setIsRequesting] = useRef(false)
     const [isNeedDoc, setIsNeedDocs] = useState(false)
-
     const [customer, setCustomer] = useState({})
     const [showcase, setShowcase] = useState([{...pic}])
 
-    const doc = props.app.docs.find(d => d.name === 'buy')
+    useEffect(() => {
+
+        if (!isRequesting && isNeedDoc) {
+
+            const doc = props.app.docs.find(d => d.name === 'buy')
+
+            const stock = props.app.stocks.find(s => s.id === props.app.stock_id)
+
+            const alias = {
+                organization_organization: props.app.organization.organization,
+                organization_legal_address: props.app.organization.legal_address,
+                organization_inn: props.app.organization.inn,
+                access_point_address: stock.address || '',
+                access_point_phone_number: stock.phone_number || '',
+                today: createDate(),
+                fio: customer.fio,
+                phone_number: customer.phone_number,
+                birthday: customer.birthday ? createDate(customer.birthday) : '',
+                doc_sn: customer.doc_sn,
+                doc_date: customer.doc_date ? createDate(customer.doc_date) : '',
+                doc_division_name: customer.doc_division_name,
+                address: customer.address,
+            }
+
+            Print(doc, alias)
+
+        }
+
+       return props.history.push('/showcase')
+
+    }, [isRequesting])
 
     const save = () => {
 
-        rest('showcase', 'POST', {
+        let error
+
+        if (!props.app.stock_id) error = 'выберите точку'
+        else showcase.map(s => {
+            if (!s.categoryId || !s.model || !s.imei) {
+                error = 'заполните все поля'
+            }
+        })
+
+        if (error) return enqueueSnackbar(error, {variant: 'error'})
+
+        setIsRequesting(true)
+
+        rest('goods/showcase/' + props.app.stock_id, 'POST', {
             customer,
             showcase
         })
             .then(res => {
+
+                setIsRequesting(false)
+
                 if (res.status === 200) {
 
+
+
                 }
+
             })
 
     }
@@ -170,7 +214,10 @@ const Buy = props => {
                         </TableCell>
                         <TableCell>
                             <Tooltip title={'Добавить'}>
-                                <IconButton onClick={() => add()}>
+                                <IconButton
+                                    disabled={isRequesting.current}
+                                    onClick={() => add()}
+                                >
                                     <AddCircleIcon/>
                                 </IconButton>
                             </Tooltip>
@@ -191,7 +238,7 @@ const Buy = props => {
 
                                         return <MenuItem key={'menu-item-in-buy' + c.id}
                                                          value={c.id}>
-                                            {c.name || <br />}
+                                            {c.name || <br/>}
                                         </MenuItem>
                                     })}
 
@@ -220,7 +267,10 @@ const Buy = props => {
                                     {s.isSale ? 'Продажа' : 'Проверка'}
                                 </Button>,
                                 <Tooltip title={'Удалить'}>
-                                    <IconButton onClick={() => sub(si)}>
+                                    <IconButton
+                                        disabled={isRequesting.current}
+                                        onClick={() => sub(si)}
+                                    >
                                         <DeleteIcon/>
                                     </IconButton>
                                 </Tooltip>
@@ -235,6 +285,7 @@ const Buy = props => {
                         </TableCell>
                         <TableCell colSpan={2}>
                             <Button onClick={() => save()}
+                                    disabled={isRequesting.current}
                                     size="small"
                                     variant="contained"
                                     color="primary">
