@@ -183,6 +183,10 @@ const Good = props => {
 
                     props.upd_app(res.body)
 
+                    if (url.substring(0, 7) === 'transit' && method === 'POST') {
+                        props.hide(good.id)
+                    }
+
                     if (props.close) props.close()
 
                     enqueueSnackbar(success, {variant: 'success'})

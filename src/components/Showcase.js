@@ -63,12 +63,15 @@ const Showcase = props => {
 
     }, [status])
 
+    const hide = id => setShowcase(showcase.filter(s => s.id !== id))
+
     return <>
 
         <GoodModal
             good={good}
             setGood={setGood}
             close={() => setGood({})}
+            hide={hide}
         />
 
         <div style={{
