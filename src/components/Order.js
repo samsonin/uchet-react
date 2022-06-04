@@ -129,26 +129,26 @@ const Order = props => {
     }, [])
 
     const setOrder = order => {
+
         setId(order.id)
         setStockId(order.stock_id)
         setCreated(order.created_at)
 
         props.upd_app({order})
 
+    }
+
+    if (order && needPrint.current) {
+
+        needPrint.current = false
+
         let url = '/order'
         if (order.stock_id && order.id) url += '/' + order.stock_id + '/' + order.id
 
-        props.history.push(url)
+        Print(doc, alias, aliasFunction, props.history.push(url))
+
     }
 
-    useEffect(() => {
-
-        if (order && needPrint.current) {
-            needPrint.current = false
-            Print(doc, alias, aliasFunction)
-        }
-
-    }, [order])
 
     const disabled = !!id
 
@@ -208,6 +208,7 @@ const Order = props => {
                   fields={fields}
                   isAdmin={props.auth.admin}
                   needPrint={needPrint}
+                // print={print}
             />
         }
 

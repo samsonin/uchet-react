@@ -1,4 +1,4 @@
-export function Print(doc, alias, aliasFunction) {
+export function Print(doc, alias, aliasFunction, afterPrint) {
 
     const html = doc
         ? doc.text
@@ -34,7 +34,11 @@ export function Print(doc, alias, aliasFunction) {
 
     document.body.append(div)
 
+    if (typeof (afterPrint) === "function") window.onafterprint = () => afterPrint()
+
     window.print()
+
+    window.onafterprint = null
 
     div.remove()
 

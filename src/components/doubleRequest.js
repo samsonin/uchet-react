@@ -19,10 +19,6 @@ export default function doubleRequest(data = {}, url = "") {
         if (circularln) circularln.style.display = '';
 
         return fetch(server + '/' + url, init)
-            .catch(error => {
-                // console.error('Ошибка запроса: ', error)
-                // return {result: false}
-            })
             .finally(() => {
                 if (circularln) circularln.style.display = 'none'
             });

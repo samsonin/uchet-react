@@ -44,42 +44,11 @@ const Buy = props => {
 
     const {enqueueSnackbar} = useSnackbar()
 
-    const [isRequesting, setIsRequesting] = useRef(false)
+    const [isRequesting, setIsRequesting] = useState(false)
     const [isNeedDoc, setIsNeedDocs] = useState(false)
     const [customer, setCustomer] = useState({})
     const [showcase, setShowcase] = useState([{...pic}])
-
-    useEffect(() => {
-
-        if (!isRequesting && isNeedDoc) {
-
-            const doc = props.app.docs.find(d => d.name === 'buy')
-
-            const stock = props.app.stocks.find(s => s.id === props.app.stock_id)
-
-            const alias = {
-                organization_organization: props.app.organization.organization,
-                organization_legal_address: props.app.organization.legal_address,
-                organization_inn: props.app.organization.inn,
-                access_point_address: stock.address || '',
-                access_point_phone_number: stock.phone_number || '',
-                today: createDate(),
-                fio: customer.fio,
-                phone_number: customer.phone_number,
-                birthday: customer.birthday ? createDate(customer.birthday) : '',
-                doc_sn: customer.doc_sn,
-                doc_date: customer.doc_date ? createDate(customer.doc_date) : '',
-                doc_division_name: customer.doc_division_name,
-                address: customer.address,
-            }
-
-            Print(doc, alias)
-
-        }
-
-       return props.history.push('/showcase')
-
-    }, [isRequesting])
+    const [done, setDone] = useState(false)
 
     const save = () => {
 
@@ -106,7 +75,47 @@ const Buy = props => {
 
                 if (res.status === 200) {
 
+                    setDone(true)
 
+                    if (isNeedDoc) {
+
+                        const doc = props.app.docs.find(d => d.name === 'buy')
+
+                        const stock = props.app.stocks.find(s => s.id === props.app.stock_id)
+
+                        let table = '<table border="1"><thead><tr>' +
+                            '<th>Группа</th><th>Модель</th><th>Идентификатор</th><th>Сумма</th></tr></thead><tbody>'
+                        let sum = 0
+                        showcase.map(s => {
+
+                            table += '<tr><td>' + s.categoryId + '</td><td>' + s.model + '</td>' +
+                                '<td>' + s.imei + '</td><td>' + s.sum + '</td></tr>'
+                            sum += s.sum
+
+                        })
+                        table += '</tbody></table>'
+
+                        const alias = {
+                            organization_organization: props.app.organization.organization,
+                            organization_legal_address: props.app.organization.legal_address,
+                            organization_inn: props.app.organization.inn,
+                            access_point_address: stock.address || '',
+                            access_point_phone_number: stock.phone_number || '',
+                            today: createDate(),
+                            fio: customer.fio,
+                            phone_number: customer.phone_number,
+                            birthday: customer.birthday ? createDate(customer.birthday) : '',
+                            doc_sn: customer.doc_sn,
+                            doc_date: customer.doc_date ? createDate(customer.doc_date) : '',
+                            doc_division_name: customer.doc_division_name,
+                            address: customer.address,
+                            sum,
+                            all_model: table
+                        }
+
+                        Print(doc, alias, '', props.history.push('/showcase'))
+
+                    }
 
                 }
 
@@ -215,7 +224,7 @@ const Buy = props => {
                         <TableCell>
                             <Tooltip title={'Добавить'}>
                                 <IconButton
-                                    disabled={isRequesting.current}
+                                    disabled={isRequesting}
                                     onClick={() => add()}
                                 >
                                     <AddCircleIcon/>
@@ -268,7 +277,7 @@ const Buy = props => {
                                 </Button>,
                                 <Tooltip title={'Удалить'}>
                                     <IconButton
-                                        disabled={isRequesting.current}
+                                        disabled={isRequesting}
                                         onClick={() => sub(si)}
                                     >
                                         <DeleteIcon/>
@@ -285,7 +294,7 @@ const Buy = props => {
                         </TableCell>
                         <TableCell colSpan={2}>
                             <Button onClick={() => save()}
-                                    disabled={isRequesting.current}
+                                    disabled={isRequesting || done}
                                     size="small"
                                     variant="contained"
                                     color="primary">

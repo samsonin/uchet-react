@@ -1,5 +1,4 @@
 import React from 'react';
-import {connect} from "react-redux";
 import {makeStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -8,6 +7,7 @@ import Typography from "@material-ui/core/Typography";
 import CardActions from '@material-ui/core/CardActions';
 import CardHeader from "@material-ui/core/CardHeader";
 import Button from '@material-ui/core/Button';
+import {connect} from "react-redux";
 
 
 const useStyles = makeStyles(theme => ({
@@ -51,41 +51,28 @@ const subscribes = [
 
 let dollar = 0;
 
-try {
-
-    fetch("https://www.cbr-xml-daily.ru/daily_json.js")
-        .then(response => response.json())
-        .then(response => dollar = response.Valute.USD.Value)
-        .catch(res => console.error(res))
-
-} catch (e) {
-
-    console.error(e)
-
-}
+fetch("https://www.cbr-xml-daily.ru/daily_json.js")
+    .then(response => response.json())
+    .then(response => dollar = response.Valute.USD.Value)
+    .catch(res => console.error(res))
 
 function yandex(org_id, month, cost) {
 
     if (dollar === 0) return;
-    let paymentTargetsValue = "Продление подписки в Uchet.store на ";
-    paymentTargetsValue += subscribes.find(v => v.month === month).monthText
 
-    let label = btoa(JSON.stringify({
+    document.getElementById('paymentTargets').value = "Продление подписки в Uchet.store на " +
+        (subscribes.find(v => v.month === month).monthText)
+    document.getElementById('subscribeLabel').value = btoa(JSON.stringify({
         org_id,
         action: 'addSubscribe'
-    }));
-
-    document.getElementById('paymentTargets').value = paymentTargetsValue
-    document.getElementById('subscribeLabel').value = label
-
-    let subscribeSum = month * cost * dollar;
-    document.getElementById('subscribeSum').value = subscribeSum
+    }))
+    document.getElementById('subscribeSum').value = month * cost * dollar
     document.getElementById('subscribeForm').submit();
 
 }
 
-function SpacingGrid(props) {
-
+const Subscribe = ({organization_id}) => {
+    
     const classes = useStyles();
 
     function subHeader(profit) {
@@ -100,34 +87,32 @@ function SpacingGrid(props) {
                 Пожалуйста продлите подписку
             </Typography>
             <Grid container item xs={12} justify="center" className={classes.root} spacing={4}>
-                {subscribes.map(v => (
-                    <Grid key={v.monthText + v.cost} item>
-                        <Paper className={classes.paper}>
-                            <CardHeader
-                                title={v.monthText}
-                                subheader={subHeader(v.profit)}
-                                titleTypographyProps={{align: 'center'}}
-                                subheaderTypographyProps={{align: 'center'}}
-                                className={classes.cardHeader}
-                            />
-                            <CardContent className={classes.cardBody}>
-                                <Typography component="h2" variant="h3" color="textPrimary">
-                                    ${v.cost}
-                                </Typography>
-                                <Typography variant="h6" color="textSecondary">
-                                    / месяц
-                                </Typography>
-                            </CardContent>
-                            <CardActions className={classes.cardBody}>
-                                <Button variant="outlined"
-                                        className={classes.button}
-                                        onClick={() => yandex(props.organization_id, v.month, v.cost)}>
-                                    Продлить
-                                </Button>
-                            </CardActions>
-                        </Paper>
-                    </Grid>
-                ))}
+                {subscribes.map(v => <Grid key={v.monthText + v.cost} item>
+                    <Paper className={classes.paper}>
+                        <CardHeader
+                            title={v.monthText}
+                            subheader={subHeader(v.profit)}
+                            titleTypographyProps={{align: 'center'}}
+                            subheaderTypographyProps={{align: 'center'}}
+                            className={classes.cardHeader}
+                        />
+                        <CardContent className={classes.cardBody}>
+                            <Typography component="h2" variant="h3" color="textPrimary">
+                                ${v.cost}
+                            </Typography>
+                            <Typography variant="h6" color="textSecondary">
+                                / месяц
+                            </Typography>
+                        </CardContent>
+                        <CardActions className={classes.cardBody}>
+                            <Button variant="outlined"
+                                    className={classes.button}
+                                    onClick={() => yandex(organization_id, v.month, v.cost)}>
+                                Продлить
+                            </Button>
+                        </CardActions>
+                    </Paper>
+                </Grid>)}
 
                 <form id="subscribeForm" method="POST" action="https://money.yandex.ru/quickpay/confirm.xml">
                     <input type="hidden" name="receiver" value="410012390556672"/>
@@ -144,4 +129,4 @@ function SpacingGrid(props) {
     );
 }
 
-export default connect(state => (state.auth))(SpacingGrid);
+export default connect(state => state.auth)(Subscribe)
