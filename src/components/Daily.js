@@ -377,7 +377,7 @@ const Daily = props => {
                 </Grid>
             </Grid>
 
-            {date !== today && (!localDaily || !localDaily.hasOwnProperty('id') )
+            {date !== today && (!localDaily || !localDaily.hasOwnProperty('id'))
                 ? <div style={{
                     margin: '1rem',
                     fontSize: 20

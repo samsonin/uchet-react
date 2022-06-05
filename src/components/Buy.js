@@ -37,7 +37,7 @@ const pic = {
     model: '',
     imei: '',
     sum: 0,
-    isSale: false,
+    isSale: true,
 }
 
 const Buy = props => {
@@ -60,6 +60,12 @@ const Buy = props => {
                 error = 'заполните все поля'
             }
         })
+
+        if (isNeedDoc) {
+
+            if (!(customer.id || customer.fio)) error = 'введите данные продавца'
+
+        }
 
         if (error) return enqueueSnackbar(error, {variant: 'error'})
 

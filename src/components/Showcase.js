@@ -16,7 +16,7 @@ import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 const statuses = {
     all: 'Вся',
-    sale: 'На витрине',
+    sale: 'На продаже',
     check: 'На проверке',
     parts: 'На запчасти'
 }
