@@ -128,7 +128,7 @@ const Prepaid = props => {
                         setDisabled(!isEditableStatus(status))
 
                         setId(+props.preId || res.body.id)
-                        setCreated(res.body.time.substr(0, 10))
+                        setCreated(res.body.time.substring(0, 10))
                         setItem(res.body.item)
                         setPresum(res.body.presum)
                         setSum(res.body.sum)

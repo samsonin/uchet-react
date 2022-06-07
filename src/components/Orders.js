@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {connect} from "react-redux";
 
 import Checkbox from "@material-ui/core/Checkbox";
@@ -47,12 +47,13 @@ const Orders = props => {
     const [model, setModel] = useState()
     const [imei, setImei] = useState()
 
-    const [search, setSearch] = useState('')
     const [hideFinished, setHideFinished] = useState(false)
 
     const [orders, setOrders] = useState()
 
     const {enqueueSnackbar} = useSnackbar()
+
+    const inputRef = useRef();
 
     const position = props.app.positions.find(p => p.id === props.auth.position_id)
 
@@ -76,6 +77,8 @@ const Orders = props => {
 
     useEffect(() => {
 
+        inputRef.current.focus();
+
         let url = 'orders/all'
 
         if (props.auth.organization_id === 1 && props.app.stock_id) url += '/' + props.app.stock_id
@@ -92,6 +95,9 @@ const Orders = props => {
     useEffect(() => {
 
         if (props.enterPress) find()
+
+        props.setEnterPress(false)
+
 // eslint-disable-next-line
     }, [props.enterPress])
 
@@ -152,18 +158,6 @@ const Orders = props => {
 
     }
 
-    const changeSearchParameters = () => {
-
-        setId(0)
-        setCustomer(initCustomer)
-        setCreatedDate()
-        setCreatedDate2()
-        setCheckoutDate()
-        setCheckoutDate2()
-        setMasterId(0)
-
-    }
-
     const renderStatus = (stock_id, order_id, status_id) => {
 
         const status = props.app.statuses.find(s => s.id === status_id)
@@ -182,6 +176,17 @@ const Orders = props => {
 
     }
 
+    const findButton = () => <Button
+        style={{
+            margin: '1rem'
+        }}
+        onClick={() => find()}
+        color={'primary'}
+        variant='outlined'
+    >
+        Найти
+    </Button>
+
     return <div
         style={{
             backgroundColor: '#fff',
@@ -189,6 +194,22 @@ const Orders = props => {
             padding: '1rem'
         }}
     >
+
+        <div>
+
+            <TextField
+                style={{
+                    margin: '1rem'
+                }}
+                label={"Заказ №"}
+                value={id ? id.toString() : ''}
+                onChange={e => intInputHandler(e.target.value, setId)}
+                inputRef={inputRef}
+            />
+
+            {parameters || findButton()}
+
+        </div>
 
         <Button style={{
             padding: '1rem',
@@ -205,12 +226,6 @@ const Orders = props => {
             <Grid container
                   justify='space-between'
             >
-                <TextField
-                    className={"m-2 p-2"}
-                    label={"Заказ №"}
-                    value={id ? id.toString() : ''}
-                    onChange={e => intInputHandler(e.target.value, setId)}
-                />
 
             </Grid>
 
@@ -305,22 +320,8 @@ const Orders = props => {
 
             </>}
 
-            <Grid container
-                  justify={'flex-end'}
-            >
+            {parameters && findButton()}
 
-                <Button
-                    style={{
-                        margin: '1rem'
-                    }}
-                    onClick={() => find()}
-                    color={'primary'}
-                    variant='outlined'
-                >
-                    Найти
-                </Button>
-
-            </Grid>
         </>}
 
         <div style={{
@@ -369,29 +370,6 @@ const Orders = props => {
             </TableHead>
             <TableBody>
                 {orders && orders.filter(o => !hideFinished || o.status_id < 6)
-                    .filter(o => {
-
-                        if (!search) return true
-
-                        const fio = o.customer.fio.toLowerCase()
-                        const pn = o.customer.phone_number.toLowerCase()
-                        const model = o.model.toLowerCase()
-
-                        let r = true
-
-                        search.toLowerCase()
-                            .split(' ')
-                            .map(s => {
-
-                                if (fio.indexOf(s) < 0 && pn.indexOf(s) < 0 && model.indexOf(s) < 0) {
-                                    r = false
-                                }
-
-                            })
-
-                        return r
-
-                    })
                     .map(o => {
 
                         const master = props.app.users.find(u => u.id === o.master_id)

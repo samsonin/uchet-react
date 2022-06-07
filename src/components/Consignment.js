@@ -152,6 +152,9 @@ const Consignment = props => {
     useEffect(() => {
 
         if (props.enterPress) addConsignment()
+
+        props.setEnterPress(false)
+
 // eslint-disable-next-line
     }, [props.enterPress])
 

@@ -25,7 +25,7 @@ export function inputToA(html, allElements) {
                 }
                 if (value === 'НЕИЗВЕСТНАЯ ПЕРЕМЕННАЯ') console.log(name, value)
 
-                value = value.charAt(0).toUpperCase() + value.substr(1).toLowerCase();
+                value = value.charAt(0).toUpperCase() + value.substring(1).toLowerCase();
                 let a = document.createElement('a');
                 a.innerHTML = value;
                 a.href = value

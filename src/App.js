@@ -141,18 +141,16 @@ const App = props => {
             if (window.location.pathname === '/orders' || !barcode.current) {
 
                 setEnterPress(true)
-                setEnterPress(false)
 
                 return
 
             }
 
-            if (["112116", "103100"].includes(barcode.current.substr(0, 6)) || barcode.current.length === 15) {
+            if (["112116", "103100"].includes(barcode.current.substring(0, 6)) || barcode.current.length === 15) {
 
                 setOurBarcode(barcode.current)
-                setOurBarcode()
 
-            } else if (barcode.current.substr(0, 1) === "R" && barcode.current.length === 13) {
+            } else if (barcode.current.substring(0, 1) === "R" && barcode.current.length === 13) {
 
                 setOrderBarcode(barcode.current)
                 setOrderBarcode()
@@ -184,7 +182,7 @@ const App = props => {
         setOurBarcode()
     }
 
-    const expire = !(+props.auth.user_id && (props.auth.expiration_time -180000 > Math.round(new Date().getTime() / 1000.0)))
+    const expire = !(+props.auth.user_id && (props.auth.expiration_time - 180000 > Math.round(new Date().getTime() / 1000.0)))
 
     return <>
 
@@ -201,7 +199,8 @@ const App = props => {
 
             <LoginModal
                 isOpen={!+props.auth.user_id}
-                close={() => {}}
+                close={() => {
+                }}
                 parseJwt={parseJwt}
             />
 
@@ -249,6 +248,7 @@ const App = props => {
                                 <Route exact path="/order/:stock_id/:order_id" component={Order}/>
                                 <Route path="/orders" render={props => <Orders
                                     enterPress={enterPress}
+                                    setEnterPress={setEnterPress}
                                     {...props}
                                 />}
                                 />                            </>}
@@ -260,12 +260,16 @@ const App = props => {
                                 <Route path="/arrival" render={props => <Consignment
                                     newScan={globalBarcode}
                                     enterPress={enterPress}
+                                    setEnterPress={setEnterPress}
                                     {...props}
                                 />}/>
                                 <Route path="/consignments" component={Consignments}/>
                             </>}
 
-                            <Route path="/transit" render={props => <Transit newScan={ourBarcode} {...props} />}/>
+                            <Route path="/transit" render={props => <Transit
+                                newScan={ourBarcode} {...props} />}
+                                   setOurBarcode={setOurBarcode}
+                            />
 
                             {props.auth.admin && <>
                                 <Route path="/funds" component={FundsFlow}/>

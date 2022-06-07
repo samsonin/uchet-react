@@ -50,15 +50,15 @@ const itemToDate = item => {
 
     const year = (new Date()).getFullYear()
 
-    const dateFrom = year + '-' + item.substr( 3, 2) + '-' + item.substr( 0, 2)
-    const dateTo = year + '-' + item.substr( 9, 2) + '-' + item.substr( 6, 2)
+    const dateFrom = year + '-' + item.substring( 3, 2) + '-' + item.substring( 0, 2)
+    const dateTo = year + '-' + item.substring( 9, 2) + '-' + item.substring( 6, 2)
 
     return [dateFrom, dateTo]
 
 }
 
-const toZp = (date1, date2) => date1.substr(8, 2) + '.' + date1.substr(5, 2) + '-' +
-    date2.substr(8, 2) + '.' + date2.substr(5, 2)
+const toZp = (date1, date2) => date1.substring(8, 2) + '.' + date1.substring(5, 2) + '-' +
+    date2.substring(8, 2) + '.' + date2.substring(5, 2)
 
 
 const DailyModal = props => {

@@ -156,7 +156,7 @@ const Docs = props => {
                     }
                     if (value === 'НЕИЗВЕСТНАЯ ПЕРЕМЕННАЯ') console.log(name, value)
 
-                    value = value.charAt(0).toUpperCase() + value.substr(1).toLowerCase();
+                    value = value.charAt(0).toUpperCase() + value.substring(1).toLowerCase();
                     inputs[0].replaceWith(createA(value));
                 } else {
                     console.log(html)

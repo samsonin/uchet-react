@@ -18,7 +18,7 @@ export default class {
 
     getElement(any) {
         return typeof any === 'string'
-            ? any.substr(0, 1) === '#'
+            ? any.substring(0, 1) === '#'
                 ? document.querySelector(any)
                 : document.querySelector('#' + any)
             : any.target
