@@ -75,7 +75,7 @@ const Inventory = () => {
                 </Button>
                 <Button onClick={() => {}} color="primary">
                     Сохранить
-                </Button>}
+                </Button>
             </DialogActions>
         </Dialog>
 

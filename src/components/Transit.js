@@ -149,7 +149,7 @@ const Transit = props => {
                     <TableBody>
                         {props.transit.map(good => {
 
-                            good.id = +good.barcode.toString().substring(6, 6)
+                            good.id = +good.barcode.toString().substring(6, 12)
                             let stock = props.stocks.find(st => st.id === good.stock_id)
                             let user = props.users.find(u => u.id === good.responsible_id)
                             let category = props.categories.find(c => c.id === good.category_id)

@@ -48,6 +48,23 @@ const woAlliases = {
     prepaid: 'По предоплате'
 }
 
+const groupAlias = {
+    5: 'Телефон',
+    38: 'Ноутбук',
+    41: 'Планшет',
+}
+
+const aliases = {
+    categoryId: 'category_id',
+    model: 'model',
+    imei: 'imei',
+    sum: 'sum',
+    storagePlace: 'storage_place',
+    isPublic: 'public',
+    responsibleId: 'responsible_id'
+}
+
+
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -79,8 +96,16 @@ const Good = props => {
     const {enqueueSnackbar} = useSnackbar()
 
     const [treeOpen, setTreeOpen] = useState(false)
+
+    const [categoryId, setCategoryId] = useState(0)
+    const [model, setModel] = useState('')
+    const [imei, setImei] = useState('')
     const [orderId, setOrderId] = useState()
     const [sum, setSum] = useState(0)
+    const [storagePlace, setStoragePlace] = useState('')
+    const [isPublic, setIsPublic] = useState(false)
+    const [responsibleId, setResponsibleId] = useState(0)
+
     const [reason, setReason] = useState('')
     const [isReasonOpen, setIsReasonOpen] = useState(false)
     const [isRepair, setIsRepair] = useState(false)
@@ -89,13 +114,30 @@ const Good = props => {
     const [repairJob, setRepairJob] = useState('')
     const [repairMasterId, setRepairMasterId] = useState(0)
 
+
     useEffect(() => {
 
         setIsReasonOpen(false)
 
+        if (!props.good.category_id && props.good.group) {
+            Object.entries(groupAlias).map(([cat, groupName]) => {
+                if (props.good.group === groupName) setCategoryId(+cat)
+            })
+        } else setCategoryId(props.good.category_id)
+
         setSum(props.good.sum)
+        setModel(props.good.model)
+        if (props.good.imei) setImei(props.good.imei)
+        setResponsibleId(+good.responsible_id)
+        setStoragePlace(props.good.storage_place)
+        setIsPublic(!!props.good.public)
 
     }, [props.good])
+
+    const isSame = model === props.good.model
+        && imei === props.good.imei
+        && storagePlace === props.good.storage_place
+        && isPublic === !!props.good.public
 
     const getStockName = stockId => {
         let stock = props.app.stocks.find(v => +v.id === +stockId);
@@ -250,6 +292,31 @@ const Good = props => {
 
     }
 
+    const save = () => {
+
+        if (isSame) return enqueueSnackbar('нет изменений', {variant: 'error'})
+
+        const data = {}
+
+        for (const key in aliases) {
+
+            if (key === 'isPublic') {
+                if (isPublic === !props.good.public) {
+                    data.public = eval(key)
+                }
+            } else if (eval(key) !== props.good[aliases[key]]) {
+                data[aliases[key]] = eval(key)
+            }
+
+        }
+
+        if (data === {}) return enqueueSnackbar('нет изменений', {variant: 'error'})
+
+        rest('goods/' + props.good.barcode, 'PATCH', data)
+            .then(res => res)
+
+    }
+
     const onSelected = (good, afterRes) => {
 
         setGoodsForRepair(prev => {
@@ -320,13 +387,7 @@ const Good = props => {
 
     const provider = props.app.providers.find(v => +v.id === +good.provider_id);
 
-    const responsible = props.app.users.find(v => v.id === +good.responsible_id)
-
     let time = good.time;
-
-    let isPublic = typeof (good.public) === "boolean"
-        ? good.public
-        : +good.public > 0
 
     let categoryName = good.category_id > 0
         ? props.app.categories.find(v => v.id === good.category_id).name
@@ -531,15 +592,17 @@ const Good = props => {
 
                 <TextField label="Наименование"
                            className={classes.field}
-                           value={good.model}
+                           value={model}
                            disabled={!editable}
+                           onChange={e => setModel(e.target.value)}
                 />
 
                 {good.imei
                     ? <TextField label="imei"
                                  className={classes.field}
-                                 value={good.imei}
+                                 value={imei}
                                  disabled={!editable}
+                                 onChange={e => setImei(e.target.value)}
                     />
                     : ''}
 
@@ -592,12 +655,13 @@ const Good = props => {
                            className={classes.field}
                            value={time}
                 />
+
                 {provider
                     ? <TextField label="Поставщик"
                                  className={classes.field}
                                  value={provider.name}
                     />
-                    : null}
+                    : ''}
 
                 {consignment
                     ? <TextField
@@ -605,28 +669,39 @@ const Good = props => {
                         label="Накладная"
                         value={consignment}
                     />
-                    : null}
+                    : ''}
 
                 <TextField label="Точка"
                            className={classes.field}
                            value={getStockName(good.stock_id)}
                 />
 
-                {editable ? <>
+                {editable || responsibleId
+                    ? <UsersSelect
+                        classes={classes.field}
+                        users={props.app.users}
+                        user={responsibleId}
+                        setUser={setResponsibleId}
+                        onlyValid={true}
+                        disabled={!editable}
+                        label="ответственный"
+                    />
+                    : null}
+
+                {editable
+                    ? <>
                         <TextField label="Хранение"
                                    className={classes.field}
-                                   value={good.storage_place}
-                                   onChange={() => console.log('Хранение')}
+                                   value={storagePlace}
+                                   onChange={e => setStoragePlace(e.target.value)}
                         />
 
                         <FormControlLabel
-                            className="m-2 p-2"
+                            className="m-2 p-2 w-100"
                             control={
                                 <Checkbox
-                                    defaultChecked={!!good.public}
-                                    // checked={isPublic}
-                                    // onChange={handleChange}
-                                    // name="checkedB"
+                                    checked={isPublic}
+                                    onChange={() => setIsPublic(!isPublic)}
                                     color="primary"
                                 />
                             }
@@ -634,22 +709,31 @@ const Good = props => {
                         />
                     </>
                     : <>
+
                         {good.wo
                             ? <TextField label="Израсходованна"
                                          value={ui_wo}
                                          className={classes.field}
                             />
-                            : null
-                        }
+                            : null}
+
                         {good.outtime
                             ? <TextField label="Время расхода"
                                          className={classes.field}
                                          value={good.outtime}
                             />
-                            : null
-                        }
+                            : null}
+
                     </>
                 }
+
+                {isSame
+                    ? null
+                    : <Button onClick={() => save()}
+                              variant="outlined"
+                              color="secondary">
+                        Сохранить
+                    </Button>}
 
                 {!editable && good.stock_id === props.app.stock_id && isSale(good.wo)
                     ? isReasonOpen
@@ -668,7 +752,7 @@ const Good = props => {
                             </Button>
                         </div>
                         : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
-                                  className={classes.button}
+                                  variant="outlined"
                                   color="secondary">
                             Отмена продажи
                         </Button>
