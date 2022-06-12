@@ -83,6 +83,8 @@ export default function (props) {
             value={value}
             options={customers}
             loading={request.current}
+            filterSelectedOptions={true}
+            filterOptions={options => Object.keys(options).length ? options : true}
             onInputChange={(e, v, r) => handlerInput(v, r, f.name)}
             onChange={(e, v) => handler(v)}
             getOptionLabel={option => option ? option[f.name] || '' : ''}

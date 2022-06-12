@@ -19,7 +19,7 @@ import TableBody from "@material-ui/core/TableBody";
 
 import StocksSelect from "./common/StocksSelect";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
     typography: {
         margin: 5,
         textAlign: "center"
@@ -42,72 +42,21 @@ export default connect(state => state)(props => {
     const [dateFrom, setDateFrom] = useState(() => today)
     const [dateTo, setDateTo] = useState(() => today)
 
-    const [requesting, setRequesting] = useState(false)
-    const [actual, setActual] = useState(false)
-
+    const [isRequesting, setIsRequesting] = useState(false)
     const [data, setData] = useState(null)
-    const [proceeds, setProceeds] = useState(0)
-    const [cashless, setCashless] = useState(0)
-    const [handed, setHanded] = useState(0)
 
-    const setInRange = date => date > today
-        ? today
-        : date < minDate
-            ? minDate
-            : date
-
-    useEffect(() => {
-
-        if (dateTo !== setInRange(dateTo)) {
-            return setDateTo(date => setInRange(date))
-        }
-
-        if (dateFrom !== setInRange(dateFrom)) {
-            return setDateFrom(date => setInRange(date))
-        }
-
-        if (dateFrom > dateTo) {
-            return setDateTo(dateFrom)
-        }
-
-        setActual(false)
-
-    }, [stock, dateFrom, dateTo])
-
-    useEffect(() => {
-
-        let p = 0, c = 0, h = 0
-
-        if (!data) return
-
-        data.forEach(d => {
-            p += d.proceeds
-            c += d.cashless
-            h += d.handed
-        })
-
-        setProceeds(p)
-        setCashless(c)
-        setHanded(h)
-
-    }, [data])
+    const setInRange = date => date > today ? today : date < minDate ? minDate : date
 
     const getReport = () => {
 
-        setRequesting(true)
+        setIsRequesting(true)
 
-        rest('daily/' + stock + '/' + dateFrom + '/' + dateTo)
+        rest('daily/funds')
             .then(res => {
 
-                setRequesting(false)
+                setIsRequesting(false)
 
                 if (res.ok) {
-
-                    setActual(true)
-
-                    if (stock) {
-                        return setData(res.body)
-                    }
 
                     let totalData = []
 
@@ -147,7 +96,7 @@ export default connect(state => state)(props => {
             key={'table-row-key-in-funds' + d.id}
         >
             {['date', 'morning', 'proceeds', 'cashless', 'handed', `evening`]
-                    .map(v => <TableCell>{d[v]}</TableCell>)}
+                .map(v => <TableCell>{d[v]}</TableCell>)}
         </TableRow>)
         : <TableRow>
             <TableCell colSpan={6}>
@@ -175,7 +124,7 @@ export default connect(state => state)(props => {
                         stocks={props.app.stocks}
                         stock={stock}
                         setStock={setStock}
-                        disabled={requesting}
+                        disabled={isRequesting}
                         classes={classes.controls}
                     />
 
@@ -186,14 +135,11 @@ export default connect(state => state)(props => {
                     <TextField
                         className={classes.controls}
                         variant="outlined"
-                        disabled={requesting}
+                        disabled={isRequesting}
                         label="дата с"
                         type="date"
                         value={dateFrom}
                         onChange={e => setDateFrom(e.target.value)}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
                     />
 
                 </Grid>
@@ -203,29 +149,12 @@ export default connect(state => state)(props => {
                     <TextField
                         className={classes.controls}
                         variant="outlined"
-                        disabled={requesting}
+                        disabled={isRequesting}
                         label="дата по"
                         type="date"
                         value={dateTo}
                         onChange={e => setDateTo(e.target.value)}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
                     />
-
-                </Grid>
-
-                <Grid item>
-
-                    <Button
-                        variant="contained"
-                        disabled={requesting || actual}
-                        className={classes.controls}
-                        startIcon={<CachedIcon/>}
-                        onClick={() => getReport()}
-                    >
-                        Сформировать
-                    </Button>
 
                 </Grid>
 

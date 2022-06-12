@@ -182,7 +182,7 @@ const App = props => {
         setOurBarcode()
     }
 
-    const expire = !(+props.auth.user_id && (props.auth.expiration_time - 180000 > Math.round(new Date().getTime() / 1000.0)))
+    const expire = !(+props.auth.user_id && (props.auth.expiration_time - 180 > Math.round(new Date().getTime() / 1000.0)))
 
     return <>
 
