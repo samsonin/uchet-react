@@ -56,7 +56,7 @@ const Transit = props => {
 
             })
 
-        props.setOurBarcode()
+        if (typeof (props.setOurBarcode) === 'function') props.setOurBarcode()
 
 // eslint-disable-next-line
     }, [props.newScan])
