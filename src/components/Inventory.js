@@ -12,15 +12,22 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import Slide from "@material-ui/core/Slide";
+import {intInputHandler} from "./common/InputHandlers";
+import IsPublicCheckBox from "./common/IsPublicCheckBox";
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const Inventory = () => {
+
+const Inventory = props => {
 
     const [goods, setGoods] = useState([])
     const [isOpen, setIsOpen] = useState(false)
+    const [model, setModel] = useState('')
+    const [imei, setImei] = useState('')
+    const [sum, setSum] = useState('')
+    const [isPublic, setIsPublic] = useState(true)
     const [place, setPlace] = useState('')
     const currentId = useRef()
 
@@ -41,10 +48,14 @@ const Inventory = () => {
 
         const g = goods.find(g => g.id === id)
 
-        if (!g.storage) return setIsOpen(true)
+        if (g.storage) return saveStorage(false, '')
 
-        saveStorage(false, '')
+        setModel(g.model)
+        setImei(g.imei)
+        setSum(g.sum)
+        setIsPublic(g.parts === 'sale')
 
+        return setIsOpen(true)
 
     }
 
@@ -54,7 +65,7 @@ const Inventory = () => {
 
         if (isInStock) data.place = place
 
-        rest('goods/' + currentId.current + '/storage', 'PATCH', data)
+        rest('goods/showcase/' + props.app.stock_id + '/' + currentId.current, 'PATCH', data)
             .then(res => {
 
                 if (res.status === 200) {
@@ -62,7 +73,7 @@ const Inventory = () => {
                     setIsOpen(false)
 
                     const prev = goods.map(g => {
-                        if (g.id === id) g.storage = isInStock ? 'instock' : ''
+                        if (g.id === currentId.current) g.storage = isInStock ? 'instock' : ''
                         return g
                     })
 
@@ -85,14 +96,21 @@ const Inventory = () => {
             keepMounted
             onClose={() => setIsOpen(false)}
         >
-            <DialogTitle>
-                Введите место хранения
-            </DialogTitle>
             <DialogContent>
-                <TextField
-                    value={place}
-                    onChange={e => setPlace(lengthControl(e.target.value))}
-                />
+                {[
+                    {label: "Модель", value: model, onChange: null},
+                    {label: "imei S/N", value: imei, onChange: e => setImei(lengthControl(e.target.value))},
+                    {label: "цена", value: sum, onChange: e => intInputHandler(e.target.value, setSum)},
+                    {label: "Место хранения", value: place, onChange: e => setPlace(lengthControl(e.target.value))},
+                ].map(f => <TextField style={{
+                    margin: '1rem .3rem',
+                    width: '95%'
+                }}
+                                      label={f.label}
+                                      value={f.value}
+                                      onChange={f.onChange}
+                />)}
+                <IsPublicCheckBox value={isPublic} onChange={() => setIsPublic(!isPublic)}/>
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => setIsOpen(false)} color="secondary">
@@ -120,39 +138,40 @@ const Inventory = () => {
             </TableHead>
             <TableBody>
                 {goods.length
-                    ? goods.map(g => {
+                    ? goods.filter(g => !props.app.stock_id || props.app.stock_id === g.stock_id)
+                        .map(g => {
 
-                        const isInStock = g.storage === 'instock'
+                            const isInStock = g.storage === 'instock'
 
-                        return <TableRow key={'table-row-in-inventory' + g.id}
-                                         style={{
-                                             cursor: 'pointer',
-                                             backgroundColor: isInStock
-                                                 ? 'green'
-                                                 : 'white'
-                                         }}
-                                         onClick={() => {
-                                         }}
-                        >
-                            <TableCell>{g.id}</TableCell>
-                            <TableCell>{g.group}</TableCell>
-                            <TableCell>
-                                {TwoLineInCell(g.model, g.imei)}
-                            </TableCell>
-                            <TableCell>
-                                {g.sum}
-                            </TableCell>
-                            <TableCell>
-                                <IconButton
-                                    onClick={() => setStorage(g.id)}
-                                >
-                                    {isInStock
-                                        ? <CheckBoxIcon/>
-                                        : <CheckBoxOutlineBlankIcon/>}
-                                </IconButton>
-                            </TableCell>
-                        </TableRow>
-                    })
+                            return <TableRow key={'table-row-in-inventory' + g.id}
+                                             style={{
+                                                 cursor: 'pointer',
+                                                 backgroundColor: isInStock
+                                                     ? 'green'
+                                                     : 'white'
+                                             }}
+                                             onClick={() => {
+                                             }}
+                            >
+                                <TableCell>{g.id}</TableCell>
+                                <TableCell>{g.group}</TableCell>
+                                <TableCell>
+                                    {TwoLineInCell(g.model, g.imei)}
+                                </TableCell>
+                                <TableCell>
+                                    {g.sum}
+                                </TableCell>
+                                <TableCell>
+                                    <IconButton
+                                        onClick={() => setStorage(g.id)}
+                                    >
+                                        {isInStock
+                                            ? <CheckBoxIcon/>
+                                            : <CheckBoxOutlineBlankIcon/>}
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>
+                        })
                     : ''}
             </TableBody>
         </Table>

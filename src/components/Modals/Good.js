@@ -30,6 +30,7 @@ import {intInputHandler} from "../common/InputHandlers";
 import {GoodSearch} from "../common/GoodSearch";
 import UsersSelect from "../common/UsersSelect";
 import {createDate, Print} from "../common/Print";
+import IsPublicCheckBox from "../common/IsPublicCheckBox";
 // import {Barcodes} from '../Barcodes'
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -696,17 +697,11 @@ const Good = props => {
                                    onChange={e => setStoragePlace(e.target.value)}
                         />
 
-                        <FormControlLabel
-                            className="m-2 p-2 w-100"
-                            control={
-                                <Checkbox
-                                    checked={isPublic}
-                                    onChange={() => setIsPublic(!isPublic)}
-                                    color="primary"
-                                />
-                            }
-                            label="Опубликовать в интернете"
+                        <IsPublicCheckBox
+                            value={isPublic}
+                            onChange={() => setIsPublic(!isPublic)}
                         />
+
                     </>
                     : <>
 
