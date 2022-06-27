@@ -431,7 +431,7 @@ const Good = props => {
         organization_inn: props.app.organization.inn,
         access_point_address: stock.address || '',
         access_point_phone_number: stock.phone_number || '',
-        today: createDate(good.outtime),
+        today: createDate(good.wo ? good.outtime : null),
         model: good.model,
         imei: good.imei,
         sum: sum || good.sum,
