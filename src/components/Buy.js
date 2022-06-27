@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useState} from 'react';
 import {connect} from "react-redux";
 import {useSnackbar} from "notistack";
 import Fields from "./customer/Fields";
@@ -26,6 +26,7 @@ import {intInputHandler} from "./common/InputHandlers";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import {createDate, Print} from "./common/Print";
+import IsPublicCheckBox from "./common/IsPublicCheckBox";
 
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -225,7 +226,7 @@ const Buy = props => {
                             Сумма
                         </TableCell>
                         <TableCell>
-                            Назначение
+                            На продажу
                         </TableCell>
                         <TableCell>
                             <Tooltip title={'Добавить'}>
@@ -274,13 +275,11 @@ const Buy = props => {
                                     value={s.sum}
                                     onChange={e => handler(si, e.target.value, 'sum')}
                                 />,
-                                <Button variant="contained"
-                                        size='small'
-                                        color={s.isSale ? 'primary' : 'secondary'}
-                                        onClick={() => destinationHandler(si)}
-                                >
-                                    {s.isSale ? 'Продажа' : 'Проверка'}
-                                </Button>,
+                                <IsPublicCheckBox
+                                    onlyBox
+                                    value={s.isSale}
+                                    onChange={() => destinationHandler(si)}
+                                />,
                                 <Tooltip title={'Удалить'}>
                                     <IconButton
                                         disabled={isRequesting}

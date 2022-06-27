@@ -1,12 +1,11 @@
 import React, {forwardRef, useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
-import {Table, TableBody, TableCell, TableHead, TableRow, TextField} from "@material-ui/core";
+import {InputAdornment, Table, TableBody, TableCell, TableHead, TableRow, TextField} from "@material-ui/core";
 import rest from "./Rest";
 import TwoLineInCell from "./common/TwoLineInCell";
 import IconButton from "@material-ui/core/IconButton";
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
@@ -14,6 +13,11 @@ import Dialog from "@material-ui/core/Dialog";
 import Slide from "@material-ui/core/Slide";
 import {intInputHandler} from "./common/InputHandlers";
 import IsPublicCheckBox from "./common/IsPublicCheckBox";
+import {useSnackbar} from "notistack";
+import SearchIcon from "@material-ui/icons/Search";
+import CloseIcon from "@material-ui/icons/Close";
+import Checkbox from "@material-ui/core/Checkbox";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -24,12 +28,18 @@ const Inventory = props => {
 
     const [goods, setGoods] = useState([])
     const [isOpen, setIsOpen] = useState(false)
+    const [search, setSearch] = useState('')
+    const [hide, setHide] = useState(false)
+
     const [model, setModel] = useState('')
     const [imei, setImei] = useState('')
     const [sum, setSum] = useState('')
     const [isPublic, setIsPublic] = useState(true)
     const [place, setPlace] = useState('')
+    const [error, setError] = useState(false)
     const currentId = useRef()
+
+    const {enqueueSnackbar} = useSnackbar()
 
     useEffect(() => {
 
@@ -41,6 +51,10 @@ const Inventory = props => {
             })
 
     }, [])
+
+    useEffect(() => {
+        setError(false)
+    }, [imei, sum, place])
 
     const setStorage = id => {
 
@@ -63,7 +77,19 @@ const Inventory = props => {
 
         const data = {isInStock: isInStock}
 
-        if (isInStock) data.place = place
+        if (isInStock) {
+
+            if (!place || !imei) {
+
+                enqueueSnackbar('Заполните все поля', {variant: 'error'})
+
+                return setError(true)
+
+            }
+
+            data.place = place
+
+        }
 
         rest('goods/showcase/' + props.app.stock_id + '/' + currentId.current, 'PATCH', data)
             .then(res => {
@@ -102,13 +128,16 @@ const Inventory = props => {
                     {label: "imei S/N", value: imei, onChange: e => setImei(lengthControl(e.target.value))},
                     {label: "цена", value: sum, onChange: e => intInputHandler(e.target.value, setSum)},
                     {label: "Место хранения", value: place, onChange: e => setPlace(lengthControl(e.target.value))},
-                ].map(f => <TextField style={{
-                    margin: '1rem .3rem',
-                    width: '95%'
-                }}
-                                      label={f.label}
-                                      value={f.value}
-                                      onChange={f.onChange}
+                ].map(f => <TextField
+                    key={'imventory-fields-key-' + f.label}
+                    style={{
+                        margin: '1rem .3rem',
+                        width: '95%'
+                    }}
+                    label={f.label}
+                    value={f.value}
+                    onChange={f.onChange}
+                    error={!f.value && error}
                 />)}
                 <IsPublicCheckBox value={isPublic} onChange={() => setIsPublic(!isPublic)}/>
             </DialogContent>
@@ -121,6 +150,42 @@ const Inventory = props => {
                 </Button>
             </DialogActions>
         </Dialog>
+
+        <div style={{
+            display: 'flex',
+            justifyContent: 'space-around'
+        }}>
+
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={hide}
+                        onChange={() => setHide(!hide)}
+                        color="primary"
+                    />
+                }
+                label="Скрыть учтенные"
+            />
+
+            <TextField InputProps={{
+                startAdornment: (
+                    <InputAdornment position="start">
+                        <SearchIcon/>
+                    </InputAdornment>
+                ),
+                endAdornment: (
+                    <InputAdornment position="end">
+                        <IconButton onClick={() => setSearch('')}>
+                            <CloseIcon/>
+                        </IconButton>
+                    </InputAdornment>
+                ),
+            }}
+                       value={search}
+                       onChange={e => setSearch(e.target.value)}
+            />
+
+        </div>
 
         <Table size="small"
                style={{
@@ -139,6 +204,30 @@ const Inventory = props => {
             <TableBody>
                 {goods.length
                     ? goods.filter(g => !props.app.stock_id || props.app.stock_id === g.stock_id)
+                        .filter(g => {
+
+                            if (!search || g.sum == search || g.id == search) return true
+
+                            const model = g.model.toLowerCase()
+                            const imei = g.imei.toLowerCase()
+                            const sum = g.imei.toLowerCase()
+
+                            let r = true
+
+                            search.toLowerCase()
+                                .split(' ')
+                                .map(s => {
+
+                                    if (model.indexOf(s) < 0 && imei.indexOf(s) < 0 && sum.indexOf(s) < 0) {
+                                        r = false
+                                    }
+
+                                })
+
+                            return r
+
+                        })
+                        .filter(g => !g.storage || hide === !g.storage)
                         .map(g => {
 
                             const isInStock = g.storage === 'instock'

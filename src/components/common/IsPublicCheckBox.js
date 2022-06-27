@@ -4,20 +4,26 @@ import * as PropTypes from "prop-types";
 import React from "react";
 
 export default function IsPublicCheckBox(props) {
-    return <FormControlLabel
-        style={{
-            margin: '1rem .3rem',
-            width: '95%'
-        }}
-        control={
-            <Checkbox
-                checked={props.value}
-                onChange={props.onChange}
-                color="primary"
-            />
-        }
-        label="Опубликовать в интернете"
-    />
+    return props.onlyBox
+        ? <Checkbox
+            checked={props.value}
+            onChange={props.onChange}
+            color="primary"
+        />
+        : <FormControlLabel
+            style={{
+                margin: '1rem .3rem',
+                width: '95%'
+            }}
+            control={
+                <Checkbox
+                    checked={props.value}
+                    onChange={props.onChange}
+                    color="primary"
+                />
+            }
+            label="Опубликовать в интернете"
+        />
 }
 
 IsPublicCheckBox.propTypes = {
