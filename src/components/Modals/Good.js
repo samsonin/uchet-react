@@ -60,9 +60,9 @@ const aliases = {
     model: 'model',
     imei: 'imei',
     sum: 'sum',
+    responsibleId: 'responsible_id',
     storagePlace: 'storage_place',
     isPublic: 'public',
-    responsibleId: 'responsible_id'
 }
 
 
@@ -135,8 +135,11 @@ const Good = props => {
 
     }, [props.good])
 
-    const isSame = model === props.good.model
+    const isSame = categoryId === props.good.category_id
+        && model === props.good.model
         && imei === props.good.imei
+        && sum === props.good.sum
+        && responsibleId === +props.good.responsible_id
         && storagePlace === props.good.storage_place
         && isPublic === !!props.good.public
 
@@ -314,7 +317,13 @@ const Good = props => {
         if (data === {}) return enqueueSnackbar('нет изменений', {variant: 'error'})
 
         rest('goods/' + props.good.barcode, 'PATCH', data)
-            .then(res => res)
+            .then(res => {
+                if (res.status === 200) {
+
+                    if (typeof res.body.good === 'object') props.setGood(res.body.good)
+
+                }
+            })
 
     }
 

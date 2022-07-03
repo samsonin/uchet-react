@@ -4,13 +4,7 @@ import * as PropTypes from "prop-types";
 import React from "react";
 
 export default function IsPublicCheckBox(props) {
-    return props.onlyBox
-        ? <Checkbox
-            checked={props.value}
-            onChange={props.onChange}
-            color="primary"
-        />
-        : <FormControlLabel
+    return <FormControlLabel
             style={{
                 margin: '1rem .3rem',
                 width: '95%'

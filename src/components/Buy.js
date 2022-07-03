@@ -275,10 +275,10 @@ const Buy = props => {
                                     value={s.sum}
                                     onChange={e => handler(si, e.target.value, 'sum')}
                                 />,
-                                <IsPublicCheckBox
-                                    onlyBox
-                                    value={s.isSale}
+                                <Checkbox
+                                    checked={s.isSale}
                                     onChange={() => destinationHandler(si)}
+                                    color="primary"
                                 />,
                                 <Tooltip title={'Удалить'}>
                                     <IconButton
