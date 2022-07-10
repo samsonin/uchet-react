@@ -1,6 +1,6 @@
 import React, {forwardRef, useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
-import {InputAdornment, Table, TableBody, TableCell, TableHead, TableRow, TextField} from "@material-ui/core";
+import {Fade, InputAdornment, Table, TableBody, TableCell, TableHead, TableRow, TextField} from "@material-ui/core";
 import rest from "./Rest";
 import TwoLineInCell from "./common/TwoLineInCell";
 import IconButton from "@material-ui/core/IconButton";
@@ -18,6 +18,8 @@ import SearchIcon from "@material-ui/icons/Search";
 import CloseIcon from "@material-ui/icons/Close";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+
+import {v4 as uuidv4} from 'uuid';
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -129,7 +131,7 @@ const Inventory = props => {
                     {label: "цена", value: sum, onChange: e => intInputHandler(e.target.value, setSum)},
                     {label: "Место хранения", value: place, onChange: e => setPlace(lengthControl(e.target.value))},
                 ].map(f => <TextField
-                    key={'imventory-fields-key-' + f.label}
+                    key={uuidv4()}
                     style={{
                         margin: '1rem .3rem',
                         width: '95%'
@@ -232,34 +234,39 @@ const Inventory = props => {
 
                             const isInStock = g.storage === 'instock'
 
-                            return <TableRow key={'table-row-in-inventory' + g.id}
-                                             style={{
-                                                 cursor: 'pointer',
-                                                 backgroundColor: isInStock
-                                                     ? 'green'
-                                                     : 'white'
-                                             }}
-                                             onClick={() => {
-                                             }}
+                            return (<Fade
+                                in={true}
+                                timeout={1000}
                             >
-                                <TableCell>{g.id}</TableCell>
-                                <TableCell>{g.group}</TableCell>
-                                <TableCell>
-                                    {TwoLineInCell(g.model, g.imei)}
-                                </TableCell>
-                                <TableCell>
-                                    {g.sum}
-                                </TableCell>
-                                <TableCell>
-                                    <IconButton
-                                        onClick={() => setStorage(g.id)}
-                                    >
-                                        {isInStock
-                                            ? <CheckBoxIcon/>
-                                            : <CheckBoxOutlineBlankIcon/>}
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
+                                <TableRow key={uuidv4()}
+                                          style={{
+                                              cursor: 'pointer',
+                                              backgroundColor: isInStock
+                                                  ? 'green'
+                                                  : 'white'
+                                          }}
+                                          onClick={() => {
+                                          }}
+                                >
+                                    <TableCell>{g.id}</TableCell>
+                                    <TableCell>{g.group}</TableCell>
+                                    <TableCell>
+                                        {TwoLineInCell(g.model, g.imei)}
+                                    </TableCell>
+                                    <TableCell>
+                                        {g.sum}
+                                    </TableCell>
+                                    <TableCell>
+                                        <IconButton
+                                            onClick={() => setStorage(g.id)}
+                                        >
+                                            {isInStock
+                                                ? <CheckBoxIcon/>
+                                                : <CheckBoxOutlineBlankIcon/>}
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            </Fade>)
                         })
                     : ''}
             </TableBody>

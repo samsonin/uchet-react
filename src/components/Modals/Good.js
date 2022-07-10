@@ -19,7 +19,7 @@ import {useSnackbar} from "notistack";
 
 import rest from '../Rest'
 import Tree from "../Tree";
-import {List, ListItem, ListItemText, ListSubheader, TextField} from "@material-ui/core";
+import {Fade, List, ListItem, ListItemText, ListSubheader, TextField} from "@material-ui/core";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
@@ -62,7 +62,7 @@ const aliases = {
     sum: 'sum',
     responsibleId: 'responsible_id',
     storagePlace: 'storage_place',
-    isPublic: 'public',
+    // isPublic: 'public',
 }
 
 
@@ -131,7 +131,7 @@ const Good = props => {
         if (props.good.imei) setImei(props.good.imei)
         setResponsibleId(+good.responsible_id)
         setStoragePlace(props.good.storage_place)
-        setIsPublic(!!props.good.public)
+        setIsPublic(props.good.public || props.good.parts === 'sale')
 
     }, [props.good])
 
@@ -141,7 +141,9 @@ const Good = props => {
         && sum === props.good.sum
         && responsibleId === +props.good.responsible_id
         && storagePlace === props.good.storage_place
-        && isPublic === !!props.good.public
+        && isPublic === (props.good.public || props.good.parts === 'sale')
+
+    console.log(isSame, props.good.public || props.good.parts === 'sale')
 
     const getStockName = stockId => {
         let stock = props.app.stocks.find(v => +v.id === +stockId);
@@ -302,13 +304,15 @@ const Good = props => {
 
         const data = {}
 
+        if (isPublic !== props.good.public || props.good.parts === 'sale') {
+            data.public = !isPublic
+        }
+
+        data.isSale = isPublic
+
         for (const key in aliases) {
 
-            if (key === 'isPublic') {
-                if (isPublic === !props.good.public) {
-                    data.public = eval(key)
-                }
-            } else if (eval(key) !== props.good[aliases[key]]) {
+            if (eval(key) !== props.good[aliases[key]]) {
                 data[aliases[key]] = eval(key)
             }
 
@@ -731,13 +735,16 @@ const Good = props => {
                     </>
                 }
 
-                {isSame
-                    ? null
-                    : <Button onClick={() => save()}
-                              variant="outlined"
-                              color="secondary">
+                <Fade
+                    in={!isSame}
+                    timeout={300}
+                >
+                    <Button onClick={() => save()}
+                            variant="outlined"
+                            color="secondary">
                         Сохранить
-                    </Button>}
+                    </Button>
+                </Fade>
 
                 {!editable && good.stock_id === props.app.stock_id && isSale(good.wo)
                     ? isReasonOpen

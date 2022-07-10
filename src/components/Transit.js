@@ -18,6 +18,7 @@ import TextField from "@material-ui/core/TextField/TextField";
 import {bindActionCreators} from "redux";
 import {upd_app} from "../actions/actionCreator";
 import {useSnackbar} from "notistack";
+import {v4 as uuidv4} from 'uuid';
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     upd_app
@@ -104,7 +105,7 @@ const Transit = props => {
                             {label: 'Ответственный', value: good.user},
                         ].map(f => f.value
                             ? <TextField
-                                key={'keyinmapgoodmodaltransit' + f.label}
+                                key={uuidv4()}
                                 style={{
                                     width: '100%',
                                     padding: '1rem',
@@ -168,35 +169,35 @@ const Transit = props => {
                                 ? category.name
                                 : 'нет'
 
-                            return <TableRow
-                                key={'tablerowintransitkey' + good.barcode}
-                                className={good.c}
-                                onClick={e => getInfo(good, e.target)}
-                                style={{cursor: 'pointer'}}
-                            >
-                                <TableCell>
-                                    {good.id}
-                                </TableCell>
-                                <TableCell>
-                                    {good.category}
-                                </TableCell>
-                                <TableCell>
-                                    {good.model}
-                                </TableCell>
-                                <TableCell>
-                                    {good.stock}
-                                </TableCell>
-                                {!!props.stock_id && <TableCell>
-                                    <Tooltip title="Принять">
-                                        <IconButton
-                                            style={{padding: '0.2rem'}}
-                                            onClick={e => fromTransit(e, good)}
-                                        >
-                                            <CheckIcon/>
-                                        </IconButton>
-                                    </Tooltip>
-                                </TableCell>}
-                            </TableRow>
+                            return (<TableRow
+                                    key={uuidv4()}
+                                    className={good.c}
+                                    onClick={e => getInfo(good, e.target)}
+                                    style={{cursor: 'pointer'}}
+                                >
+                                    <TableCell>
+                                        {good.id}
+                                    </TableCell>
+                                    <TableCell>
+                                        {good.category}
+                                    </TableCell>
+                                    <TableCell>
+                                        {good.model}
+                                    </TableCell>
+                                    <TableCell>
+                                        {good.stock}
+                                    </TableCell>
+                                    {!!props.stock_id && <TableCell>
+                                        <Tooltip title="Принять">
+                                            <IconButton
+                                                style={{padding: '0.2rem'}}
+                                                onClick={e => fromTransit(e, good)}
+                                            >
+                                                <CheckIcon/>
+                                            </IconButton>
+                                        </Tooltip>
+                                    </TableCell>}
+                                </TableRow>)
                         })}
                     </TableBody>
                 </Table>
