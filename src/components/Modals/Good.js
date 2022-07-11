@@ -62,7 +62,7 @@ const aliases = {
     sum: 'sum',
     responsibleId: 'responsible_id',
     storagePlace: 'storage_place',
-    // isPublic: 'public',
+    isPublic: 'public'
 }
 
 
@@ -104,7 +104,7 @@ const Good = props => {
     const [orderId, setOrderId] = useState()
     const [sum, setSum] = useState(0)
     const [storagePlace, setStoragePlace] = useState('')
-    const [isPublic, setIsPublic] = useState(false)
+    const [isPublic, setIsPublic] = useState(true)
     const [responsibleId, setResponsibleId] = useState(0)
 
     const [reason, setReason] = useState('')
@@ -115,6 +115,7 @@ const Good = props => {
     const [repairJob, setRepairJob] = useState('')
     const [repairMasterId, setRepairMasterId] = useState(0)
 
+    const pb = props.good.public || props.good.parts === 'sale'
 
     useEffect(() => {
 
@@ -131,7 +132,7 @@ const Good = props => {
         if (props.good.imei) setImei(props.good.imei)
         setResponsibleId(+good.responsible_id)
         setStoragePlace(props.good.storage_place)
-        setIsPublic(props.good.public || props.good.parts === 'sale')
+        setIsPublic(pb)
 
     }, [props.good])
 
@@ -141,9 +142,7 @@ const Good = props => {
         && sum === props.good.sum
         && responsibleId === +props.good.responsible_id
         && storagePlace === props.good.storage_place
-        && isPublic === (props.good.public || props.good.parts === 'sale')
-
-    console.log(isSame, props.good.public || props.good.parts === 'sale')
+        && isPublic === (pb)
 
     const getStockName = stockId => {
         let stock = props.app.stocks.find(v => +v.id === +stockId);
@@ -303,12 +302,6 @@ const Good = props => {
         if (isSame) return enqueueSnackbar('нет изменений', {variant: 'error'})
 
         const data = {}
-
-        if (isPublic !== props.good.public || props.good.parts === 'sale') {
-            data.public = !isPublic
-        }
-
-        data.isSale = isPublic
 
         for (const key in aliases) {
 
