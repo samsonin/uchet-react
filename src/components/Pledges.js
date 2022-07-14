@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {connect} from "react-redux";
+import uuid from "uuid";
 
-import rest from "../components/Rest"
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
@@ -13,7 +13,9 @@ import CloseIcon from "@material-ui/icons/Close";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 
+import rest from "../components/Rest"
 import Pledge from "./Pledge";
+
 
 const Pledges = props => {
 
@@ -22,6 +24,22 @@ const Pledges = props => {
 
     const [currentPledge, setCurrentPledge] = useState()
 
+    const dateNow = Date.now()
+
+    const getSum2 = (date1, date2, sum) => {
+
+        const days = Math.ceil((date2 - date1) / 86400000)
+
+        const min = +props.app.config.zalog_min_sum ?? 500
+        const percent = +props.app.config.zalog_day_percent ?? 3
+
+        const daily = sum * percent / 100
+        const prof = daily * days
+
+        return 50 * Math.round((sum + (min < prof ? prof : min)) / 50)
+
+    }
+
     useEffect(() => {
 
         rest('pledges')
@@ -29,7 +47,26 @@ const Pledges = props => {
 
                 if (res.status === 200) {
 
-                    setPledges(res.body)
+                    const pledges = res.body.map(p => {
+
+                        const stock = props.app.stocks.find(s => s.id === p.stock)
+                        const timeZone = stock.timezone_offset ?? 0
+
+                        p.stockName = stock.name
+                        p.isDelay = (dateNow - Date.parse(p.ransomdate)) / 3600000 + timeZone > 24
+
+                        if (p.isDelay) {
+
+                            const sum2 = getSum2(Date.parse(p.time), dateNow, p.sum)
+
+                            p.sum2 = Math.max(sum2, p.sum2)
+
+                        }
+
+                        return p
+                    })
+
+                    setPledges(pledges)
 
                     const id = +props.match.params.id
 
@@ -73,30 +110,14 @@ const Pledges = props => {
 
     }
 
-    const dateNow = Date.now()
-
-    const getSum2 = (date1, date2, sum) => {
-
-        const days = Math.ceil((date2 - date1) / 86400000)
-
-        const min = +props.app.config.zalog_min_sum ?? 500
-        const percent = +props.app.config.zalog_day_percent ?? 3
-
-        const daily = sum * percent / 100
-        const prof = daily * days
-
-        return 50 * Math.round((sum + (min < prof ? prof : min)) / 50)
-
-    }
-
     return currentPledge
         ? <Pledge
             current={currentPledge}
             setCurrent={setCurrentPledge}
+            getSum2={getSum2}
             addPledge={addPledge}
             updPledge={updPledge}
             delPledge={delPledge}
-            getSum2={getSum2}
         />
         : <div style={{
             backgroundColor: '#fff',
@@ -183,33 +204,24 @@ const Pledges = props => {
                             return r
 
                         })
-                        .map(p => {
-
-                            const stock = props.app.stocks.find(s => s.id === p.stock)
-                            const timeZone = stock.timezone_offset ?? 0
-
-                            const isDelay = (Date.now() - Date.parse(p.ransomdate)) / 3600000 + timeZone > 24
-
-                            return <TableRow style={{
-                                cursor: 'pointer',
-                            }}
-                                             key={'table-row-key-in-pledges-' + p.id}
-                                             onClick={() => setCurrentPledge(p)}
-                            >
-                                {[props.app.stock_id ? null : stock.name,
-                                    TwoLineInCell(p.model, p.imei),
-                                    p.ransomdate,
-                                    isDelay ? getSum2(Date.parse(p.time), dateNow, p.sum) : p.sum2]
-                                    .map(c => c && <TableCell key={'cell-key-in-pledges-' + p.id + c}
-                                                         style={{color: isDelay ? 'red' : 'black'}}>
-                                        {c}
-                                    </TableCell>)}
-                            < /TableRow>
-                        })}
+                        .map(p => <TableRow style={{
+                            cursor: 'pointer',
+                        }}
+                                            key={uuid()}
+                                            onClick={() => setCurrentPledge(p)}
+                        >
+                            {[props.app.stock_id ? null : p.stockName,
+                                TwoLineInCell(p.model, p.imei),
+                                p.ransomdate,
+                                p.sum2]
+                                .map(c => c && <TableCell key={uuid()}
+                                                          style={{color: p.isDelay ? 'red' : 'black'}}>
+                                    {c}
+                                </TableCell>)}
+                        < /TableRow>)}
                 </TableBody>
             </Table>
         </div>
-
 }
 
 export default connect(state => state)(Pledges)
