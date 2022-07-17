@@ -75,6 +75,22 @@ const Orders = props => {
         })
     }
 
+    const afterRest = res => {
+
+        if (res.status === 200) {
+
+            setParameters(false)
+            setOrders(res.body)
+
+        } else if (res.status === 204) {
+
+            enqueueSnackbar('Заказов не найдено', {variant: 'error'})
+
+        }
+
+    }
+
+
     useEffect(() => {
 
         inputRef.current.focus();
@@ -131,20 +147,12 @@ const Orders = props => {
             : 'allowedOrders'
 
         rest(url)
-            .then(res => {
-                if (res.status === 200) {
-
-                    setParameters(false)
-                    setOrders(res.body)
-
-                } else if (res.status === 204) {
-
-                    enqueueSnackbar('Заказов не найдено', {variant: 'error'})
-
-                }
-            })
+            .then(res => afterRest(res))
 
     }
+
+    const getMy = () => rest('allowedOrders')
+        .then(res => afterRest(res))
 
     const updateCustomer = (name, val) => {
 
@@ -220,6 +228,17 @@ const Orders = props => {
                 onClick={() => setParameters(!parameters)}
         >
             Параметры поиска
+        </Button>
+
+        <Button style={{
+            padding: '1rem',
+            margin: '1rem'
+        }}
+                variant="outlined"
+                size="small"
+                onClick={() => getMy()}
+        >
+            Мои текущие
         </Button>
 
         {parameters && <>
