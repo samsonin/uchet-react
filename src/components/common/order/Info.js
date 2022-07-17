@@ -8,7 +8,7 @@ import rest from "../../Rest"
 import CustomersSelect from "../CustomersSelect";
 // import Tree from "../../Tree";
 import UsersSelect from "../UsersSelect";
-import {intInputHandler, numberInputHandler} from "../InputHandlers";
+import {intInputHandler, numberInputHandler, sumField} from "../InputHandlers";
 import {totalSum} from "./functions";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -16,15 +16,19 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Slide from "@material-ui/core/Slide";
+import uuid from "uuid";
 
 const fieldsStyle = {
     margin: '.4rem',
-    width: '100%'
+    width: '100%',
 }
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
+
+const initSum = 'Предварительная стоимость'
+const initPresum = 'Предоплата при оформлении заказа'
 
 export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
@@ -43,8 +47,8 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         fio: '',
     })
     const [model, setModel] = useState('')
-    const [presum, setPresum] = useState(0)
-    const [sum, setSum] = useState(order ? order.sum : 0)
+    const [presum, setPresum] = useState(initPresum)
+    const [sum, setSum] = useState(order ? order.sum : initSum)
     const [sum2, setSum2] = useState(order ? order.sum : 0)
     const [master_id, setMaster_id] = useState(order ? order.master_id : 0)
     const [for_client, setFor_client] = useState(order ? order.for_client : '')
@@ -349,12 +353,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             />
             : null}
 
-        <TextField label="Предварительная стоимость"
-                   disabled={isRest || !!order}
-                   style={fieldsStyle}
-                   value={sum}
-                   onChange={e => intInputHandler(e.target.value, setSum)}
-        />
+        {sumField(initSum, sum, setSum, fieldsStyle, isRest || !!order)}
 
         {order
             ? <TextField label="Итого сумма заказа"
@@ -363,12 +362,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                          value={sum2}
                          onChange={e => numberInputHandler(e.target.value, setSum2)}
             />
-            : <TextField label="Предоплата при оформлении заказа"
-                         disabled={isRest || !!order}
-                         style={fieldsStyle}
-                         value={presum}
-                         onChange={e => intInputHandler(e.target.value, setPresum)}
-            />}
+            : sumField(initPresum, presum, setPresum, fieldsStyle, isRest || !!order)}
 
         {/*{treeOpen*/}
         {/*    ? <div style={{*/}
@@ -404,7 +398,9 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             ? null
             : <FormControl style={fieldsStyle}>
 
-                <InputLabel id="order-info-select-label">Категоррия</InputLabel>
+                <InputLabel id="order-info-select-label">
+                    Категория
+                </InputLabel>
 
                 <Select value={category_id}
                         onChange={e => setCategory_id(e.target.value)}
@@ -414,16 +410,17 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
                         const category = app.categories.find(c => c.id === g)
 
-                        return <MenuItem key={'menuitemininfoordergroup' + g}
+                        return <MenuItem key={uuid()}
                                          value={g}>
                             {category ? category.name : <br/>}
                         </MenuItem>
                     })}
 
-                    <MenuItem key={'menuitemininfoordergroup' + 1000}
+                    <MenuItem key={uuid()}
                               value={1000}>
                         Другая категория...
                     </MenuItem>
+
                 </Select>
 
             </FormControl>}
@@ -443,7 +440,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         />
 
         {fields.map(f => <TextField label={f.value}
-                                    key={'text-fields-in-new-order' + f.name}
+                                    key={uuid()}
                                     disabled={!isEditable}
                                     style={fieldsStyle}
                                     value={state[f.name] || ''}

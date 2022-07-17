@@ -1,3 +1,6 @@
+import {TextField} from "@material-ui/core";
+import React from "react";
+
 export const intInputHandler = (value, setInt) => {
 
     const newSum = +value
@@ -25,3 +28,18 @@ export const fioHandler = fio => fio.replace(/[^a-zA-Zа-яёА-ЯЁ ]/g, "")
         .split(' ')
         .map(w => w.substring(0, 1).toUpperCase() + w.substring(1).toLowerCase())
         .join(' ')
+
+export const sumField = (initValue, value, setValue, style, disabled) => {
+
+    console.log(initValue, value)
+
+    return <TextField
+        label={Number.isInteger(value) ? initValue : <br/>}
+        disabled={disabled}
+        style={style}
+        value={value}
+        onFocus={() => Number.isInteger(value) || setValue(0)}
+        onBlur={() => value > 0 || setValue(initValue)}
+        onChange={e => intInputHandler(e.target.value, setValue)}
+    />
+}

@@ -23,7 +23,7 @@ import TextField from "@material-ui/core/TextField/TextField";
 import {connect} from "react-redux";
 
 import {Print, createDate} from "../common/Print"
-import {intInputHandler} from "../common/InputHandlers";
+import {sumField} from "../common/InputHandlers";
 
 const statuses = [
     'Новая',
@@ -80,6 +80,9 @@ const initCustomer = {
 
 const fields = ['id', 'fio', 'phone_number']
 
+const initPrepaid = 'Предоплата'
+const initSum = 'Окончательная стоимость'
+
 const Prepaid = props => {
 
     const classes = useStyles()
@@ -88,8 +91,8 @@ const Prepaid = props => {
     const [id, setId] = useState(0)
     const [created, setCreated] = useState('')
     const [item, setItem] = useState('')
-    const [presum, setPresum] = useState(0)
-    const [sum, setSum] = useState(0)
+    const [presum, setPresum] = useState(initPrepaid)
+    const [sum, setSum] = useState(initSum)
     const [customer, setCustomer] = useState(initCustomer)
     const [status, setStatus] = useState(statuses[0])
     const [note, setNote] = useState('')
@@ -100,8 +103,8 @@ const Prepaid = props => {
         setId(0)
         setCreated('')
         setItem('')
-        setPresum(0)
-        setSum(0)
+        setPresum(initPrepaid)
+        setSum(initSum)
         setCustomer(initCustomer)
         setStatus(statuses[0])
         setNote('')
@@ -305,19 +308,15 @@ const Prepaid = props => {
                        onChange={e => setItem(e.target.value)}
             />
 
-            <TextField label="Предоплата"
-                       disabled={disabled}
-                       className={classes.field}
-                       value={presum}
-                       onChange={e => intInputHandler(e.target.value, setPresum)}
-            />
+            {sumField(initPrepaid, presum, setPresum, {
+                margin: '1rem .3rem',
+                width: '100%'
+            }, disabled)}
 
-            <TextField label="Окончательная стоимость"
-                       disabled={disabled}
-                       className={classes.field}
-                       value={sum}
-                       onChange={e => intInputHandler(e.target.value, setSum)}
-            />
+            {sumField(initSum, sum, setSum, {
+                margin: '1rem .3rem',
+                width: '100%'
+            }, disabled)}
 
             <CustomersSelect
                 customer={customer}

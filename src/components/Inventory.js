@@ -128,7 +128,7 @@ const Inventory = props => {
                 {[
                     {label: "Модель", value: model, onChange: null},
                     {label: "imei S/N", value: imei, onChange: e => setImei(lengthControl(e.target.value))},
-                    {label: "цена", value: sum, onChange: e => intInputHandler(e.target.value, setSum)},
+                    {label: "Цена", value: sum, onChange: e => intInputHandler(e.target.value, setSum)},
                     {label: "Место хранения", value: place, onChange: e => setPlace(lengthControl(e.target.value))},
                 ].map(f => <TextField
                     key={uuidv4()}
@@ -234,12 +234,11 @@ const Inventory = props => {
 
                             const isInStock = g.storage === 'instock'
 
-                            return (<Fade
+                            return (<Fade key={uuidv4()}
                                 in={true}
                                 timeout={1000}
                             >
-                                <TableRow key={uuidv4()}
-                                          style={{
+                                <TableRow style={{
                                               cursor: 'pointer',
                                               backgroundColor: isInStock
                                                   ? 'green'
