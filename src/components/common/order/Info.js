@@ -16,7 +16,6 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Slide from "@material-ui/core/Slide";
-import uuid from "uuid";
 
 const fieldsStyle = {
     margin: '.4rem',
@@ -410,13 +409,13 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
                         const category = app.categories.find(c => c.id === g)
 
-                        return <MenuItem key={uuid()}
+                        return <MenuItem key={'menu-item-key-in-info-' + g}
                                          value={g}>
                             {category ? category.name : <br/>}
                         </MenuItem>
                     })}
 
-                    <MenuItem key={uuid()}
+                    <MenuItem key={'menu-item-key-in-info-1000'}
                               value={1000}>
                         Другая категория...
                     </MenuItem>
@@ -440,7 +439,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         />
 
         {fields.map(f => <TextField label={f.value}
-                                    key={uuid()}
+                                    key={'text-field-keys-in-info-' + f.value + f.name}
                                     disabled={!isEditable}
                                     style={fieldsStyle}
                                     value={state[f.name] || ''}
