@@ -43,6 +43,7 @@ import Prices from "./components/Prices";
 import Pledges from "./components/Pledges";
 import Buy from "./components/Buy";
 import Inventory from "./components/Inventory";
+import ArrivalToday from "./components/ArrivalToday";
 
 
 const parseJwt = token => {
@@ -118,7 +119,7 @@ const App = props => {
 
         if (!ourBarcode) return
 
-        if (!['/transit'].includes(window.location.pathname)) {
+        if (!['/transit', '/arrival/today'].includes(window.location.pathname)) {
 
             rest("goods/" + ourBarcode)
                 .then(res => {
@@ -256,8 +257,15 @@ const App = props => {
                             <Route path="/call_records" component={Records}/>
                             {props.app.users[0] && <Route path="/queue" component={Queue}/>}
 
+                            <Route exact path="/arrival/today"
+                                   render={props => <ArrivalToday
+                                       newScan={ourBarcode}
+                                       setOurBarcode={setOurBarcode}
+                                       {...props}
+                                   />}/>
+
                             {!props.app.stock_id || <>
-                                <Route path="/arrival" render={props => <Consignment
+                                <Route exact path="/arrival" render={props => <Consignment
                                     newScan={globalBarcode}
                                     enterPress={enterPress}
                                     setEnterPress={setEnterPress}
@@ -267,9 +275,10 @@ const App = props => {
                             </>}
 
                             <Route path="/transit" render={props => <Transit
-                                newScan={ourBarcode} {...props} />}
-                                   setOurBarcode={setOurBarcode}
-                            />
+                                newScan={ourBarcode}
+                                setOurBarcode={setOurBarcode}
+                                {...props}
+                            />}/>
 
                             {props.auth.admin && <>
                                 <Route path="/funds" component={FundsFlow}/>
