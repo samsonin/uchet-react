@@ -221,7 +221,6 @@ const App = props => {
                         <form onSubmit={e => e.preventDefault()}>
 
                             <Route exact path="/" component={Main}/>
-                            <Route path="/barcodes" component={Barcodes(['123456789012'])}/>
                             <Route exact path="/settings" component={Settings}/>
                             <Route path="/subscribe" component={Subscribe}/>
 

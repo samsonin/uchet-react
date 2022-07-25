@@ -13,6 +13,8 @@ import {v4 as uuidv4} from "uuid";
 import LineWeightIcon from "@material-ui/icons/LineWeight";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
+import {PrintBarcodes} from "./common/PrintBarcodes";
+import Barcode from "react-barcode";
 
 const ArrivalToday = props => {
 
@@ -91,7 +93,7 @@ const ArrivalToday = props => {
 
     const  barcodesPrint = barcodes => {
 
-        console.log(barcodes)
+        PrintBarcodes(barcodes)
 
     }
 
