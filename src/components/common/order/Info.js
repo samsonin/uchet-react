@@ -177,6 +177,10 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const checkout = () => {
 
+        if (!for_client) return enqueueSnackbar('Заполните \'В чек для заказчика\'',
+            {variant: 'error'}
+        )
+
         const payments = totalSum(order)
 
         if (sum2 !== payments) {
