@@ -16,6 +16,9 @@ import Tooltip from "@material-ui/core/Tooltip";
 import {PrintBarcodes} from "./common/PrintBarcodes";
 import Barcode from "react-barcode";
 
+import {Barcodes} from "./Barcodes";
+
+
 const ArrivalToday = props => {
 
     const [goods, setGoods] = useState([])
@@ -91,12 +94,6 @@ const ArrivalToday = props => {
 
     }
 
-    const  barcodesPrint = barcodes => {
-
-        PrintBarcodes(barcodes)
-
-    }
-
     return <>
 
         <FormControlLabel
@@ -164,11 +161,11 @@ const ArrivalToday = props => {
                                 <TableCell>
                                     {props.stock_id
                                         ? <Tooltip title="штрихкод">
-                                        <IconButton onClick={() => barcodesPrint(good.barcodes)}>
-                                            <LineWeightIcon/>
-                                        </IconButton>
-                                    </Tooltip>
-                                    : stock ? stock.name : ''}
+                                            <IconButton onClick={() => PrintBarcodes(good.barcodes)}>
+                                                <LineWeightIcon/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        : stock ? stock.name : ''}
                                 </TableCell>
                             </TableRow>
                         })
@@ -211,6 +208,9 @@ const ArrivalToday = props => {
                                 <TableCell>
                                     {good.ui_wf}
                                 </TableCell>
+                                <TableCell>
+                                    <Barcode value={good.barcode.toString()}/>
+                                </TableCell>
                             </TableRow>
 
                         })}
@@ -218,6 +218,7 @@ const ArrivalToday = props => {
                 </TableBody>
             </Table>
         </TableContainer>
+
 
     </>
 

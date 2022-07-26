@@ -1,25 +1,14 @@
 import React from "react";
-import './barcodes.css'
+import uuid from "uuid";
+import Barcode from "react-barcode";
 
-const Barcode = require('react-barcode');
 
-export const Barcodes = ({barcodes}) => {
-
-    return (barcodes && typeof (barcodes) === 'object')
-        ? barcodes.map(b => <div
-            key={'divinbarcodes' + b.toString()}
-                className={'barcodes'}
-            >
-                <Barcode
-                    value={b}
-                    format={'EAN13'}
-                    width={1.5}
-                    height={70}
-                    displayValue={false}
-                    key={'barcodeskey' + b}
-                />
-            </div>
-        )
-        : null
-
-}
+export const Barcodes = ({barcodes}) => barcodes.map(b => <Barcode
+        value={b.toString()}
+        format={'EAN13'}
+        width={1.5}
+        height={70}
+        displayValue={false}
+        key={uuid()}
+    />
+)

@@ -1,7 +1,4 @@
-import React from "react";
-import Barcode from 'react-barcode';
-import uuid from "uuid";
-
+import JsBarcode from 'jsbarcode';
 
 export function PrintBarcodes(barcodes, afterPrint) {
 
@@ -11,34 +8,24 @@ export function PrintBarcodes(barcodes, afterPrint) {
         printable[i].remove()
     }
 
-
     const div = document.createElement('div')
     div.className = 'printable'
 
-    const bc = <Barcode
-        value={barcodes[0].toString()}
-    />
+    // заглушка
+    // barcodes = ['103100123123', '013186398723', '187354915734']
 
-    div.append(bc)
+    barcodes.map(b => {
 
-    console.log(typeof bc, bc)
+        const svg = document.createElement('svg')
+        svg.className = "barcode"
+        svg.setAttribute("jsbarcode-value", b)
+        div.appendChild(svg)
 
-    // div.append(barcodes.map(b => {
-    //
-    //     console.log(b)
-    //
-    //     return <div
-    //         key={uuid()}
-    //     >
-    //         <Barcode
-    //             value={b.toString()}
-    //             // format={'EAN13'}
-    //             // displayValue={false}
-    //         />
-    //     </div>
-    // }))
+    })
 
     document.body.append(div)
+
+    JsBarcode(".barcode").init();
 
     if (typeof (afterPrint) === "function") window.onafterprint = () => afterPrint()
 
@@ -46,6 +33,6 @@ export function PrintBarcodes(barcodes, afterPrint) {
 
     window.onafterprint = null
 
-    // div.remove()
+    div.remove()
 
 }

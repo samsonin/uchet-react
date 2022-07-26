@@ -93,10 +93,6 @@
         background-color: rgba(32, 252, 178, 0.11);
     }
 
-    .barcodes {
-        display: none !important;
-    }
-
     .transition-hidden {
         opacity: 0;
         transition: 2s opacity;
@@ -128,7 +124,7 @@
     .non-printable { display: none;}
 
     .printable {
-        display: block;
+        display: block !important;
         padding: 0;
         font-size: 13px;
         font-family: Verdana, Arial, Helvetica, sans-serif;

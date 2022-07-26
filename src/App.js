@@ -22,7 +22,6 @@ import Transit from "./components/Transit";
 import FundsFlow from "./components/FundsFlow";
 import rest from "./components/Rest";
 import GoodModal from "./components/Modals/Good";
-import {Barcodes} from "./components/Barcodes";
 import Config from "./components/Settings/Config";
 import Organization from "./components/Settings/Organization";
 import Employees from "./components/Settings/Employees";

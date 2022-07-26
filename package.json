@@ -14,7 +14,7 @@
     "@material-ui/lab": "^4.0.0-alpha.56",
     "date-fns": "^2.16.1",
     "dotenv": "^8.2.0",
-    "jsbarcode": "^3.11.0",
+    "jsbarcode": "^3.11.5",
     "jss": "^9.8.7",
     "jss-camel-case": "^6.1.0",
     "mdbreact": "4.19.1",

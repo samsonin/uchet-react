@@ -7198,10 +7198,10 @@
     "argparse" "^1.0.7"
     "esprima" "^4.0.0"
 
-"jsbarcode@^3.11.0", "jsbarcode@^3.8.0":
-  "integrity" "sha512-PHtad17lOl6LOLGK20k5I6P7MabiyHaJY5u5N5TlzC6ZunOR+yFnFnRUoqqOefrYPqO2nuJ1weHzG8B7YYEnHg=="
-  "resolved" "https://registry.npmjs.org/jsbarcode/-/jsbarcode-3.11.4.tgz"
-  "version" "3.11.4"
+"jsbarcode@^3.11.5", "jsbarcode@^3.8.0":
+  "integrity" "sha512-zv3KsH51zD00I/LrFzFSM6dst7rDn0vIMzaiZFL7qusTjPZiPtxg3zxetp0RR7obmjTw4f6NyGgbdkBCgZUIrA=="
+  "resolved" "https://registry.npmjs.org/jsbarcode/-/jsbarcode-3.11.5.tgz"
+  "version" "3.11.5"
 
 "jsbn@~0.1.0":
   "integrity" "sha1-peZUwuWi3rXyAdls77yoDA7y9RM="
