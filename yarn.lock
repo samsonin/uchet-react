@@ -7198,7 +7198,7 @@
     "argparse" "^1.0.7"
     "esprima" "^4.0.0"
 
-"jsbarcode@^3.11.5", "jsbarcode@^3.8.0":
+"jsbarcode@^3.11.5":
   "integrity" "sha512-zv3KsH51zD00I/LrFzFSM6dst7rDn0vIMzaiZFL7qusTjPZiPtxg3zxetp0RR7obmjTw4f6NyGgbdkBCgZUIrA=="
   "resolved" "https://registry.npmjs.org/jsbarcode/-/jsbarcode-3.11.5.tgz"
   "version" "3.11.5"
@@ -9862,14 +9862,6 @@
     "raf" "^3.4.1"
     "regenerator-runtime" "^0.13.3"
     "whatwg-fetch" "^3.0.0"
-
-"react-barcode@^1.4.0":
-  "integrity" "sha512-xDxIc9WUTQPMcwc3kbCVsjh03WiPyynms9OSdsNSh2AAgB6XqMiy9hYWkCNHgdNdvurkvKB6hm25AZHXyQfvlQ=="
-  "resolved" "https://registry.npmjs.org/react-barcode/-/react-barcode-1.4.0.tgz"
-  "version" "1.4.0"
-  dependencies:
-    "jsbarcode" "^3.8.0"
-    "prop-types" "^15.6.2"
 
 "react-chartjs-2@2.7.6":
   "integrity" "sha512-xDr0jhgt/o26atftXxTVsepz+QYZI2GNKBYpxtLvYgwffLUm18a9n562reUJAHvuwKsy2v+qMlK5HyjFtSW0mg=="
