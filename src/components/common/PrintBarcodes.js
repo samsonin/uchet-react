@@ -2,6 +2,8 @@ import JsBarcode from 'jsbarcode';
 
 export function PrintBarcodes(barcodes, afterPrint) {
 
+    console.log(barcodes)
+
     const printable = document.getElementsByClassName('printable')
 
     for (let i = 0; i < printable.length; i++) {
@@ -10,9 +12,6 @@ export function PrintBarcodes(barcodes, afterPrint) {
 
     const div = document.createElement('div')
     div.className = 'printable'
-
-    // заглушка
-    // barcodes = ['103100123123', '013186398723', '187354915734']
 
     barcodes.map(b => {
 

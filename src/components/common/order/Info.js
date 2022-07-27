@@ -147,16 +147,25 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     }
 
-    const save = () => orderRest({
-        customer,
-        status_id,
-        master_id,
-        category_id,
-        model,
-        sum2,
-        for_client,
-        ...state
-    })
+    const checkoutError  = () => enqueueSnackbar('Заполните \'В чек для заказчика\'',
+        {variant: 'error'}
+    )
+
+    const save = () => {
+
+        if (status_id === 5 && !for_client) return checkoutError()
+
+        orderRest({
+            customer,
+            status_id,
+            master_id,
+            category_id,
+            model,
+            sum2,
+            for_client,
+            ...state
+        })
+    }
 
     const checkoutRest = () => {
 
@@ -177,9 +186,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const checkout = () => {
 
-        if (!for_client) return enqueueSnackbar('Заполните \'В чек для заказчика\'',
-            {variant: 'error'}
-        )
+        if (!for_client) return checkoutError()
 
         const payments = totalSum(order)
 

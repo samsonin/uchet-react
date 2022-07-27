@@ -22,7 +22,6 @@ import {Barcodes} from "./Barcodes";
 const ArrivalToday = props => {
 
     const [goods, setGoods] = useState([])
-    const [group, setGroup] = useState([])
     const [isGroup, setIsGroup] = useState(false)
 
     useEffect(() => {
@@ -33,8 +32,6 @@ const ArrivalToday = props => {
                 if (res.status === 200) {
 
                     setGoods(res.body)
-
-                    setGroup(makeGroup(res.body))
 
                 }
 
@@ -58,41 +55,47 @@ const ArrivalToday = props => {
 
     const makeGroup = goods => {
 
-        if (!goods.length) return []
-
         const group = []
 
-        let nextGood
+        if (goods.length) {
 
-        goods.map(g => {
+            let nextGood
 
-            if (nextGood && nextGood.category_id === g.category_id && nextGood.model === g.model) {
+            goods.map(g => {
 
-                nextGood.barcodes.push(g.barcode)
-                nextGood.count++
+                if (nextGood && nextGood.category_id === g.category_id && nextGood.model === g.model) {
 
-            } else {
+                    nextGood.barcodes.push(g.barcode)
+                    nextGood.count++
 
-                if (nextGood) group.push(nextGood)
+                } else {
 
-                nextGood = {
-                    barcodes: [g.barcode],
-                    category_id: g.category_id,
-                    model: g.model,
-                    stock_id: g.stock_id,
-                    ui_wf: g.ui_wf,
-                    count: 1
+                    if (nextGood) group.push(nextGood)
+
+                    nextGood = {
+                        barcodes: [g.barcode],
+                        category_id: g.category_id,
+                        model: g.model,
+                        stock_id: g.stock_id,
+                        ui_wf: g.ui_wf,
+                        count: 1
+                    }
+
                 }
 
-            }
+            })
 
-        })
+            group.push(nextGood)
 
-        group.push(nextGood)
+        }
 
         return group
 
     }
+
+    const goodsView = isGroup
+        ? makeGroup(goods)
+        : goods
 
     return <>
 
@@ -130,47 +133,9 @@ const ArrivalToday = props => {
 
                 <TableBody>
 
-                    {isGroup
-                        ? group.map(good => {
-
-                            let stock = props.stocks.find(st => st.id === good.stock_id)
-                            let category = props.categories.find(c => c.id === good.category_id)
-
-                            good.category = category
-                                ? category.name
-                                : 'нет'
-
-                            return <TableRow
-                                key={uuidv4()}
-                                // className={good.c}
-                                // onClick={e => getInfo(good, e.target)}
-                                style={{cursor: 'pointer'}}
-                            >
-                                <TableCell>
-                                    {good.category}
-                                </TableCell>
-                                <TableCell>
-                                    {good.model}
-                                </TableCell>
-                                <TableCell>
-                                    {good.ui_wf}
-                                </TableCell>
-                                <TableCell>
-                                    {good.count}
-                                </TableCell>
-                                <TableCell>
-                                    {props.stock_id
-                                        ? <Tooltip title="штрихкод">
-                                            <IconButton onClick={() => PrintBarcodes(good.barcodes)}>
-                                                <LineWeightIcon/>
-                                            </IconButton>
-                                        </Tooltip>
-                                        : stock ? stock.name : ''}
-                                </TableCell>
-                            </TableRow>
-                        })
-
-                        : goods.map(good => {
+                    {goodsView
+                        .filter(g => !props.stock_id || props.stock_id === g.stock_id)
+                        .map(good => {
 
                             let stock = props.stocks.find(st => st.id === good.stock_id)
                             let user = props.users.find(u => u.id === good.responsible_id)
@@ -190,15 +155,14 @@ const ArrivalToday = props => {
 
                             return <TableRow
                                 key={uuidv4()}
-                                // onClick={e => good.isInStock = true}
                                 style={{
                                     cursor: 'pointer',
-                                    background: good.isInStock ? 'green' : 'white'
+                                    background: !isGroup && good.isInStock ? 'green' : 'white'
                                 }}
                             >
-                                <TableCell>
+                                {isGroup || <TableCell>
                                     {good.id}
-                                </TableCell>
+                                </TableCell>}
                                 <TableCell>
                                     {good.category}
                                 </TableCell>
@@ -209,10 +173,21 @@ const ArrivalToday = props => {
                                     {good.ui_wf}
                                 </TableCell>
                                 <TableCell>
-                                    <Barcode value={good.barcode.toString()}/>
+                                    {good.count}
                                 </TableCell>
-                            </TableRow>
+                                <TableCell>
+                                    {props.stock_id
+                                        ? <Tooltip title="штрихкод">
+                                            <IconButton onClick={
+                                                () => PrintBarcodes(isGroup ? good.barcodes : [good.barcode])
+                                            }>
+                                                <LineWeightIcon/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        : stock ? stock.name : ''}
+                                </TableCell>
 
+                            </TableRow>
                         })}
 
                 </TableBody>
