@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 
 import rest from "../components/Rest";
 import TableContainer from "@material-ui/core/TableContainer";
-import {Checkbox, FormControlLabel, Paper} from "@material-ui/core";
+import {Checkbox, FormControlLabel, InputAdornment, Paper, TextField} from "@material-ui/core";
 import Table from "@material-ui/core/Table";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
@@ -14,6 +14,8 @@ import LineWeightIcon from "@material-ui/icons/LineWeight";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import {PrintBarcodes} from "./common/PrintBarcodes";
+import SearchIcon from "@material-ui/icons/Search";
+import CloseIcon from "@material-ui/icons/Close";
 
 
 
@@ -21,6 +23,7 @@ const ArrivalToday = props => {
 
     const [goods, setGoods] = useState([])
     const [isGroup, setIsGroup] = useState(false)
+    const [search, setSearch] = useState('')
 
     useEffect(() => {
 
@@ -106,8 +109,27 @@ const ArrivalToday = props => {
             label="Сгруппировать"
         />
 
+        <TextField InputProps={{
+            startAdornment: (
+                <InputAdornment position="start">
+                    <SearchIcon/>
+                </InputAdornment>
+            ),
+            endAdornment: (
+                <InputAdornment position="end">
+                    <IconButton onClick={() => setSearch('')}>
+                        <CloseIcon/>
+                    </IconButton>
+                </InputAdornment>
+            ),
+        }}
+                   value={search}
+                   onChange={e => setSearch(e.target.value)}
+        />
+
         <TableContainer component={Paper}>
             <Table size="small">
+
                 <TableHead>
 
                     <TableRow>
@@ -133,6 +155,31 @@ const ArrivalToday = props => {
 
                     {goodsView
                         .filter(g => !props.stock_id || props.stock_id === g.stock_id)
+                        .filter(g => {
+
+                            if (!search || g.id == search) return true
+
+                            const category = props.categories.find(c => c.id === g.category_id)
+
+                            const model = g.model.toLowerCase()
+                            const categoryName = category.name.toLowerCase()
+                            const wf = g.ui_wf.toLowerCase()
+
+                            let r = true
+
+                            search.toLowerCase()
+                                .split(' ')
+                                .map(s => {
+
+                                    if (wf.indexOf(s) < 0 && categoryName.indexOf(s) < 0 && model.indexOf(s) < 0) {
+                                        r = false
+                                    }
+
+                                })
+
+                            return r
+
+                        })
                         .map(good => {
 
                             let stock = props.stocks.find(st => st.id === good.stock_id)
@@ -189,6 +236,7 @@ const ArrivalToday = props => {
                         })}
 
                 </TableBody>
+
             </Table>
         </TableContainer>
 

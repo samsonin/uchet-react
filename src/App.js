@@ -235,13 +235,13 @@ const App = props => {
                             <Route exact path="/prepaids" component={Prepaids}/>
                             <Route exact path="/showcase" component={Showcase}/>
                             <Route exact path="/showcase/buy" component={Buy}/>
-                            <Route exact path="/pledges" component={Pledges}/>
-                            <Route exact path="/pledges/:id" component={Pledges}/>
                             <Route exact path="/inventory" component={Inventory}/>
                             <Route exact path="/customers" component={Customers}/>
                             <Route exact path="/customers/:id" component={Customer}/>
                             <Route exact path="/entities" component={Entities}/>
                             {props.app.fields.allElements && <>
+                                <Route exact path="/pledges" component={Pledges}/>
+                                <Route exact path="/pledges/:id" component={Pledges}/>
                                 <Route exact path="/entities/:id" component={Entity}/>
                                 <Route exact path="/order" component={Order}/>
                                 <Route exact path="/order/:stock_id/:order_id" component={Order}/>
