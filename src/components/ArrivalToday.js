@@ -16,7 +16,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import {PrintBarcodes} from "./common/PrintBarcodes";
 import SearchIcon from "@material-ui/icons/Search";
 import CloseIcon from "@material-ui/icons/Close";
-
+import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 
 const ArrivalToday = props => {
@@ -100,32 +100,50 @@ const ArrivalToday = props => {
 
     return <>
 
-        <FormControlLabel
-            control={<Checkbox
-                checked={isGroup}
-                onChange={() => setIsGroup(!isGroup)}
-                inputProps={{'aria-label': 'primary checkbox'}}
-            />}
-            label="Сгруппировать"
-        />
+        <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
 
-        <TextField InputProps={{
-            startAdornment: (
-                <InputAdornment position="start">
-                    <SearchIcon/>
-                </InputAdornment>
-            ),
-            endAdornment: (
-                <InputAdornment position="end">
-                    <IconButton onClick={() => setSearch('')}>
-                        <CloseIcon/>
-                    </IconButton>
-                </InputAdornment>
-            ),
-        }}
-                   value={search}
-                   onChange={e => setSearch(e.target.value)}
-        />
+            width: '100%',
+            margin: '.5rem'
+        }}>
+
+            <FormControlLabel
+                control={<Checkbox
+                    checked={isGroup}
+                    onChange={() => setIsGroup(!isGroup)}
+                    inputProps={{'aria-label': 'primary checkbox'}}
+                />}
+                label="Сгруппировать"
+            />
+
+            <TextField InputProps={{
+                startAdornment: (
+                    <InputAdornment position="start">
+                        <SearchIcon/>
+                    </InputAdornment>
+                ),
+                endAdornment: (
+                    <InputAdornment position="end">
+                        <IconButton onClick={() => setSearch('')}>
+                            <CloseIcon/>
+                        </IconButton>
+                    </InputAdornment>
+                ),
+            }}
+                       value={search}
+                       onChange={e => setSearch(e.target.value)}
+            />
+
+            <Tooltip title={'Новая наклвдная'}>
+                <IconButton
+                    onClick={() => props.history.push('/arrival')}
+                >
+                    <AddCircleIcon/>
+                </IconButton>
+            </Tooltip>
+
+        </div>
 
         <TableContainer component={Paper}>
             <Table size="small">

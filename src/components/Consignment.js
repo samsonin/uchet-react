@@ -527,43 +527,23 @@ const Consignment = props => {
                            : 0}
             />
 
+            {props.close
+                ? <Tooltip title={'Назад'}>
+                    <IconButton onClick={props.close}>
+                        <ArrowBackIcon/>
+                    </IconButton>
+                </Tooltip>
+                : <Button style={{margin: '.5rem'}}
+                          variant="outlined"
+                    onClick={() => props.history.push('/arrival/today')}
+                >
+                    Все за сегодня
+                </Button>}
+
             <Grid container
                   justify={'center'}
                   alignItems={'center'}
             >
-
-                <Grid container
-                      style={{margin: '1rem'}}
-                      justify="space-between"
-                >
-
-                    <Grid item>
-                        {props.close
-                            ? <Tooltip title={'Назад'}>
-                                <IconButton onClick={props.close}>
-                                    <ArrowBackIcon/>
-                                </IconButton>
-                            </Tooltip>
-                            : <Typography variant="h5">Новая накладная</Typography>}
-                    </Grid>
-
-                    <Grid item>
-                        {<Tooltip title={props.close ? 'Удалить' : 'Очистить'}>
-                            <IconButton
-                                disabled={isRequesting}
-                                onClick={() => props.close
-                                    ? del()
-                                    : setState(initialState)
-                                }
-                            >
-                                {props.close
-                                    ? <DeleteIcon/>
-                                    : <ClearIcon/>}
-                            </IconButton>
-                        </Tooltip>}
-                    </Grid>
-                </Grid>
-
                 <Grid item>
                     <TableContainer component={Paper}>
                         <Table size="small">
@@ -585,11 +565,26 @@ const Consignment = props => {
                                         />
 
                                     </TableCell>
-                                    <TableCell colSpan={4} className="pt-3">
+                                    <TableCell colSpan={3} className="pt-3">
                                         <TextField label="Накладная"
                                                    value={state.consignment.consignment_number}
                                                    onChange={e => handleTotals('consignment_number', e.target.value)}
                                         />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Tooltip title={props.close ? 'Удалить' : 'Очистить'}>
+                                            <IconButton
+                                                disabled={isRequesting}
+                                                onClick={() => props.close
+                                                    ? del()
+                                                    : setState(initialState)
+                                                }
+                                            >
+                                                {props.close
+                                                    ? <DeleteIcon/>
+                                                    : <ClearIcon/>}
+                                            </IconButton>
+                                        </Tooltip>
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>

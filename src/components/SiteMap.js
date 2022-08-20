@@ -71,7 +71,6 @@ export const siteMap = isAdmin => {
 
         ? map.concat([
 
-            {id: 12, path: "arrival/today", text: "Сегодня"},
             {id: 19, path: "inventory", text: "Инвентаризация"},
 
             {id: 32, path: "funds", text: "Движение денег"},
