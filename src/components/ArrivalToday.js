@@ -45,7 +45,7 @@ const ArrivalToday = props => {
         setGoods(goods.map(g => {
             if (+g.barcode === +props.newScan.substring(0, 12)) {
 
-                console.log(g.barcode)
+                // console.log(g.barcode)
 
                 g.isInStock = true
             }
@@ -83,6 +83,8 @@ const ArrivalToday = props => {
                     }
 
                 }
+
+                return g
 
             })
 
@@ -192,6 +194,8 @@ const ArrivalToday = props => {
                                     if (wf.indexOf(s) < 0 && categoryName.indexOf(s) < 0 && model.indexOf(s) < 0) {
                                         r = false
                                     }
+
+                                    return s
 
                                 })
 

@@ -21,8 +21,7 @@ import {intInputHandler} from "./common/InputHandlers";
 import UsersSelect from "./common/UsersSelect";
 import StatusesSelect from "./common/StatusesSelect";
 import {OrderText} from "./common/OrderText"
-import {InputAdornment} from "@material-ui/core";
-import SearchIcon from "@material-ui/icons/Search";
+
 
 const initCustomer = {
     id: 0,
@@ -134,7 +133,9 @@ const Orders = props => {
 
         if (id) url = 'orders?id=' + id
         else if (customer.id) url = 'orders?customer_id=' + customer.id
-        else if (createdDate || createdDate2 || checkoutDate || checkoutDate2) {
+        else if (customer.fio || customer.phone_number) {
+            url = 'orders?fio=' + customer.fio + '&phone_number=' + customer.phone_number
+        } else if (createdDate || createdDate2 || checkoutDate || checkoutDate2) {
 
             ['createdDate', 'createdDate2', 'checkoutDate', 'checkoutDate2'].map(v => {
                 if (eval(v)) url += v + '=' + eval(v) + '&'
@@ -242,11 +243,6 @@ const Orders = props => {
         </Button>
 
         {parameters && <>
-            <Grid container
-                  justify='space-between'
-            >
-
-            </Grid>
 
             {!id && <CustomersSelect
                 customer={customer}
@@ -254,7 +250,7 @@ const Orders = props => {
                 onlySearch={true}
             />}
 
-            {!id && !customer.id && <>
+            {!id && !(customer.id || customer.fio || customer.phone_number) && <>
                 <Grid item className="w-100 m-2 p-2">
 
                     {props.app.stocks.map(s => s.is_valid
@@ -339,7 +335,7 @@ const Orders = props => {
 
             </>}
 
-            {parameters && findButton()}
+            {findButton()}
 
         </>}
 

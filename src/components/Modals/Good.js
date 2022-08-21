@@ -114,6 +114,7 @@ const Good = props => {
     const [goodsForRepair, setGoodsForRepair] = useState([])
     const [repairJob, setRepairJob] = useState('')
     const [repairMasterId, setRepairMasterId] = useState(0)
+    const [repairCash, setRepairCash] = useState(false)
 
     const pb = props.good.public || props.good.parts === 'sale'
 
@@ -267,8 +268,10 @@ const Good = props => {
         const data = {
             sum: repairSum,
             job: repairJob,
-            master_id: repairMasterId,
         }
+
+        if (repairCash) data.cash = true
+        else data.master_id = repairMasterId
 
         if (goodsForRepair.length) data.barcodes = goodsForRepair.map(g => g.barcode)
 
@@ -550,13 +553,24 @@ const Good = props => {
 
                 <GoodSearch onSelected={onSelected}/>
 
-                <UsersSelect
-                    classes={classes.field}
-                    users={props.app.users}
-                    user={repairMasterId}
-                    setUser={setRepairMasterId}
-                    onlyValid={true}
-                />
+                <div style={{
+                    width: '100%'
+                }}>
+
+                    {repairCash || <UsersSelect
+                        classes={classes.field}
+                        users={props.app.users}
+                        user={repairMasterId}
+                        setUser={setRepairMasterId}
+                        onlyValid={true}
+                    />}
+
+                    {!repairMasterId && <FormControlLabel
+                        control={<Checkbox checked={repairCash} onChange={() => setRepairCash(!repairCash)}/>}
+                        label="списать с кассы"
+                    />}
+
+                </div>
 
                 <Button
                     variant="outlined"

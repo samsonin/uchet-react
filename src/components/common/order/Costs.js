@@ -184,9 +184,6 @@ export const Costs = ({order, isEditable, users, providers, updApp}) => {
                 />}
 
                 {!user_id && <FormControlLabel
-                    style={{
-
-                    }}
                     control={<Checkbox checked={cash}
                                        onChange={() => setCash(!cash)}
                     />}

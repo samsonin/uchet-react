@@ -8,7 +8,7 @@ import rest from "../../Rest"
 import CustomersSelect from "../CustomersSelect";
 // import Tree from "../../Tree";
 import UsersSelect from "../UsersSelect";
-import {intInputHandler, numberInputHandler, sumField} from "../InputHandlers";
+import {numberInputHandler, sumField} from "../InputHandlers";
 import {totalSum} from "./functions";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";

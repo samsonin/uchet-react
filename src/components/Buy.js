@@ -26,7 +26,6 @@ import {intInputHandler} from "./common/InputHandlers";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import {createDate, Print} from "./common/Print";
-import IsPublicCheckBox from "./common/IsPublicCheckBox";
 
 
 const mapDispatchToProps = dispatch => bindActionCreators({

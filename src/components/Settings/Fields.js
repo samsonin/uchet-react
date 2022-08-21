@@ -1,7 +1,7 @@
 import {bindActionCreators} from "redux";
 import {upd_app} from "../../actions/actionCreator";
 import {connect} from "react-redux";
-import React, {Component, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import FormControl from "@material-ui/core/FormControl";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import IconButton from "@material-ui/core/IconButton";

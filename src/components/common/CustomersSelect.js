@@ -25,6 +25,12 @@ export default function (props) {
 
     const handlerInput = (val, reason, name) => {
 
+        if (reason === 'clear') {
+            props.updateCustomer('phone_number', '')
+            props.updateCustomer('fio', '')
+            return
+        }
+
         if (reason !== 'input') return
 
         if (name === 'phone_number') val = phoneNumberHandler(val)
