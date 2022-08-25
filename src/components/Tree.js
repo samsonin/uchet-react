@@ -47,7 +47,9 @@ export default function ControlledTreeView({categories, initialId, onSelected, f
 
             expandedInitial.current.push(id.toString())
 
-            getExpanded(categories.find(cat => cat.id === id).parent_id)
+            const c = categories.find(cat => cat.id === id)
+
+            if (c) getExpanded(c.parent_id)
 
         }
 

@@ -7,7 +7,7 @@ import Grid from "@material-ui/core/Grid";
 import {connect} from "react-redux";
 
 // выделяем цветом популярные кнопки
-const primaryIds = [0, 1, 10, 13, 31];
+const primaryIds = [1, 10, 31];
 
 // расстановка кнопок на главной странице
 

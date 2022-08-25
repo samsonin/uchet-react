@@ -43,6 +43,7 @@ import Pledges from "./components/Pledges";
 import Buy from "./components/Buy";
 import Inventory from "./components/Inventory";
 import ArrivalToday from "./components/ArrivalToday";
+import Store from "./components/Store";
 
 
 const parseJwt = token => {
@@ -270,6 +271,7 @@ const App = props => {
                                     {...props}
                                 />}/>
                                 <Route path="/consignments" component={Consignments}/>
+                                <Route path="/store" component={Store}/>
                             </>}
 
                             <Route path="/transit" render={props => <Transit
