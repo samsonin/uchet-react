@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useRef, useState} from "react";
 import {connect} from "react-redux";
 import {Button, IconButton, InputAdornment, Table, TableBody, TableCell, TableRow, TextField} from "@material-ui/core";
 import uuid from "uuid";
@@ -27,18 +27,26 @@ const style = {
 const Store = props => {
 
     const [goods, setGoods] = useState([])
-    const [categoryFilter, setCategoryFilter] = useState(0)
+    const [catId, setCatId] = useState(0)
     const [isExpand, setIsExpand] = useState(false)
+    const [isRest, setIsRest] = useState(false)
     const [search, setSearch] = useState('')
-    const [limit, setLimit] = useState(25)
 
+    const limit = useRef(25)
 
     const sendRequest = () => {
 
-        if (!categoryFilter) return
+        setIsRest(true)
 
-        rest('goods?category_id=' + categoryFilter)
+        let url = 'goods?'
+        if (catId) url += '&category_id=' + catId
+        if (search) url += '&search=' + search
+
+        if (limit.current > 25) url += '&limit=' + limit.current
+
+        rest(url)
             .then(res => {
+                setIsRest(false)
                 if (res.status === 200) setGoods(res.body)
             })
 
@@ -49,7 +57,7 @@ const Store = props => {
 
         id = +id
 
-        setCategoryFilter(id)
+        setCatId(id)
 
         if (oftenUsedButtons.length < 8) {
 
@@ -73,15 +81,36 @@ const Store = props => {
 
     }
 
+    const find = () => {
+
+        limit.current = 25
+        sendRequest()
+
+    }
+
+    const more = () => {
+
+        limit.current += 25
+        sendRequest()
+
+    }
+
+    const searchHandle = v => {
+
+        limit.current = 25
+        setSearch(v)
+
+    }
+
     return <>
 
         <div className="w-100">
 
             {isExpand
                 ? <Tree categories={props.app.categories}
-                          onSelected={id => setCat(id)}
-                          finished={id => setCat(id)}
-                    />
+                        onSelected={id => setCat(id)}
+                        finished={id => setCat(id)}
+                />
                 : <IconButton onClick={() => setIsExpand(!isExpand)}>
                     <ExpandLessIcon/>
                 </IconButton>}
@@ -90,9 +119,9 @@ const Store = props => {
                 key={uuid()}
                 size="small"
                 style={{margin: '.5rem'}}
-                color={categoryFilter === b.catId ? "primary" : "default"}
-                variant={categoryFilter === b.catId ? "contained" : "outlined"}
-                onClick={() => setCategoryFilter(b.catId)}>
+                color={catId === b.catId ? "primary" : "default"}
+                variant={catId === b.catId ? "contained" : "outlined"}
+                onClick={() => setCatId(b.catId)}>
                 {b.label}
             </Button>)}
 
@@ -101,18 +130,21 @@ const Store = props => {
         <div style={style}>
 
             <TextField
-                       InputProps={{
-                           startAdornment: (
-                               <InputAdornment position="start">
-                                   <SearchIcon/>
-                               </InputAdornment>
-                           ),
-                       }}
-                       value={search}
-                       onChange={e => setSearch(e.target.value)}
+                disabled={isRest}
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchIcon/>
+                        </InputAdornment>
+                    ),
+                }}
+                value={search}
+                onChange={e => searchHandle(e.target.value)}
             />
 
-            <Button onClick={() => sendRequest()}>
+            <Button onClick={find}
+                    disabled={isRest}
+            >
                 Найти
             </Button>
 
@@ -155,22 +187,49 @@ const Store = props => {
 
 
                         })
-                        .map(g => <TableRow key={'tablerowingoods' + g.id}
-                                            style={{
-                                                cursor: 'pointer',
-                                                opacity: props.app.stock_id === g.stock_id ? '100%' : '50%',
-                                            }}
-                                            onClick={() => console.log(g)}
-                        >
-                            <TableCell>{g.id}</TableCell>
-                            <TableCell>{g.group}</TableCell>
-                            <TableCell>
-                                {TwoLineInCell(g.model, g.imei)}
-                            </TableCell>
-                            <TableCell>
-                                {g.sum}
-                            </TableCell>
-                        </TableRow>)}
+                        .map(g => {
+
+                            const color = g.wo === 't'
+                                ? 'green'
+                                : g.wo === 'reject'
+                                    ? 'red'
+                                    : 'black'
+
+                            const opacity = props.app.stock_id === g.stock_id ? '100%' : '50%'
+
+                            return <TableRow key={'tablerowingoods' + g.id}
+                                             style={{
+                                                 cursor: 'pointer',
+                                                 opacity,
+                                             }}
+                                             onClick={() => console.log(g)}
+                            >
+                                <TableCell style={{color}}>
+                                    {g.id}
+                                </TableCell>
+                                <TableCell style={{color}}>
+                                    {g.group}
+                                </TableCell>
+                                <TableCell style={{color}}>
+                                    {TwoLineInCell(g.model, g.imei)}
+                                </TableCell>
+                                <TableCell style={{color}}>
+                                    {g.sum}
+                                </TableCell>
+                            </TableRow>
+                        })}
+
+                    <TableRow>
+                        <TableCell colSpan={4}>
+                            <Button className="w-100"
+                                    disabled={isRest}
+                                    size="small"
+                                    onClick={more}
+                            >
+                                Показать еще
+                            </Button>
+                        </TableCell>
+                    </TableRow>
                 </TableBody>
             </Table>
             : 'Нет данных'}

@@ -290,6 +290,10 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     let categories = [0, 5, 41, 38]
 
+    const catHandler = catId => {
+
+    }
+
     return <>
 
         <Dialog
@@ -374,47 +378,12 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
             />
             : sumField(initPresum, presum, setPresum, fieldsStyle, isRest || !!order)}
 
-        {/*{treeOpen*/}
-        {/*    ? <div style={{*/}
-        {/*        margin: '1rem'*/}
-        {/*    }}>*/}
-        {/*        <Tree*/}
-        {/*            initialId={category_id}*/}
-        {/*            categories={app.categories}*/}
-        {/*            onSelected={id => setCategory_id(+id)}*/}
-        {/*            finished={id => handleTree(id)}*/}
-        {/*        />*/}
-        {/*        <Button size="small"*/}
-        {/*                onClick={() => setTreeOpen(false)}*/}
-        {/*                variant="outlined"*/}
-        {/*        >*/}
-        {/*            Ок*/}
-        {/*        </Button>*/}
-        {/*    </div>*/}
-        {/*    : isEditable && category && <div style={{*/}
-        {/*    margin: '1rem'*/}
-        {/*}}>*/}
-        {/*    <Button size="small"*/}
-        {/*            className="w-100"*/}
-        {/*            disabled={!isEditable}*/}
-        {/*            onClick={() => setTreeOpen(true)}*/}
-        {/*    >*/}
-        {/*        {category ? category.name : "Выбрать категорию..."}*/}
-        {/*    </Button>*/}
-        {/*</div>*/}
-        {/*}*/}
-
         {order
             ? null
             : <FormControl style={fieldsStyle}>
 
-                <InputLabel id="order-info-select-label">
-                    Категория
-                </InputLabel>
-
                 <Select value={category_id}
                         onChange={e => setCategory_id(e.target.value)}
-                        labelId="order-info-select-label"
                 >
                     {categories.map(g => {
 
@@ -426,6 +395,10 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                         </MenuItem>
                     })}
 
+                    <MenuItem key={'menu-item-key-in-info-999'}
+                              value={999}>
+                        Категория
+                    </MenuItem>
                     <MenuItem key={'menu-item-key-in-info-1000'}
                               value={1000}>
                         Другая категория...
