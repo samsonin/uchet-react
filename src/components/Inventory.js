@@ -131,7 +131,7 @@ const Inventory = props => {
                     {label: "Цена", value: sum, onChange: e => intInputHandler(e.target.value, setSum)},
                     {label: "Место хранения", value: place, onChange: e => setPlace(lengthControl(e.target.value))},
                 ].map(f => <TextField
-                    key={uuidv4()}
+                    key={'dialog-content-in-inventory-' + f.label}
                     style={{
                         margin: '1rem .3rem',
                         width: '95%'
