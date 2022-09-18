@@ -77,7 +77,10 @@ const Inventory = props => {
 
     const saveStorage = (isInStock, place) => {
 
-        const data = {isInStock: isInStock}
+        const data = {
+            isInStock,
+            isPublic
+        }
 
         if (isInStock) {
 
@@ -90,6 +93,16 @@ const Inventory = props => {
             }
 
             data.place = place
+
+        }
+
+        const showcase = goods.find(g => g.id === currentId.current)
+
+        if (showcase) {
+
+            if (model !== showcase.model) data.model = model
+            if (imei !== showcase.imei) data.imei = imei
+            if (sum !== showcase.sum) data.sum = sum
 
         }
 
@@ -116,6 +129,8 @@ const Inventory = props => {
 
     const lengthControl = val => val.length > 255 ? val.substring(0, 255) : val
 
+    const strChange = (f, e) => f(lengthControl(e.target.value))
+
     return <>
 
         <Dialog
@@ -126,10 +141,10 @@ const Inventory = props => {
         >
             <DialogContent>
                 {[
-                    {label: "Модель", value: model, onChange: null},
-                    {label: "imei S/N", value: imei, onChange: e => setImei(lengthControl(e.target.value))},
+                    {label: "Модель", value: model, onChange: e => strChange(setModel, e)},
+                    {label: "imei S/N", value: imei, onChange: e => strChange(setImei, e)},
                     {label: "Цена", value: sum, onChange: e => intInputHandler(e.target.value, setSum)},
-                    {label: "Место хранения", value: place, onChange: e => setPlace(lengthControl(e.target.value))},
+                    {label: "Место хранения", value: place, onChange: e => strChange(setPlace, e)},
                 ].map(f => <TextField
                     key={'dialog-content-in-inventory-' + f.label}
                     style={{
