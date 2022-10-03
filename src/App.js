@@ -271,7 +271,12 @@ const App = props => {
                                     {...props}
                                 />}/>
                                 <Route path="/consignments" component={Consignments}/>
-                                <Route path="/store" component={Store}/>
+                                <Route path="/store" render={props => <Store
+                                    enterPress={enterPress}
+                                    setEnterPress={setEnterPress}
+                                    {...props}
+                                />}/>
+
                             </>}
 
                             <Route path="/transit" render={props => <Transit

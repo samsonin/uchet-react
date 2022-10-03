@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
 import {Button, IconButton, InputAdornment, Table, TableBody, TableCell, TableRow, TextField} from "@material-ui/core";
 import uuid from "uuid";
@@ -9,6 +9,7 @@ import rest from "../components/Rest";
 import TableHead from "@material-ui/core/TableHead";
 import TwoLineInCell from "./common/TwoLineInCell";
 import SearchIcon from "@material-ui/icons/Search";
+import {toLocalTimeStr} from "./common/Time";
 
 
 const oftenUsedButtons = [
@@ -51,6 +52,15 @@ const Store = props => {
             })
 
     }
+
+    useEffect(() => {
+
+        if (props.enterPress) find()
+
+        if (typeof (props.setEnterPress) === 'function') props.setEnterPress(false)
+
+// eslint-disable-next-line
+    }, [props.enterPress])
 
 
     const setCat = id => {
@@ -157,9 +167,9 @@ const Store = props => {
                 <TableHead>
                     <TableRow>
                         <TableCell>#</TableCell>
-                        <TableCell>Группа</TableCell>
-                        <TableCell>Наименование / imei</TableCell>
+                        <TableCell>Товар</TableCell>
                         <TableCell>Цена / Себестоимость</TableCell>
+                        <TableCell>Хранение</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -169,7 +179,6 @@ const Store = props => {
                             if (!search || s.sum == search || s.id == search) return true
 
                             const model = s.model.toLowerCase()
-                            const imei = s.imei.toLowerCase()
 
                             let r = true
 
@@ -177,7 +186,7 @@ const Store = props => {
                                 .split(' ')
                                 .map(s => {
 
-                                    if (model.indexOf(s) < 0 && imei.indexOf(s) < 0) {
+                                    if (model.indexOf(s) < 0) {
                                         r = false
                                     }
 
@@ -195,6 +204,24 @@ const Store = props => {
                                     ? 'red'
                                     : 'black'
 
+                            const stock = props.app.stocks.find(s => s.id === g.stock_id)
+
+                            const inTime = new Date(g.time).getTime()
+                            const outTime = new Date(g.outtime).getTime()
+                            const storageTime = new Date(g.storage_time).getTime()
+
+                            const checkTime = Math.max(inTime || 0, outTime || 0, storageTime || 0)
+
+                            const checkTimeStr = toLocalTimeStr(checkTime / 1000)
+
+                            const storage = g.wo === 't'
+                                ? TwoLineInCell('Транзит', checkTimeStr)
+                                : g.wo === 'reject'
+                                    ? TwoLineInCell('брак', checkTimeStr)
+                                    : !stock || g.stock_id === props.app.stock_id
+                                        ? TwoLineInCell(g.storage_place, checkTimeStr)
+                                        : TwoLineInCell(stock.name, g.storage_place || checkTimeStr)
+
                             const opacity = props.app.stock_id === g.stock_id ? '100%' : '50%'
 
                             return <TableRow key={'tablerowingoods' + g.id}
@@ -208,13 +235,13 @@ const Store = props => {
                                     {g.id}
                                 </TableCell>
                                 <TableCell style={{color}}>
-                                    {g.group}
+                                    {TwoLineInCell(g.model, g.group + ' ' + g.imei)}
                                 </TableCell>
                                 <TableCell style={{color}}>
-                                    {TwoLineInCell(g.model, g.imei)}
+                                    {TwoLineInCell(g.sum, g.remcost || g.cost)}
                                 </TableCell>
                                 <TableCell style={{color}}>
-                                    {g.sum}
+                                    {storage}
                                 </TableCell>
                             </TableRow>
                         })}
