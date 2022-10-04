@@ -138,7 +138,7 @@ const Pledge = props => {
 
                     props.addPledge(res.body.pledge)
 
-                    props.upd_app(res.body.daily)
+                    props.upd_app(res.body)
 
                     needPrint.current = true
 
@@ -178,7 +178,7 @@ const Pledge = props => {
                     setIsOpen(false)
                     props.updPledge(newPledge)
 
-                    props.upd_app(res.body.daily)
+                    props.upd_app(res.body)
 
                     needPrint.current = true
 
@@ -201,7 +201,7 @@ const Pledge = props => {
 
                     props.delPledge(pledge.id)
 
-                    props.upd_app(res.body.daily)
+                    props.upd_app(res.body)
 
                 }
 
