@@ -83,6 +83,10 @@ const Buy = props => {
 
                     setDone(true)
 
+                    if (res.status === 200 && res.body.daily) {
+                        props.upd_app(res.body)
+                    }
+
                     if (isNeedDoc) {
 
                         const doc = props.app.docs.find(d => d.name === 'buy')
@@ -119,7 +123,11 @@ const Buy = props => {
                             all_model: table
                         }
 
-                        Print(doc, alias, '', props.history.push('/showcase'))
+                        Print(doc, alias, '', props.history.push('/daily'))
+
+                    } else {
+
+                        props.history.push('/daily')
 
                     }
 

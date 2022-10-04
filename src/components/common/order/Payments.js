@@ -33,7 +33,7 @@ const totalSum = payments => {
 
 }
 
-export const Payments = ({order, isEditable}) => {
+export const Payments = ({order, isEditable, updApp}) => {
 
     const [sum, setSum] = useState(0)
 
@@ -47,6 +47,7 @@ export const Payments = ({order, isEditable}) => {
             .then(res => {
                 if (res.status === 200) {
                     setSum(0)
+                    updApp(res.body)
                     enqueueSnackbar('Внесено ' + sum, {variant: 'success'})
                 } else {
                     enqueueSnackbar('Ошибка', {variant: 'error'})

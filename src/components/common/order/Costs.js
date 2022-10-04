@@ -80,6 +80,10 @@ export const Costs = ({order, isEditable, users, providers, updApp}) => {
         if (!barcode) return enqueueSnackbar('нет кода', {variant: "error"})
 
         rest('orders/' + order.stock_id + '/' + order.id + '/' + barcode, 'POST')
+            .then(res => {
+                if (res.status === 200) updApp(res.body)
+                return res
+            })
             .then(res => afterRes(res.status === 200, res.status))
 
     }
@@ -116,31 +120,24 @@ export const Costs = ({order, isEditable, users, providers, updApp}) => {
 
     }
 
+    const afterRes = res => res.status === 200
+        ? updApp(res.body)
+        : enqueueSnackbar('ошибка ' + res.status, {variant: "error"})
+
     const delGood = barcode => {
 
         if (!barcode) return enqueueSnackbar('нет кода', {variant: "error"})
 
         rest('orders/' + order.stock_id + '/' + order.id + '/' + barcode, 'DELETE')
-            .then(res => res.status === 200
-                ? updApp(res.body)
-                : enqueueSnackbar('ошибка ' + res.status, {variant: "error"}))
+            .then(res => afterRes(res))
+
     }
 
-    const delJob = i => {
+    const delJob = i => rest('order/jobs/' + order.stock_id + '/' + order.id + '/' + i, 'DELETE')
+        .then(res => afterRes(res))
 
-        rest('order/jobs/' + order.stock_id + '/' + order.id + '/' + i, 'DELETE')
-            .then(res => res.status === 200
-                ? updApp(res.body)
-                : enqueueSnackbar('ошибка ' + res.status, {variant: "error"}))
-    }
-
-    const delSale = id => {
-
-        rest('sales/' + order.stock_id + '/' + id, 'DELETE')
-            .then(res => res.status === 200
-                ? updApp(res.body)
-                : enqueueSnackbar('ошибка ' + res.status, {variant: "error"}))
-    }
+    const delSale = id => rest('sales/' + order.stock_id + '/' + id, 'DELETE')
+        .then(res => afterRes(res))
 
     return <>
 

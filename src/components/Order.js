@@ -134,8 +134,6 @@ const Order = props => {
         setStockId(order.stock_id)
         setCreated(order.created_at)
 
-        props.upd_app({order})
-
     }
 
     if (order && needPrint.current) {
@@ -207,7 +205,7 @@ const Order = props => {
                   fields={fields}
                   isAdmin={props.auth.admin}
                   needPrint={needPrint}
-                // print={print}
+                  updApp={props.upd_app}
             />
         }
 
@@ -221,11 +219,17 @@ const Order = props => {
         }
 
         {order && tabId === 2 &&
-            <Payments order={order} isEditable={canEdit() && isSale}/>
+            <Payments order={order}
+                      isEditable={canEdit() && isSale}
+                      updApp={props.upd_app}
+            />
         }
 
         {order && tabId === 3 &&
-            <Remarks order={order} users={props.app.users}/>
+            <Remarks order={order}
+                     users={props.app.users}
+                     updApp={props.upd_app}
+            />
         }
 
     </div>

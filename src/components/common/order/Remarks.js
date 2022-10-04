@@ -10,7 +10,7 @@ import {useSnackbar} from "notistack";
 import rest from "../../Rest"
 import {toLocalTimeStr} from "../Time";
 
-export const Remarks = ({order, users}) => {
+export const Remarks = ({order, users, updApp}) => {
 
     const [remark, setRemark] = useState('')
 
@@ -24,7 +24,7 @@ export const Remarks = ({order, users}) => {
             .then(res => {
                 if (res.status === 200) {
                     setRemark('')
-                    enqueueSnackbar('Внесено', {variant: 'success'})
+                    updApp(res.body)
                 } else {
                     enqueueSnackbar('Ошибка', {variant: 'error'})
                 }
