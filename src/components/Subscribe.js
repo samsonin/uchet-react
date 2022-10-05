@@ -72,7 +72,7 @@ function yandex(org_id, month, cost) {
 }
 
 const Subscribe = ({organization_id}) => {
-    
+
     const classes = useStyles();
 
     function subHeader(profit) {
@@ -125,6 +125,26 @@ const Subscribe = ({organization_id}) => {
                 </form>
 
             </Grid>
+
+            <Grid container>
+
+                <div style={{
+                    margin: '1rem',
+                }}>
+                    <Typography variant="h5" style={{
+                        display: 'flex',
+                        justifyContent: 'center'
+                    }}>
+                        Уважаемые пользователи!
+                    </Typography>
+                    <Typography variant="body1">
+                        В случае невозможности оплатить подписку,
+                        Вы можете перевести деньги на карту Сбербанка 4276500031174871 Иван Николаевич С.,
+                        в рублях по курсу ЦБ РФ, в комментарии укажите логин для входа в Uchet.store
+                    </Typography>
+                </div>
+            </Grid>
+
         </div>
     );
 }
