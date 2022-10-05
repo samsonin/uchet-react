@@ -114,7 +114,7 @@ const Subscribe = ({organization_id}) => {
                     </Paper>
                 </Grid>)}
 
-                <form id="subscribeForm" method="POST" action="https://money.yandex.ru/quickpay/confirm.xml">
+                <form id="subscribeForm" method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
                     <input type="hidden" name="receiver" value="410012390556672"/>
                     <input type="hidden" name="quickpay-form" value="shop"/>
                     <input type="hidden" name="successURL" value="https://uchet.store"/>
