@@ -9,6 +9,7 @@ import CardHeader from "@material-ui/core/CardHeader";
 import Button from '@material-ui/core/Button';
 import {connect} from "react-redux";
 
+import {Yoo, Tinkoff} from '/src/images/logos'
 
 const useStyles = makeStyles(theme => ({
     root: {
