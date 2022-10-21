@@ -10,6 +10,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TwoLineInCell from "./common/TwoLineInCell";
 import SearchIcon from "@material-ui/icons/Search";
 import {toLocalTimeStr} from "./common/Time";
+import GoodModal from "./Modals/Good";
 
 
 const oftenUsedButtons = [
@@ -28,6 +29,7 @@ const style = {
 const Store = props => {
 
     const [goods, setGoods] = useState([])
+    const [good, setGood] = useState({})
     const [catId, setCatId] = useState(0)
     const [isExpand, setIsExpand] = useState(false)
     const [isRest, setIsRest] = useState(false)
@@ -112,7 +114,16 @@ const Store = props => {
 
     }
 
+    const hide = id => console.log(id)
+
     return <>
+
+        <GoodModal
+            good={good}
+            setGood={setGood}
+            close={() => setGood({})}
+            hide={hide}
+        />
 
         <div className="w-100">
 
@@ -222,14 +233,16 @@ const Store = props => {
                                         ? TwoLineInCell(g.storage_place, checkTimeStr)
                                         : TwoLineInCell(stock.name, g.storage_place || checkTimeStr)
 
-                            const opacity = props.app.stock_id === g.stock_id ? '100%' : '50%'
+                            const opacity = g.wo === 't' || props.app.stock_id !== g.stock_id
+                                ? '50%'
+                                : '100%'
 
                             return <TableRow key={'tablerowingoods' + g.id}
                                              style={{
                                                  cursor: 'pointer',
                                                  opacity,
                                              }}
-                                             onClick={() => console.log(g)}
+                                             onClick={() => setGood(g)}
                             >
                                 <TableCell style={{color}}>
                                     {g.id}
