@@ -278,7 +278,7 @@ const Good = props => {
         rest('goods/repair/' + barcode, 'PATCH', data)
             .then(res => {
 
-                if (res.status < 300) {
+                if (res.status === 200) {
 
                     setRepairSum(0)
                     setRepairJob('')
@@ -288,7 +288,8 @@ const Good = props => {
 
                     enqueueSnackbar('Работа добавлена!', {variant: 'success'})
 
-                    if (res.status === 200 && res.body.goods) props.setGood(res.body.goods)
+                    if (res.body.goods) props.setGood(res.body.goods)
+                    upd_app(res.body)
 
                 } else {
 

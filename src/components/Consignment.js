@@ -69,6 +69,8 @@ const Consignment = props => {
     const [productOption, setProductOption] = useState([])
     const [productNameLoading, setProductNameLoading] = useState(false)
 
+    const [isOnlyManual, setIsOnlyManual] = useState(false)
+
     const scanRef = useRef()
     const scanTr = useRef(0)
 
@@ -386,7 +388,9 @@ const Consignment = props => {
 
             newState.currentTr = false;
 
-            if (!props.close) newState.consignment.actually_paid = getConsignmentTotal();
+            if (!(props.close || isOnlyManual)) {
+                newState.consignment.actually_paid = getConsignmentTotal();
+            }
 
             return newState
 
@@ -629,7 +633,10 @@ const Consignment = props => {
                                     <TableCell colSpan="2" align="center" className="pt-3">
                                         <TextField label="Оплатили"
                                                    value={state.consignment.actually_paid}
-                                                   onChange={e => handleTotals('actually_paid', e.target.value)}
+                                                   onChange={e => {
+                                                       setIsOnlyManual(true)
+                                                       handleTotals('actually_paid', e.target.value)
+                                                   }}
                                         />
                                     </TableCell>
                                 </TableRow>
