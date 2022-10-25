@@ -259,7 +259,7 @@ const Store = props => {
                             </TableRow>
                         })}
 
-                    <TableRow>
+                    {goods.length > 24 && <TableRow>
                         <TableCell colSpan={4}>
                             <Button className="w-100"
                                     disabled={isRest}
@@ -269,7 +269,7 @@ const Store = props => {
                                 Показать еще
                             </Button>
                         </TableCell>
-                    </TableRow>
+                    </TableRow>}
                 </TableBody>
             </Table>
             : 'Нет данных'}

@@ -218,6 +218,7 @@ const Consignment = props => {
                 if (res.status === 200) {
 
                     setState(initialState)
+                    setIsOnlyManual(false)
                     setImprestId(0)
                     if (props.close) props.close()
 
