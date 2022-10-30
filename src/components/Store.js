@@ -11,6 +11,7 @@ import TwoLineInCell from "./common/TwoLineInCell";
 import SearchIcon from "@material-ui/icons/Search";
 import {toLocalTimeStr} from "./common/Time";
 import GoodModal from "./Modals/Good";
+import {useSnackbar} from "notistack";
 
 
 const oftenUsedButtons = [
@@ -33,11 +34,21 @@ const Store = props => {
     const [catId, setCatId] = useState(0)
     const [isExpand, setIsExpand] = useState(false)
     const [isRest, setIsRest] = useState(false)
+    const [error, setError] = useState(false)
     const [search, setSearch] = useState('')
 
     const limit = useRef(25)
 
+    const {enqueueSnackbar} = useSnackbar();
+
     const sendRequest = () => {
+
+        if (!search) {
+
+            setError(true)
+            return enqueueSnackbar('Заполните поле поиска', {variant: 'error'})
+
+        }
 
         setIsRest(true)
 
@@ -109,6 +120,7 @@ const Store = props => {
 
     const searchHandle = v => {
 
+        setError(false)
         limit.current = 25
         setSearch(v)
 
@@ -152,6 +164,8 @@ const Store = props => {
 
             <TextField
                 disabled={isRest}
+                error={error}
+                autoFocus
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">
