@@ -14,6 +14,30 @@ let initialState = {
     categories: [],
 }
 
+const probableKeys = [
+    'balance',
+    'stock_id',
+    'positions',
+    'stocks',
+    'users',
+    'stockusers',
+    'organization',
+    'config',
+    'fields',
+    'docs',
+    'entities',
+    'providers',
+    'categories',
+    'order',
+    'orders',
+    'referals',
+    'statuses',
+    'queue',
+    'daily',
+    'transit',
+]
+
+
 const getItems = () => {
 
     const items = JSON.parse(window.localStorage.getItem('app'))
@@ -36,11 +60,11 @@ const app = (state = getItems() || initialState, action) => {
 
             Object.keys(action.data).map(k => {
 
-                if (k === 'entities') {
+                if (!probableKeys.includes(k)) return k
 
-                    newState.providers = action.data[k]
+                if (k === 'entities') k = 'providers'
 
-                } else if (k === 'order') {
+                if (k === 'order') {
 
                     if (newState.orders) {
 

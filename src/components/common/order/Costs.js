@@ -80,10 +80,6 @@ export const Costs = ({order, isEditable, users, providers, updApp}) => {
         if (!barcode) return enqueueSnackbar('нет кода', {variant: "error"})
 
         rest('orders/' + order.stock_id + '/' + order.id + '/' + barcode, 'POST')
-            .then(res => {
-                if (res.status === 200) updApp(res.body)
-                return res
-            })
             .then(res => afterRes(res.status === 200, res.status))
 
     }
@@ -108,8 +104,6 @@ export const Costs = ({order, isEditable, users, providers, updApp}) => {
                     setServiceOpen(false)
                     enqueueSnackbar('Добавлено', {variant: 'success'})
 
-                    updApp(res.body)
-
                 } else {
 
                     enqueueSnackbar('Ошибка', {variant: 'error'})
@@ -120,9 +114,11 @@ export const Costs = ({order, isEditable, users, providers, updApp}) => {
 
     }
 
-    const afterRes = res => res.status === 200
-        ? updApp(res.body)
-        : enqueueSnackbar('ошибка ' + res.status, {variant: "error"})
+    const afterRes = res => {
+        if (res.status !== 200) {
+            enqueueSnackbar('ошибка ' + res.status, {variant: "error"})
+        }
+    }
 
     const delGood = barcode => {
 

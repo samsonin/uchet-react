@@ -278,8 +278,6 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     }
 
-    // const category = app.categories.find(c => c.id === category_id)
-
     const actionButton = (label, onClick) => <Button variant='outlined'
                                                      disabled={isRest}
                                                      className="m-1"
@@ -289,10 +287,6 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
     </Button>
 
     let categories = [0, 5, 41, 38]
-
-    const catHandler = catId => {
-
-    }
 
     return <>
 

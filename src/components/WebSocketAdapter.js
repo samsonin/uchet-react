@@ -117,7 +117,6 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
             // };
 
             // rest('initial', 'PUT')
-            //     .then(res => upd_app(res.body))
 
             const sendIsFocus = isFocus => {
                 if (ws && ws.readyState === ws.OPEN) {

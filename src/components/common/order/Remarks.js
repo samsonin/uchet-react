@@ -24,7 +24,6 @@ export const Remarks = ({order, users, updApp}) => {
             .then(res => {
                 if (res.status === 200) {
                     setRemark('')
-                    updApp(res.body)
                 } else {
                     enqueueSnackbar('Ошибка', {variant: 'error'})
                 }
