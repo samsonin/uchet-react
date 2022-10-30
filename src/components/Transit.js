@@ -15,14 +15,8 @@ import CheckIcon from '@material-ui/icons/Check';
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
 import TextField from "@material-ui/core/TextField/TextField";
-import {bindActionCreators} from "redux";
-import {upd_app} from "../actions/actionCreator";
 import {useSnackbar} from "notistack";
 import {v4 as uuidv4} from 'uuid';
-
-const mapDispatchToProps = dispatch => bindActionCreators({
-    upd_app
-}, dispatch);
 
 
 const Transit = props => {
@@ -71,8 +65,6 @@ const Transit = props => {
             .then(res => {
 
                 if (res.status === 200) {
-
-                    props.upd_app(res.body)
 
                     enqueueSnackbar('ok', {variant: 'success'})
 
@@ -207,4 +199,4 @@ const Transit = props => {
         : <h5>Загружаем данные...</h5>
 }
 
-export default connect(state => (state.app), mapDispatchToProps)(Transit);
+export default connect(state => (state.app))(Transit);

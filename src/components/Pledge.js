@@ -14,8 +14,6 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
 import {makeStyles} from "@material-ui/core/styles";
 import Slide from "@material-ui/core/Slide";
-import {bindActionCreators} from "redux";
-import {upd_app} from "../actions/actionCreator";
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -29,9 +27,6 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-    upd_app
-}, dispatch);
 
 const Pledge = props => {
 
@@ -138,8 +133,6 @@ const Pledge = props => {
 
                     props.addPledge(res.body.pledge)
 
-                    props.upd_app(res.body)
-
                     needPrint.current = true
 
                 }
@@ -178,8 +171,6 @@ const Pledge = props => {
                     setIsOpen(false)
                     props.updPledge(newPledge)
 
-                    props.upd_app(res.body)
-
                     needPrint.current = true
 
                     setRansomdate(newPledge.ransomdate)
@@ -200,8 +191,6 @@ const Pledge = props => {
                 if (res.status === 200 || res.status === 201) {
 
                     props.delPledge(pledge.id)
-
-                    props.upd_app(res.body)
 
                 }
 
@@ -446,4 +435,4 @@ const Pledge = props => {
     </>
 }
 
-export default connect(state => state, mapDispatchToProps)(Pledge)
+export default connect(state => state)(Pledge)

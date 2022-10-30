@@ -15,8 +15,6 @@ import FormControl from "@material-ui/core/FormControl";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import {useSnackbar} from "notistack";
-import {bindActionCreators} from "redux";
-import {upd_app} from "../actions/actionCreator";
 
 const MyPaper = styled(Paper)({
     marginTop: 20,
@@ -30,7 +28,6 @@ const MyFormControl = styled(FormControl)({
     minWidth: 150,
 });
 
-const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
 const Queue = (props) => {
 
@@ -44,11 +41,6 @@ const Queue = (props) => {
 
         rest('queue', 'PATCH', {user_id, stock_id})
             .then(res => {
-
-                if (res.ok) {
-                    const {upd_app} = props
-                    upd_app({queue: res.body.queue})
-                }
 
                 setRequest(false)
 
@@ -132,4 +124,4 @@ const Queue = (props) => {
 
 }
 
-export default connect(state => (state), mapDispatchToProps)(Queue);
+export default connect(state => state)(Queue);

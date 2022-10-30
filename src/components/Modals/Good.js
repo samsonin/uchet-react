@@ -1,7 +1,5 @@
 import React, {forwardRef, useEffect, useState} from "react";
 import {connect} from "react-redux";
-import {bindActionCreators} from "redux";
-import {upd_app} from "../../actions/actionCreator";
 
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -31,11 +29,7 @@ import {GoodSearch} from "../common/GoodSearch";
 import UsersSelect from "../common/UsersSelect";
 import {createDate, Print} from "../common/Print";
 import IsPublicCheckBox from "../common/IsPublicCheckBox";
-// import {Barcodes} from '../Barcodes'
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-    upd_app
-}, dispatch);
 
 const woAlliases = {
     use: "В пользовании",
@@ -183,7 +177,6 @@ const Good = props => {
             .then(res => {
                 if (res.status === 200) {
 
-                    props.upd_app(res.body)
                     props.close()
 
                     if (good.barcode.toString().substring(0, 6) === '115104') Print(doc, alias)
@@ -228,8 +221,6 @@ const Good = props => {
             .then(res => {
 
                 if (res.status === 200) {
-
-                    props.upd_app(res.body)
 
                     if (url.substring(0, 7) === 'transit' && method === 'POST') {
                         if (typeof (props.hide) === "function") props.hide(good.id)
@@ -289,7 +280,6 @@ const Good = props => {
                     enqueueSnackbar('Работа добавлена!', {variant: 'success'})
 
                     if (res.body.goods) props.setGood(res.body.goods)
-                    upd_app(res.body)
 
                 } else {
 
@@ -784,4 +774,4 @@ const Good = props => {
 
 }
 
-export default connect(state => (state), mapDispatchToProps)(Good)
+export default connect(state => (state))(Good)

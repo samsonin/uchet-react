@@ -9,8 +9,6 @@ import Grid from "@material-ui/core/Grid";
 
 import {Print, createDate} from "./common/Print";
 import rest from "../components/Rest";
-import {upd_app,} from "../actions/actionCreator";
-import {bindActionCreators} from "redux";
 
 import {Payments} from "./common/order/Payments";
 import {Remarks} from "./common/order/Remarks";
@@ -26,9 +24,6 @@ const useStyles = makeStyles(() => ({
     }
 }))
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-    upd_app
-}, dispatch);
 
 const Order = props => {
 
@@ -115,14 +110,6 @@ const Order = props => {
         if (stockId && id && !order) {
 
             rest('orders/' + stockId + '/' + id)
-                .then(res => {
-
-                    if (res.status === 200) {
-
-                        props.upd_app({order: res.body})
-
-                    }
-                })
 
         }
 
@@ -205,7 +192,6 @@ const Order = props => {
                   fields={fields}
                   isAdmin={props.auth.admin}
                   needPrint={needPrint}
-                  updApp={props.upd_app}
             />
         }
 
@@ -214,25 +200,22 @@ const Order = props => {
                    isEditable={canEdit()}
                    users={props.app.users}
                    providers={props.app.providers}
-                   updApp={props.upd_app}
             />
         }
 
         {order && tabId === 2 &&
             <Payments order={order}
                       isEditable={canEdit() && isSale}
-                      updApp={props.upd_app}
             />
         }
 
         {order && tabId === 3 &&
             <Remarks order={order}
                      users={props.app.users}
-                     updApp={props.upd_app}
             />
         }
 
     </div>
 }
 
-export default connect(state => state, mapDispatchToProps)(Order)
+export default connect(state => state)(Order)

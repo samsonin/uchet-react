@@ -4,7 +4,6 @@ import {useSnackbar} from "notistack";
 import Fields from "./customer/Fields";
 import rest from "./Rest";
 import {bindActionCreators} from "redux";
-import {upd_app} from "../actions/actionCreator";
 import {
     Button,
     Checkbox,
@@ -27,10 +26,6 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import {createDate, Print} from "./common/Print";
 
-
-const mapDispatchToProps = dispatch => bindActionCreators({
-    upd_app
-}, dispatch);
 
 const pic = {
     categoryId: 0,
@@ -82,10 +77,6 @@ const Buy = props => {
                 if (res.status === 200) {
 
                     setDone(true)
-
-                    if (res.status === 200 && res.body.daily) {
-                        props.upd_app(res.body)
-                    }
 
                     if (isNeedDoc) {
 
@@ -320,4 +311,4 @@ const Buy = props => {
     </>
 }
 
-export default connect(state => state, mapDispatchToProps)(Buy)
+export default connect(state => state)(Buy)

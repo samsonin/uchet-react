@@ -6,7 +6,7 @@ import {MDBBtn} from "mdbreact";
 
 import AuthControl from './AuthControl';
 import request from "./Request";
-import {closeSnackbar, enqueueSnackbar, upd_app} from "../actions/actionCreator";
+import {closeSnackbar, enqueueSnackbar} from "../actions/actionCreator";
 
 let authControl = new AuthControl();
 
@@ -28,7 +28,6 @@ const defaultState = {
 const mapDispatchToProps = dispatch => bindActionCreators({
   enqueueSnackbar,
   closeSnackbar,
-  upd_app
 }, dispatch);
 
 export default connect(state => (state), mapDispatchToProps)(class extends Component {

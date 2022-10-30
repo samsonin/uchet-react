@@ -6,8 +6,6 @@ import IconButton from "@material-ui/core/IconButton";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {connect} from "react-redux";
-import {bindActionCreators} from "redux";
-import {upd_app} from "../../actions/actionCreator";
 import {BottomButtons} from "../common/BottomButtons";
 import {List} from "@material-ui/core";
 import ListItem from "@material-ui/core/ListItem";
@@ -19,7 +17,6 @@ import rest from "../Rest";
 import TextField from "@material-ui/core/TextField/TextField";
 import {useSnackbar} from "notistack";
 
-const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
 const Stock = props => {
 
@@ -50,10 +47,7 @@ const Stock = props => {
 
                 setIsRequest(false)
 
-                if (res.status < 300) {
-                    const {upd_app} = props;
-                    upd_app(res.body)
-
+                if (res.status === 200) {
                     enqueueSnackbar('ok', {variant: 'success'})
                 }
 
@@ -72,9 +66,7 @@ const Stock = props => {
 
                 setIsRequest(false)
 
-                if (res.status < 300) {
-                    const {upd_app} = props;
-                    upd_app(res.body)
+                if (res.status === 200) {
 
                     enqueueSnackbar('ok', {variant: 'success'})
 
@@ -190,4 +182,4 @@ const Stock = props => {
 
 }
 
-export default connect(state => (state), mapDispatchToProps)(Stock)
+export default connect(state => state)(Stock)

@@ -56,13 +56,6 @@ const NavbarPage = props => {
     const pointExit = () => props.upd_app({stock_id: 0})
 
     const newDay = () => rest('daily/' + props.app.stock_id, 'POST')
-        .then(res => {
-            if (res.status === 200) {
-
-                props.upd_app(res.body)
-
-            }
-        })
 
     const accessPoints = () => {
 

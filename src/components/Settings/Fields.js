@@ -1,5 +1,3 @@
-import {bindActionCreators} from "redux";
-import {upd_app} from "../../actions/actionCreator";
 import {connect} from "react-redux";
 import React, {useEffect, useState} from "react";
 import FormControl from "@material-ui/core/FormControl";
@@ -19,8 +17,6 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import rest from "../Rest";
 
-
-const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
 const Fields = props => {
 
@@ -146,7 +142,6 @@ const Fields = props => {
                 setRequest(false)
 
                 if (res.status === 200) {
-                    props.upd_app(res.body)
                     initial(res.body.fields.allElements)
                 }
 
@@ -267,4 +262,4 @@ const Fields = props => {
 
 }
 
-export default connect(state => state, mapDispatchToProps)(Fields)
+export default connect(state => state)(Fields)

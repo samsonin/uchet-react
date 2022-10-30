@@ -29,7 +29,7 @@ const Transition = forwardRef(function Transition(props, ref) {
 const initSum = 'Предварительная стоимость'
 const initPresum = 'Предоплата при оформлении заказа'
 
-export const Info = ({order, app, fields, isAdmin, setOrder, needPrint, updApp}) => {
+export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
@@ -99,7 +99,6 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint, updApp})
         if (res.status === 200) {
 
             setOrder(res.body.order)
-            updApp(res.body)
 
         } else {
 

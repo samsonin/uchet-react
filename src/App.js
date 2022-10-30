@@ -36,7 +36,7 @@ import Daily from "./components/Daily";
 import LoginModal from "./components/LoginModal";
 import Prepaids from "./components/Prepaids";
 import {bindActionCreators} from "redux";
-import {init_user, upd_app} from "./actions/actionCreator";
+import {init_user} from "./actions/actionCreator";
 import Showcase from "./components/Showcase";
 import Prices from "./components/Prices";
 import Pledges from "./components/Pledges";
@@ -326,7 +326,6 @@ const App = props => {
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     init_user,
-    upd_app
 }, dispatch);
 
 export default connect(state => state, mapDispatchToProps)(App);

@@ -16,13 +16,7 @@ import {useSnackbar} from 'notistack';
 
 import rest from "./Rest";
 import {BottomButtons} from "./common/BottomButtons";
-import {bindActionCreators} from "redux";
-import {upd_app} from "../actions/actionCreator";
 
-
-const mapDispatchToProps = dispatch => bindActionCreators({
-    upd_app
-}, dispatch);
 
 const Entity = props => {
 
@@ -68,9 +62,6 @@ const Entity = props => {
             setRequesting(false)
 
             if (res.ok) {
-
-                const {upd_app} = props;
-                upd_app(res.body);
 
                 if (entity.id) {
 
@@ -196,4 +187,4 @@ const Entity = props => {
 
 }
 
-export default connect(state => state.app, mapDispatchToProps)(Entity);
+export default connect(state => state.app)(Entity);

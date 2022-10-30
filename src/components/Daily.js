@@ -18,8 +18,6 @@ import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import SaveOutlinedIcon from '@material-ui/icons/SaveOutlined';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import {bindActionCreators} from "redux";
-import {upd_app} from "../actions/actionCreator";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
@@ -65,9 +63,6 @@ const salesArray = ['продажа', 'возврат', 'из залога', 'в
 const serviceArray = ['0']
 const costsArray = ['поступление', 'покупка', 'в залог', 'вернули', 'расход', 'зарплата', 'другое']
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-    upd_app
-}, dispatch);
 
 const Daily = props => {
 
@@ -129,8 +124,6 @@ const Daily = props => {
     const afterRes = (res, local, text) => {
 
         if (res.status === 200) {
-
-            props.upd_app(res.body)
 
             local && local(0)
 
@@ -619,4 +612,4 @@ const Daily = props => {
 
 }
 
-export default connect(state => state, mapDispatchToProps)(Daily)
+export default connect(state => state)(Daily)

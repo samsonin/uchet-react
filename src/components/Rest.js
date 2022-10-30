@@ -1,4 +1,6 @@
-import {SERVER, NEW_SERVER} from '../constants';
+import {SERVER, NEW_SERVER, UPD_APP} from '../constants';
+import store from '../store'
+
 
 let response = {};
 
@@ -51,6 +53,19 @@ export default function fetchPost(url, method = 'GET', data = '') {
         .then(res => {
             response.body = res;
             return response;
+        })
+        .then(res => {
+
+            if (res.status === 200) {
+
+                store.dispatch({
+                    type: 'UPD_APP',
+                    data: res.body
+                });
+
+            }
+
+            return res
         })
         .catch(error => {
             if (!response.ok) response.error = error;

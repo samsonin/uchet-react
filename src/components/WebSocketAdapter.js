@@ -5,8 +5,8 @@ import {bindActionCreators} from 'redux';
 
 import {useSnackbar} from 'notistack';
 
-import rest from "./Rest";
 import Button from "@material-ui/core/Button";
+import rest from "./Rest";
 
 const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
@@ -48,7 +48,6 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
         if (!jwt) return
 
         rest('initial')
-            .then(res => upd_app(res.body))
 
         try {
 

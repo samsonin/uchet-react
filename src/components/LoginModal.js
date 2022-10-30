@@ -12,7 +12,7 @@ import {TextField} from "@material-ui/core";
 import doubleRequest from "./doubleRequest";
 import rest from "./Rest";
 import {bindActionCreators} from "redux";
-import {init_user, upd_app} from "../actions/actionCreator";
+import {init_user} from "../actions/actionCreator";
 import License from "./License";
 import Privacy from "./Privacy";
 import {makeStyles} from "@material-ui/core/styles";
@@ -36,7 +36,6 @@ const useStyles = makeStyles((theme) => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     init_user,
-    upd_app
 }, dispatch);
 
 export default connect(state => state, mapDispatchToProps)(props => {

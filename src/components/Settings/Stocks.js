@@ -1,7 +1,5 @@
 import React from "react";
-import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
-import {upd_app} from "../../actions/actionCreator";
 
 import {useSnackbar} from 'notistack';
 
@@ -21,7 +19,6 @@ import AddCircleIcon from "@material-ui/icons/AddCircle";
 // сократить и оптимизировать код
 // пожалуйста, работайте в отдельной ветке гита
 
-const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
 const useStyles = makeStyles({
     title: {
@@ -61,9 +58,6 @@ const Stocks = props => {
 
                     setIsRequest(false);
                     if (res.status < 300) {
-                        const {upd_app} = props;
-                        upd_app(res.body)
-
                         enqueueSnackbar('ok', {variant: 'success'})
                     }
                 });
@@ -83,9 +77,6 @@ const Stocks = props => {
                     setIsRequest(false);
 
                     if (res.status < 300) {
-
-                        const {upd_app} = props;
-                        upd_app(res.body)
 
                         enqueueSnackbar('ok', {variant: 'success'})
 
@@ -168,4 +159,4 @@ const Stocks = props => {
 
 }
 
-export default connect(state => (state), mapDispatchToProps)(Stocks)
+export default connect(state => state)(Stocks)
