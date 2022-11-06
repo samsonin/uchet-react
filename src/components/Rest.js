@@ -61,7 +61,7 @@ export default function fetchPost(url, method = 'GET', data = '') {
                 store.dispatch({
                     type: 'UPD_APP',
                     data: res.body
-                });
+                })
 
             }
 

@@ -123,16 +123,22 @@ const Order = props => {
 
     }
 
-    if (order && needPrint.current) {
+    useEffect(() => {
 
-        needPrint.current = false
+        if (needPrint.current) {
 
-        let url = '/order'
-        if (order.stock_id && order.id) url += '/' + order.stock_id + '/' + order.id
+            needPrint.current = false
 
-        Print(doc, alias, aliasFunction, props.history.push(url))
+            let url = '/order'
+            if (order.stock_id && order.id) url += '/' + order.stock_id + '/' + order.id
 
-    }
+            props.history.push(url)
+
+            Print(doc, alias, aliasFunction)
+
+        }
+
+    }, [order])
 
     const disabled = !!id
 

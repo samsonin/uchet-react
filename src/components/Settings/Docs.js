@@ -253,6 +253,7 @@ const Docs = props => {
                         value = date.getDate() + ' ' + monthes[date.getMonth()].toLowerCase() + ' ' + date.getFullYear() + 'г. ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
                         break;
                     case 'key' :
+                        // TODO убрать заглушку
                         value = 'uchet.store/c?298y;54opj;3;';
                         break;
                     case 'sbso' :
