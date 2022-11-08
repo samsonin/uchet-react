@@ -1,15 +1,17 @@
 import React from "react";
 
 export default function(first, second) {
-    return first || second
-        ? <>
+
+    const replaceUndefined = v => v === undefined ? null : v
+
+    return <>
             <span style={{
                 fontWeight: 'bold'
             }}>
-                {first}
+                {replaceUndefined(first)}
             </span>
-            <br/>
-            {second}
-        </>
-        : 'не определен'
+        <br/>
+        {replaceUndefined(second)}
+    </>
+
 }

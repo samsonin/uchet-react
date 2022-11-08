@@ -251,7 +251,7 @@ const Store = props => {
                                 ? '50%'
                                 : '100%'
 
-                            return <TableRow key={'tablerowingoods' + g.id}
+                            return <TableRow key={uuid()}
                                              style={{
                                                  cursor: 'pointer',
                                                  opacity,
