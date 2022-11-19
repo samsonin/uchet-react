@@ -171,7 +171,7 @@ const Pledges = props => {
 
                 <TableHead>
                     <TableRow>
-                        {props.app.stock_id
+                        {props.app.current_stock_id
                             ? null
                             : <TableCell>Точка</TableCell>}
                         <TableCell>Устройство</TableCell>
@@ -181,7 +181,7 @@ const Pledges = props => {
                 </TableHead>
                 <TableBody>
                     {pledges
-                        .filter(p => !props.app.stock_id || props.app.stock_id === p.stock)
+                        .filter(p => !props.app.current_stock_id || props.app.current_stock_id === p.stock)
                         .filter(p => {
 
                             if (!search) return true
@@ -210,7 +210,7 @@ const Pledges = props => {
                                             key={uuid()}
                                             onClick={() => setCurrentPledge(p)}
                         >
-                            {[props.app.stock_id ? null : p.stockName,
+                            {[props.app.current_stock_id ? null : p.stockName,
                                 TwoLineInCell(p.model, p.imei),
                                 p.ransomdate,
                                 p.sum2]

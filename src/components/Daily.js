@@ -30,6 +30,7 @@ import Consignment from "./Consignment";
 import DailyModal from "./Modals/Daily";
 import {numberInputHandler} from "./common/InputHandlers";
 import TwoLineInCell from "./common/TwoLineInCell";
+import uuid from "uuid";
 
 const useStyles = makeStyles(() => ({
     controls: {
@@ -66,7 +67,7 @@ const costsArray = ['поступление', 'покупка', 'в залог',
 
 const Daily = props => {
 
-    const [stock, setStock] = useState(() => props.app.stock_id || props.app.stocks.find(s => s.is_valid).id)
+    const [stock, setStock] = useState(() => props.app.current_stock_id || props.app.stocks.find(s => s.is_valid).id)
     const [date, setDate] = useState(() => today)
     const [localDaily, setLocalDaily] = useState({})
 
@@ -117,7 +118,7 @@ const Daily = props => {
         ? props.app.daily.find(d => d.stock_id === stock)
         : localDaily
 
-    const canChange = date === today && props.app.stock_id === stock
+    const canChange = date === today && props.app.current_stock_id === stock
 
     const canAdminChange = date === today && props.auth.admin
 
@@ -385,7 +386,7 @@ const Daily = props => {
                                 const user = props.app.users.find(u => u.id === e)
 
                                 return user && <ListItem
-                                    key={'userindailylistitem' + user.id}
+                                    key={uuid()}
                                     component={Paper}
                                     className="m-1"
                                 >
@@ -442,8 +443,8 @@ const Daily = props => {
                         },
                     ]
                         .map(t => date !== today && t.rows === imprests
-                            ? ''
-                            : <div key={'tablecontindailykey' + t.title}
+                            ? <div key={uuid()}/>
+                            : <div key={uuid()}
                                    style={{margin: '0 1rem 0 0'}}
                             >
                                 <TableContainer
@@ -474,14 +475,14 @@ const Daily = props => {
                                         <TableHead>
                                             <TableRow>
                                                 {t.titles.map(t => <TableCell
-                                                    key={'rowsintabledaily' + t}
+                                                    key={uuid()}
                                                 >{t}</TableCell>)}
                                             </TableRow>
                                         </TableHead>
 
                                         <TableBody>
                                             {t.rows.map(row => <TableRow
-                                                key={'tablerowindaily' + t.title + JSON.stringify(row)}
+                                                key={uuid()}
                                                 style={{
                                                     cursor: 'pointer'
                                                 }}
@@ -499,14 +500,14 @@ const Daily = props => {
 
                                                     if (row.action === 'зарплата' && v === 'note') {
 
-                                                        return <TableCell>
+                                                        return <TableCell key={uuid()}>
                                                             {TwoLineInCell(userName, row.note)}
                                                         </TableCell>
 
                                                     }
 
                                                     return <TableCell
-                                                        key={'rowsintabledailysec' + v}
+                                                        key={uuid()}
                                                     >
                                                         {row.work && row.action !== 'расход'
                                                             ? v === 'item'
@@ -564,7 +565,7 @@ const Daily = props => {
                                         },
                                         {text: 'Остаток:', value: daily.evening},
                                     ].map(l => (date === today || l.text !== 'Подотчеты:') && <TableRow
-                                        key={'griditemkeyindailypertotals' + l.text}
+                                        key={uuid()}
                                     >
 
                                         <TableCell style={{

@@ -49,7 +49,7 @@ const Buy = props => {
 
         let error
 
-        if (!props.app.stock_id) error = 'выберите точку'
+        if (!props.app.current_stock_id) error = 'выберите точку'
         else showcase.map(s => {
             if (!s.categoryId || !s.model || !s.imei) {
                 error = 'заполните все поля'
@@ -66,7 +66,7 @@ const Buy = props => {
 
         setIsRequesting(true)
 
-        rest('goods/showcase/' + props.app.stock_id, 'POST', {
+        rest('goods/showcase/' + props.app.current_stock_id, 'POST', {
             customer,
             showcase
         })
@@ -82,7 +82,7 @@ const Buy = props => {
 
                         const doc = props.app.docs.find(d => d.name === 'buy')
 
-                        const stock = props.app.stocks.find(s => s.id === props.app.stock_id)
+                        const stock = props.app.stocks.find(s => s.id === props.app.current_stock_id)
 
                         let table = '<table border="1"><thead><tr>' +
                             '<th>Группа</th><th>Модель</th><th>Идентификатор</th><th>Сумма</th></tr></thead><tbody>'

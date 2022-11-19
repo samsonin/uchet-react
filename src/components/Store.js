@@ -243,11 +243,11 @@ const Store = props => {
                                 ? TwoLineInCell('Транзит', checkTimeStr)
                                 : g.wo === 'reject'
                                     ? TwoLineInCell('брак', checkTimeStr)
-                                    : !stock || g.stock_id === props.app.stock_id
+                                    : !stock || g.stock_id === props.app.current_stock_id
                                         ? TwoLineInCell(g.storage_place, checkTimeStr)
                                         : TwoLineInCell(stock.name, g.storage_place || checkTimeStr)
 
-                            const opacity = g.wo === 't' || props.app.stock_id !== g.stock_id
+                            const opacity = g.wo === 't' || props.app.current_stock_id !== g.stock_id
                                 ? '50%'
                                 : '100%'
 

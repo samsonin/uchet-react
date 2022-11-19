@@ -208,7 +208,7 @@ const Consignment = props => {
 
         rest('consignments/' + (props.close
             ? props.consignment.provider_id + '/' + props.consignment.consignment_number
-            : props.app.stock_id),
+            : props.app.current_stock_id),
             props.close ? 'PATCH' : 'POST',
             {...state.consignment, imprestId})
             .then(res => {
@@ -497,9 +497,9 @@ const Consignment = props => {
 
     const currentTr = state.consignment.products[state.currentTr]
 
-    const dailyReport = props.app.daily.find(d => d.stock_id === props.app.stock_id)
+    const dailyReport = props.app.daily.find(d => d.stock_id === props.app.current_stock_id)
 
-    return props.app.stock_id
+    return props.app.current_stock_id
         ? <>
 
             <MDBContainer>

@@ -51,11 +51,11 @@ const NavbarPage = props => {
 
     const toggleCollapse = () => setIsOpen(!isOpen)
 
-    const pointChange = e => props.upd_app({stock_id: +e.target.value})
+    const pointChange = e => props.upd_app({current_stock_id: +e.target.value})
 
-    const pointExit = () => props.upd_app({stock_id: 0})
+    const pointExit = () => props.upd_app({current_stock_id: 0})
 
-    const newDay = () => rest('daily/' + props.app.stock_id, 'POST')
+    const newDay = () => rest('daily/' + props.app.current_stock_id, 'POST')
 
     const accessPoints = () => {
 
@@ -81,10 +81,10 @@ const NavbarPage = props => {
 
         const isSale = position && position.is_sale
 
-        const currentStock = validStocks.find(stock => +stock.id === props.app.stock_id)
+        const currentStock = validStocks.find(stock => +stock.id === props.app.current_stock_id)
 
         return validStocks
-            ? props.app.stock_id
+            ? props.app.current_stock_id
                 ? <>
                     <strong className="white-text">
                         {currentStock ? currentStock.name : ''}
@@ -104,7 +104,7 @@ const NavbarPage = props => {
                         </Button>
                         : ''}
 
-                    {props.app.stock_id && <IconButton
+                    {props.app.current_stock_id && <IconButton
                         variant="outlined"
                         className="ml-2"
                         style={{

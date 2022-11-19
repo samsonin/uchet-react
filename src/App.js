@@ -263,7 +263,7 @@ const App = props => {
                                        {...props}
                                    />}/>
 
-                            {!props.app.stock_id || <>
+                            {!props.app.current_stock_id || <>
                                 <Route exact path="/arrival" render={props => <Consignment
                                     newScan={globalBarcode}
                                     enterPress={enterPress}

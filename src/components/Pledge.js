@@ -126,7 +126,7 @@ const Pledge = props => {
             note
         }
 
-        rest('pledges/' + props.app.stock_id, 'POST', data)
+        rest('pledges/' + props.app.current_stock_id, 'POST', data)
             .then(res => {
 
                 if (res.status === 200 && res.body.pledge) {
@@ -144,7 +144,7 @@ const Pledge = props => {
 
     const save = () => {
 
-        rest('pledges/' + props.app.stock_id + '/' + pledge.id, 'PATCH', {note})
+        rest('pledges/' + props.app.current_stock_id + '/' + pledge.id, 'PATCH', {note})
             .then(res => {
 
                 if (res.status === 200) {
@@ -157,7 +157,7 @@ const Pledge = props => {
 
     const prolong = () => {
 
-        rest('pledges/' + props.app.stock_id + '/' + pledge.id + '/prolong', 'PATCH', {
+        rest('pledges/' + props.app.current_stock_id + '/' + pledge.id + '/prolong', 'PATCH', {
             date: prolongDate,
             sum: checkoutSum() - pledge.sum,
             sum2: prolongSum
@@ -184,7 +184,7 @@ const Pledge = props => {
 
     const checkout = isToSale => {
 
-        rest('pledges/' + props.app.stock_id + '/' + pledge.id + '/' + (isToSale ? 'toSale' : checkoutSum()),
+        rest('pledges/' + props.app.current_stock_id + '/' + pledge.id + '/' + (isToSale ? 'toSale' : checkoutSum()),
             'DELETE')
             .then(res => {
 
@@ -254,7 +254,7 @@ const Pledge = props => {
 
     const renderId = () => {
 
-        const st = props.app.stocks.find(s => s.id === props.app.stock_id)
+        const st = props.app.stocks.find(s => s.id === props.app.current_stock_id)
 
         return pledge.id
             ? !st || pledge.stock !== st.id
@@ -346,7 +346,7 @@ const Pledge = props => {
                     {renderId()}
             </span>
 
-                {pledge.id && pledge.status === 'new' && pledge.stock === props.app.stock_id &&
+                {pledge.id && pledge.status === 'new' && pledge.stock === props.app.current_stock_id &&
                     <IconButton
                         onClick={() => Print(doc, alias)}
                     >
@@ -413,13 +413,13 @@ const Pledge = props => {
                        onChange={e => setNote(e.target.value)}
             />
 
-            {props.app.stock_id
+            {props.app.current_stock_id
                 ? <div style={{
                 padding: '.3rem',
                 display: "flex",
                 justifyContent: 'space-around'
             }}>
-                {pledge.stock === props.app.stock_id
+                {pledge.stock === props.app.current_stock_id
                     ? <>
                         {note === pledge.note || mb('Сохранить', () => save())}
                         {mb('Выкупают', () => checkout())}

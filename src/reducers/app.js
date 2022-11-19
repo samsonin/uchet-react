@@ -16,7 +16,7 @@ let initialState = {
 
 const probableKeys = [
     'balance',
-    'stock_id',
+    'current_stock_id',
     'positions',
     'stocks',
     'users',

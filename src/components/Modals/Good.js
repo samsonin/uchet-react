@@ -152,7 +152,7 @@ const Good = props => {
             variant: 'error',
         })
 
-        rest('orders/' + props.app.stock_id + '/' + orderId + '/' + props.good.barcode,
+        rest('orders/' + props.app.current_stock_id + '/' + orderId + '/' + props.good.barcode,
             'POST')
             .then(res => {
                 if (res.status === 200) {
@@ -173,7 +173,7 @@ const Good = props => {
 
     const toSale = () => {
 
-        rest('sales/' + props.app.stock_id + '/' + good.barcode + '/' + sum, 'POST')
+        rest('sales/' + props.app.current_stock_id + '/' + good.barcode + '/' + sum, 'POST')
             .then(res => {
                 if (res.status === 200) {
 
@@ -195,7 +195,7 @@ const Good = props => {
 
         if (good.barcode && reason) {
 
-            rest('sales/' + props.app.stock_id + '/' + good.barcode + '/' + reason, 'DELETE')
+            rest('sales/' + props.app.current_stock_id + '/' + good.barcode + '/' + reason, 'DELETE')
                 .then(res => {
 
                     if (res.status === 200) {
@@ -240,7 +240,7 @@ const Good = props => {
             })
     }
 
-    const transit = isTo => goodRest('transit/' + props.app.stock_id + '/',
+    const transit = isTo => goodRest('transit/' + props.app.current_stock_id + '/',
         isTo ? 'POST' : 'DELETE',
         isTo ? 'Передано в транзит' : 'Принято из транзита')
 
@@ -394,7 +394,7 @@ const Good = props => {
         ? props.app.categories.find(v => v.id === good.category_id).name
         : 'Выбрать...'
 
-    const editable = !good.wo && good.stock_id === props.app.stock_id
+    const editable = !good.wo && good.stock_id === props.app.current_stock_id
 
     const renderIcon = (title, onClick, elem) => <Tooltip title={title}>
         <IconButton onClick={onClick}>
@@ -449,7 +449,7 @@ const Good = props => {
 
             {'#' + good.id}
 
-            {props.app.stock_id
+            {props.app.current_stock_id
                 ? <span style={{
                     position: "absolute",
                     right: "50px"
@@ -744,7 +744,7 @@ const Good = props => {
                     </Button>
                 </Fade>
 
-                {!editable && good.stock_id === props.app.stock_id && isSale(good.wo)
+                {!editable && good.stock_id === props.app.current_stock_id && isSale(good.wo)
                     ? isReasonOpen
                         ? <div style={{width: '100%'}}>
                             <TextField label="Причина возврата"

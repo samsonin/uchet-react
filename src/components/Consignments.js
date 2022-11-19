@@ -37,7 +37,7 @@ const Consignments = props => {
 
     const init = () => {
 
-        rest('consignments/' + props.app.stock_id)
+        rest('consignments/' + props.app.current_stock_id)
             .then(res => {
                 if (res.status === 200) {
                     setCons(res.body)

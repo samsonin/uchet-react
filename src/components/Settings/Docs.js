@@ -54,9 +54,9 @@ const Docs = props => {
 
     useEffect(() => {
 
-        if (props.app.stock_id) {
+        if (props.app.current_stock_id) {
 
-            rest('docs/' + props.app.stock_id)
+            rest('docs/' + props.app.current_stock_id)
                 .then(data => {
 
                     // console.log(data)
@@ -65,11 +65,11 @@ const Docs = props => {
 
         }
 
-    }, [props.app.stock_id])
+    }, [props.app.current_stock_id])
 
     const handleOrderChange = orderId => {
 
-        rest('orders/' + props.app.stock_id + '/' + orderId)
+        rest('orders/' + props.app.current_stock_id + '/' + orderId)
             .then(data => {
 
                 // console.log(data)
@@ -81,7 +81,7 @@ const Docs = props => {
 
         request({
             action: 'getCustomer',
-            stockId: props.app.stock_id,
+            stockId: props.app.current_stock_id,
             customerId: e.target.value,
         }, '/settings', props.auth.jwt)
             .then(data => {
@@ -99,7 +99,7 @@ const Docs = props => {
 
         request({
             action: 'getProvider',
-            stockId: props.app.stock_id,
+            stockId: props.app.current_stock_id,
             providerId: e.target.value,
         }, '/settings', props.auth.jwt)
             .then(data => {
@@ -216,7 +216,7 @@ const Docs = props => {
 
                 let span = document.createElement('span');
                 let value = '';
-                let currentStock = props.app.stocks.find(v => props.app.stock_id === +v.id);
+                let currentStock = props.app.stocks.find(v => props.app.current_stock_id === +v.id);
                 let date = new Date();
 
                 const orderIndexes = ['id', 'visual_defects', 'for_client', 'sum', 'sum2', 'defect', 'password'];
@@ -463,7 +463,7 @@ const Docs = props => {
 
     }
 
-    if (+props.app.stock_id === 0) return <h3>Выберите точку</h3>;
+    if (+props.app.current_stock_id === 0) return <h3>Выберите точку</h3>;
     if (!props.app.docs.docs) return <h3>Получаем данные...</h3>;
 
     return (

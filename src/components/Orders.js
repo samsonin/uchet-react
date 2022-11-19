@@ -33,7 +33,7 @@ const Orders = props => {
 
     const [parameters, setParameters] = useState(false)
 
-    const [stocks, setStocks] = useState(() => [props.app.stock_id])
+    const [stocks, setStocks] = useState(() => [props.app.current_stock_id])
 
     const [id, setId] = useState(0)
     const [customer, setCustomer] = useState(initCustomer)
@@ -96,7 +96,7 @@ const Orders = props => {
 
         let url = 'orders/all'
 
-        if (props.auth.organization_id === 1 && props.app.stock_id) url += '/' + props.app.stock_id
+        if (props.auth.organization_id === 1 && props.app.current_stock_id) url += '/' + props.app.current_stock_id
 
         rest(url)
             .then(res => {
@@ -143,8 +143,8 @@ const Orders = props => {
 
         }
 
-        if (!url) url = position && position.is_sale && props.app.stock_id
-            ? 'orders?current_shift_only&stock_ids[]=' + props.app.stock_id
+        if (!url) url = position && position.is_sale && props.app.current_stock_id
+            ? 'orders?current_shift_only&stock_ids[]=' + props.app.current_stock_id
             : 'allowedOrders'
 
         rest(url)

@@ -106,7 +106,7 @@ const Inventory = props => {
 
         }
 
-        rest('goods/showcase/' + props.app.stock_id + '/' + currentId.current, 'PATCH', data)
+        rest('goods/showcase/' + props.app.current_stock_id + '/' + currentId.current, 'PATCH', data)
             .then(res => {
 
                 if (res.status === 200) {
@@ -220,7 +220,7 @@ const Inventory = props => {
             </TableHead>
             <TableBody>
                 {goods.length
-                    ? goods.filter(g => !props.app.stock_id || props.app.stock_id === g.stock_id)
+                    ? goods.filter(g => !props.app.current_stock_id || props.app.current_stock_id === g.stock_id)
                         .filter(g => {
 
                             if (!search || g.sum == search || g.id == search) return true

@@ -130,8 +130,8 @@ const Showcase = props => {
                 </TableHead>
                 <TableBody>
                     {showcase
-                        .filter(s => props.app.stock_id
-                            ? props.app.stock_id === s.stock_id
+                        .filter(s => props.app.current_stock_id
+                            ? props.app.current_stock_id === s.stock_id
                             : true)
                         .filter(s => ['all', s.parts].includes(status))
                         .filter(s => {

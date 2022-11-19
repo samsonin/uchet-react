@@ -38,7 +38,7 @@ export default connect(state => state)(props => {
 
     const classes = useStyles();
 
-    const [stock, setStock] = useState(() => props.app.stock_id)
+    const [stock, setStock] = useState(() => props.app.current_stock_id)
     const [dateFrom, setDateFrom] = useState(() => today)
     const [dateTo, setDateTo] = useState(() => today)
 

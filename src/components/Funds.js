@@ -18,6 +18,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableBody from "@material-ui/core/TableBody";
 
 import StocksSelect from "./common/StocksSelect";
+import uuid from "uuid";
 
 const useStyles = makeStyles(theme => ({
     typography: {
@@ -34,11 +35,14 @@ const minDate = '2020-01-01'
 const full = d => d < 10 ? '0' + d : d
 const today = (new Date()).getFullYear() + '-' + full(1 + (new Date()).getMonth()) + '-' + full((new Date()).getDate())
 
+const columnNames = ['дата', 'на утро', 'выручка', 'безнал', 'сдали', 'на вечер']
+const columnValues = [null, 'Всего:', proceeds, cashless, handed, null]
+
 export default connect(state => state)(props => {
 
     const classes = useStyles();
 
-    const [stock, setStock] = useState(() => props.app.stock_id)
+    const [stock, setStock] = useState(() => props.app.current_stock_id)
     const [dateFrom, setDateFrom] = useState(() => today)
     const [dateTo, setDateTo] = useState(() => today)
 
@@ -92,13 +96,11 @@ export default connect(state => state)(props => {
     useEffect(() => getReport(), [])
 
     const renderBody = () => data && data.length
-        ? data.map(d => <TableRow
-            key={'table-row-key-in-funds' + d.id}
-        >
+        ? data.map(d => <TableRow key={uuid()}>
             {['date', 'morning', 'proceeds', 'cashless', 'handed', `evening`]
-                .map(v => <TableCell>{d[v]}</TableCell>)}
+                .map(v => <TableCell key={uuid()}>{d[v]}</TableCell>)}
         </TableRow>)
-        : <TableRow>
+        : <TableRow key={uuid()}>
             <TableCell colSpan={6}>
                 Нет данных
             </TableCell>
@@ -164,12 +166,7 @@ export default connect(state => state)(props => {
                 <Table size="small">
                     <TableHead>
                         <TableRow>
-                            <TableCell>дата</TableCell>
-                            <TableCell>на утро</TableCell>
-                            <TableCell>выручка</TableCell>
-                            <TableCell>безнал</TableCell>
-                            <TableCell>сдали</TableCell>
-                            <TableCell>на вечер</TableCell>
+                            {columnNames.map(v => <TableCell key={uuid()}>{v}</TableCell>)}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -180,12 +177,7 @@ export default connect(state => state)(props => {
 
                     <TableHead>
                         <TableRow>
-                            <TableCell></TableCell>
-                            <TableCell>Всего:</TableCell>
-                            <TableCell>{proceeds}</TableCell>
-                            <TableCell>{cashless}</TableCell>
-                            <TableCell>{handed}</TableCell>
-                            <TableCell></TableCell>
+                            {columnValues.map(v => <TableCell key={uuid()}>{v}</TableCell>)}
                         </TableRow>
                     </TableHead>
 

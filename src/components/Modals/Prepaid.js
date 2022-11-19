@@ -152,7 +152,7 @@ const Prepaid = props => {
 
     const sendRest = () => {
 
-        let url = 'zakaz/' + props.app.stock_id
+        let url = 'zakaz/' + props.app.current_stock_id
         const data = {item, presum, sum, customer, status, note}
 
         if (id) url += '/' + id
@@ -224,7 +224,7 @@ const Prepaid = props => {
 
     const del = () => {
 
-        rest('zakaz/' + props.app.stock_id + '/' + id, 'DELETE')
+        rest('zakaz/' + props.app.current_stock_id + '/' + id, 'DELETE')
             .then(res => {
 
                 if (res.status === 200) {

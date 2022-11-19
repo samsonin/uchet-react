@@ -30,9 +30,9 @@ const Prepaids = props => {
 
     const getPrepaids = () => {
 
-        if (props.app.stock_id) {
+        if (props.app.current_stock_id) {
 
-            rest('prepaids/' + props.app.stock_id)
+            rest('prepaids/' + props.app.current_stock_id)
                 .then(res => {
                     if (res.status === 200) {
 
@@ -49,7 +49,7 @@ const Prepaids = props => {
 
     useEffect(() => {
         getPrepaids()
-    }, [props.app.stock_id])
+    }, [props.app.current_stock_id])
 
     useEffect(() => {
 
