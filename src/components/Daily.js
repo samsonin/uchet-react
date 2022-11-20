@@ -565,7 +565,7 @@ const Daily = props => {
                                         },
                                         {text: 'Остаток:', value: daily.evening},
                                     ].map(l => (date === today || l.text !== 'Подотчеты:') && <TableRow
-                                        key={uuid()}
+                                        key={'table-row-in-daily-' + l.text}
                                     >
 
                                         <TableCell style={{

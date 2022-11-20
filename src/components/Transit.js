@@ -40,7 +40,7 @@ const Transit = props => {
 
         if (!props.newScan) return
 
-        rest('transit/' + props.stock_id + '/' + props.newScan, 'PATCH')
+        rest('transit/' + props.current_stock_id + '/' + props.newScan, 'PATCH')
             .then(res => {
 
                 if (res.status === 200) {
@@ -61,7 +61,7 @@ const Transit = props => {
         let tr = e.target.closest('tr')
         if (tr) tr.classList.add('transition-hidden')
 
-        rest('transit/' + props.stock_id + '/' + good.barcode, 'DELETE')
+        rest('transit/' + props.current_stock_id + '/' + good.barcode, 'DELETE')
             .then(res => {
 
                 if (res.status === 200) {
@@ -111,7 +111,7 @@ const Transit = props => {
                         <MDBBtn color="secondary" onClick={() => setInfoOpen(false)}>
                             Отмена
                         </MDBBtn>
-                        {props.stock_id
+                        {props.current_stock_id
                             ? <MDBBtn color="primary" onClick={_ => fromTransit(_, good)}>
                                 Принять
                             </MDBBtn>
@@ -136,7 +136,7 @@ const Transit = props => {
                             <TableCell>
                                 откуда
                             </TableCell>
-                            {!!props.stock_id && <TableCell/>}
+                            {!!props.current_stock_id && <TableCell/>}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -179,7 +179,7 @@ const Transit = props => {
                                     <TableCell>
                                         {good.stock}
                                     </TableCell>
-                                    {!!props.stock_id && <TableCell>
+                                    {!!props.current_stock_id && <TableCell>
                                         <Tooltip title="Принять">
                                             <IconButton
                                                 style={{padding: '0.2rem'}}

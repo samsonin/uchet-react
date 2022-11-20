@@ -174,7 +174,7 @@ const ArrivalToday = props => {
                 <TableBody>
 
                     {goodsView
-                        .filter(g => !props.stock_id || props.stock_id === g.stock_id)
+                        .filter(g => !props.current_stock_id || props.current_stock_id === g.stock_id)
                         .filter(g => {
 
                             if (!search || g.id == search) return true
@@ -243,7 +243,7 @@ const ArrivalToday = props => {
                                     {good.count}
                                 </TableCell>
                                 <TableCell>
-                                    {props.stock_id
+                                    {props.current_stock_id
                                         ? <Tooltip title="штрихкод">
                                             <IconButton onClick={
                                                 () => PrintBarcodes(isGroup ? good.barcodes : [good.barcode])

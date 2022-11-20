@@ -113,7 +113,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         let error = ''
 
-        if (!app.stock_id) error = 'Выберите точку'
+        if (!app.current_stock_id) error = 'Выберите точку'
         if (!(customer.id || customer.fio || customer.phone_number)) error = 'Нет заказчика'
         if (customer.phone_number && customer.phone_number.length !== 10) error = 'неправильный номер телефона'
         if (!category_id) error = 'Выберите категорию'
@@ -133,7 +133,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         needPrint.current = true
 
-        rest('orders/' + app.stock_id, 'POST', data)
+        rest('orders/' + app.current_stock_id, 'POST', data)
             .then(res => afterRest(res))
 
     }
@@ -266,7 +266,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         needPrint.current = true
 
-        rest('orders/' + app.stock_id + '/' + order.id + '/warranty', 'POST', {reason})
+        rest('orders/' + app.current_stock_id + '/' + order.id + '/warranty', 'POST', {reason})
             .then(res => {
                 if (res.status === 200) {
                     setIsReasonOpen(false)

@@ -125,7 +125,7 @@ const Order = props => {
 
     useEffect(() => {
 
-        if (needPrint.current) {
+        if (order && needPrint.current) {
 
             needPrint.current = false
 

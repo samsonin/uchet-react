@@ -28,7 +28,7 @@ const SaleModal = props => {
 
     const handleTry = () => {
 
-        rest('resale/' + props.stock_id + '/' + props.row.id, 'PATCH',
+        rest('resale/' + props.current_stock_id + '/' + props.row.id, 'PATCH',
             {name})
             .then(res => {
 

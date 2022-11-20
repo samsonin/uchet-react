@@ -126,7 +126,7 @@ const DailyModal = props => {
             ? 'imprest'
             : 'sales'
 
-        rest(url + '/' + props.stock_id + '/' + props.row.id, 'DELETE')
+        rest(url + '/' + props.current_stock_id + '/' + props.row.id, 'DELETE')
             .then(res => {
 
                 if (res.status === 200) exit()
@@ -138,7 +138,7 @@ const DailyModal = props => {
 
     const save = () => {
 
-        if (props.row && props.row.stock_id && props.stock_id !== props.row.stock_id) {
+        if (props.row && props.row.stock_id && props.current_stock_id !== props.row.stock_id) {
             return enqueueSnackbar('другая точка', {variant: 'error'})
         }
 
@@ -154,7 +154,7 @@ const DailyModal = props => {
 
         let url = (props.type === 'Подотчеты'
             ? 'imprest'
-            : 'sales') + '/' + props.stock_id
+            : 'sales') + '/' + props.current_stock_id
 
         if (props.row) url += '/' + props.row.id
 
