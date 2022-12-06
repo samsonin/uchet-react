@@ -44,6 +44,7 @@ import Buy from "./components/Buy";
 import Inventory from "./components/Inventory";
 import ArrivalToday from "./components/ArrivalToday";
 import Store from "./components/Store";
+import Zp from "./components/Zp";
 
 
 const parseJwt = token => {
@@ -234,6 +235,7 @@ const App = props => {
                             </>}
 
                             <Route exact path="/prepaids" component={Prepaids}/>
+                            <Route exact path="/zp" component={Zp}/>
                             <Route exact path="/showcase" component={Showcase}/>
                             <Route exact path="/showcase/buy" component={Buy}/>
                             <Route exact path="/inventory" component={Inventory}/>
