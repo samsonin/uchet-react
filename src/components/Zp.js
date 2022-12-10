@@ -5,8 +5,10 @@ import TableHead from "@material-ui/core/TableHead";
 import {Button, Table, TableBody, TableCell, TableRow} from "@material-ui/core";
 import uuid from "uuid";
 import {toLocalTimeStr} from "./common/Time";
-import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
+import {connect} from "react-redux";
+import UsersSelect from "./common/UsersSelect";
+import {makeStyles} from "@material-ui/core/styles";
 
 
 const full = i => i > 9 ? i : '0' + i
@@ -20,23 +22,44 @@ const toUnix = date => {
 
 }
 
-const Zp = () => {
+const useStyles = makeStyles(() => ({
+    field: {
+        margin: '.3rem .3rem',
+    }
+}))
+
+const Zp = props => {
+
+    const classes = useStyles()
 
     const [zp, setZp] = useState([])
     const [from, setFrom] = useState(() => today)
     const [to, setTo] = useState(() => today)
+    const [userId, setUserId] = useState(() => props.auth.user_id)
+    const [isRequest, setIsRequest] = useState(false);
 
 
     const getZp = () => {
 
-        const f = toUnix(from)
+        let url = 'zp/' + toUnix(from)
 
-        let url = 'zp/' + f
+        if (to && from !== to) {
 
-        if (from !== to) url += '/' + to
+            url += '/' + (86399 + toUnix(to))
+
+            if (props.auth.admin && props.auth.admin !== userId) {
+                url += '/' + userId
+            }
+
+        }
+
+        setIsRequest(true)
 
         rest(url)
             .then(res => {
+
+                setIsRequest(false)
+
                 if (res.status === 200) {
                     setZp(res.body)
                 }
@@ -49,29 +72,47 @@ const Zp = () => {
     return (
         <>
 
-            <Grid item className="w-100 m-2 p-2">
-                c
+            {props.auth.admin && props.app.users && props.app.users.length && <UsersSelect
+                classes={classes.field}
+                // disabled={false}
+                users={props.app.users}
+                user={userId}
+                setUser={setUserId}
+            />}
+
+            <div style={{
+                width: '100%',
+                display: "flex",
+                justifyContent: "space-between",
+            }}>
+
                 <TextField
+                    style={{margin: '.5rem'}}
                     type="date"
-                    className={"m-2 p-2"}
+                    label="c"
                     value={from}
                     onChange={e => setFrom(e.target.value)}
                 />
-                по
+
                 <TextField
+                    style={{margin: '.5rem'}}
                     type="date"
-                    className={"m-2 p-2"}
+                    label="по"
                     value={to}
                     onChange={e => setTo(e.target.value)}
                 />
 
-                <Button size="small" variant="outlined"
-                        disabled={false}
-                        onClick={() => getZp()}
-                >
-                    Рассчитать
-                </Button>
-            </Grid>
+            </div>
+
+            <Button
+                size="small"
+                style={{margin: '.5rem'}}
+                variant="outlined"
+                disabled={isRequest}
+                onClick={() => getZp()}
+            >
+                Рассчитать
+            </Button>
 
 
             {zp
@@ -109,4 +150,4 @@ const Zp = () => {
         </>)
 }
 
-export default Zp
+export default connect(state => state)(Zp)
