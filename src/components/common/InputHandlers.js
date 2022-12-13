@@ -31,6 +31,7 @@ export const fioHandler = fio => fio.replace(/[^a-zA-Zа-яёА-ЯЁ ]/g, "")
 
 export const sumField = (initValue, value, setValue, style, disabled) => <TextField
     label={Number.isInteger(value) ? initValue : <br/>}
+    // label={Number.isInteger(value) ? initValue : 'Предоплата'}
     disabled={disabled}
     style={style}
     value={value}
