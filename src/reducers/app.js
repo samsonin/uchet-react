@@ -35,6 +35,7 @@ const probableKeys = [
     'queue',
     'daily',
     'transit',
+    'zp',
 ]
 
 

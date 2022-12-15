@@ -1,14 +1,15 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 
 import rest from "./Rest";
 import TableHead from "@material-ui/core/TableHead";
-import {Button, Table, TableBody, TableCell, TableRow} from "@material-ui/core";
+import {Button, FormControlLabel, Table, TableBody, TableCell, TableRow} from "@material-ui/core";
 import uuid from "uuid";
 import {toLocalTimeStr} from "./common/Time";
 import TextField from "@material-ui/core/TextField";
 import {connect} from "react-redux";
 import UsersSelect from "./common/UsersSelect";
 import {makeStyles} from "@material-ui/core/styles";
+import Checkbox from "@material-ui/core/Checkbox";
 
 
 const full = i => i > 9 ? i : '0' + i
@@ -36,6 +37,7 @@ const Zp = props => {
     const [from, setFrom] = useState(() => today)
     const [to, setTo] = useState(() => today)
     const [userId, setUserId] = useState(() => props.auth.user_id)
+    const [isAll, setIsAll] = useState(false);
     const [isRequest, setIsRequest] = useState(false);
 
 
@@ -72,13 +74,29 @@ const Zp = props => {
     return (
         <>
 
-            {props.auth.admin && props.app.users && props.app.users.length && <UsersSelect
-                classes={classes.field}
-                // disabled={false}
-                users={props.app.users}
-                user={userId}
-                setUser={setUserId}
-            />}
+            {props.auth.admin && props.app.users && props.app.users.length &&
+                <div style={{
+                    width: '100%',
+                    display: "flex",
+                    justifyContent: "space-between",
+                }}>
+                    <UsersSelect
+                        classes={classes.field}
+                        onlyValid={!isAll}
+                        // disabled={false}
+                        users={props.app.users}
+                        user={userId}
+                        setUser={setUserId}
+                    />
+                    <FormControlLabel
+                        control={<Checkbox
+                            checked={isAll}
+                            onChange={() => setIsAll(!isAll)}
+                            inputProps={{'aria-label': 'primary checkbox'}}
+                        />}
+                        label="Включая уволенных"
+                    />
+                </div>}
 
             <div style={{
                 width: '100%',

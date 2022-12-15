@@ -258,6 +258,12 @@ const App = props => {
                             <Route path="/call_records" component={Records}/>
                             {props.app.users[0] && <Route path="/queue" component={Queue}/>}
 
+                            <Route path="/store" render={props => <Store
+                                enterPress={enterPress}
+                                setEnterPress={setEnterPress}
+                                {...props}
+                            />}/>
+
                             <Route exact path="/arrival/today"
                                    render={props => <ArrivalToday
                                        newScan={ourBarcode}
@@ -273,11 +279,6 @@ const App = props => {
                                     {...props}
                                 />}/>
                                 <Route path="/consignments" component={Consignments}/>
-                                <Route path="/store" render={props => <Store
-                                    enterPress={enterPress}
-                                    setEnterPress={setEnterPress}
-                                    {...props}
-                                />}/>
 
                             </>}
 

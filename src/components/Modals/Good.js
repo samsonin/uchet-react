@@ -141,9 +141,7 @@ const Good = props => {
 
     const getStockName = stockId => {
         let stock = props.app.stocks.find(v => +v.id === +stockId);
-        return stock
-            ? stock.name
-            : ''
+        return stock ? stock.name : ''
     }
 
     const toOrder = () => {

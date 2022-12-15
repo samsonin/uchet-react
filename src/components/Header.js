@@ -11,17 +11,8 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import BalanceModal from "./BalanceModal";
 import rest from './Rest'
+import {toLocalTimeStr} from "./common/Time";
 
-
-const unixConverter = unix => {
-
-    const date = new Date(unix * 1000);
-    const day = (date.getDate() < 10 ? '0' : '') + date.getDate();
-    const month = (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1);
-    const year = date.getFullYear(); //full year in yyyy format
-    return (day + '-' + month + '-' + year);
-
-}
 
 const NavbarPage = props => {
 
@@ -165,7 +156,7 @@ const NavbarPage = props => {
             </MDBDropdownItem>
             <MDBDropdownItem>
                 <MDBNavLink to="/subscribe" className="text-dark">
-                    Подписка до: {unixConverter(props.auth.expiration_time)}
+                    Подписка до: {toLocalTimeStr(props.auth.expiration_time).slice(0, -9)}
                 </MDBNavLink>
             </MDBDropdownItem>
             {props.app
@@ -196,16 +187,17 @@ const NavbarPage = props => {
         <MDBNavbarToggler onClick={toggleCollapse}/>
         <MDBCollapse id="navbarCollapse3" isOpen={isOpen} navbar className="text-right">
             <MDBNavbarNav right>
-                <MDBNavItem>
-                    <MDBNavLink className="waves-effect waves-light" to="#!">
+                {props.auth.organization_id === 1 && <MDBNavItem>
+                    <MDBNavLink className="waves-effect waves-light" to="/zp">
                         <i className="fas fa-coins"/>
+                        {props.app.zp || 0}
                     </MDBNavLink>
-                </MDBNavItem>
-                <MDBNavItem>
-                    <MDBNavLink className="waves-effect waves-light" to="#!">
-                        <i className="far fa-envelope"/>
-                    </MDBNavLink>
-                </MDBNavItem>
+                </MDBNavItem>}
+                {/*<MDBNavItem>*/}
+                {/*    <MDBNavLink className="waves-effect waves-light" to="#!">*/}
+                {/*        <i className="far fa-envelope"/>*/}
+                {/*    </MDBNavLink>*/}
+                {/*</MDBNavItem>*/}
                 <MDBNavItem>
                     <MDBDropdown>
                         <MDBDropdownToggle nav caret>
