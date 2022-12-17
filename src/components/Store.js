@@ -75,6 +75,16 @@ const Store = props => {
 // eslint-disable-next-line
     }, [props.enterPress])
 
+    useEffect(() => {
+
+        if (good) {
+
+            const newGoods = goods.map(g => g.id === good.id ? good : g)
+            setGoods(newGoods)
+
+        }
+
+    }, [good])
 
     const setCat = id => {
 

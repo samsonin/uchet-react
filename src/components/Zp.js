@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
 import rest from "./Rest";
 import TableHead from "@material-ui/core/TableHead";
@@ -40,19 +40,14 @@ const Zp = props => {
     const [isAll, setIsAll] = useState(false);
     const [isRequest, setIsRequest] = useState(false);
 
-
     const getZp = () => {
 
         let url = 'zp/' + toUnix(from)
 
-        if (to && from !== to) {
+        url += '/' + (86399 + toUnix(to))
 
-            url += '/' + (86399 + toUnix(to))
-
-            if (props.auth.admin && props.auth.admin !== userId) {
-                url += '/' + userId
-            }
-
+        if (props.auth.admin && props.auth.admin !== userId) {
+            url += '/' + userId
         }
 
         setIsRequest(true)
@@ -68,6 +63,8 @@ const Zp = props => {
             })
 
     }
+
+    useEffect(() => getZp(), [])
 
     let total = 0
 
