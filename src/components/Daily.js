@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
-import rest from "../components/Rest"
 import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
 import StocksSelect from "./common/StocksSelect";
@@ -23,14 +22,19 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import List from "@material-ui/core/List";
 import {useSnackbar} from "notistack";
+import uuid from "uuid";
 
+import rest from "../components/Rest"
 import SaleModal from './Modals/Sale'
 import PrepaidModal from './Modals/Prepaid'
 import Consignment from "./Consignment";
 import DailyModal from "./Modals/Daily";
 import {numberInputHandler} from "./common/InputHandlers";
 import TwoLineInCell from "./common/TwoLineInCell";
-import uuid from "uuid";
+import {today} from "./common/Time";
+
+const mainUrl = document.location.protocol + '//' + document.location.host
+
 
 const useStyles = makeStyles(() => ({
     controls: {
@@ -56,8 +60,6 @@ const useStyles = makeStyles(() => ({
 }))
 
 const minDate = '2020-01-01'
-const full = d => d < 10 ? '0' + d : d
-const today = (new Date()).getFullYear() + '-' + full(1 + (new Date()).getMonth()) + '-' + full((new Date()).getDate())
 
 const prepaidArray = ['предоплата']
 const salesArray = ['продажа', 'возврат', 'из залога', 'выкупили', 'продали']
@@ -201,21 +203,9 @@ const Daily = props => {
 
                 }
 
-            } else if (row.action === '0') {
+            } else if (row.action === '0' || (row.action === 'расход' && row.wf.rem_id)) {
 
-                try {
-
-                    if (row.wf.rem_id) {
-
-                        return props.history.push('/order/' + stock + '/' + row.wf.rem_id)
-
-                    }
-
-                } catch (e) {
-
-                    console.log(e)
-
-                }
+                return window.open(mainUrl + '/order/' + stock + '/' + row.wf.rem_id, "_blank")
 
             } else if (['продали', 'вернули', 'купили', 'покупка', 'возврат'].includes(row.action)) {
 

@@ -1,20 +1,19 @@
 import React, {useEffect, useState} from "react";
 
-import rest from "./Rest";
 import TableHead from "@material-ui/core/TableHead";
 import {Button, FormControlLabel, Table, TableBody, TableCell, TableRow} from "@material-ui/core";
 import uuid from "uuid";
-import {toLocalTimeStr} from "./common/Time";
 import TextField from "@material-ui/core/TextField";
 import {connect} from "react-redux";
-import UsersSelect from "./common/UsersSelect";
 import {makeStyles} from "@material-ui/core/styles";
 import Checkbox from "@material-ui/core/Checkbox";
 
+import rest from "./Rest";
+import UsersSelect from "./common/UsersSelect";
+import {toLocalTimeStr, today} from "./common/Time";
 
-const full = i => i > 9 ? i : '0' + i
-const today = (new Date()).getFullYear() + '-' + full(1 + (new Date()).getMonth()) + '-' + full((new Date()).getDate())
 
+const mainUrl = document.location.protocol + '//' + document.location.host
 const toUnix = date => {
 
     const d = new Date(date)
@@ -65,6 +64,22 @@ const Zp = props => {
     }
 
     useEffect(() => getZp(), [])
+
+    const handler = z => {
+
+        try {
+
+            if (z.wf.rem_id && z.wf.stock_id) {
+
+                window.open(mainUrl + '/order/' + z.wf.stock_id + '/' + z.wf.rem_id, "_blank")
+
+            }
+
+        } catch (e) {
+            console.log(e)
+        }
+
+    }
 
     let total = 0
 
@@ -149,7 +164,9 @@ const Zp = props => {
                             return <TableRow style={{
                                 cursor: "pointer"
                             }}
-                                             key={uuid()}>
+                                             key={uuid()}
+                                             onClick={() => handler(z)}
+                            >
                                 <TableCell>{toLocalTimeStr(z.unix, true)}</TableCell>
                                 <TableCell>{z.note}</TableCell>
                                 <TableCell>{z.sum}</TableCell>

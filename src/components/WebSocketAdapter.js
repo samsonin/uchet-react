@@ -12,35 +12,6 @@ const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
 export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app}) => {
 
-    const notifyMe = text => {
-
-        // Let's check if the browser supports notifications
-        if (!("Notification" in window)) {
-            return false;
-        }
-
-        // Let's check whether notification permissions have already been granted
-        else if (Notification.permission === "granted") {
-            // If it's okay let's create a notification
-            return new Notification(text);
-        }
-
-        // Otherwise, we need to ask the user for permission
-        else if (Notification.permission !== "denied") {
-            Notification.requestPermission().then(permission => {
-                // If the user accepts, let's create a notification
-                return permission === "granted"
-                    ? new Notification(text)
-                    : false;
-
-            });
-        }
-
-        return false;
-        // At last, if the user has denied notifications, and you
-        // want to be respectful there is no need to bother them any more.
-    }
-
     const {enqueueSnackbar} = useSnackbar();
 
     useEffect(() => {
@@ -70,13 +41,9 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
 
                     } else if (data.type === "notification") {
 
-                        // if (!notifyMe(data.text)) {
-
                         enqueueSnackbar(data.text, {
                             variant: 'success',
                         });
-
-                        // }
 
                     } else if (data.type === "incoming_call_order" && data.order_id && data.stock_id) {
 

@@ -16,7 +16,7 @@ import {useSnackbar} from "notistack";
 import rest from "../components/Rest"
 import CustomersSelect from "../components/common/CustomersSelect"
 import TwoLineInCell from "./common/TwoLineInCell";
-import {toLocalTimeStr} from "./common/Time"
+import {toLocalTimeStr, today} from "./common/Time"
 import {intInputHandler} from "./common/InputHandlers";
 import UsersSelect from "./common/UsersSelect";
 import StatusesSelect from "./common/StatusesSelect";
@@ -33,11 +33,13 @@ const Orders = props => {
 
     const [parameters, setParameters] = useState(false)
 
-    const [stocks, setStocks] = useState(() => [props.app.current_stock_id])
+    const [stocks, setStocks] = useState(() => props.app.stocks
+            .map(s => s.is_valid ? s.id : null)
+            .filter(s => s))
 
     const [id, setId] = useState(0)
     const [customer, setCustomer] = useState(initCustomer)
-    const [createdDate, setCreatedDate] = useState()
+    const [createdDate, setCreatedDate] = useState(() => today)
     const [createdDate2, setCreatedDate2] = useState()
     const [checkoutDate, setCheckoutDate] = useState()
     const [checkoutDate2, setCheckoutDate2] = useState()
@@ -88,7 +90,6 @@ const Orders = props => {
         }
 
     }
-
 
     useEffect(() => {
 

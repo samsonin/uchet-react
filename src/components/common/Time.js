@@ -25,3 +25,6 @@ export const toLocalTimeStr = (unix, needTwoLine = false) => {
         : firstLine + secondLine
 
 }
+
+const full = i => i > 9 ? i : '0' + i
+export const today = (new Date()).getFullYear() + '-' + full(1 + (new Date()).getMonth()) + '-' + full((new Date()).getDate())
