@@ -84,6 +84,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+const reader = new FileReader()
 
 const Good = props => {
 
@@ -92,6 +93,7 @@ const Good = props => {
 
     const [treeOpen, setTreeOpen] = useState(false)
 
+    const [image, setImage] = useState()
     const [categoryId, setCategoryId] = useState(0)
     const [model, setModel] = useState('')
     const [imei, setImei] = useState('')
@@ -400,6 +402,8 @@ const Good = props => {
         </IconButton>
     </Tooltip>
 
+    reader.onloadend = () => setImage(reader.result)
+
     const isSale = wo => {
 
         if (wo === 'sale') return true
@@ -434,6 +438,8 @@ const Good = props => {
         imei: good.imei,
         sum: sum || good.sum,
     }
+
+    console.log(image, good.picture)
 
     return <Dialog
         open={!!(good ?? good.id)}
@@ -599,6 +605,34 @@ const Good = props => {
                     }
 
                 </Grid>
+
+                {image
+                    ? <>
+
+                        <img
+                            src={image}
+                            alt={good.model}
+                            width={'100%'}
+                        />
+
+                        <Button onClick={() => console.log('Загрузить')}>
+                            Загрузить
+                        </Button>
+
+                    </>
+                    : good.picture
+                        ? <>
+                            <img
+                                src={'https://uchet.store/uploads/' + good.picture}
+                                alt={good.model}
+                                width={'100%'}
+                            />
+                            <Button onClick={() => console.log('Удалить')}>
+                                Удалить
+                            </Button>
+                        </>
+                        : <input type='file' onChange={e => reader.readAsDataURL(e.target.files[0])}/>
+                }
 
                 <TextField label="Наименование"
                            className={classes.field}
