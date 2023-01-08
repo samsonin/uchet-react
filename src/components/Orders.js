@@ -22,6 +22,7 @@ import UsersSelect from "./common/UsersSelect";
 import StatusesSelect from "./common/StatusesSelect";
 import {OrderText} from "./common/OrderText"
 
+const mainUrl = document.location.protocol + '//' + document.location.host
 
 const initCustomer = {
     id: 0,
@@ -399,7 +400,8 @@ const Orders = props => {
                                 cursor: 'pointer',
                             }}
                             key={'ordertablerowkeyinorders' + o.stock_id + (o.id || o.order_id)}
-                            onClick={() => props.history.push('/order/' + o.stock_id + '/' + (o.id || o.order_id))}
+                            onClick={() => window
+                                .open(mainUrl + '/order/' + o.stock_id + '/' + (o.id || o.order_id), "_blank")}
                         >
                             <TableCell style={{color}}>
                                 {OrderText(o, props.app)}

@@ -38,18 +38,28 @@ const Transit = props => {
 
     useEffect(() => {
 
+        console.log('newScan')
+
         if (!props.newScan) return
 
-        rest('transit/' + props.current_stock_id + '/' + props.newScan, 'PATCH')
-            .then(res => {
+        if (props.current_stock_id) {
 
-                if (res.status === 200) {
+            rest('transit/' + props.current_stock_id + '/' + props.newScan, 'PATCH')
+                .then(res => {
 
-                    enqueueSnackbar('ok', {variant: 'success'})
+                    if (res.status === 200) {
 
-                }
+                        enqueueSnackbar('ok', {variant: 'success'})
 
-            })
+                    }
+
+                })
+
+        } else {
+
+            enqueueSnackbar('выберете точку', {variant: 'error'})
+
+        }
 
         if (typeof (props.setOurBarcode) === 'function') props.setOurBarcode()
 
@@ -57,6 +67,8 @@ const Transit = props => {
     }, [props.newScan])
 
     const fromTransit = (e, good) => {
+
+        if (!props.current_stock_id) return enqueueSnackbar('выберете точку', {variant: 'error'})
 
         let tr = e.target.closest('tr')
         if (tr) tr.classList.add('transition-hidden')
@@ -162,34 +174,34 @@ const Transit = props => {
                                 : 'нет'
 
                             return (<TableRow
-                                    key={uuidv4()}
-                                    className={good.c}
-                                    onClick={e => getInfo(good, e.target)}
-                                    style={{cursor: 'pointer'}}
-                                >
-                                    <TableCell>
-                                        {good.id}
-                                    </TableCell>
-                                    <TableCell>
-                                        {good.category}
-                                    </TableCell>
-                                    <TableCell>
-                                        {good.model}
-                                    </TableCell>
-                                    <TableCell>
-                                        {good.stock}
-                                    </TableCell>
-                                    {!!props.current_stock_id && <TableCell>
-                                        <Tooltip title="Принять">
-                                            <IconButton
-                                                style={{padding: '0.2rem'}}
-                                                onClick={e => fromTransit(e, good)}
-                                            >
-                                                <CheckIcon/>
-                                            </IconButton>
-                                        </Tooltip>
-                                    </TableCell>}
-                                </TableRow>)
+                                key={uuidv4()}
+                                className={good.c}
+                                onClick={e => getInfo(good, e.target)}
+                                style={{cursor: 'pointer'}}
+                            >
+                                <TableCell>
+                                    {good.id}
+                                </TableCell>
+                                <TableCell>
+                                    {good.category}
+                                </TableCell>
+                                <TableCell>
+                                    {good.model}
+                                </TableCell>
+                                <TableCell>
+                                    {good.stock}
+                                </TableCell>
+                                {!!props.current_stock_id && <TableCell>
+                                    <Tooltip title="Принять">
+                                        <IconButton
+                                            style={{padding: '0.2rem'}}
+                                            onClick={e => fromTransit(e, good)}
+                                        >
+                                            <CheckIcon/>
+                                        </IconButton>
+                                    </Tooltip>
+                                </TableCell>}
+                            </TableRow>)
                         })}
                     </TableBody>
                 </Table>

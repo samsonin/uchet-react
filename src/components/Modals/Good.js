@@ -2,12 +2,8 @@ import React, {forwardRef, useEffect, useState} from "react";
 import {connect} from "react-redux";
 
 import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
 import DeleteIcon from '@material-ui/icons/Delete';
-import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash';
-import LineWeightIcon from '@material-ui/icons/LineWeight';
-import BuildIcon from '@material-ui/icons/Build';
-import PrintIcon from '@material-ui/icons/Print';
+
 
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -17,19 +13,32 @@ import {useSnackbar} from "notistack";
 
 import rest from '../Rest'
 import Tree from "../Tree";
-import {Fade, List, ListItem, ListItemText, ListSubheader, TextField} from "@material-ui/core";
+import {
+    Card,
+    CardActionArea, CardActions,
+    CardMedia,
+    Fade,
+    List,
+    ListItem,
+    ListItemText,
+    ListSubheader,
+    TextField
+} from "@material-ui/core";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
 import {makeStyles} from "@material-ui/core/styles";
 import DialogContent from "@material-ui/core/DialogContent";
+
 import {intInputHandler} from "../common/InputHandlers";
 import {GoodSearch} from "../common/GoodSearch";
 import UsersSelect from "../common/UsersSelect";
 import {createDate, Print} from "../common/Print";
 import IsPublicCheckBox from "../common/IsPublicCheckBox";
-
+import TwoLineInCell from "../common/TwoLineInCell";
+import {toLocalTimeStr} from "../common/Time";
+import GoodsActions from "../Good/GoodActions";
 
 const woAlliases = {
     use: "В пользовании",
@@ -81,6 +90,10 @@ const useStyles = makeStyles((theme) => ({
         right: theme.spacing(1),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
+    },
+    card: {
+        width: '100%',
+        // maxWidth: '400px'
     }
 }));
 
@@ -93,6 +106,7 @@ const Good = props => {
 
     const [treeOpen, setTreeOpen] = useState(false)
 
+    const [isDrag, setIsDrag] = useState(false)
     const [image, setImage] = useState()
     const [categoryId, setCategoryId] = useState(0)
     const [model, setModel] = useState('')
@@ -105,12 +119,14 @@ const Good = props => {
 
     const [reason, setReason] = useState('')
     const [isReasonOpen, setIsReasonOpen] = useState(false)
+
     const [isRepair, setIsRepair] = useState(false)
     const [repairSum, setRepairSum] = useState(0)
     const [goodsForRepair, setGoodsForRepair] = useState([])
     const [repairJob, setRepairJob] = useState('')
     const [repairMasterId, setRepairMasterId] = useState(0)
     const [repairCash, setRepairCash] = useState(false)
+
 
     const pb = props.good.public || props.good.parts === 'sale'
 
@@ -144,6 +160,48 @@ const Good = props => {
     const getStockName = stockId => {
         let stock = props.app.stocks.find(v => +v.id === +stockId);
         return stock ? stock.name : ''
+    }
+
+
+    const repair = () => {
+
+        const barcode = good.barcode || good.imei
+
+        if (!barcode) enqueueSnackbar('нет кода или S/N', {variant: 'error'})
+
+        const data = {
+            sum: repairSum,
+            job: repairJob,
+        }
+
+        if (repairCash) data.cash = true
+        else data.master_id = repairMasterId
+
+        if (goodsForRepair.length) data.barcodes = goodsForRepair.map(g => g.barcode)
+
+        rest('goods/repair/' + barcode, 'PATCH', data)
+            .then(res => {
+
+                if (res.status === 200) {
+
+                    setRepairSum(0)
+                    setRepairJob('')
+                    setRepairMasterId(0)
+                    setGoodsForRepair([])
+                    setIsRepair(false)
+
+                    enqueueSnackbar('Работа добавлена!', {variant: 'success'})
+
+                    if (res.body.goods) props.setGood(res.body.goods)
+
+                } else {
+
+                    enqueueSnackbar('ошибка ' + res.status, {variant: 'error'})
+
+                }
+
+            })
+
     }
 
     const toOrder = () => {
@@ -212,85 +270,6 @@ const Good = props => {
 
     }
 
-    const goodRest = (url, method, success) => {
-
-        const barcode = good.barcode || good.imei
-        if (!barcode) enqueueSnackbar('нет кода или S/N', {variant: 'error'})
-
-        rest(url + barcode, method)
-            .then(res => {
-
-                if (res.status === 200) {
-
-                    if (url.substring(0, 7) === 'transit' && method === 'POST') {
-                        if (typeof (props.hide) === "function") props.hide(good.id)
-                    }
-
-                    if (props.close) props.close()
-
-                    enqueueSnackbar(success, {variant: 'success'})
-
-                    if (res.body.goods) props.setGood(res.body.goods)
-
-                } else {
-
-                    enqueueSnackbar('ошибка ' + res.status, {variant: 'error'})
-
-                }
-            })
-    }
-
-    const transit = isTo => goodRest('transit/' + props.app.current_stock_id + '/',
-        isTo ? 'POST' : 'DELETE',
-        isTo ? 'Передано в транзит' : 'Принято из транзита')
-
-    const use = () => goodRest('goods/', 'DELETE', 'Списано в пользование')
-
-    const restore = () => goodRest('goods/restore/', 'POST', 'Восстановлено')
-
-    const reject = () => goodRest('goods/reject/', 'DELETE', 'Списано в брак')
-
-    const repair = () => {
-
-        const barcode = good.barcode || good.imei
-
-        if (!barcode) enqueueSnackbar('нет кода или S/N', {variant: 'error'})
-
-        const data = {
-            sum: repairSum,
-            job: repairJob,
-        }
-
-        if (repairCash) data.cash = true
-        else data.master_id = repairMasterId
-
-        if (goodsForRepair.length) data.barcodes = goodsForRepair.map(g => g.barcode)
-
-        rest('goods/repair/' + barcode, 'PATCH', data)
-            .then(res => {
-
-                if (res.status === 200) {
-
-                    setRepairSum(0)
-                    setRepairJob('')
-                    setRepairMasterId(0)
-                    setGoodsForRepair([])
-                    setIsRepair(false)
-
-                    enqueueSnackbar('Работа добавлена!', {variant: 'success'})
-
-                    if (res.body.goods) props.setGood(res.body.goods)
-
-                } else {
-
-                    enqueueSnackbar('ошибка ' + res.status, {variant: 'error'})
-
-                }
-
-            })
-
-    }
-
     const save = () => {
 
         if (isSame) return enqueueSnackbar('нет изменений', {variant: 'error'})
@@ -339,11 +318,10 @@ const Good = props => {
         setTreeOpen(false)
     }
 
+
     let good = props.good
 
     if (!(good && good.id)) return '';
-
-    let isBarcodePrinted = props.auth.admin || 12 > Math.round((Date.now() - Date.parse(good.time)) / 360000);
 
     let ui_wo = good.ui_wo
 
@@ -353,6 +331,8 @@ const Good = props => {
             ui_wo = 'Продан'
         } else if (good.wo === 'reject') {
             ui_wo = 'В браке'
+        } else if (good.wo === 't') {
+            ui_wo = 'В транзите'
         } else {
 
             try {
@@ -373,34 +353,15 @@ const Good = props => {
 
         }
 
-        ui_wo = 'Израсходованна'
-
-    }
-
-    let consignment;
-    try {
-        let wf = JSON.parse(good.wf)
-        good.provider_id = wf.provider_id || good.provider_id;
-        consignment = wf.consignment_number;
-    } catch (e) {
+        if (!ui_wo) ui_wo = 'Израсходованна'
 
     }
 
     const provider = props.app.providers.find(v => +v.id === +good.provider_id);
 
-    let time = good.time;
+    const category = props.app.categories.find(v => v.id === good.category_id)
 
-    let categoryName = good.category_id > 0
-        ? props.app.categories.find(v => v.id === good.category_id).name
-        : 'Выбрать...'
-
-    const editable = !good.wo && good.stock_id === props.app.current_stock_id
-
-    const renderIcon = (title, onClick, elem) => <Tooltip title={title}>
-        <IconButton onClick={onClick}>
-            {elem}
-        </IconButton>
-    </Tooltip>
+    const isEditable = !good.wo && good.stock_id === props.app.current_stock_id
 
     reader.onloadend = () => setImage(reader.result)
 
@@ -426,6 +387,30 @@ const Good = props => {
 
     const stock = props.app.stocks.find(s => s.id === good.stock_id)
 
+    const upload = () => {
+
+
+    }
+
+    const onDrag = (e, isLeave) => {
+
+        e.preventDefault()
+        setIsDrag(isLeave)
+
+    }
+
+    const onDrop = e => {
+
+        e.preventDefault()
+
+        const file = e.dataTransfer.files[0]
+
+        rest('goods/' + good.barcode, 'POST', {file})
+
+        setIsDrag(false)
+
+    }
+
     const alias = {
         organization_organization: props.app.organization.organization,
         organization_name: props.app.organization.name,
@@ -439,7 +424,8 @@ const Good = props => {
         sum: sum || good.sum,
     }
 
-    console.log(image, good.picture)
+    const border = isDrag ? '3px dashed black' : '3px black'
+
 
     return <Dialog
         open={!!(good ?? good.id)}
@@ -453,57 +439,17 @@ const Good = props => {
 
             {'#' + good.id}
 
-            {props.app.current_stock_id
-                ? <span style={{
-                    position: "absolute",
-                    right: "50px"
-                }}>
-                    {good.wo === 't'
-                        ? renderIcon('Из транзита',
-                            () => transit(false),
-                            <i className="fas fa-truck"/>)
-                        : editable
-                            ? <>
-                                {isBarcodePrinted
-                                    ? renderIcon('Штрихкод',
-                                        () => window.print(),
-                                        <LineWeightIcon/>)
-                                    : ''}
-                                {renderIcon('В транзит',
-                                    () => transit(true),
-                                    <i className="fas fa-truck"/>)}
-                                {renderIcon('В брак',
-                                    () => reject(),
-                                    <i className="fas fa-redo"/>)}
-                                {renderIcon('Починить',
-                                    () => setIsRepair(!isRepair),
-                                    <BuildIcon/>)}
-                            </>
-                            : good.wo.indexOf('sale') > -1 && <IconButton onClick={() => Print(doc, alias)}>
-                            <PrintIcon/>
-                        </IconButton>}
+            {<span style={{
+                position: "absolute",
+                right: "50px"
+            }}>
 
-                    {props.auth.admin
-                        ? good.wo
-                            ? good.wo === 'use'
-                                ? <Tooltip title="Восстановить">
-                                    <IconButton
-                                        onClick={() => restore()}
-                                    >
-                                        <RestoreFromTrashIcon/>
-                                    </IconButton>
-                                </Tooltip>
-                                : null
-                            : <Tooltip title="Списать">
-                                <IconButton
-                                    onClick={() => use()}
-                                >
-                                    <DeleteIcon/>
-                                </IconButton>
-                            </Tooltip>
-                        : null}
-                        </span>
-                : ''}
+                <GoodsActions
+                    good={props.good}
+                    setGood={props.setGood}
+                />
+
+            </span>}
 
             <IconButton aria-label="close" className={classes.closeButton}
                         onClick={() => props.close()}>
@@ -599,27 +545,33 @@ const Good = props => {
                         </>
                         : <Grid item xs={12}>
                             <Button size="small" className="w-100" onClick={() => setTreeOpen(true)}>
-                                {categoryName}
+                                {category ? category.name : 'Выбрать...'}
                             </Button>
                         </Grid>
                     }
 
                 </Grid>
 
-                {image
-                    ? <>
-
-                        <img
-                            src={image}
-                            alt={good.model}
-                            width={'100%'}
-                        />
-
-                        <Button onClick={() => console.log('Загрузить')}>
-                            Загрузить
-                        </Button>
-
-                    </>
+                {image && isEditable
+                    ? <Card className={classes.card}>
+                        <CardActionArea>
+                            <CardMedia
+                                component="img"
+                                alt="Contemplative Reptile"
+                                image={image}
+                            />
+                        </CardActionArea>
+                        <CardActions>
+                            <Button size="small" color="primary"
+                                    onClick={() => setImage()}>
+                                Отменить
+                            </Button>
+                            <Button size="small" color="primary"
+                                    onClick={() => upload()}>
+                                Загрузить
+                            </Button>
+                        </CardActions>
+                    </Card>
                     : good.picture
                         ? <>
                             <img
@@ -627,17 +579,36 @@ const Good = props => {
                                 alt={good.model}
                                 width={'100%'}
                             />
-                            <Button onClick={() => console.log('Удалить')}>
+                            {isEditable && <Button onClick={() => console.log('Удалить')}>
                                 Удалить
-                            </Button>
+                            </Button>}
                         </>
-                        : <input type='file' onChange={e => reader.readAsDataURL(e.target.files[0])}/>
+                        : isEditable && <>
+                        <div style={{
+                            width: '100%',
+                            height: '100px',
+                            backgroundColor: 'lightgray',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            border
+                        }}
+                             onDragLeave={e => onDrag(e, false)}
+                             onDragOver={e => onDrag(e, true)}
+                             onDrop={e => onDrop(e)}
+                        >
+                            {isDrag
+                                ? 'Отпустите фото, чтобы загрузить'
+                                : 'Перетащите фото, чтобы загрузить'}
+                        </div>
+                        <input type='file' onChange={e => reader.readAsDataURL(e.target.files[0])}/>
+                    </>
                 }
 
                 <TextField label="Наименование"
                            className={classes.field}
                            value={model}
-                           disabled={!editable}
+                           disabled={!isEditable}
                            onChange={e => setModel(e.target.value)}
                 />
 
@@ -645,19 +616,19 @@ const Good = props => {
                     ? <TextField label="imei"
                                  className={classes.field}
                                  value={imei}
-                                 disabled={!editable}
+                                 disabled={!isEditable}
                                  onChange={e => setImei(e.target.value)}
                     />
                     : ''}
 
-                {editable
+                {isEditable
                     ? <>
 
                         <div style={{width: '100%'}}>
 
                             <TextField label="Номер заказа"
                                        className={classes.halfField}
-                                       disabled={!editable}
+                                       disabled={!isEditable}
                                        value={orderId}
                                        onChange={e => intInputHandler(e.target.value, setOrderId)}
                             />
@@ -674,7 +645,7 @@ const Good = props => {
 
                             <TextField label="Цена"
                                        className={classes.halfField}
-                                       disabled={!editable}
+                                       disabled={!isEditable}
                                        value={sum}
                                        onChange={e => intInputHandler(e.target.value, setSum)}
                             />
@@ -691,49 +662,35 @@ const Good = props => {
 
                     : ''}
 
-                <TextField label="Себестоимость"
-                           className={classes.field}
-                           value={good.remcost ?? good.cost ?? 0}
-                />
-                <TextField label="Оприходовали"
-                           className={classes.field}
-                           value={time}
-                />
 
-                {provider
-                    ? <TextField label="Поставщик"
-                                 className={classes.field}
-                                 value={provider.name}
-                    />
-                    : ''}
+                <div className={classes.field}>
+                    {TwoLineInCell("Себестоимость", good.remcost ?? good.cost ?? 0)}
+                </div>
 
-                {consignment
-                    ? <TextField
-                        className={classes.field}
-                        label="Накладная"
-                        value={consignment}
-                    />
-                    : ''}
+                <div className={classes.field}>
+                    {TwoLineInCell("Время оприходования", good.unix ? toLocalTimeStr(good.unix) : good.time)}
+                </div>
 
-                <TextField label="Точка"
-                           className={classes.field}
-                           value={getStockName(good.stock_id)}
-                />
+                {provider && <div className={classes.field}>
+                    {TwoLineInCell('Поставщик: ' + provider.name,
+                        good.wf && good.wf.consignment_number && 'накладная: ' + good.wf.consignment_number)}
+                </div>}
 
-                {editable || responsibleId
-                    ? <UsersSelect
-                        classes={classes.field}
-                        users={props.app.users}
-                        user={responsibleId}
-                        setUser={setResponsibleId}
-                        onlyValid={true}
-                        disabled={!editable}
-                        label="ответственный"
-                    />
-                    : null}
+                {good.wo === 't' || <div className={classes.field}>
+                    {TwoLineInCell('Точка:', getStockName(good.stock_id))}
+                </div>}
 
-                {editable
+                {isEditable
                     ? <>
+                        <UsersSelect
+                            classes={classes.field}
+                            users={props.app.users}
+                            user={responsibleId}
+                            setUser={setResponsibleId}
+                            onlyValid={true}
+                            disabled={!isEditable}
+                            label="ответственный"
+                        />
                         <TextField label="Хранение"
                                    className={classes.field}
                                    value={storagePlace}
@@ -747,26 +704,17 @@ const Good = props => {
 
                     </>
                     : <>
-
-                        {good.wo
-                            ? <TextField label="Израсходованна"
-                                         value={ui_wo}
-                                         className={classes.field}
-                            />
-                            : null}
-
-                        {good.outtime
-                            ? <TextField label="Время расхода"
-                                         className={classes.field}
-                                         value={good.outtime}
-                            />
-                            : null}
-
+                        <div className={classes.field}>
+                            {TwoLineInCell('Ответственный:', responsibleId)}
+                        </div>
+                        {good.wo && <div className={classes.field}>
+                            {TwoLineInCell('Статус:', ui_wo + ', c ' + toLocalTimeStr(good.out_unix))}
+                        </div>}
                     </>
                 }
 
                 <Fade
-                    in={!isSame}
+                    in={!isSame && isEditable}
                     timeout={300}
                 >
                     <Button onClick={() => save()}
@@ -776,7 +724,7 @@ const Good = props => {
                     </Button>
                 </Fade>
 
-                {!editable && good.stock_id === props.app.current_stock_id && isSale(good.wo)
+                {!isEditable && good.stock_id === props.app.current_stock_id && isSale(good.wo)
                     ? isReasonOpen
                         ? <div style={{width: '100%'}}>
                             <TextField label="Причина возврата"

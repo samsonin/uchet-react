@@ -1,6 +1,16 @@
 import React, {useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
-import {Button, IconButton, InputAdornment, Table, TableBody, TableCell, TableRow, TextField} from "@material-ui/core";
+import {
+    Button,
+    Checkbox, FormControlLabel,
+    IconButton,
+    InputAdornment,
+    Table,
+    TableBody,
+    TableCell,
+    TableRow,
+    TextField
+} from "@material-ui/core";
 import uuid from "uuid";
 import Tree from "./Tree";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
@@ -36,6 +46,8 @@ const Store = props => {
     const [isRest, setIsRest] = useState(false)
     const [error, setError] = useState(false)
     const [search, setSearch] = useState('')
+    const [isMyStock, setIsMyStock] = useState(false)
+    const [isPublic, setIsPublic] = useState(false)
 
     const limit = useRef(25)
 
@@ -138,6 +150,8 @@ const Store = props => {
 
     const hide = id => console.log(id)
 
+    const currentStock = props.app.stocks.find(s => s.id === props.app.current_stock_id)
+
     return <>
 
         <GoodModal
@@ -195,6 +209,22 @@ const Store = props => {
 
         </div>
 
+        <div style={style}>
+
+            {currentStock && <FormControlLabel control={<Checkbox checked={isMyStock}
+                                                                  onChange={() => setIsMyStock(!isMyStock)}
+            />}
+                                               label={"только " + currentStock.name}
+            />}
+
+            <FormControlLabel control={<Checkbox checked={isPublic}
+                                                 onChange={() => setIsPublic(!isPublic)}
+            />}
+                              label={"только опубликованные"}
+            />
+
+        </div>
+
         {goods.length
             ? <Table size="small"
                      style={{background: 'white'}}
@@ -209,6 +239,8 @@ const Store = props => {
                 </TableHead>
                 <TableBody>
                     {goods
+                        .filter(s => !isPublic || s.public)
+                        .filter(s => !isMyStock || s.stock_id === currentStock.id)
                         .filter(s => {
 
                             if (!search || s.sum == search || s.id == search) return true
