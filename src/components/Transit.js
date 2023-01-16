@@ -38,8 +38,6 @@ const Transit = props => {
 
     useEffect(() => {
 
-        console.log('newScan')
-
         if (!props.newScan) return
 
         if (props.current_stock_id) {

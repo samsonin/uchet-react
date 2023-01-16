@@ -22,6 +22,7 @@ import Transit from "./components/Transit";
 import FundsFlow from "./components/FundsFlow";
 import rest from "./components/Rest";
 import GoodModal from "./components/Modals/Good";
+import Good from "./components/Good"
 import Config from "./components/Settings/Config";
 import Organization from "./components/Settings/Organization";
 import Employees from "./components/Settings/Employees";
@@ -69,6 +70,7 @@ const App = props => {
 
     const [orderBarcode, setOrderBarcode] = useState()
     const [ourBarcode, setOurBarcode] = useState()
+    // const [ourBarcode, setOurBarcode] = useState('115104006041')
     const [globalBarcode, setGlobalBarcode] = useState()
     const [enterPress, setEnterPress] = useState(false)
 
@@ -120,7 +122,10 @@ const App = props => {
 
         if (!ourBarcode) return
 
-        if (!['/transit', '/arrival/today'].includes(window.location.pathname)) {
+        let path = window.location.pathname
+        if (path.substring(0, 6) === '/order') path = '/order'
+
+        if (!['/transit', '/arrival/today', '/order'].includes(path)) {
 
             rest("goods/" + ourBarcode)
                 .then(res => {
@@ -263,6 +268,8 @@ const App = props => {
                                 setEnterPress={setEnterPress}
                                 {...props}
                             />}/>
+
+                            <Route exact path="/goods/:barcode" component={Good}/>
 
                             <Route exact path="/arrival/today"
                                    render={props => <ArrivalToday

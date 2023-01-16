@@ -9,17 +9,16 @@ import BuildIcon from "@material-ui/icons/Build";
 import LineWeightIcon from "@material-ui/icons/LineWeight";
 import DeleteIcon from "@material-ui/icons/Delete";
 import PrintIcon from "@material-ui/icons/Print";
+import AspectRatioIcon from '@material-ui/icons/AspectRatio';
 import {useSnackbar} from "notistack";
 
 import rest from "../Rest";
 import {PrintBarcodes} from "../common/PrintBarcodes";
 
 
-
 const GoodActions = props => {
 
     const {enqueueSnackbar} = useSnackbar()
-
 
     const goodRest = (url, method, success) => {
 
@@ -53,8 +52,6 @@ const GoodActions = props => {
 
         if (!props.app.current_stock_id) return enqueueSnackbar('выберете точку', {variant: 'error'})
 
-        console.log(props.app.current_stock_id)
-
         goodRest('transit/' + props.app.current_stock_id + '/',
             isTo ? 'POST' : 'DELETE',
             isTo ? 'Передано в транзит' : 'Принято из транзита')
@@ -69,7 +66,6 @@ const GoodActions = props => {
     const passedMilliseconds = Date.now() - (props.good.unix ? props.good.unix * 1000 : Date.parse(props.good.time))
     const canPrintBarcode = props.auth.admin || 12 >= Math.round(passedMilliseconds / 3600000)
 
-    // const repairHandler = () => setIsRepair(!isRepair)
     const refundHandler = () => {
         // зачислить деньги в кассу или увеличить дебиторку
 
@@ -85,42 +81,45 @@ const GoodActions = props => {
     </Tooltip>
 
     const actions = {
+        open: renderIcon('открыть в отдельной вкладке', () => props.open(), <AspectRatioIcon />),
         transit: renderIcon(props.good.wo ? 'Из транзита' : 'В транзит',
             () => transit(props.good.wo !== 't'),
             <i className="fas fa-truck"/>),
-        reject: renderIcon( 'В брак', () => reject(), <ThumbDownIcon />),
+        reject: renderIcon('В брак', () => reject(), <ThumbDownIcon/>),
         restore: renderIcon("Восстановить", () => restore(), <RestoreFromTrashIcon/>),
         refund: renderIcon('Вернуть поставщику', refundHandler, <i className="fas fa-truck"/>),
-        // repair: renderIcon('Починить', repairHandler, <BuildIcon />),
+        repair: renderIcon('Починить', () => props.setIsRepair(!props.isRepair), <BuildIcon/>),
         barcode: renderIcon('Штрихкод', () => PrintBarcodes([props.good.barcode]), <LineWeightIcon/>),
         use: renderIcon("В пользование", () => use(), <DeleteIcon/>),
-        check: renderIcon('копия чека', checkPrintHandler, <PrintIcon/>),
+        check: renderIcon('Копия чека', checkPrintHandler, <PrintIcon/>),
     }
+
+    if (props.isRepair) return actions.repair
+
+    if (props.good.wo === 't') return actions.transit
 
     if (props.app.current_stock_id === props.good.stock_id) {
 
-        if (props.good.wo === 't') return actions.transit
+        if (['use'].includes(props.good.wo)) return actions.restore
 
-        if (props.good.wo === 'reject') {
-            return <>
-                {actions.restore}
-                {actions.refund}
-            </>
-        }
+        if (props.good.wo === 'reject') return <>
+            {actions.restore}
+            {actions.refund}
+        </>
 
-        if (['use', 'shortage'].includes(props.good.wo) && props.auth.admin) return actions.restore
+        if (['shortage'].includes(props.good.wo) && props.auth.admin) return actions.restore
 
     }
 
-    return !props.good.wo && props.good.stock_id === props.app.current_stock_id
-        ? <>
-            {canPrintBarcode && actions.barcode}
-            {actions.transit}
-            {actions.reject}
-            {actions.repair}
-            {props.auth.admin && actions.use}
-        </>
-        : props.good.wo.indexOf('sale') > -1 && actions.check
-
+    return props.good.wo
+        ? props.good.wo.indexOf('sale') > -1 && actions.check
+        : props.good.stock_id === props.app.current_stock_id && <>
+        {actions.open}
+        {canPrintBarcode && actions.barcode}
+        {actions.transit}
+        {actions.reject}
+        {actions.repair}
+        {props.auth.admin && actions.use}
+    </>
 }
 export default connect(state => state)(GoodActions)
