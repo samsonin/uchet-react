@@ -127,9 +127,11 @@ const GoodContent = props => {
 
     const pb = props.good.public || props.good.parts === 'sale'
 
+    const isShowcase = props.good.barcode.toString().substring(0, 6) === '115104'
+
     const isSame = categoryId === props.good.category_id
         && model === props.good.model
-        && imei === props.good.imei
+        && (!isShowcase || imei === props.good.imei)
         && sum === props.good.sum
         && responsibleId === +props.good.responsible_id
         && storagePlace === props.good.storage_place
@@ -168,7 +170,7 @@ const GoodContent = props => {
 
                     props.close()
 
-                    if (props.good.barcode.toString().substring(0, 6) === '115104') Print(doc, alias)
+                    if (isShowcase) Print(doc, alias)
                     else enqueueSnackbar('продано!', {variant: 'success'})
 
                 } else {
@@ -384,40 +386,27 @@ const GoodContent = props => {
 
     }
 
-    const editableLine = (label, value, onChange) => <div style={{
-        display: 'flex',
-        padding: '.5rem 0',
-        // borderBottom: '1px solid lightgray'
-    }}>
-            <span style={{
-                width: '40%',
-            }}>
-                {label}
-            </span>
+    const line = (label, value, onChange) => {
 
-        <TextField fullWidth
-                   value={value}
-                   onChange={onChange}
-        />
+        const style = {
+            display: 'flex',
+            padding: '1rem 0'
+        }
 
-    </div>
+        const isEd = isEditable && typeof (onChange) === 'function'
 
-    const line = (first, second) => <div style={{
-        display: 'flex',
-        padding: '1rem 0',
-        borderBottom: '1px solid lightgray'
-    }}>
-            <span style={{
-                width: '40%',
-            }}>
-                {first}
-            </span>
-        <span style={{
-            fontWeight: 'bold'
-        }}>
-                {second}
-            </span>
-    </div>
+        if (!isEd) style.borderBottom = '1px solid lightgray'
+
+        return <div style={style}>
+
+            <span style={{width: '40%',}}>{label}</span>
+
+            {isEd
+                ? <TextField fullWidth value={value} onChange={onChange}/>
+                : <span style={{fontWeight: 'bold'}}>{value}</span>}
+
+        </div>
+    }
 
     const textWithButton = (label, value, onChange, onClick, isPrimary, text) => <div style={{width: '100%'}}>
         <TextField label={label}
@@ -442,99 +431,99 @@ const GoodContent = props => {
     const responsible = props.app.users.find(u => u.id === responsibleId)
 
     return props.isRepair
-        ? <>
+        ? <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-around',
+            padding: '0 1rem',
+        }}>
 
-            <TextField label="Общая стоимость работ"
-                       className={classes.field}
-                       value={repairSum}
-                       onChange={e => intInputHandler(e.target.value, setRepairSum)}
-            />
 
-            <TextField label="Выполненная работа"
-                       className={classes.field}
-                       value={repairJob}
-                       onChange={e => setRepairJob(e.target.value)}
-            />
+            {line('Общая стоимость:', repairSum, e => intInputHandler(e.target.value, setRepairSum))}
 
-            {goodsForRepair && goodsForRepair.length
-                ? <List subheader={
-                    <ListSubheader component="div" id="nested-list-subheader">
-                        Список используемых запчастей
-                    </ListSubheader>
-                }>
-                    {goodsForRepair.map(g => <ListItem
-                        key={'listitemkeyingoodmodalsforrepair' + g.barcode}
+            {line('Выполненная работа:', repairJob, e => setRepairJob(e.target.value))}
+
+            {goodsForRepair && !!goodsForRepair.length && <List subheader={
+                <ListSubheader component="div" id="nested-list-subheader">
+                    Список используемых запчастей:
+                </ListSubheader>
+            }>
+                {goodsForRepair.map(g => <ListItem
+                    key={'listitemkeyingoodmodalsforrepair' + g.barcode}
+                >
+                    <ListItemText primary={g.model} secondary={g.remcost}/>
+                    <IconButton
+                        onClick={() => remove(g.barcode)}
                     >
-                        <ListItemText primary={g.model} secondary={g.remcost}/>
-                        <IconButton
-                            onClick={() => remove(g.barcode)}
-                        >
-                            <DeleteIcon/>
-                        </IconButton>
-                    </ListItem>)}
-                </List>
-                : null}
+                        <DeleteIcon/>
+                    </IconButton>
+                </ListItem>)}
+            </List>}
 
             <GoodSearch onSelected={onSelected}/>
 
-            <div style={{
-                width: '100%'
-            }}>
+            {repairCash || <UsersSelect
+                classes={classes.field}
+                users={props.app.users}
+                user={repairMasterId}
+                setUser={setRepairMasterId}
+                onlyValid={true}
+            />}
 
-                {repairCash || <UsersSelect
-                    classes={classes.field}
-                    users={props.app.users}
-                    user={repairMasterId}
-                    setUser={setRepairMasterId}
-                    onlyValid={true}
-                />}
-
-                {!repairMasterId && <FormControlLabel
-                    control={<Checkbox checked={repairCash} onChange={() => setRepairCash(!repairCash)}/>}
-                    label="списать с кассы"
-                />}
-
-            </div>
+            {!repairMasterId && <FormControlLabel
+                control={<Checkbox checked={repairCash} onChange={() => setRepairCash(!repairCash)}/>}
+                label="списать с кассы"
+            />}
 
             <Button
+                className="m-2"
                 variant="outlined"
                 onClick={() => repair()}
             >
                 Добавить работу
             </Button>
 
-        </>
+        </div>
         : <>
 
-            <Grid container>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-around',
+                padding: '0 1rem',
+            }}>
 
-                {treeOpen
-                    ? <>
-                        <Grid item xs={10} className="pt-1 pr-1">
-                            <Tree initialId={props.good.category_id}
-                                  categories={props.app.categories}
-                                  onSelected={id => props.good.category_id = +id}
-                                  finished={id => handleTree(id)}
-                            />
-                        </Grid>
-                        <Grid item xs={2}>
-                            <Button size="small" onClick={() => setTreeOpen(false)}
-                                    variant="outlined"
-                            >
-                                Ок
+            {isEditable
+                ? <Grid container>
+
+                    {treeOpen
+                        ? <>
+                            <Grid item xs={10} className="pt-1 pr-1">
+                                <Tree initialId={props.good.category_id}
+                                      categories={props.app.categories}
+                                      onSelected={id => props.good.category_id = +id}
+                                      finished={id => handleTree(id)}
+                                />
+                            </Grid>
+                            <Grid item xs={2}>
+                                <Button size="small" onClick={() => setTreeOpen(false)}
+                                        variant="outlined"
+                                >
+                                    Ок
+                                </Button>
+                            </Grid>
+                        </>
+                        : <Grid item xs={12}>
+                            <Button size="small" className="w-100" onClick={() => setTreeOpen(true)}>
+                                {category ? category.name : 'Выбрать...'}
                             </Button>
                         </Grid>
-                    </>
-                    : <Grid item xs={12}>
-                        <Button size="small" className="w-100" onClick={() => setTreeOpen(true)}>
-                            {category ? category.name : 'Выбрать...'}
-                        </Button>
-                    </Grid>
-                }
+                    }
 
-            </Grid>
+                </Grid>
+                : category && line('Категория:', category.name)}
 
-            {image && isEditable
+            {isShowcase && (image && isEditable
                 ? <Card className={classes.card}>
                     <CardActionArea>
                         <CardMedia
@@ -584,34 +573,11 @@ const GoodContent = props => {
                             : 'Перетащите фото, чтобы загрузить'}
                     </div>
                     <input type='file' onChange={e => reader.readAsDataURL(e.target.files[0])}/>
-                </>
-            }
+                </>)}
 
-            <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-around',
-                padding: '0 1rem',
-                // alignItems: 'center'
-            }}>
+                {line('Наименование:', model, e => setImei(e.target.value))}
 
-                <TextField label="Наименование"
-                           value={model}
-                           disabled={!isEditable}
-                           onChange={e => setModel(e.target.value)}
-                />
-
-                {props.good.imei
-                    ? <TextField label="imei"
-                                 value={imei}
-                                 disabled={!isEditable}
-                                 onChange={e => setImei(e.target.value)}
-                    />
-                    : ''}
-
-                {editableLine('Наименование', model, e => setImei(e.target.value))}
-
-                {props.good.imei && editableLine('imei', imei, e => setImei(e.target.value))}
+                {isShowcase && line('imei, S/N', imei, e => setImei(e.target.value))}
 
                 {isEditable && textWithButton('Номер заказа', orderId,
                     e => intInputHandler(e.target.value, setOrderId), () => toOrder(),
@@ -626,62 +592,60 @@ const GoodContent = props => {
                     ? toLocalTimeStr(props.good.unix)
                     : props.good.time)}
 
-                {provider && line('Поставщик: ' + provider.name,
-                    props.good.wf
-                    && props.good.wf.consignment_number && 'накладная: ' + props.good.wf.consignment_number)}
+                {provider && line('Поставщик:', provider.name)}
+
+                {props.good.wf && props.good.wf.consignment_number &&
+                    line('накладная: ', props.good.wf.consignment_number)}
 
                 {props.good.wo === 't' || line('Точка:', stock ? stock.name : null)}
 
-                {isEditable
-                    ? <UsersSelect
-                        users={props.app.users}
-                        user={responsibleId}
-                        setUser={setResponsibleId}
-                        onlyValid={true}
-                        disabled={!isEditable}
-                        label="ответственный"
-                    />
-                    : responsible && line('Ответственный:', responsible.name)
-                }
-
-                {isEditable && <TextField label="Хранение"
-                                          className={classes.field}
-                                          value={storagePlace}
-                                          onChange={e => setStoragePlace(e.target.value)}
-                />}
+                {line('Хранение', storagePlace, e => setStoragePlace(e.target.value))}
 
                 {isEditable && <IsPublicCheckBox
                     value={isPublic}
                     onChange={() => setIsPublic(!isPublic)}
                 />}
 
+                {isEditable
+                    ? <UsersSelect
+                        users={props.app.users}
+                        user={responsibleId}
+                        setUser={setResponsibleId}
+                        onlyValid
+                        classes='w-100 m-2 p-2'
+                        label="Ответственный"
+                    />
+                    : responsible && line('Ответственный:', responsible.name)}
+
                 {props.good.out_unix &&
                     line('Статус:', ui_wo + ', c ' + toLocalTimeStr(props.good.out_unix))}
 
+                {isEditable && <Fade
+                    in={!isSame && isEditable}
+                    timeout={300}
+                    style={{margin: '1rem 0'}}
+                >
+                    <Button onClick={() => save()}
+                            variant="outlined"
+                            color="secondary">
+                        Сохранить
+                    </Button>
+                </Fade>}
+
+                {!isEditable && props.good.stock_id === props.app.current_stock_id && isSale(props.good.wo)
+                    ? isReasonOpen
+                        ? textWithButton('Причина возврата', reason, e => setReason(e.target.value),
+                            () => setIsReasonOpen(!isReasonOpen), false, 'Вернуть')
+                        : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
+                                  variant="outlined"
+                                  color="secondary">
+                            Отмена продажи
+                        </Button>
+                    : null
+                }
+
             </div>
 
-            <Fade
-                in={!isSame && isEditable}
-                timeout={300}
-            >
-                <Button onClick={() => save()}
-                        variant="outlined"
-                        color="secondary">
-                    Сохранить
-                </Button>
-            </Fade>
-
-            {!isEditable && props.good.stock_id === props.app.current_stock_id && isSale(props.good.wo)
-                ? isReasonOpen
-                    ? textWithButton('Причина возврата', reason, e => setReason(e.target.value),
-                        () => setIsReasonOpen(!isReasonOpen), false, 'Вернуть')
-                    : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
-                              variant="outlined"
-                              color="secondary">
-                        Отмена продажи
-                    </Button>
-                : null
-            }
         </>
 
 }
