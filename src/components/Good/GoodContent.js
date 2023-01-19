@@ -28,13 +28,8 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import {GoodSearch} from "../common/GoodSearch";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import {groupAlias} from "../common/GroupAliases";
 
-
-const groupAlias = {
-    5: 'Телефон',
-    38: 'Ноутбук',
-    41: 'Планшет',
-}
 
 const woAlliases = {
     use: "В пользовании",
@@ -75,8 +70,9 @@ const useStyles = makeStyles((theme) => ({
 const GoodContent = props => {
 
     const [isDrag, setIsDrag] = useState(false)
-    const [image, setImage] = useState()
     const [treeOpen, setTreeOpen] = useState(false)
+
+    const [image, setImage] = useState()
     const [categoryId, setCategoryId] = useState(0)
     const [model, setModel] = useState('')
     const [imei, setImei] = useState('')
@@ -102,18 +98,22 @@ const GoodContent = props => {
 
         setIsReasonOpen(false)
 
-        if (!props.good.category_id && props.good.group) {
+        // picture
+
+        if (props.good.category_id) {
+            setCategoryId(props.good.category_id)
+        } else if (props.good.group) {
             Object.entries(groupAlias).map(([cat, groupName]) => {
                 if (props.good.group === groupName) setCategoryId(+cat)
             })
-        } else setCategoryId(props.good.category_id)
+        }
 
-        setSum(props.good.sum)
         setModel(props.good.model)
         if (props.good.imei) setImei(props.good.imei)
-        setResponsibleId(+props.good.responsible_id)
+        setSum(props.good.sum)
         setStoragePlace(props.good.storage_place)
         setIsPublic(pb)
+        setResponsibleId(+props.good.responsible_id)
 
     }, [props.good])
 
@@ -122,11 +122,10 @@ const GoodContent = props => {
     const category = props.app.categories.find(v => v.id === props.good.category_id)
     const doc = props.app.docs.find(d => d.name === 'sale_showcase')
     const stock = props.app.stocks.find(s => s.id === props.good.stock_id)
+    const responsible = props.app.users.find(u => u.id === responsibleId)
 
+    const pb = !!props.good.public || props.good.parts === 'sale'
     const isEditable = !props.good.wo && props.good.stock_id === props.app.current_stock_id
-
-    const pb = props.good.public || props.good.parts === 'sale'
-
     const isShowcase = props.good.barcode.toString().substring(0, 6) === '115104'
 
     const isSame = categoryId === props.good.category_id
@@ -170,7 +169,7 @@ const GoodContent = props => {
 
                     props.close()
 
-                    if (isShowcase) Print(doc, alias)
+                    if (isShowcase) Print(doc, props.alias)
                     else enqueueSnackbar('продано!', {variant: 'success'})
 
                 } else {
@@ -316,20 +315,6 @@ const GoodContent = props => {
 
     }
 
-    const alias = {
-        organization_organization: props.app.organization.organization,
-        organization_name: props.app.organization.name,
-        organization_legal_address: props.app.organization.legal_address,
-        organization_inn: props.app.organization.inn,
-        access_point_address: stock.address || '',
-        access_point_phone_number: stock.phone_number || '',
-        today: createDate(props.good.wo ? props.good.outtime : null),
-        model: props.good.model,
-        imei: props.good.imei,
-        sum: sum || props.good.sum,
-    }
-
-
     reader.onloadend = () => setImage(reader.result)
 
     const border = isDrag ? '3px dashed black' : '3px black'
@@ -428,8 +413,6 @@ const GoodContent = props => {
         </Button>
     </div>
 
-    const responsible = props.app.users.find(u => u.id === responsibleId)
-
     return props.isRepair
         ? <div style={{
             display: 'flex',
@@ -493,11 +476,61 @@ const GoodContent = props => {
                 padding: '0 1rem',
             }}>
 
-            {isEditable
-                ? <Grid container>
-
-                    {treeOpen
+                {isShowcase && (image && isEditable
+                    ? <Card className={classes.card}>
+                        <CardActionArea>
+                            <CardMedia
+                                component="img"
+                                alt={props.good.model}
+                                image={image}
+                            />
+                        </CardActionArea>
+                        <CardActions>
+                            <Button size="small" color="primary"
+                                    onClick={() => setImage()}>
+                                Отменить
+                            </Button>
+                            <Button size="small" color="primary"
+                                    onClick={() => upload()}>
+                                Загрузить
+                            </Button>
+                        </CardActions>
+                    </Card>
+                    : props.good.picture
                         ? <>
+                            <img
+                                src={'https://uchet.store/uploads/' + props.good.picture}
+                                alt={props.good.model}
+                                width={'100%'}
+                            />
+                            {isEditable && <Button onClick={() => console.log('Удалить')}>
+                                Удалить
+                            </Button>}
+                        </>
+                        : isEditable && <>
+                        <div style={{
+                            width: '100%',
+                            height: '100px',
+                            backgroundColor: 'lightgray',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            border
+                        }}
+                             onDragLeave={e => onDrag(e, false)}
+                             onDragOver={e => onDrag(e, true)}
+                             onDrop={e => onDrop(e)}
+                        >
+                            {isDrag
+                                ? 'Отпустите фото, чтобы загрузить'
+                                : 'Перетащите фото, чтобы загрузить'}
+                        </div>
+                        <input type='file' onChange={e => reader.readAsDataURL(e.target.files[0])}/>
+                    </>)}
+
+                {isEditable
+                    ? treeOpen
+                        ? <Grid container>
                             <Grid item xs={10} className="pt-1 pr-1">
                                 <Tree initialId={props.good.category_id}
                                       categories={props.app.categories}
@@ -512,68 +545,20 @@ const GoodContent = props => {
                                     Ок
                                 </Button>
                             </Grid>
-                        </>
-                        : <Grid item xs={12}>
-                            <Button size="small" className="w-100" onClick={() => setTreeOpen(true)}>
-                                {category ? category.name : 'Выбрать...'}
-                            </Button>
                         </Grid>
-                    }
+                        : <Grid container>
+                            <Grid item xs={3}>Категория:</Grid>
+                            <Grid item xs={9}>
+                                <Button size="small"
+                                        className="w-100"
+                                        onClick={() => setTreeOpen(true)}
+                                >
+                                    {category ? category.name : 'Выбрать...'}
+                                </Button>
+                            </Grid>
+                        </Grid>
 
-                </Grid>
-                : category && line('Категория:', category.name)}
-
-            {isShowcase && (image && isEditable
-                ? <Card className={classes.card}>
-                    <CardActionArea>
-                        <CardMedia
-                            component="img"
-                            alt={props.good.model}
-                            image={image}
-                        />
-                    </CardActionArea>
-                    <CardActions>
-                        <Button size="small" color="primary"
-                                onClick={() => setImage()}>
-                            Отменить
-                        </Button>
-                        <Button size="small" color="primary"
-                                onClick={() => upload()}>
-                            Загрузить
-                        </Button>
-                    </CardActions>
-                </Card>
-                : props.good.picture
-                    ? <>
-                        <img
-                            src={'https://uchet.store/uploads/' + props.good.picture}
-                            alt={props.good.model}
-                            width={'100%'}
-                        />
-                        {isEditable && <Button onClick={() => console.log('Удалить')}>
-                            Удалить
-                        </Button>}
-                    </>
-                    : isEditable && <>
-                    <div style={{
-                        width: '100%',
-                        height: '100px',
-                        backgroundColor: 'lightgray',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        border
-                    }}
-                         onDragLeave={e => onDrag(e, false)}
-                         onDragOver={e => onDrag(e, true)}
-                         onDrop={e => onDrop(e)}
-                    >
-                        {isDrag
-                            ? 'Отпустите фото, чтобы загрузить'
-                            : 'Перетащите фото, чтобы загрузить'}
-                    </div>
-                    <input type='file' onChange={e => reader.readAsDataURL(e.target.files[0])}/>
-                </>)}
+                    : category && line('Категория:', category.name)}
 
                 {line('Наименование:', model, e => setImei(e.target.value))}
 
@@ -617,7 +602,7 @@ const GoodContent = props => {
                     />
                     : responsible && line('Ответственный:', responsible.name)}
 
-                {props.good.out_unix &&
+                {props.good.out_unix && ui_wo &&
                     line('Статус:', ui_wo + ', c ' + toLocalTimeStr(props.good.out_unix))}
 
                 {isEditable && <Fade
@@ -635,8 +620,9 @@ const GoodContent = props => {
                 {!isEditable && props.good.stock_id === props.app.current_stock_id && isSale(props.good.wo)
                     ? isReasonOpen
                         ? textWithButton('Причина возврата', reason, e => setReason(e.target.value),
-                            () => setIsReasonOpen(!isReasonOpen), false, 'Вернуть')
+                            () => refund(), false, 'Вернуть')
                         : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
+                                  className={"m-2 p-1"}
                                   variant="outlined"
                                   color="secondary">
                             Отмена продажи

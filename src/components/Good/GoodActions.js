@@ -14,11 +14,14 @@ import {useSnackbar} from "notistack";
 
 import rest from "../Rest";
 import {PrintBarcodes} from "../common/PrintBarcodes";
+import {Print} from "../common/Print";
 
 
 const GoodActions = props => {
 
     const {enqueueSnackbar} = useSnackbar()
+
+    const doc = props.app.docs.find(d => d.name === 'sale_showcase')
 
     const goodRest = (url, method, success) => {
 
@@ -70,9 +73,6 @@ const GoodActions = props => {
         // зачислить деньги в кассу или увеличить дебиторку
 
     }
-    const checkPrintHandler = () => {
-
-    }
 
     const renderIcon = (tooltip, onClick, elem) => <Tooltip title={tooltip}>
         <IconButton onClick={onClick}>
@@ -91,7 +91,7 @@ const GoodActions = props => {
         repair: renderIcon('Починить', () => props.setIsRepair(!props.isRepair), <BuildIcon/>),
         barcode: renderIcon('Штрихкод', () => PrintBarcodes([props.good.barcode]), <LineWeightIcon/>),
         use: renderIcon("В пользование", () => use(), <DeleteIcon/>),
-        check: renderIcon('Копия чека', checkPrintHandler, <PrintIcon/>),
+        check: renderIcon("Копия чека", () => Print(doc, props.alias), <PrintIcon/>),
     }
 
     if (props.isRepair) return actions.repair

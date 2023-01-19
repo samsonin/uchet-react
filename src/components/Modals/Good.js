@@ -10,6 +10,7 @@ import {makeStyles} from "@material-ui/core/styles";
 
 import GoodActions from "../Good/GoodActions";
 import GoodContent from "../Good/GoodContent";
+import {createDate} from "../common/Print";
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -33,6 +34,21 @@ const Good = props => {
     const [isRepair, setIsRepair] = useState(false)
 
     if (!(props.good && props.good.id)) return '';
+
+    const stock = props.app.stocks.find(s => s.id === props.good.stock_id)
+
+    const alias = {
+        organization_organization: props.app.organization.organization,
+        organization_name: props.app.organization.name,
+        organization_legal_address: props.app.organization.legal_address,
+        organization_inn: props.app.organization.inn,
+        access_point_address: stock.address || '',
+        access_point_phone_number: stock.phone_number || '',
+        today: createDate(props.good.wo ? props.good.outtime : null),
+        model: props.good.model,
+        imei: props.good.imei,
+        sum: props.good.sum,
+    }
 
     const open = () => {
 
@@ -66,6 +82,8 @@ const Good = props => {
                 isRepair={isRepair}
                 setIsRepair={setIsRepair}
                 open={open}
+                close={props.close}
+                alias={alias}
             />
 
             </span>}
@@ -81,6 +99,8 @@ const Good = props => {
             good={props.good}
             isRepair={isRepair}
             setIsRepair={setIsRepair}
+            close={props.close}
+            alias={alias}
         />
 
     </Dialog>

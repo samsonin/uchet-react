@@ -22,6 +22,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import {toLocalTimeStr} from "./common/Time";
 import GoodModal from "./Modals/Good";
 import {useSnackbar} from "notistack";
+import {groupAlias} from "./common/GroupAliases";
 
 
 const oftenUsedButtons = [
@@ -52,15 +53,7 @@ const Store = props => {
     const limit = useRef(25)
 
     const {enqueueSnackbar} = useSnackbar();
-
     const sendRequest = () => {
-
-        if (!search) {
-
-            setError(true)
-            return enqueueSnackbar('Заполните поле поиска', {variant: 'error'})
-
-        }
 
         setIsRest(true)
 
@@ -77,6 +70,12 @@ const Store = props => {
             })
 
     }
+
+    useEffect(() => {
+
+        sendRequest()
+
+    }, [])
 
     useEffect(() => {
 
@@ -281,6 +280,16 @@ const Store = props => {
 
                             const checkTimeStr = toLocalTimeStr(checkTime / 1000)
 
+                            if (!g.category_id && g.group) {
+                                Object.entries(groupAlias).map(([cat, groupName]) => {
+                                    if (g.group === groupName) g.category_id = +cat
+                                })
+                            }
+
+                            const category = g.category_id
+                                ? props.app.categories.find(c => c.id === g.category_id)
+                                : null
+
                             const storage = g.wo === 't'
                                 ? TwoLineInCell('Транзит', checkTimeStr)
                                 : g.wo === 'reject'
@@ -288,6 +297,10 @@ const Store = props => {
                                     : !stock || g.stock_id === props.app.current_stock_id
                                         ? TwoLineInCell(g.storage_place, checkTimeStr)
                                         : TwoLineInCell(stock.name, g.storage_place || checkTimeStr)
+
+                            let description
+                            if (category) description = category.name
+                            if (g.imei) description = description + ', ' + g.imei
 
                             const opacity = g.wo === 't' || props.app.current_stock_id !== g.stock_id
                                 ? '50%'
@@ -304,7 +317,7 @@ const Store = props => {
                                     {g.id}
                                 </TableCell>
                                 <TableCell style={{color}}>
-                                    {TwoLineInCell(g.model, g.group + ' ' + g.imei)}
+                                    {TwoLineInCell(g.model, description)}
                                 </TableCell>
                                 <TableCell style={{color}}>
                                     {TwoLineInCell(g.sum, g.remcost || g.cost)}
