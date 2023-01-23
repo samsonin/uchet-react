@@ -142,15 +142,11 @@ const DailyModal = props => {
             return enqueueSnackbar('другая точка', {variant: 'error'})
         }
 
-        if (isZp && !employee) {
-            return enqueueSnackbar('не указан получатель зарплаты',
+        if (isZp && !employee) return enqueueSnackbar('не указан получатель зарплаты',
                 {variant: 'error'})
-        }
 
-        if (!+sum) {
-            return enqueueSnackbar('сумма должна отличатся от нуля',
-                {variant: 'error'})
-        }
+        if (!+sum) return enqueueSnackbar('сумма должна отличатся от нуля',
+            {variant: 'error'})
 
         let url = (props.type === 'Подотчеты'
             ? 'imprest'

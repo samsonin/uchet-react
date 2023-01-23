@@ -97,6 +97,7 @@ const Good = props => {
 
         <GoodContent
             good={props.good}
+            setGood={props.setGood}
             isRepair={isRepair}
             setIsRepair={setIsRepair}
             close={props.close}

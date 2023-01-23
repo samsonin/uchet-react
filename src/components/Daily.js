@@ -91,7 +91,8 @@ const Daily = props => {
         .filter(su => su.user_id === props.auth.user_id)
         .map(su => su.stock_id)
 
-    const validStocks = props.app.stocks.filter(s => validStockIds.includes(s.id))
+    const validStocks = props.app.stocks
+        .filter(s => [2, 4].includes(props.auth.user_id) || validStockIds.includes(s.id))
 
     const setInRange = date => date > today
         ? today

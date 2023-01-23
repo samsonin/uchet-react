@@ -11,7 +11,7 @@ import {
     Fade,
     TextField,
     List,
-    ListSubheader, ListItem, ListItemText
+    ListSubheader, ListItem, ListItemText, TextareaAutosize, Typography
 } from "@material-ui/core";
 
 import Tree from "../Tree";
@@ -21,7 +21,7 @@ import UsersSelect from "../common/UsersSelect";
 import IsPublicCheckBox from "../common/IsPublicCheckBox";
 import rest from "../Rest";
 import {makeStyles} from "@material-ui/core/styles";
-import {createDate, Print} from "../common/Print";
+import {Print} from "../common/Print";
 import {useSnackbar} from "notistack";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -50,7 +50,9 @@ const aliases = {
     sum: 'sum',
     responsibleId: 'responsible_id',
     storagePlace: 'storage_place',
-    isPublic: 'public'
+    isPublic: 'public',
+    privateNote: 'private_note',
+    publicNote: 'public_note',
 }
 
 const reader = new FileReader()
@@ -81,6 +83,8 @@ const GoodContent = props => {
     const [storagePlace, setStoragePlace] = useState('')
     const [isPublic, setIsPublic] = useState(true)
     const [responsibleId, setResponsibleId] = useState(0)
+    const [privateNote, setPrivateNote] = useState()
+    const [publicNote, setPublicNote] = useState()
 
     const [repairSum, setRepairSum] = useState(0)
     const [goodsForRepair, setGoodsForRepair] = useState([])
@@ -114,6 +118,8 @@ const GoodContent = props => {
         setStoragePlace(props.good.storage_place)
         setIsPublic(pb)
         setResponsibleId(+props.good.responsible_id)
+        if (props.good.private_note) setPrivateNote(props.good.private_note)
+        if (props.good.public_note) setPublicNote(props.good.public_note)
 
     }, [props.good])
 
@@ -387,9 +393,19 @@ const GoodContent = props => {
             <span style={{width: '40%',}}>{label}</span>
 
             {isEd
-                ? <TextField fullWidth value={value} onChange={onChange}/>
+                ? <TextField fullWidth value={value || ''} onChange={onChange}/>
                 : <span style={{fontWeight: 'bold'}}>{value}</span>}
 
+        </div>
+    }
+
+    const note = (label, value, onChange) => {
+
+        if (!isEditable && !value) return null
+
+        return <div style={{padding: '1rem 0'}}>
+            {label}
+            <TextareaAutosize style={{width: '100%'}} value={value || ''} onChange={onChange}/>
         </div>
     }
 
@@ -530,7 +546,7 @@ const GoodContent = props => {
 
                 {isEditable
                     ? treeOpen
-                        ? <Grid container>
+                        ? <Grid container className="m-1 p-1">
                             <Grid item xs={10} className="pt-1 pr-1">
                                 <Tree initialId={props.good.category_id}
                                       categories={props.app.categories}
@@ -546,7 +562,7 @@ const GoodContent = props => {
                                 </Button>
                             </Grid>
                         </Grid>
-                        : <Grid container>
+                        : <Grid container className="m-1 p-1">
                             <Grid item xs={3}>Категория:</Grid>
                             <Grid item xs={9}>
                                 <Button size="small"
@@ -557,7 +573,6 @@ const GoodContent = props => {
                                 </Button>
                             </Grid>
                         </Grid>
-
                     : category && line('Категория:', category.name)}
 
                 {line('Наименование:', model, e => setImei(e.target.value))}
@@ -584,12 +599,16 @@ const GoodContent = props => {
 
                 {props.good.wo === 't' || line('Точка:', stock ? stock.name : null)}
 
-                {line('Хранение', storagePlace, e => setStoragePlace(e.target.value))}
+                {!props.good.wo && line('Хранение', storagePlace, e => setStoragePlace(e.target.value))}
 
-                {isEditable && <IsPublicCheckBox
+                {isEditable && (!isPublic || props.auth.admin) && <IsPublicCheckBox
                     value={isPublic}
                     onChange={() => setIsPublic(!isPublic)}
                 />}
+
+                {note('Информация для сотрудников:', privateNote, e => setPrivateNote(e.target.value))}
+
+                {note('Информация для покупателей:', publicNote, e => setPublicNote(e.target.value))}
 
                 {isEditable
                     ? <UsersSelect
