@@ -118,8 +118,8 @@ const GoodContent = props => {
         setStoragePlace(props.good.storage_place)
         setIsPublic(pb)
         setResponsibleId(+props.good.responsible_id)
-        if (props.good.private_note) setPrivateNote(props.good.private_note)
-        if (props.good.public_note) setPublicNote(props.good.public_note)
+        setPrivateNote(props.good.private_note)
+        setPublicNote(props.good.public_note)
 
     }, [props.good])
 
@@ -141,6 +141,8 @@ const GoodContent = props => {
         && responsibleId === +props.good.responsible_id
         && storagePlace === props.good.storage_place
         && isPublic === (pb)
+        && privateNote === props.good.private_note
+        && publicNote === props.good.public_note
 
     const toOrder = () => {
 
@@ -575,7 +577,7 @@ const GoodContent = props => {
                         </Grid>
                     : category && line('Категория:', category.name)}
 
-                {line('Наименование:', model, e => setImei(e.target.value))}
+                {line('Наименование:', model, e => setModel(e.target.value))}
 
                 {isShowcase && line('imei, S/N', imei, e => setImei(e.target.value))}
 
