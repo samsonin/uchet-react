@@ -68,6 +68,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+let file
 
 const GoodContent = props => {
 
@@ -75,6 +76,7 @@ const GoodContent = props => {
     const [treeOpen, setTreeOpen] = useState(false)
 
     const [image, setImage] = useState()
+    const [picture, setPicture] = useState()
     const [categoryId, setCategoryId] = useState(0)
     const [model, setModel] = useState('')
     const [imei, setImei] = useState('')
@@ -102,7 +104,7 @@ const GoodContent = props => {
 
         setIsReasonOpen(false)
 
-        // picture
+        if (props.good.picture) setPicture(props.good.picture)
 
         if (props.good.category_id) {
             setCategoryId(props.good.category_id)
@@ -310,9 +312,9 @@ const GoodContent = props => {
 
         e.preventDefault()
 
-        const file = e.dataTransfer.files[0]
+        file = e.dataTransfer.files[0]
 
-        rest('goods/' + props.good.barcode, 'POST', {file})
+        reader.readAsDataURL(file)
 
         setIsDrag(false)
 
@@ -320,6 +322,16 @@ const GoodContent = props => {
 
     const upload = () => {
 
+        console.log(file)
+
+        const formData = new FormData()
+        // formData.append(file.name, file)
+        formData.append('image', file)
+
+        rest('goods/picture/' + props.good.barcode, 'POST', file, true)
+            .then(res => {
+
+            })
 
     }
 
@@ -431,6 +443,13 @@ const GoodContent = props => {
         </Button>
     </div>
 
+    const pictureRender = () => <img
+        src={'https://uchet.store/uploads/' + props.good.picture}
+        alt={props.good.model}
+        width={'100%'}
+        onError={() => setPicture()}
+    />
+
     return props.isRepair
         ? <div style={{
             display: 'flex',
@@ -485,16 +504,15 @@ const GoodContent = props => {
             </Button>
 
         </div>
-        : <>
+        : <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-around',
+            padding: '0 1rem',
+        }}>
 
-            <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-around',
-                padding: '0 1rem',
-            }}>
-
-                {isShowcase && (image && isEditable
+            {isEditable
+                ? image
                     ? <Card className={classes.card}>
                         <CardActionArea>
                             <CardMedia
@@ -506,7 +524,7 @@ const GoodContent = props => {
                         <CardActions>
                             <Button size="small" color="primary"
                                     onClick={() => setImage()}>
-                                Отменить
+                                Удалить
                             </Button>
                             <Button size="small" color="primary"
                                     onClick={() => upload()}>
@@ -514,146 +532,142 @@ const GoodContent = props => {
                             </Button>
                         </CardActions>
                     </Card>
-                    : props.good.picture
+                    : picture
                         ? <>
-                            <img
-                                src={'https://uchet.store/uploads/' + props.good.picture}
-                                alt={props.good.model}
-                                width={'100%'}
-                            />
-                            {isEditable && <Button onClick={() => console.log('Удалить')}>
+                            {pictureRender()}
+                            <Button size="small" color="primary"
+                                    onClick={() => setPicture()}>
                                 Удалить
-                            </Button>}
+                            </Button>
                         </>
-                        : isEditable && <>
-                        <div style={{
-                            width: '100%',
-                            height: '100px',
-                            backgroundColor: 'lightgray',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            border
-                        }}
-                             onDragLeave={e => onDrag(e, false)}
-                             onDragOver={e => onDrag(e, true)}
-                             onDrop={e => onDrop(e)}
-                        >
-                            {isDrag
-                                ? 'Отпустите фото, чтобы загрузить'
-                                : 'Перетащите фото, чтобы загрузить'}
-                        </div>
-                        <input type='file' onChange={e => reader.readAsDataURL(e.target.files[0])}/>
-                    </>)}
+                        : <>
+                            <div style={{
+                                width: '100%',
+                                height: '100px',
+                                backgroundColor: 'lightgray',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                border
+                            }}
+                                 onDragLeave={e => onDrag(e, false)}
+                                 onDragOver={e => onDrag(e, true)}
+                                 onDrop={e => onDrop(e)}
+                            >
+                                {isDrag
+                                    ? 'Отпустите фото, чтобы загрузить'
+                                    : 'Перетащите фото, чтобы загрузить'}
+                            </div>
+                            <input type='file' onChange={e => reader.readAsDataURL(e.target.files[0])}/>
+                        </>
+                : picture && pictureRender()}
 
-                {isEditable
-                    ? treeOpen
-                        ? <Grid container className="m-1 p-1">
-                            <Grid item xs={10} className="pt-1 pr-1">
-                                <Tree initialId={props.good.category_id}
-                                      categories={props.app.categories}
-                                      onSelected={id => props.good.category_id = +id}
-                                      finished={id => handleTree(id)}
-                                />
-                            </Grid>
-                            <Grid item xs={2}>
-                                <Button size="small" onClick={() => setTreeOpen(false)}
-                                        variant="outlined"
-                                >
-                                    Ок
-                                </Button>
-                            </Grid>
+            {isEditable
+                ? treeOpen
+                    ? <Grid container className="m-1 p-1">
+                        <Grid item xs={10} className="pt-1 pr-1">
+                            <Tree initialId={props.good.category_id}
+                                  categories={props.app.categories}
+                                  onSelected={id => props.good.category_id = +id}
+                                  finished={id => handleTree(id)}
+                            />
                         </Grid>
-                        : <Grid container className="m-1 p-1">
-                            <Grid item xs={3}>Категория:</Grid>
-                            <Grid item xs={9}>
-                                <Button size="small"
-                                        className="w-100"
-                                        onClick={() => setTreeOpen(true)}
-                                >
-                                    {category ? category.name : 'Выбрать...'}
-                                </Button>
-                            </Grid>
+                        <Grid item xs={2}>
+                            <Button size="small" onClick={() => setTreeOpen(false)}
+                                    variant="outlined"
+                            >
+                                Ок
+                            </Button>
                         </Grid>
-                    : category && line('Категория:', category.name)}
+                    </Grid>
+                    : <Grid container className="m-1 p-1">
+                        <Grid item xs={3}>Категория:</Grid>
+                        <Grid item xs={9}>
+                            <Button size="small"
+                                    className="w-100"
+                                    onClick={() => setTreeOpen(true)}
+                            >
+                                {category ? category.name : 'Выбрать...'}
+                            </Button>
+                        </Grid>
+                    </Grid>
+                : category && line('Категория:', category.name)}
 
-                {line('Наименование:', model, e => setModel(e.target.value))}
+            {line('Наименование:', model, e => setModel(e.target.value))}
 
-                {isShowcase && line('imei, S/N', imei, e => setImei(e.target.value))}
+            {isShowcase && line('imei, S/N', imei, e => setImei(e.target.value))}
 
-                {isEditable && textWithButton('Номер заказа', orderId,
-                    e => intInputHandler(e.target.value, setOrderId), () => toOrder(),
-                    true, 'Внести в заказ')}
+            {isEditable && textWithButton('Номер заказа', orderId,
+                e => intInputHandler(e.target.value, setOrderId), () => toOrder(),
+                true, 'Внести в заказ')}
 
-                {isEditable && textWithButton('Цена', sum, e => intInputHandler(e.target.value, setSum),
-                    () => toSale(), true, 'Продать')}
+            {isEditable && textWithButton('Цена', sum, e => intInputHandler(e.target.value, setSum),
+                () => toSale(), true, 'Продать')}
 
-                {line("Себестоимость:", props.good.remcost ?? props.good.cost ?? 0)}
+            {line("Себестоимость:", props.good.remcost ?? props.good.cost ?? 0)}
 
-                {line("Время оприходования:", props.good.unix
-                    ? toLocalTimeStr(props.good.unix)
-                    : props.good.time)}
+            {line("Время оприходования:", props.good.unix
+                ? toLocalTimeStr(props.good.unix)
+                : props.good.time)}
 
-                {provider && line('Поставщик:', provider.name)}
+            {provider && line('Поставщик:', provider.name)}
 
-                {props.good.wf && props.good.wf.consignment_number &&
-                    line('накладная: ', props.good.wf.consignment_number)}
+            {props.good.wf && props.good.wf.consignment_number &&
+                line('накладная: ', props.good.wf.consignment_number)}
 
-                {props.good.wo === 't' || line('Точка:', stock ? stock.name : null)}
+            {props.good.wo === 't' || line('Точка:', stock ? stock.name : null)}
 
-                {!props.good.wo && line('Хранение', storagePlace, e => setStoragePlace(e.target.value))}
+            {!props.good.wo && line('Хранение', storagePlace, e => setStoragePlace(e.target.value))}
 
-                {isEditable && (!isPublic || props.auth.admin) && <IsPublicCheckBox
-                    value={isPublic}
-                    onChange={() => setIsPublic(!isPublic)}
-                />}
+            {isEditable && (!isPublic || props.auth.admin) && <IsPublicCheckBox
+                value={isPublic}
+                onChange={() => setIsPublic(!isPublic)}
+            />}
 
-                {note('Информация для сотрудников:', privateNote, e => setPrivateNote(e.target.value))}
+            {note('Информация для сотрудников:', privateNote, e => setPrivateNote(e.target.value))}
 
-                {note('Информация для покупателей:', publicNote, e => setPublicNote(e.target.value))}
+            {note('Информация для покупателей:', publicNote, e => setPublicNote(e.target.value))}
 
-                {isEditable
-                    ? <UsersSelect
-                        users={props.app.users}
-                        user={responsibleId}
-                        setUser={setResponsibleId}
-                        onlyValid
-                        classes='w-100 m-2 p-2'
-                        label="Ответственный"
-                    />
-                    : responsible && line('Ответственный:', responsible.name)}
+            {isEditable
+                ? <UsersSelect
+                    users={props.app.users}
+                    user={responsibleId}
+                    setUser={setResponsibleId}
+                    onlyValid
+                    classes='w-100 m-2 p-2'
+                    label="Ответственный"
+                />
+                : responsible && line('Ответственный:', responsible.name)}
 
-                {props.good.out_unix && ui_wo &&
-                    line('Статус:', ui_wo + ', c ' + toLocalTimeStr(props.good.out_unix))}
+            {props.good.out_unix && ui_wo &&
+                line('Статус:', ui_wo + ', c ' + toLocalTimeStr(props.good.out_unix))}
 
-                {isEditable && <Fade
-                    in={!isSame && isEditable}
-                    timeout={300}
-                    style={{margin: '1rem 0'}}
-                >
-                    <Button onClick={() => save()}
-                            variant="outlined"
-                            color="secondary">
-                        Сохранить
+            {isEditable && <Fade
+                in={!isSame && isEditable}
+                timeout={300}
+                style={{margin: '1rem 0'}}
+            >
+                <Button onClick={() => save()}
+                        variant="outlined"
+                        color="secondary">
+                    Сохранить
+                </Button>
+            </Fade>}
+
+            {!isEditable && props.good.stock_id === props.app.current_stock_id && isSale(props.good.wo)
+                ? isReasonOpen
+                    ? textWithButton('Причина возврата', reason, e => setReason(e.target.value),
+                        () => refund(), false, 'Вернуть')
+                    : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
+                              className={"m-2 p-1"}
+                              variant="outlined"
+                              color="secondary">
+                        Отмена продажи
                     </Button>
-                </Fade>}
+                : null
+            }
 
-                {!isEditable && props.good.stock_id === props.app.current_stock_id && isSale(props.good.wo)
-                    ? isReasonOpen
-                        ? textWithButton('Причина возврата', reason, e => setReason(e.target.value),
-                            () => refund(), false, 'Вернуть')
-                        : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
-                                  className={"m-2 p-1"}
-                                  variant="outlined"
-                                  color="secondary">
-                            Отмена продажи
-                        </Button>
-                    : null
-                }
-
-            </div>
-
-        </>
+        </div>
 
 }
 

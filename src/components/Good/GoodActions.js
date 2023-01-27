@@ -114,7 +114,7 @@ const GoodActions = props => {
     return props.good.wo
         ? props.good.wo.indexOf('sale') > -1 && actions.check
         : props.good.stock_id === props.app.current_stock_id && <>
-        {actions.open}
+        {typeof(props.open === 'function') && actions.open}
         {canPrintBarcode && actions.barcode}
         {actions.transit}
         {actions.reject}

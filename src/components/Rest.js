@@ -4,7 +4,7 @@ import store from '../store'
 
 let response = {};
 
-export default function fetchPost(url, method = 'GET', data = '') {
+export default function fetchPost(url, method = 'GET', data = '', isFile = false) {
 
     let auth = JSON.parse(window.localStorage.getItem('auth'));
 
@@ -24,7 +24,20 @@ export default function fetchPost(url, method = 'GET', data = '') {
             'Authorization': 'Bearer ' + jwt
         },
     }
-    if (data) init.body = JSON.stringify(data);
+
+    if (data) {
+
+        if (isFile) {
+            init.headers["Content-Type"] = false
+            init.enctype="multipart/form-data"
+            console.log('isFile')
+        }
+
+        init.body = isFile
+            ? data
+            : JSON.stringify(data)
+
+    }
 
     let server = !jwt || JSON.parse(window.localStorage.getItem('auth')).organization_id > 1000
         ? NEW_SERVER
@@ -68,6 +81,9 @@ export default function fetchPost(url, method = 'GET', data = '') {
             return res
         })
         .catch(error => {
+
+            console.log(error)
+
             if (!response.ok) response.error = error;
             return response;
         })
