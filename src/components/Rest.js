@@ -28,14 +28,16 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
     if (data) {
 
         if (isFile) {
-            init.headers["Content-Type"] = false
+            delete(init.headers["Content-Type"])
             init.enctype="multipart/form-data"
-            console.log('isFile')
-        }
 
-        init.body = isFile
-            ? data
-            : JSON.stringify(data)
+            const fd = new FormData()
+            fd.append('image', data)
+
+            init.body = fd
+        } else {
+            init.body = JSON.stringify(data)
+        }
 
     }
 

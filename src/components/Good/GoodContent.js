@@ -322,16 +322,25 @@ const GoodContent = props => {
 
     const upload = () => {
 
-        console.log(file)
+        console.log(file.type)
 
-        const formData = new FormData()
-        // formData.append(file.name, file)
-        formData.append('image', file)
+        if (file.size > 500000) return enqueueSnackbar('файл не должен превышеть 500Kb', {variant: 'error'})
 
-        rest('goods/picture/' + props.good.barcode, 'POST', file, true)
-            .then(res => {
+        if (!['image/gif', 'image/jpeg'].includes(file.type)) {
+            return enqueueSnackbar('тип файла должен быть jpg или gif')
+        }
 
-            })
+        // rest('goods/picture/' + props.good.barcode, 'POST', file, true)
+        //     .then(res => {
+        //
+        //         if (res.status === 200) {
+        //             file = null
+        //             if (res.body.good) props.setGood(res.body.good)
+        //         } else {
+        //             enqueueSnackbar('ошибка ' + res.status, {variant: 'error'})
+        //         }
+        //
+        //     })
 
     }
 
