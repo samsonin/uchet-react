@@ -61,14 +61,18 @@ function yandex(org_id, month, cost) {
 
     if (dollar === 0) return;
 
-    document.getElementById('paymentTargets').value = "Продление подписки в Uchet.store на " +
-        (subscribes.find(v => v.month === month).monthText)
-    document.getElementById('subscribeLabel').value = btoa(JSON.stringify({
-        org_id,
-        action: 'addSubscribe'
-    }))
+    document.getElementById('paymentTargets')
+        .value = "Продление подписки в Uchet.store на " + (subscribes.find(v => v.month === month).monthText)
+    document.getElementById('subscribeLabel')
+        .value = btoa(JSON.stringify({org_id, action: 'addSubscribe'}))
     document.getElementById('subscribeSum').value = month * cost * dollar
     document.getElementById('subscribeForm').submit();
+
+    const form = document.createElement('form');
+    form.action="https://yoomoney.ru/quickpay/confirm.xml"
+    form.method="POST"
+
+
 
 }
 
