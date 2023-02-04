@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {createElement} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -61,18 +61,37 @@ function yandex(org_id, month, cost) {
 
     if (dollar === 0) return;
 
-    document.getElementById('paymentTargets')
-        .value = "Продление подписки в Uchet.store на " + (subscribes.find(v => v.month === month).monthText)
-    document.getElementById('subscribeLabel')
-        .value = btoa(JSON.stringify({org_id, action: 'addSubscribe'}))
-    document.getElementById('subscribeSum').value = month * cost * dollar
-    document.getElementById('subscribeForm').submit();
+    const form = document.createElement('form')
+    form.action = "https://yoomoney.ru/quickpay/confirm.xml"
+    form.method = "POST"
 
-    const form = document.createElement('form');
-    form.action="https://yoomoney.ru/quickpay/confirm.xml"
-    form.method="POST"
+    const subscribe = subscribes.find(v => v.month === month)
 
+    if (!subscribe) return
 
+    const inputs = [
+        {name: "receiver", value: "410012390556672"},
+        {name: "quickpay-form", value: "shop"},
+        {name: "successURL", value: "https://uchet.store"},
+        {name: "targets", value: "Продление подписки в Uchet.store на " + subscribe.monthText},
+        {name: "paymentType", value: "AC"},
+        {name: "label", value: btoa(JSON.stringify({org_id, action: 'addSubscribe'}))},
+        {name: "sum", value: month * cost * dollar}
+    ]
+
+    inputs.map(i => {
+
+        const input = document.createElement('input')
+        input.type = "hidden"
+        input.name = i.name
+        input.value = i.value
+
+        form.append(input)
+
+    })
+
+    document.body.append(form)
+    form.submit()
 
 }
 
@@ -118,16 +137,6 @@ const Subscribe = ({organization_id}) => {
                         </CardActions>
                     </Paper>
                 </Grid>)}
-
-                <form id="subscribeForm" method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
-                    <input type="hidden" name="receiver" value="410012390556672"/>
-                    <input type="hidden" name="quickpay-form" value="shop"/>
-                    <input type="hidden" name="successURL" value="https://uchet.store"/>
-                    <input id="paymentTargets" type="hidden" name="targets"/>
-                    <input id="paymentType" type="hidden" name="paymentType" value="AC"/>
-                    <input id="subscribeLabel" type="hidden" name="label" value=""/>
-                    <input id="subscribeSum" type="hidden" name="sum" value=""/>
-                </form>
 
             </Grid>
 
