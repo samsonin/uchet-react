@@ -322,29 +322,34 @@ const GoodContent = props => {
 
     const upload = () => {
 
-        console.log(file.type)
-
         if (file.size > 500000) return enqueueSnackbar('файл не должен превышеть 500Kb', {variant: 'error'})
 
         if (!['image/gif', 'image/jpeg'].includes(file.type)) {
-            return enqueueSnackbar('тип файла должен быть jpg или gif')
+            return enqueueSnackbar('тип файла должен быть jpg или gif', {variant: 'error'})
         }
 
-        // rest('goods/picture/' + props.good.barcode, 'POST', file, true)
-        //     .then(res => {
-        //
-        //         if (res.status === 200) {
-        //             file = null
-        //             if (res.body.good) props.setGood(res.body.good)
-        //         } else {
-        //             enqueueSnackbar('ошибка ' + res.status, {variant: 'error'})
-        //         }
-        //
-        //     })
+        rest('goods/picture/' + props.good.barcode, 'POST', file, true)
+            .then(res => {
+
+                if (res.status === 200) {
+                    file = null
+                    if (res.body.good) {
+
+                        setImage()
+                        props.setGood(res.body.good)
+
+                    }
+                } else {
+                    enqueueSnackbar('ошибка ' + res.status, {variant: 'error'})
+                }
+
+            })
 
     }
 
-    reader.onloadend = () => setImage(reader.result)
+    reader.onloadend = () => {
+        setImage(reader.result)
+    }
 
     const border = isDrag ? '3px dashed black' : '3px black'
 
@@ -398,6 +403,11 @@ const GoodContent = props => {
 
         }
 
+    }
+
+    const onManualSelect = f => {
+        file = f
+        reader.readAsDataURL(f)
     }
 
     const line = (label, value, onChange) => {
@@ -457,6 +467,7 @@ const GoodContent = props => {
         alt={props.good.model}
         width={'100%'}
         onError={() => setPicture()}
+        onChange={() => {console.log('onChange')}}
     />
 
     return props.isRepair
@@ -567,7 +578,7 @@ const GoodContent = props => {
                                     ? 'Отпустите фото, чтобы загрузить'
                                     : 'Перетащите фото, чтобы загрузить'}
                             </div>
-                            <input type='file' onChange={e => reader.readAsDataURL(e.target.files[0])}/>
+                            <input type='file' onChange={e => onManualSelect(e.target.files[0])}/>
                         </>
                 : picture && pictureRender()}
 
