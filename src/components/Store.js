@@ -4,7 +4,7 @@ import {
     Button,
     Checkbox, FormControlLabel,
     IconButton,
-    InputAdornment,
+    InputAdornment, LinearProgress,
     Table,
     TableBody,
     TableCell,
@@ -21,7 +21,6 @@ import TwoLineInCell from "./common/TwoLineInCell";
 import SearchIcon from "@material-ui/icons/Search";
 import {toLocalTimeStr} from "./common/Time";
 import GoodModal from "./Modals/Good";
-import {useSnackbar} from "notistack";
 import {groupAlias} from "./common/GroupAliases";
 
 
@@ -44,32 +43,57 @@ const Store = props => {
     const [good, setGood] = useState({})
     const [catId, setCatId] = useState(0)
     const [isExpand, setIsExpand] = useState(false)
-    const [isRest, setIsRest] = useState(false)
     const [error, setError] = useState(false)
     const [search, setSearch] = useState('')
     const [isMyStock, setIsMyStock] = useState(false)
     const [isPublic, setIsPublic] = useState(false)
 
     const limit = useRef(25)
+    const isRequest = useRef(false)
 
-    const {enqueueSnackbar} = useSnackbar();
+    const currentStock = props.app.stocks.find(s => s.id === props.app.current_stock_id)
+
     const sendRequest = () => {
 
-        setIsRest(true)
+        if (isRequest.current) return
+        isRequest.current = true
 
         let url = 'goods?'
         if (catId) url += '&category_id=' + catId
         if (search) url += '&search=' + search
+        if (isMyStock && currentStock) url += '&stock_id=' + currentStock.id
+        if (isPublic) url += '&is_public=1'
 
         if (limit.current > 25) url += '&limit=' + limit.current
 
         rest(url)
             .then(res => {
-                setIsRest(false)
-                if (res.status === 200) setGoods(res.body)
+                isRequest.current = false
+                if (res.status === 200) {
+
+                    if (goods.length === res.body.length) limit.current = 0
+
+                    setGoods(res.body)
+
+                }
             })
 
     }
+
+    useEffect(() => {
+
+        if (props.scrollDown) {
+
+            props.setScrollDown(false)
+
+            if (limit.current > 0) {
+                limit.current += 25
+                sendRequest()
+            }
+
+        }
+
+    }, [props.scrollDown])
 
     useEffect(() => {
 
@@ -132,13 +156,6 @@ const Store = props => {
 
     }
 
-    const more = () => {
-
-        limit.current += 25
-        sendRequest()
-
-    }
-
     const searchHandle = v => {
 
         setError(false)
@@ -148,8 +165,6 @@ const Store = props => {
     }
 
     const hide = id => console.log(id)
-
-    const currentStock = props.app.stocks.find(s => s.id === props.app.current_stock_id)
 
     return <>
 
@@ -186,7 +201,7 @@ const Store = props => {
         <div style={style}>
 
             <TextField
-                disabled={isRest}
+                disabled={isRequest.current}
                 error={error}
                 autoFocus
                 InputProps={{
@@ -201,7 +216,7 @@ const Store = props => {
             />
 
             <Button onClick={find}
-                    disabled={isRest}
+                    disabled={isRequest.current}
             >
                 Найти
             </Button>
@@ -210,15 +225,13 @@ const Store = props => {
 
         <div style={style}>
 
-            {currentStock && <FormControlLabel control={<Checkbox checked={isMyStock}
-                                                                  onChange={() => setIsMyStock(!isMyStock)}
-            />}
+            {currentStock && <FormControlLabel control={
+                <Checkbox checked={isMyStock} onChange={() => setIsMyStock(!isMyStock)}/>}
                                                label={"только " + currentStock.name}
             />}
 
-            <FormControlLabel control={<Checkbox checked={isPublic}
-                                                 onChange={() => setIsPublic(!isPublic)}
-            />}
+            <FormControlLabel control={
+                <Checkbox checked={isPublic} onChange={() => setIsPublic(!isPublic)}/>}
                               label={"только опубликованные"}
             />
 
@@ -238,13 +251,15 @@ const Store = props => {
                 </TableHead>
                 <TableBody>
                     {goods
-                        .filter(s => !isPublic || s.public)
+                        .filter(s => !isPublic || s.public || s.parts === 'sale')
                         .filter(s => !isMyStock || s.stock_id === currentStock.id)
                         .filter(s => {
 
                             if (!search || s.sum == search || s.id == search) return true
 
                             const model = s.model.toLowerCase()
+
+                            const imei = s.imei && s.imei.toLowerCase()
 
                             let r = true
 
@@ -253,7 +268,9 @@ const Store = props => {
                                 .map(s => {
 
                                     if (model.indexOf(s) < 0) {
-                                        r = false
+
+                                        r = imei && imei.indexOf(s) > -1
+
                                     }
 
                                 })
@@ -300,7 +317,9 @@ const Store = props => {
 
                             let description
                             if (category) description = category.name
-                            if (g.imei) description = description + ', ' + g.imei
+                            if (g.imei) description = description
+                                ? description + ', ' + g.imei
+                                : g.imei
 
                             const opacity = g.wo === 't' || props.app.current_stock_id !== g.stock_id
                                 ? '50%'
@@ -328,17 +347,12 @@ const Store = props => {
                             </TableRow>
                         })}
 
-                    {goods.length > 24 && <TableRow>
+                    {isRequest.current && <TableRow>
                         <TableCell colSpan={4}>
-                            <Button className="w-100"
-                                    disabled={isRest}
-                                    size="small"
-                                    onClick={more}
-                            >
-                                Показать еще
-                            </Button>
+                            <LinearProgress/>
                         </TableCell>
                     </TableRow>}
+
                 </TableBody>
             </Table>
             : 'Нет данных'}

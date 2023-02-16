@@ -73,6 +73,7 @@ const App = props => {
     // const [ourBarcode, setOurBarcode] = useState('115104006049')
     const [globalBarcode, setGlobalBarcode] = useState()
     const [enterPress, setEnterPress] = useState(false)
+    const [scrollDown, setScrollDown] = useState(false)
 
     const barcode = useRef('')
 
@@ -97,6 +98,16 @@ const App = props => {
     useEffect(() => {
 
         document.addEventListener('keydown', handleKeyPress)
+
+        window.addEventListener("scroll",  () => {
+
+            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+
+                setScrollDown(true)
+
+            }
+
+        }, false);
 
         window.location.search
             .replace('?', '')
@@ -266,6 +277,8 @@ const App = props => {
                             <Route path="/store" render={props => <Store
                                 enterPress={enterPress}
                                 setEnterPress={setEnterPress}
+                                scrollDown={scrollDown}
+                                setScrollDown={setScrollDown}
                                 {...props}
                             />}/>
 
