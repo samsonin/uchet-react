@@ -69,13 +69,6 @@ const Good = props => {
 
         <DialogTitle>
 
-            {'#' + props.good.id}
-
-            {<span style={{
-                position: "absolute",
-                right: "50px"
-            }}>
-
             <GoodActions
                 good={props.good}
                 setGood={props.setGood}
@@ -85,8 +78,6 @@ const Good = props => {
                 close={props.close}
                 alias={alias}
             />
-
-            </span>}
 
             <IconButton aria-label="close" className={classes.closeButton}
                         onClick={() => props.close()}>

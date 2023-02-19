@@ -29,6 +29,7 @@ import {GoodSearch} from "../common/GoodSearch";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import {groupAlias} from "../common/GroupAliases";
+import GoodsTable from "../common/CostsTable";
 
 
 const woAlliases = {
@@ -483,22 +484,7 @@ const GoodContent = props => {
 
             {line('Выполненная работа:', repairJob, e => setRepairJob(e.target.value))}
 
-            {goodsForRepair && !!goodsForRepair.length && <List subheader={
-                <ListSubheader component="div" id="nested-list-subheader">
-                    Список используемых запчастей:
-                </ListSubheader>
-            }>
-                {goodsForRepair.map(g => <ListItem
-                    key={'listitemkeyingoodmodalsforrepair' + g.barcode}
-                >
-                    <ListItemText primary={g.model} secondary={g.remcost}/>
-                    <IconButton
-                        onClick={() => remove(g.barcode)}
-                    >
-                        <DeleteIcon/>
-                    </IconButton>
-                </ListItem>)}
-            </List>}
+            <GoodsTable delGood={remove} goods={goodsForRepair} providers={props.app.providers} />
 
             <GoodSearch onSelected={onSelected}/>
 

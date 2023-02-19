@@ -22,7 +22,8 @@ import SearchIcon from "@material-ui/icons/Search";
 import {toLocalTimeStr} from "./common/Time";
 import GoodModal from "./Modals/Good";
 import {groupAlias} from "./common/GroupAliases";
-
+import AddCircleIcon from "@material-ui/icons/AddCircle";
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 
 const oftenUsedButtons = [
     {label: 'Аксессуары', catId: 6},
@@ -47,6 +48,7 @@ const Store = props => {
     const [search, setSearch] = useState('')
     const [isMyStock, setIsMyStock] = useState(false)
     const [isPublic, setIsPublic] = useState(false)
+    const [showButtons, setShowButtons] = useState(false)
 
     const limit = useRef(25)
     const isRequest = useRef(false)
@@ -166,6 +168,18 @@ const Store = props => {
 
     const hide = id => console.log(id)
 
+    const arrival = () => {
+        console.log('arrival')
+    }
+
+    const buy = () => {
+        console.log('arrival')
+    }
+
+    const produce = () => {
+        console.log('arrival')
+    }
+
     return <>
 
         <GoodModal
@@ -197,6 +211,31 @@ const Store = props => {
             </Button>)}
 
         </div>
+
+        {currentStock && <div style={{
+            display: 'flex',
+            margin: '.5rem',
+        }}>
+
+            <IconButton onClick={() => setShowButtons(!showButtons)}>
+                {showButtons ? <RemoveCircleIcon/> : <AddCircleIcon/>}
+            </IconButton>
+
+            {showButtons && [
+                {label: 'Оприходование', onClick: () => props.history.push('arrival')},
+                {label: 'Покупка техники', onClick: () => props.history.push('showcase/buy')},
+                {label: 'Изготовление', onClick: () => props.history.push('produce')},
+            ]
+                .map(b => <Button
+                    key={uuid()}
+                    size="small"
+                    style={{margin: '.5rem'}}
+                    variant="outlined"
+                    onClick={b.onClick}>
+                    {b.label}
+                </Button>)}
+
+        </div>}
 
         <div style={style}>
 

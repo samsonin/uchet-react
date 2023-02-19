@@ -22,6 +22,7 @@ import {intInputHandler} from "../InputHandlers";
 import {toLocalTimeStr} from "../Time";
 import TwoLineInCell from "../TwoLineInCell";
 import {GoodSearch} from "../GoodSearch";
+import GoodsTable from "../CostsTable";
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -52,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-export const Costs = ({order, isEditable, users, providers, updApp}) => {
+export const Costs = ({order, isEditable, users, providers}) => {
 
     const [serviceOpen, setServiceOpen] = useState(false)
     const [job, setJob] = useState('')
@@ -64,7 +65,7 @@ export const Costs = ({order, isEditable, users, providers, updApp}) => {
     const {enqueueSnackbar} = useSnackbar()
 
     const goods = order.provider && Array.isArray(order.provider)
-        ? order.provider.filter(p => p.good)
+        ? order.provider.filter(p => p.good).map(p =>p.good)
         : null
 
     const services = order.provider && Array.isArray(order.provider)
@@ -199,51 +200,7 @@ export const Costs = ({order, isEditable, users, providers, updApp}) => {
 
         </Dialog>
 
-        {goods && goods.length
-            ? <Table size="small">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>#</TableCell>
-                        <TableCell>Наименование</TableCell>
-                        <TableCell>Поставщик, время</TableCell>
-                        <TableCell colSpan="2">Себестоимость</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {goods.map(g => {
-
-                            const provider = providers.find(pr => pr.id === g.good.provider_id)
-
-                            return <TableRow key={'tablerowkeyforgoodsinordes' + g.sum + g.barcode}>
-                                <TableCell>{g.good.id}</TableCell>
-                                <TableCell>{g.good.model}</TableCell>
-                                <TableCell>
-                                    {provider
-                                        ? TwoLineInCell(provider.name, toLocalTimeStr(g.good.time))
-                                        : g.good.time}
-                                </TableCell>
-                                <TableCell>{g.good.remcost || g.good.cost}</TableCell>
-                                <TableCell>
-                                    <IconButton
-                                        onClick={() => delGood(g.barcode)}
-                                    >
-                                        <CancelIcon/>
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        }
-                    )}
-                    <TableRow>
-                        <TableCell colSpan={3} style={{
-                            fontWeight: 'bold',
-                            textAlign: 'center'
-                        }}>
-                            всего: {totalSum(goods)}
-                        </TableCell>
-                    </TableRow>
-                </TableBody>
-            </Table>
-            : null}
+        <GoodsTable delGood={delGood} goods={goods} providers={providers} />
 
         {isEditable && <GoodSearch onSelected={addGood}/>}
 
