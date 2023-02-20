@@ -1,5 +1,6 @@
-import {TextField} from "@material-ui/core";
 import React from "react";
+
+import {TextareaAutosize, TextField} from "@material-ui/core";
 
 export const intInputHandler = (value, setInt) => {
 
@@ -39,4 +40,36 @@ export const sumField = (initValue, value, setValue, style, disabled) => <TextFi
     onBlur={() => value > 0 || setValue(initValue)}
     onChange={e => intInputHandler(e.target.value, setValue)}
 />
+
+export const line = (label, value, isEditable, onChange) => {
+
+    const style = {
+        display: 'flex',
+        padding: '1rem 0'
+    }
+
+    const isEd = isEditable && typeof (onChange) === 'function'
+
+    if (!isEd) style.borderBottom = '1px solid lightgray'
+
+    return <div style={style}>
+
+        <span style={{width: '40%',}}>{label}</span>
+
+        {isEd
+            ? <TextField fullWidth value={value || ''} onChange={onChange}/>
+            : <span style={{fontWeight: 'bold'}}>{value}</span>}
+
+    </div>
+}
+
+export const note = (label, value, isEditable, onChange) => {
+
+    if (!isEditable && !value) return null
+
+    return <div style={{padding: '1rem 0'}}>
+        {label}
+        <TextareaAutosize style={{width: '100%'}} value={value || ''} onChange={onChange}/>
+    </div>
+}
 

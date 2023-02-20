@@ -10,8 +10,6 @@ import {
     CardMedia,
     Fade,
     TextField,
-    List,
-    ListSubheader, ListItem, ListItemText, TextareaAutosize, Typography
 } from "@material-ui/core";
 
 import Tree from "../Tree";
@@ -23,14 +21,9 @@ import rest from "../Rest";
 import {makeStyles} from "@material-ui/core/styles";
 import {Print} from "../common/Print";
 import {useSnackbar} from "notistack";
-import IconButton from "@material-ui/core/IconButton";
-import DeleteIcon from "@material-ui/icons/Delete";
-import {GoodSearch} from "../common/GoodSearch";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 import {groupAlias} from "../common/GroupAliases";
-import GoodsTable from "../common/CostsTable";
-
+import AddCosts from "../common/AddCosts";
+import {line, note} from "../common/InputHandlers";
 
 const woAlliases = {
     use: "В пользовании",
@@ -88,12 +81,6 @@ const GoodContent = props => {
     const [responsibleId, setResponsibleId] = useState(0)
     const [privateNote, setPrivateNote] = useState()
     const [publicNote, setPublicNote] = useState()
-
-    const [repairSum, setRepairSum] = useState(0)
-    const [goodsForRepair, setGoodsForRepair] = useState([])
-    const [repairJob, setRepairJob] = useState('')
-    const [repairMasterId, setRepairMasterId] = useState(0)
-    const [repairCash, setRepairCash] = useState(false)
 
     const [reason, setReason] = useState('')
     const [isReasonOpen, setIsReasonOpen] = useState(false)
@@ -240,63 +227,6 @@ const GoodContent = props => {
 
     }
 
-    const repair = () => {
-
-        const barcode = props.good.barcode
-
-        if (!barcode) enqueueSnackbar('нет кода или S/N', {variant: 'error'})
-
-        const data = {
-            sum: repairSum,
-            job: repairJob,
-        }
-
-        if (repairCash) data.cash = true
-        else data.master_id = repairMasterId
-
-        if (goodsForRepair.length) data.barcodes = goodsForRepair.map(g => g.barcode)
-
-        rest('goods/repair/' + barcode, 'PATCH', data)
-            .then(res => {
-
-                if (res.status === 200) {
-
-                    setRepairSum(0)
-                    setRepairJob('')
-                    setRepairMasterId(0)
-                    setGoodsForRepair([])
-                    props.setIsRepair(false)
-
-                    enqueueSnackbar('Работа добавлена!', {variant: 'success'})
-
-                    if (res.body.goods) props.setGood(res.body.goods)
-
-                } else {
-
-                    enqueueSnackbar('ошибка ' + res.status, {variant: 'error'})
-
-                }
-
-            })
-
-    }
-
-    const onSelected = (good, afterRes) => {
-
-        setGoodsForRepair(prev => {
-
-            const next = [...prev]
-            next.push(good)
-            return next
-
-        })
-
-        afterRes(true)
-
-    }
-
-    const remove = barcode => setGoodsForRepair(prev => prev.filter(g => g.barcode !== barcode))
-
     const handleTree = category_id => {
         props.good.category_id = +category_id
         setTreeOpen(false)
@@ -411,38 +341,6 @@ const GoodContent = props => {
         reader.readAsDataURL(f)
     }
 
-    const line = (label, value, onChange) => {
-
-        const style = {
-            display: 'flex',
-            padding: '1rem 0'
-        }
-
-        const isEd = isEditable && typeof (onChange) === 'function'
-
-        if (!isEd) style.borderBottom = '1px solid lightgray'
-
-        return <div style={style}>
-
-            <span style={{width: '40%',}}>{label}</span>
-
-            {isEd
-                ? <TextField fullWidth value={value || ''} onChange={onChange}/>
-                : <span style={{fontWeight: 'bold'}}>{value}</span>}
-
-        </div>
-    }
-
-    const note = (label, value, onChange) => {
-
-        if (!isEditable && !value) return null
-
-        return <div style={{padding: '1rem 0'}}>
-            {label}
-            <TextareaAutosize style={{width: '100%'}} value={value || ''} onChange={onChange}/>
-        </div>
-    }
-
     const textWithButton = (label, value, onChange, onClick, isPrimary, text) => <div style={{width: '100%'}}>
         <TextField label={label}
                    style={{
@@ -472,44 +370,7 @@ const GoodContent = props => {
     />
 
     return props.isRepair
-        ? <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-around',
-            padding: '0 1rem',
-        }}>
-
-
-            {line('Общая стоимость:', repairSum, e => intInputHandler(e.target.value, setRepairSum))}
-
-            {line('Выполненная работа:', repairJob, e => setRepairJob(e.target.value))}
-
-            <GoodsTable delGood={remove} goods={goodsForRepair} providers={props.app.providers} />
-
-            <GoodSearch onSelected={onSelected}/>
-
-            {repairCash || <UsersSelect
-                classes={classes.field}
-                users={props.app.users}
-                user={repairMasterId}
-                setUser={setRepairMasterId}
-                onlyValid={true}
-            />}
-
-            {!repairMasterId && <FormControlLabel
-                control={<Checkbox checked={repairCash} onChange={() => setRepairCash(!repairCash)}/>}
-                label="списать с кассы"
-            />}
-
-            <Button
-                className="m-2"
-                variant="outlined"
-                onClick={() => repair()}
-            >
-                Добавить работу
-            </Button>
-
-        </div>
+        ? <AddCosts barcode={props.good.barcode} done={() => props.setIsRepair(false)}/>
         : <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -597,11 +458,11 @@ const GoodContent = props => {
                             </Button>
                         </Grid>
                     </Grid>
-                : category && line('Категория:', category.name)}
+                : category && line('Категория:', category.name, isEditable)}
 
-            {line('Наименование:', model, e => setModel(e.target.value))}
+            {line('Наименование:', model, isEditable, e => setModel(e.target.value))}
 
-            {isShowcase && line('imei, S/N', imei, e => setImei(e.target.value))}
+            {isShowcase && line('imei, S/N', imei, isEditable, e => setImei(e.target.value))}
 
             {isEditable && textWithButton('Номер заказа', orderId,
                 e => intInputHandler(e.target.value, setOrderId), () => toOrder(),
@@ -610,29 +471,29 @@ const GoodContent = props => {
             {isEditable && textWithButton('Цена', sum, e => intInputHandler(e.target.value, setSum),
                 () => toSale(), true, 'Продать')}
 
-            {line("Себестоимость:", props.good.remcost ?? props.good.cost ?? 0)}
+            {line("Себестоимость:", props.good.remcost ?? props.good.cost ?? 0, isEditable)}
 
             {line("Время оприходования:", props.good.unix
                 ? toLocalTimeStr(props.good.unix)
-                : props.good.time)}
+                : props.good.time, isEditable)}
 
-            {provider && line('Поставщик:', provider.name)}
+            {provider && line('Поставщик:', provider.name, isEditable)}
 
             {props.good.wf && props.good.wf.consignment_number &&
-                line('накладная: ', props.good.wf.consignment_number)}
+                line('накладная: ', props.good.wf.consignment_number, isEditable)}
 
-            {props.good.wo === 't' || line('Точка:', stock ? stock.name : null)}
+            {props.good.wo === 't' || line('Точка:', stock ? stock.name : null, isEditable)}
 
-            {!props.good.wo && line('Хранение', storagePlace, e => setStoragePlace(e.target.value))}
+            {!props.good.wo && line('Хранение', storagePlace, isEditable, e => setStoragePlace(e.target.value))}
 
             {isEditable && (!isPublic || props.auth.admin) && <IsPublicCheckBox
                 value={isPublic}
                 onChange={() => setIsPublic(!isPublic)}
             />}
 
-            {note('Информация для сотрудников:', privateNote, e => setPrivateNote(e.target.value))}
+            {note('Информация для сотрудников:', privateNote, isEditable, e => setPrivateNote(e.target.value))}
 
-            {note('Информация для покупателей:', publicNote, e => setPublicNote(e.target.value))}
+            {note('Информация для покупателей:', publicNote, isEditable, e => setPublicNote(e.target.value))}
 
             {isEditable
                 ? <UsersSelect
@@ -643,10 +504,10 @@ const GoodContent = props => {
                     classes='w-100 m-2 p-2'
                     label="Ответственный"
                 />
-                : responsible && line('Ответственный:', responsible.name)}
+                : responsible && line('Ответственный:', responsible.name, isEditable)}
 
             {props.good.out_unix && ui_wo &&
-                line('Статус:', ui_wo + ', c ' + toLocalTimeStr(props.good.out_unix))}
+                line('Статус:', ui_wo + ', c ' + toLocalTimeStr(props.good.out_unix), isEditable)}
 
             {isEditable && <Fade
                 in={!isSame && isEditable}
