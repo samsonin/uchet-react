@@ -527,9 +527,7 @@ const Consignment = props => {
 
             <TreeModal isOpen={state.currentTr !== false}
                        onClose={handleCategories}
-                       initialcategory_id={currentTr
-                           ? currentTr.category_id
-                           : 0}
+                       initialcategory_id={currentTr ? currentTr.category_id : 0}
             />
 
             {props.close

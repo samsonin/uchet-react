@@ -370,7 +370,10 @@ const GoodContent = props => {
     />
 
     return props.isRepair
-        ? <AddCosts barcode={props.good.barcode} done={() => props.setIsRepair(false)}/>
+        ? <AddCosts barcode={props.good.barcode}
+                    setGood={props.setGood}
+                    done={() => props.setIsRepair(false)}
+        />
         : <div style={{
             display: 'flex',
             flexDirection: 'column',

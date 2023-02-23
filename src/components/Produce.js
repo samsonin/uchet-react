@@ -2,6 +2,7 @@ import React from "react";
 import {connect} from "react-redux";
 
 import AddCosts from "./common/AddCosts";
+import {Typography} from "@material-ui/core";
 
 const Produce = props => {
 
@@ -13,7 +14,11 @@ const Produce = props => {
         padding: '1rem'
     }}>
 
-        <AddCosts done={done}/>
+        <Typography variant="h5" >
+            Изготовление
+        </Typography>
+
+        <AddCosts done={done} button="Изготовить"/>
 
     </div>
 

@@ -19,7 +19,7 @@ const GoodsTable = ({goods, delGood, providers}) => {
 
     return goods && goods.length
         ? <>
-            <Typography variant="subtitle">
+            <Typography variant="subtitle1">
                 Запчасти и материалы:
             </Typography>
 

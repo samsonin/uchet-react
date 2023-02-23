@@ -12,6 +12,7 @@ import {GoodSearch} from "./GoodSearch";
 import rest from "../Rest";
 import {intInputHandler, line} from "./InputHandlers";
 import UsersSelect from "./UsersSelect";
+import Tree from "../../components/Tree"
 
 
 const AddCosts = props => {
@@ -23,9 +24,14 @@ const AddCosts = props => {
     const [masterId, setMasterId] = useState(0)
     const [cash, setCash] = useState(false)
 
+    const [model, setModel] = useState('')
+    const [category_id, setCategory_id] = useState(0)
+    const [isTreeOpen, setIsTreeOpen] = useState(false)
+
     const {enqueueSnackbar} = useSnackbar()
 
     const stock = props.app.stocks.find(s => s.id === props.app.current_stock_id)
+    const category = props.app.categories.find(c => c.id === category_id)
 
     const masterPercent = stock ? stock.master_percent : 0
 
@@ -36,25 +42,42 @@ const AddCosts = props => {
 
         if (!stock || cash) return
 
-        setZp(Math.round(( sum - total) * masterPercent))
+        const zp = Math.round((sum - total) * masterPercent)
 
-    }, [goods, sum])
+        intInputHandler(zp, setZp)
 
-    useEffect(() => {
+    }, [goods])
 
-        if (!stock || cash) return
+    const handleSum = sum => {
 
-        setSum(total + Math.round(zp / masterPercent))
+        const zp = Math.round((sum - total) * masterPercent)
 
-    }, [zp])
+        intInputHandler(sum, setSum)
+        intInputHandler(zp, setZp)
 
-    const repair = () => {
+    }
 
-        if (!props.barcode) return enqueueSnackbar('нет кода или S/N', {variant: 'error'})
+    const handleZp = zp => {
 
-        const data = {
-            sum,
-            job,
+        const sum = total + Math.round(zp / masterPercent)
+
+        intInputHandler(sum, setSum)
+        intInputHandler(zp, setZp)
+
+    }
+
+    const produce = () => {
+
+        const data = {sum, job}
+
+        if (!props.barcode) {
+
+            if (model) data.model = model
+            else return enqueueSnackbar('введите наименование')
+
+            if (category_id) data.category_id = category_id
+            else return enqueueSnackbar('выберите категорию')
+
         }
 
         if (cash) data.cash = true
@@ -62,7 +85,11 @@ const AddCosts = props => {
 
         if (goods.length) data.barcodes = goods.map(g => g.barcode)
 
-        rest('goods/repair/' + props.barcode, 'PATCH', data)
+        const url = props.barcode
+            ? 'goods/repair/' + props.barcode
+            : 'goods/produce'
+
+        rest(url, props.barcode ? 'PATCH' : 'POST', data)
             .then(res => {
 
                 if (res.status === 200) {
@@ -70,11 +97,12 @@ const AddCosts = props => {
                     setSum(0)
                     setJob('')
                     setMasterId(0)
+                    setZp(0)
                     setGoods([])
-                    // props.setIsRepair(false)
+                    setCash(false)
                     props.done()
 
-                    enqueueSnackbar('Работа добавлена!', {variant: 'success'})
+                    enqueueSnackbar('ok', {variant: 'success'})
 
                     if (res.body.goods) props.setGood(res.body.goods)
 
@@ -102,6 +130,13 @@ const AddCosts = props => {
 
     }
 
+    const handleTree = id => {
+
+        setIsTreeOpen(false)
+        setCategory_id(+id)
+
+    }
+
     const delGood = barcode => setGoods(prev => prev.filter(g => g.barcode !== barcode))
 
     return <div style={{
@@ -111,11 +146,11 @@ const AddCosts = props => {
         padding: '0 1rem',
     }}>
 
-        {line('Общая стоимость:', sum, true, e => intInputHandler(e.target.value, setSum))}
+        {line('Общая стоимость:', sum, true, e => handleSum(e.target.value))}
 
         {line('Выполненная работа:', job, true, e => setJob(e.target.value))}
 
-        {!!masterId && line('Зарплата', zp, true, e => intInputHandler(e.target.value, setZp))}
+        {!!masterId && line('Зарплата', zp, true, e => handleZp(e.target.value))}
 
         {cash || <UsersSelect
             // classes={classes.field}
@@ -130,14 +165,6 @@ const AddCosts = props => {
             label="списать с кассы"
         />}
 
-        <Button
-            className="m-2"
-            variant="outlined"
-            onClick={() => repair()}
-        >
-            Добавить работу
-        </Button>
-
         <GoodsTable goods={goods}
                     delGood={delGood}
                     providers={props.app.providers}
@@ -145,6 +172,34 @@ const AddCosts = props => {
 
         <GoodSearch onSelected={onSelected}/>
 
+        {!props.barcode && <>
+
+            {isTreeOpen
+                ? <Tree
+                    initialId={category_id}
+                    categories={props.app.categories}
+                    finished={id => handleTree(id)}
+                    onSelected={id => {
+                    }}
+                />
+                : <Button size="small"
+                          className="w-100"
+                          onClick={() => setIsTreeOpen(true)}
+                >
+                    {category ? category.name : 'Выбрать категорию...'}
+                </Button>}
+
+            {line('Наименование:', model, true, e => setModel(e.target.value))}
+
+        </>}
+
+        <Button
+            className="m-2"
+            variant="outlined"
+            onClick={() => produce()}
+        >
+            {props.button ?? "Добавить работу"}
+        </Button>
 
     </div>
 

@@ -1,16 +1,11 @@
-import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
 import React, {useState} from "react";
-import Tree from "./Tree";
 import {connect} from "react-redux";
-import {bindActionCreators} from "redux";
-import {enqueueSnackbar} from "../actions/actionCreator";
+import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-    enqueueSnackbar,
-}, dispatch);
+import Tree from "./Tree";
 
 
-export default connect(state => (state), mapDispatchToProps)(function ControlledTreeModal(props) {
+const TreeModal = props => {
 
     const [currentId, setCurrentId] = useState(() => props.initialCategoryId)
 
@@ -37,4 +32,6 @@ export default connect(state => (state), mapDispatchToProps)(function Controlled
         </MDBModal>
     </MDBContainer>
 
-});
+}
+
+export default connect(state => (state), TreeModal)
