@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
-import {Button} from "@material-ui/core";
+import {Button, TextField, Typography} from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 
@@ -100,11 +100,19 @@ const AddCosts = props => {
                     setZp(0)
                     setGoods([])
                     setCash(false)
+                    setCategory_id(0)
+                    setModel('')
                     props.done()
 
                     enqueueSnackbar('ok', {variant: 'success'})
 
-                    if (res.body.goods) props.setGood(res.body.goods)
+                    if (res.body.goods) {
+
+                        if (typeof (props.setGood) === 'function') props.setGood(res.body.goods)
+
+                        else if (res.body.goods.barcode) window.open('/goods/' + res.body.goods.barcode)
+
+                    }
 
                 } else {
 
@@ -172,7 +180,20 @@ const AddCosts = props => {
 
         <GoodSearch onSelected={onSelected}/>
 
-        {!props.barcode && <>
+        {!props.barcode && <div style={{
+            border: '1px solid black',
+            borderRadius: '5px',
+            padding: '.5rem'
+        }}>
+
+            <Typography variant="subtitle2">
+                Что изготовим:
+            </Typography>
+
+            <div style={{
+                margin: '.5rem',
+                padding: '.5rem'
+            }}>
 
             {isTreeOpen
                 ? <Tree
@@ -189,12 +210,21 @@ const AddCosts = props => {
                     {category ? category.name : 'Выбрать категорию...'}
                 </Button>}
 
-            {line('Наименование:', model, true, e => setModel(e.target.value))}
+            </div>
 
-        </>}
+            <TextField variant="outlined"
+                       style={{
+                           width: '100%'
+                       }}
+                       label="Наименование"
+                       value={model}
+                       onChange={e => setModel(e.target.value)}
+            />
+
+        </div>}
 
         <Button
-            className="m-2"
+            style={{margin: '1rem'}}
             variant="outlined"
             onClick={() => produce()}
         >
