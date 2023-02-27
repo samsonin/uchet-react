@@ -102,17 +102,9 @@ const AddCosts = props => {
                     setCash(false)
                     setCategory_id(0)
                     setModel('')
-                    props.done()
+                    props.done(res.body.goods)
 
                     enqueueSnackbar('ok', {variant: 'success'})
-
-                    if (res.body.goods) {
-
-                        if (typeof (props.setGood) === 'function') props.setGood(res.body.goods)
-
-                        else if (res.body.goods.barcode) window.open('/goods/' + res.body.goods.barcode)
-
-                    }
 
                 } else {
 

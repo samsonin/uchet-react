@@ -32,12 +32,6 @@ const oftenUsedButtons = [
     {label: 'Расходники', catId: 999},
 ]
 
-const style = {
-    display: 'flex',
-    justifyContent: 'space-around',
-    margin: '.5rem',
-}
-
 const Store = props => {
 
     const [goods, setGoods] = useState([])
@@ -168,16 +162,11 @@ const Store = props => {
 
     const hide = id => console.log(id)
 
-    const arrival = () => {
-        console.log('arrival')
-    }
-
-    const buy = () => {
-        console.log('arrival')
-    }
-
-    const produce = () => {
-        console.log('arrival')
+    const style = {
+        display: 'flex',
+        justifyContent: 'space-around',
+        margin: '.5rem',
+        opacity: showButtons ? '25%' : '100%'
     }
 
     return <>
@@ -189,7 +178,7 @@ const Store = props => {
             hide={hide}
         />
 
-        <div className="w-100">
+        <div style={style} >
 
             {isExpand
                 ? <Tree categories={props.app.categories}

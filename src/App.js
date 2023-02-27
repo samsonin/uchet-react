@@ -100,7 +100,7 @@ const App = props => {
 
         document.addEventListener('keydown', handleKeyPress)
 
-        window.addEventListener("scroll",  () => {
+        window.addEventListener("scroll", () => {
 
             if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
 
@@ -300,8 +300,12 @@ const App = props => {
                                     {...props}
                                 />}/>
                                 <Route path="/consignments" component={Consignments}/>
-                                <Route path="/produce" component={Produce}/>
-
+                                <Route path="/produce"
+                                       render={props => <Produce
+                                           setGood={setGood}
+                                           {...props}
+                                       />}
+                                />
                             </>}
 
                             <Route path="/transit" render={props => <Transit

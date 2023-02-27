@@ -369,10 +369,17 @@ const GoodContent = props => {
         onChange={() => {console.log('onChange')}}
     />
 
+    const done = good => {
+
+        props.setIsRepair(false)
+
+        if (good) props.setGood(good)
+
+    }
+
     return props.isRepair
         ? <AddCosts barcode={props.good.barcode}
-                    setGood={props.setGood}
-                    done={() => props.setIsRepair(false)}
+                    done={done}
         />
         : <div style={{
             display: 'flex',

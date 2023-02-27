@@ -34,4 +34,4 @@ const TreeModal = props => {
 
 }
 
-export default connect(state => (state), TreeModal)
+export default connect(state => state)(TreeModal)

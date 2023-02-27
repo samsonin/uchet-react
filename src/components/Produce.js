@@ -6,7 +6,7 @@ import {Typography} from "@material-ui/core";
 
 const Produce = props => {
 
-    const done = () => console.log('done in Produce')
+    const done = good => props.setGood(good)
 
     return <div style={{
         backgroundColor: '#fff',

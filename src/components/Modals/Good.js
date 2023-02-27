@@ -99,4 +99,4 @@ const Good = props => {
 
 }
 
-export default connect(state => (state))(Good)
+export default connect(state => state)(Good)
