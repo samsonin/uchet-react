@@ -128,15 +128,6 @@ const Buy = props => {
 
     }
 
-    const handleChange = (name, value) => {
-
-        if (customer.id) return
-
-        const newCustomer = {...customer}
-        newCustomer[name] = value
-        setCustomer(newCustomer)
-
-    }
 
     const add = () => {
 
@@ -200,11 +191,6 @@ const Buy = props => {
         {isNeedDoc && <Fields
             customer={customer}
             setCustomer={setCustomer}
-            handleChange={handleChange}
-            fieldsStyle={{
-                margin: '.4rem',
-                width: '100%',
-            }}
         />}
 
         <TableContainer component={Paper}>

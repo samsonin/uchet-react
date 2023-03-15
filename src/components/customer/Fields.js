@@ -31,7 +31,11 @@ const Fields = props => {
         if (name === 'phone_number') val = phoneNumberHandler(val)
         if (name === 'fio') val = fioHandler(val)
 
-        props.handleChange(name, val)
+        if (props.customer.id) return
+
+        const newCustomer = {...props.customer}
+        newCustomer[name] = val
+        props.setCustomer(newCustomer)
 
     }
 
@@ -104,36 +108,41 @@ const Fields = props => {
             .filter(field => isDetails || ['fio', 'phone_number'].includes(field.name))
             .map(field => ['fio', 'phone_number'].includes(field.name)
 
-                    ? <Autocomplete
-                        key={'customer-fields-key' + field.name + field.index + field.value}
-                        style={props.fieldsStyle}
-                        fullWidth
-                        inputValue={props.customer[field.name] ?? ''}
-                        options={customers}
-                        loading={request.current}
-                        onInputChange={(e, v, r) => {
-                            onInputChangeAutocomplete(v, r, field.name)
-                        }}
-                        onChange={(e, v, r) => {
-                            onChangeAutocomplete(v, r, field.name)
-                        }}
-                        getOptionLabel={option => option ? option[field.name] : ''}
-                        getOptionSelected={option => option.id === props.customer.id}
-                        renderInput={params => <TextField
-                            {...params}
-                            label={field.value}
-                        />}
-                    />
+                ? <Autocomplete
+                    key={'customer-fields-key' + field.name + field.index + field.value}
+                    style={{
+                        margin: '.4rem',
+                        width: '100%',
+                    }}
+                    fullWidth
+                    inputValue={props.customer[field.name] ?? ''}
+                    options={customers}
+                    loading={request.current}
+                    onInputChange={(e, v, r) => {
+                        onInputChangeAutocomplete(v, r, field.name)
+                    }}
+                    onChange={(e, v, r) => {
+                        onChangeAutocomplete(v, r, field.name)
+                    }}
+                    getOptionLabel={option => option ? option[field.name] : ''}
+                    getOptionSelected={option => option.id === props.customer.id}
+                    renderInput={params => <TextField
+                        {...params}
+                        label={field.value}
+                    />}
+                />
 
                 : <TextField
-                        style={props.fieldsStyle}
-                        key={'customer-fields-key' + field.name + field.index + field.value}
-                        type={types[field.name] || 'text'}
-                        label={field.value}
-                        value={props.customer[field.name] || ''}
-                        onChange={e => handler(field.name, e.target.value)}
-                    />
-
+                    style={{
+                        margin: '.4rem',
+                        width: '100%',
+                    }}
+                    key={'customer-fields-key' + field.name + field.index + field.value}
+                    type={types[field.name] || 'text'}
+                    label={field.value}
+                    value={props.customer[field.name] || ''}
+                    onChange={e => handler(field.name, e.target.value)}
+                />
             )}
 
     </div>

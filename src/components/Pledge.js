@@ -198,16 +198,6 @@ const Pledge = props => {
 
     }
 
-    const handleChange = (name, value) => {
-
-        if (customer.id) return
-
-        const newCustomer = {...customer}
-        newCustomer[name] = value
-        setCustomer(newCustomer)
-
-    }
-
     useEffect(() => {
 
         if (pledge.id && pledge.sum2) return
@@ -358,8 +348,6 @@ const Pledge = props => {
             <Fields
                 customer={customer}
                 setCustomer={setCustomer}
-                handleChange={handleChange}
-                fieldsStyle={fieldsStyle}
             />
 
             <TextField label="Наименование"

@@ -70,6 +70,8 @@ const AddCosts = props => {
 
         const data = {sum, job}
 
+        if (props.app.current_stock_id) data.stock_id = props.app.current_stock_id
+
         if (!props.barcode) {
 
             if (model) data.model = model

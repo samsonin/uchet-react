@@ -1,76 +1,171 @@
-import React, {useEffect, useState} from "react";
-
-import rest from "../components/Rest";
-import { Table, TableBody, TableCell, TableRow} from "@material-ui/core";
-import TableHead from "@material-ui/core/TableHead";
-import TwoLineInCell from "./common/TwoLineInCell";
-import uuid from "uuid";
+import React, {forwardRef, useState} from "react";
+import Fields from "./customer/Fields";
+import {connect} from "react-redux";
+import {Button, Dialog, DialogContent, DialogTitle, TextField} from "@material-ui/core";
+import IconButton from "@material-ui/core/IconButton";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import {Print} from "./common/Print";
+import PrintIcon from "@material-ui/icons/Print";
 import {toLocalTimeStr} from "./common/Time";
+import Slide from "@material-ui/core/Slide";
+import DialogActions from "@material-ui/core/DialogActions";
 
-const Real = () => {
+import rest from "./Rest"
 
-    const [goods, setGoods] = useState([])
+const Transition = forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+})
 
-    useEffect(() => {
+const checkoutText = 'Деньги будут списаны из кассы, их необходимо будет отдать собственнику и взять у него расписку о получении денежных средств'
+const cancelText = 'Договор реализации будет анулирован, необходимо вернуть товар собственнику и взять у него расписку о получении товара'
 
-        rest('real')
-            .then(res => {
+const Real = props => {
 
-                if (res.status === 200) {
+    const [customer, setCustomer] = useState(props.current.customer ? props.current.customer : {})
+    const [dialog, setDialog] = useState('')
 
-                    setGoods(res.body)
+    const fieldsStyle = {
+        margin: '.4rem',
+        width: '100%',
+    }
 
-                }
+    console.log(props)
 
-            })
+    const title = props.current.good.wo ? 'Ваплата собственнику' : 'Снять с реализации'
 
-    }, [])
+    const afterRes = res => {
 
+        setDialog('')
+        props.setCurrent()
 
-    return goods.length
-        ? <Table size="small"
-                 style={{background: 'white'}}
+    }
+
+    const checkout = () => rest('real/' + props.current.id, 'PATCH')
+        .then(res => afterRes(res))
+
+    const cancel = () => rest('real/' + props.current.id, 'DELETE')
+        .then(res => afterRes(res))
+
+    let wo
+
+    if (props.current.good.wo) {
+        wo = props.current.good.ui_wo + ' ' + toLocalTimeStr(props.current.good.out_unix)
+    }
+
+    return <>
+
+        <Dialog
+            open={dialog !== ''}
+            TransitionComponent={Transition}
+            keepMounted
+            onClose={() => setDialog('')}
         >
-            <TableHead>
-                <TableRow>
-                    <TableCell>Время</TableCell>
-                    <TableCell>Коммисионер</TableCell>
-                    <TableCell>Товар</TableCell>
-                    <TableCell>Цена</TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {goods.map(g => {
 
-                        const color = 'black'
+            <DialogTitle>
+                {title}
+            </DialogTitle>
 
-                        return <TableRow key={uuid()}
-                                         style={{
-                                             cursor: 'pointer',
-                                         }}
-                                         onClick={() => console.log('onClick')}
-                        >
-                            <TableCell style={{color}}>
-                                {toLocalTimeStr(g.good.unix)}
-                            </TableCell>
-                            <TableCell style={{color}}>
-                                {TwoLineInCell(g.customer.fio, g.customer.phone_number)}
-                            </TableCell>
-                            <TableCell style={{color}}>
-                                {TwoLineInCell(g.good.model, g.good.imei)}
-                            </TableCell>
-                            <TableCell style={{color}}>
-                                {TwoLineInCell(g.sum, g.cost)}
-                            </TableCell>
-                        </TableRow>
-                    })}
+            <DialogContent>
+                {props.current.good.wo ? checkoutText : cancelText}
+            </DialogContent>
 
-            </TableBody>
-        </Table>
-        : 'Нет данных'
+            <DialogActions>
+                <Button onClick={() => setDialog('')}
+                        color="secondary">
+                    Отмена
+                </Button>
+                <Button onClick={() => props.current.good.wo ? checkout() : cancel()}
+                        color="primary">
+                    Ок
+                </Button>
+            </DialogActions>
 
+        </Dialog>
 
+        <div style={{
+            padding: '0 1rem 0 0',
+            background: '#fff',
+            borderRadius: 3
+        }}>
+
+            <div style={{
+                margin: '.1rem',
+                padding: '.1rem',
+                display: "flex",
+                justifyContent: 'space-between',
+            }}>
+
+                <IconButton onClick={() => props.setCurrent()}>
+                    <ArrowBackIcon/>
+                </IconButton>
+
+                <span style={{
+                    fontSize: 20, fontWeight: 'bold',
+                }}>
+                Договор реализации от {toLocalTimeStr(props.current.good.unix)}
+            </span>
+
+                <IconButton
+                    // onClick={() => Print(doc, alias)}
+                >
+                    <PrintIcon/>
+                </IconButton>
+
+            </div>
+
+            <Fields
+                customer={customer}
+                setCustomer={setCustomer}
+            />
+
+            <TextField label="Наименование"
+                       style={fieldsStyle}
+                       value={props.current.good.model}
+            />
+
+            <TextField label="Imei или S/N"
+                       style={fieldsStyle}
+                       value={props.current.good.imei}
+            />
+
+            <TextField label="Цена для витрины"
+                       style={fieldsStyle}
+                       value={props.current.sum}
+            />
+
+            <TextField label="Цена комитента"
+                       style={fieldsStyle}
+                       value={props.current.cost}
+            />
+
+            {props.current.note && <TextField label="Примечание"
+                                              style={fieldsStyle}
+                                              value={props.current.note}
+            />}
+
+            {props.current.good.wo && <TextField label="Статус"
+                                                 style={fieldsStyle}
+                                                 value={wo}
+            />}
+
+            <div style={{
+                padding: '.3rem',
+                display: "flex",
+                justifyContent: 'space-around'
+            }}>
+
+                <Button size="small"
+                        color={props.current.good.wo ? 'primary' : 'secondary'}
+                        variant="contained"
+                        onClick={() => setDialog(props.current.good.wo ? 'checkout' : 'cancel')}
+                >
+                    {title}
+                </Button>
+
+            </div>
+
+        </div>
+    </>
 }
 
-
-export default Real
+export default connect(state => state)(Real)

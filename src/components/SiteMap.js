@@ -10,7 +10,7 @@ export const siteMap = isAdmin => {
         {id: 11, path: "arrival", text: "Оприходование"},
         {id: 14, path: "transit", text: "Транзит"},
         {id: 15, path: "prepaids", text: "Предоплаты"},
-        {id: 16, path: "real", text: "Реализация"},
+        {id: 16, path: "reals", text: "Реализация"},
         {id: 17, path: "pledges", text: "Залоги"},
 
         {id: 21, path: "customers", text: "Физические лица"},
