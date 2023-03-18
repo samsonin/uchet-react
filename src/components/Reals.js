@@ -10,12 +10,24 @@ import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import Real from "./Real";
+import {useSnackbar} from "notistack";
 
 const Reals = () => {
 
     const [currentReal, setCurrentReal] = useState()
     const [reals, setReals] = useState([])
 
+    const {enqueueSnackbar} = useSnackbar()
+
+    const del = id => {
+
+        setCurrentReal()
+
+        setReals(reals.filter(r => r.id !== id))
+
+        enqueueSnackbar('ok', {variant: 'success'})
+
+    }
 
     useEffect(() => {
 
@@ -37,6 +49,7 @@ const Reals = () => {
         ? <Real
             current={currentReal}
             setCurrent={setCurrentReal}
+            del={del}
         />
         : <Table size="small"
                  style={{background: 'white'}}

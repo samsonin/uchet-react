@@ -29,14 +29,16 @@ const Real = props => {
         width: '100%',
     }
 
-    console.log(props)
-
     const title = props.current.good.wo ? 'Ваплата собственнику' : 'Снять с реализации'
 
     const afterRes = res => {
 
-        setDialog('')
-        props.setCurrent()
+        if (res.status < 205) {
+
+            setDialog('')
+            props.del(props.current.id)
+
+        }
 
     }
 
