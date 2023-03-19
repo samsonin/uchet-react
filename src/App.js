@@ -48,6 +48,8 @@ import Store from "./components/Store";
 import Zp from "./components/Zp";
 import Produce from "./components/Produce";
 import Reals from "./components/Reals";
+import {useSnackbar} from "notistack";
+import {Button} from "@material-ui/core";
 
 
 const parseJwt = token => {
@@ -78,6 +80,8 @@ const App = props => {
     const [scrollDown, setScrollDown] = useState(false)
 
     const barcode = useRef('')
+
+    const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
     const isBarcodeValid = barcode => {
 
@@ -205,6 +209,24 @@ const App = props => {
     const expire = !(+props.auth.user_id && (props.auth.expiration_time - 180 > Math.round(new Date().getTime() / 1000.0)))
 
     return <>
+
+        {props.app.need_callbacks && props.app.need_callbacks.map(nc => {
+
+            const action = snackbarId => <Button onClick={() => closeSnackbar(snackbarId)}
+                                                 size="small"
+                                                 variant="outlined"
+            >
+                Ok
+            </Button>
+
+            enqueueSnackbar(nc.phone_number, {
+                variant: 'error',
+                persist: true,
+                preventDuplicate: true,
+                action
+            })
+
+        })}
 
         <Header className={'d-print-none'}/>
 

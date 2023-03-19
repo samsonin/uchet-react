@@ -94,7 +94,10 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
                 }
             }
 
-            window.onfocus = () => sendIsFocus(true);
+            window.onfocus = () => {
+                rest('app')
+                sendIsFocus(true);
+            }
             window.onblur = () => sendIsFocus(false);
 
             sendIsFocus(true)
