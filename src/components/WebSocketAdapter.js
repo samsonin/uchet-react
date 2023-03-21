@@ -95,8 +95,13 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
             }
 
             window.onfocus = () => {
-                rest('upd')
+
                 sendIsFocus(true);
+
+                if (['daily', 'transit'].includes(window.location.pathname)){
+                    rest('upd')
+                }
+
             }
             window.onblur = () => sendIsFocus(false);
 

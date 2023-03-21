@@ -69,7 +69,7 @@ const Reals = () => {
                                     marginLeft: '.1rem',
                                     marginRight: '.1rem',
                                 }}
-                                            onClick={() => console.log('Принять на реализацию')}
+                                            onClick={() => setCurrentReal({})}
                                 >
                                     <AddCircleIcon/>
                                 </IconButton>
@@ -90,7 +90,7 @@ const Reals = () => {
 
                         const color = 'black'
 
-                        return <TableRow key={uuid()}
+                        return r.good && r.customer && <TableRow key={uuid()}
                                          style={{
                                              cursor: 'pointer',
                                          }}

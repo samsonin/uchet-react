@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
-import {Button, TextField, Typography} from "@material-ui/core";
+import {Button} from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 
@@ -12,7 +12,7 @@ import {GoodSearch} from "./GoodSearch";
 import rest from "../Rest";
 import {intInputHandler, line} from "./InputHandlers";
 import UsersSelect from "./UsersSelect";
-import Tree from "../../components/Tree"
+import EnteredGood from "../EnteredGood";
 
 
 const AddCosts = props => {
@@ -26,12 +26,11 @@ const AddCosts = props => {
 
     const [model, setModel] = useState('')
     const [category_id, setCategory_id] = useState(0)
-    const [isTreeOpen, setIsTreeOpen] = useState(false)
+    const [imei, setImei] = useState('')
 
     const {enqueueSnackbar} = useSnackbar()
 
     const stock = props.app.stocks.find(s => s.id === props.app.current_stock_id)
-    const category = props.app.categories.find(c => c.id === category_id)
 
     const masterPercent = stock ? stock.master_percent : 0
 
@@ -132,12 +131,6 @@ const AddCosts = props => {
 
     }
 
-    const handleTree = id => {
-
-        setIsTreeOpen(false)
-        setCategory_id(+id)
-
-    }
 
     const delGood = barcode => setGoods(prev => prev.filter(g => g.barcode !== barcode))
 
@@ -174,48 +167,14 @@ const AddCosts = props => {
 
         <GoodSearch onSelected={onSelected}/>
 
-        {!props.barcode && <div style={{
-            border: '1px solid black',
-            borderRadius: '5px',
-            padding: '.5rem'
-        }}>
-
-            <Typography variant="subtitle2">
-                Что изготовим:
-            </Typography>
-
-            <div style={{
-                margin: '.5rem',
-                padding: '.5rem'
-            }}>
-
-            {isTreeOpen
-                ? <Tree
-                    initialId={category_id}
-                    categories={props.app.categories}
-                    finished={id => handleTree(id)}
-                    onSelected={id => {
-                    }}
-                />
-                : <Button size="small"
-                          className="w-100"
-                          onClick={() => setIsTreeOpen(true)}
-                >
-                    {category ? category.name : 'Выбрать категорию...'}
-                </Button>}
-
-            </div>
-
-            <TextField variant="outlined"
-                       style={{
-                           width: '100%'
-                       }}
-                       label="Наименование"
-                       value={model}
-                       onChange={e => setModel(e.target.value)}
-            />
-
-        </div>}
+        {!props.barcode && <EnteredGood
+            category_id={category_id}
+            setCategory_id={setCategory_id}
+            model={model}
+            setModel={setModel}
+            imei={imei}
+            setImei={setImei}
+        />}
 
         <Button
             style={{margin: '1rem'}}

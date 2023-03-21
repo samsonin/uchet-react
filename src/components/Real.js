@@ -24,12 +24,21 @@ const Real = props => {
     const [customer, setCustomer] = useState(props.current.customer ? props.current.customer : {})
     const [dialog, setDialog] = useState('')
 
+    const [model, setModel] = useState(props.current.good ? props.current.good.model : '')
+    const [cost, setCost] = useState(0)
+    const [sum, setSum] = useState(0)
+
     const fieldsStyle = {
         margin: '.4rem',
         width: '100%',
     }
 
-    const title = props.current.good.wo ? 'Ваплата собственнику' : 'Снять с реализации'
+    const title = props.current.good
+        ? props.current.good.wo
+            ? 'Ваплата собственнику'
+            : 'Снять с реализации'
+        : 'Принять на реализацию'
+
 
     const afterRes = res => {
 
@@ -50,13 +59,18 @@ const Real = props => {
 
     let wo
 
-    if (props.current.good.wo) {
+    if (props.current.good && props.current.good.wo) {
         wo = props.current.good.ui_wo + ' ' + toLocalTimeStr(props.current.good.out_unix)
+    }
+
+    let text = 'Договор реализации'
+    if (props.current.good) {
+        text +='от' + toLocalTimeStr(props.current.good.unix)
     }
 
     return <>
 
-        <Dialog
+        {props.current.good && <Dialog
             open={dialog !== ''}
             TransitionComponent={Transition}
             keepMounted
@@ -82,7 +96,7 @@ const Real = props => {
                 </Button>
             </DialogActions>
 
-        </Dialog>
+        </Dialog>}
 
         <div style={{
             padding: '0 1rem 0 0',
@@ -104,7 +118,7 @@ const Real = props => {
                 <span style={{
                     fontSize: 20, fontWeight: 'bold',
                 }}>
-                Договор реализации от {toLocalTimeStr(props.current.good.unix)}
+                    {text}
             </span>
 
                 <IconButton
@@ -122,7 +136,8 @@ const Real = props => {
 
             <TextField label="Наименование"
                        style={fieldsStyle}
-                       value={props.current.good.model}
+                       value={model}
+                       onChange={e => props.current ? {} : setModel(e.target.value)}
             />
 
             <TextField label="Imei или S/N"
