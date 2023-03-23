@@ -4,13 +4,15 @@ import {connect} from "react-redux";
 import {Button, Dialog, DialogContent, DialogTitle, TextField} from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import {Print} from "./common/Print";
+import {createDate, Print} from "./common/Print";
 import PrintIcon from "@material-ui/icons/Print";
 import {toLocalTimeStr} from "./common/Time";
 import Slide from "@material-ui/core/Slide";
 import DialogActions from "@material-ui/core/DialogActions";
 
 import rest from "./Rest"
+import CategoryHandler from "./common/CategoryHandler";
+import {intInputHandler} from "./common/InputHandlers";
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -21,24 +23,66 @@ const cancelText = 'Договор реализации будет анулир�
 
 const Real = props => {
 
-    const [customer, setCustomer] = useState(props.current.customer ? props.current.customer : {})
+    const isNew = !props.current.good
+
+    const [customer, setCustomer] = useState(isNew ? {} : props.current.customer)
     const [dialog, setDialog] = useState('')
 
-    const [model, setModel] = useState(props.current.good ? props.current.good.model : '')
-    const [cost, setCost] = useState(0)
-    const [sum, setSum] = useState(0)
+    const [catId, setCatId] = useState(isNew ? 0 : props.current.good.category_id)
+    const [model, setModel] = useState(isNew ? '' : props.current.good.model)
+    const [imei, setImei] = useState(isNew ? '' : props.current.good.imei)
+    const [cost, setCost] = useState(isNew ? 0 : props.current.good.cost)
+    const [sum, setSum] = useState(isNew ? 0 : props.current.good.sum)
+    const [note, setNote] = useState(isNew ? '' : props.current.note)
+
+    const doc = props.app.docs.find(d => d.name === 'real')
+
+    const alias = {
+        today: createDate(isNew ? '' : props.current.good.unix * 1000),
+        organization_organization: props.app.organization.organization,
+        organization_inn: props.app.organization.inn,
+        fio: customer.fio,
+        phone_number: customer.phone_number,
+        birthday: customer.birthday ? createDate(customer.birthday) : '',
+        doc_sn: customer.doc_sn,
+        doc_date: customer.doc_date ? createDate(customer.doc_date) : '',
+        doc_division_name: customer.doc_division_name,
+        address: customer.address,
+        imei,
+        model,
+        cost,
+        remark: note
+    }
+
+
+    const needImei = () => {
+
+        let cid = catId
+
+        while (cid > 4) {
+
+            const showcase = [5, 38, 39, 40, 41, 44]
+
+            if (showcase.includes(cid)) return true
+
+            cid = props.app.categories.find(c => c.id === cid).parent_id
+
+        }
+
+        return false
+
+    }
 
     const fieldsStyle = {
         margin: '.4rem',
         width: '100%',
     }
 
-    const title = props.current.good
-        ? props.current.good.wo
+    const title = isNew
+        ? 'Принять на реализацию'
+        : props.current.good.wo
             ? 'Ваплата собственнику'
             : 'Снять с реализации'
-        : 'Принять на реализацию'
-
 
     const afterRes = res => {
 
@@ -59,18 +103,49 @@ const Real = props => {
 
     let wo
 
-    if (props.current.good && props.current.good.wo) {
+    if (!isNew && props.current.good.wo) {
         wo = props.current.good.ui_wo + ' ' + toLocalTimeStr(props.current.good.out_unix)
     }
 
     let text = 'Договор реализации'
-    if (props.current.good) {
-        text +=' от ' + toLocalTimeStr(props.current.good.unix)
+    if (!isNew) {
+        text += ' от ' + toLocalTimeStr(props.current.good.unix)
+    }
+
+    const action = () => {
+
+        if (isNew) {
+
+            const data = {
+                customer,
+                category_id: catId,
+                model,
+                sum,
+                cost
+            }
+
+            if (imei) data.imei = imei
+            if (props.app.current_stock_id) data.stock_id = props.app.current_stock_id
+
+            rest('real', 'Post', data)
+                .then(res => {
+
+                    if (res.status === 200) {
+                        Print(doc, alias)
+                        if (res.body.real) props.add(res.body.real)
+                    }
+
+                })
+
+        } else {
+            setDialog(props.current.good.wo ? 'checkout' : 'cancel')
+        }
+
     }
 
     return <>
 
-        {props.current.good && <Dialog
+        {isNew || <Dialog
             open={dialog !== ''}
             TransitionComponent={Transition}
             keepMounted
@@ -122,7 +197,7 @@ const Real = props => {
             </span>
 
                 <IconButton
-                    // onClick={() => Print(doc, alias)}
+                    onClick={() => Print(doc, alias)}
                 >
                     <PrintIcon/>
                 </IconButton>
@@ -134,35 +209,44 @@ const Real = props => {
                 setCustomer={setCustomer}
             />
 
+            <CategoryHandler
+                id={catId}
+                setId={setCatId}
+            />
+
             <TextField label="Наименование"
                        style={fieldsStyle}
                        value={model}
-                       onChange={e => props.current ? {} : setModel(e.target.value)}
+                       onChange={e => isNew ? setModel(e.target.value) : {}}
             />
 
-            <TextField label="Imei или S/N"
-                       style={fieldsStyle}
-                       value={props.current.good.imei}
-            />
+            {needImei() && <TextField label="Imei или S/N"
+                                      style={fieldsStyle}
+                                      value={imei}
+                                      onChange={e => isNew ? setImei(e.target.value) : {}}
+            />}
 
             <TextField label="Цена для витрины"
                        style={fieldsStyle}
-                       value={props.current.sum}
+                       value={sum}
+                       onChange={e => isNew ? intInputHandler(e.target.value, setSum) : {}}
             />
 
             <TextField label="Цена комитента"
                        style={fieldsStyle}
-                       value={props.current.cost}
+                       value={cost}
+                       onChange={e => isNew ? intInputHandler(e.target.value, setCost) : {}}
             />
 
-            {props.current.note && <TextField label="Примечание"
-                                              style={fieldsStyle}
-                                              value={props.current.note}
-            />}
+            <TextField label="Примечание"
+                       style={fieldsStyle}
+                       value={note}
+                       onChange={e => isNew ? setNote(e.target.value) : {}}
+            />
 
-            {props.current.good.wo && <TextField label="Статус"
-                                                 style={fieldsStyle}
-                                                 value={wo}
+            {!isNew && props.current.good.wo && <TextField label="Статус"
+                                                           style={fieldsStyle}
+                                                           value={wo}
             />}
 
             <div style={{
@@ -170,11 +254,10 @@ const Real = props => {
                 display: "flex",
                 justifyContent: 'space-around'
             }}>
-
                 <Button size="small"
-                        color={props.current.good.wo ? 'primary' : 'secondary'}
+                        color={isNew || props.current.good.wo ? 'primary' : 'secondary'}
                         variant="contained"
-                        onClick={() => setDialog(props.current.good.wo ? 'checkout' : 'cancel')}
+                        onClick={() => action()}
                 >
                     {title}
                 </Button>

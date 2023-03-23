@@ -10,7 +10,7 @@ const CategoryHandler = props => {
 
     const [treeOpen, setTreeOpen] = useState(false)
 
-    const category = props.app.categories.find(v => v.id === props.id)
+    const category = props.app.categories.find(c => c.id === props.id)
 
     const handleTree = id => {
         intInputHandler(id, props.setId)
