@@ -65,7 +65,7 @@ const Real = props => {
 
     let text = 'Договор реализации'
     if (props.current.good) {
-        text +='от' + toLocalTimeStr(props.current.good.unix)
+        text +=' от ' + toLocalTimeStr(props.current.good.unix)
     }
 
     return <>

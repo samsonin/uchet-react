@@ -11,19 +11,18 @@ import {
     TableRow,
     TextField
 } from "@material-ui/core";
+import TableHead from "@material-ui/core/TableHead";
+import SearchIcon from "@material-ui/icons/Search";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import uuid from "uuid";
-import Tree from "./Tree";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 
 import rest from "../components/Rest";
-import TableHead from "@material-ui/core/TableHead";
 import TwoLineInCell from "./common/TwoLineInCell";
-import SearchIcon from "@material-ui/icons/Search";
 import {toLocalTimeStr} from "./common/Time";
 import GoodModal from "./Modals/Good";
 import {groupAlias} from "./common/GroupAliases";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+import CategoryHandler from "./common/CategoryHandler";
 
 const oftenUsedButtons = [
     {label: 'Аксессуары', catId: 6},
@@ -37,7 +36,6 @@ const Store = props => {
     const [goods, setGoods] = useState([])
     const [good, setGood] = useState({})
     const [catId, setCatId] = useState(0)
-    const [isExpand, setIsExpand] = useState(false)
     const [error, setError] = useState(false)
     const [search, setSearch] = useState('')
     const [isMyStock, setIsMyStock] = useState(false)
@@ -129,8 +127,6 @@ const Store = props => {
 
             if (cat && cat.id > 6 && cat.id < 999) {
 
-                setIsExpand(false)
-
                 const r = oftenUsedButtons.find(b => b.catId === cat.id)
 
                 if (!r) oftenUsedButtons.push({
@@ -178,16 +174,16 @@ const Store = props => {
             hide={hide}
         />
 
-        <div style={style} >
+        <div style={style}>
 
-            {isExpand
-                ? <Tree categories={props.app.categories}
-                        onSelected={id => setCat(id)}
-                        finished={id => setCat(id)}
-                />
-                : <IconButton onClick={() => setIsExpand(!isExpand)}>
-                    <ExpandLessIcon/>
-                </IconButton>}
+            <CategoryHandler
+                id={catId}
+                setId={setCat}
+            />
+
+        </div>
+
+        <div style={style}>
 
             {oftenUsedButtons.map(b => <Button
                 key={uuid()}

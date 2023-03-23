@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
 import {
-    Grid,
     Button,
     Card,
     CardActionArea,
@@ -11,19 +10,19 @@ import {
     Fade,
     TextField,
 } from "@material-ui/core";
+import {makeStyles} from "@material-ui/core/styles";
+import {useSnackbar} from "notistack";
 
-import Tree from "../Tree";
 import {intInputHandler} from "../common/InputHandlers";
 import {toLocalTimeStr} from "../common/Time";
 import UsersSelect from "../common/UsersSelect";
 import IsPublicCheckBox from "../common/IsPublicCheckBox";
 import rest from "../Rest";
-import {makeStyles} from "@material-ui/core/styles";
 import {Print} from "../common/Print";
-import {useSnackbar} from "notistack";
 import {groupAlias} from "../common/GroupAliases";
 import AddCosts from "../common/AddCosts";
 import {line, note} from "../common/InputHandlers";
+import CategoryHandler from "../common/CategoryHandler";
 
 const woAlliases = {
     use: "В пользовании",
@@ -58,7 +57,6 @@ const useStyles = makeStyles((theme) => ({
     },
     card: {
         width: '100%',
-        // maxWidth: '400px'
     }
 }));
 
@@ -67,7 +65,6 @@ let file
 const GoodContent = props => {
 
     const [isDrag, setIsDrag] = useState(false)
-    const [treeOpen, setTreeOpen] = useState(false)
 
     const [image, setImage] = useState()
     const [picture, setPicture] = useState()
@@ -227,10 +224,6 @@ const GoodContent = props => {
 
     }
 
-    const handleTree = category_id => {
-        props.good.category_id = +category_id
-        setTreeOpen(false)
-    }
 
     const onDrag = (e, isLeave) => {
 
@@ -440,34 +433,10 @@ const GoodContent = props => {
                 : picture && pictureRender()}
 
             {isEditable
-                ? treeOpen
-                    ? <Grid container className="m-1 p-1">
-                        <Grid item xs={10} className="pt-1 pr-1">
-                            <Tree initialId={props.good.category_id}
-                                  categories={props.app.categories}
-                                  onSelected={id => props.good.category_id = +id}
-                                  finished={id => handleTree(id)}
-                            />
-                        </Grid>
-                        <Grid item xs={2}>
-                            <Button size="small" onClick={() => setTreeOpen(false)}
-                                    variant="outlined"
-                            >
-                                Ок
-                            </Button>
-                        </Grid>
-                    </Grid>
-                    : <Grid container className="m-1 p-1">
-                        <Grid item xs={3}>Категория:</Grid>
-                        <Grid item xs={9}>
-                            <Button size="small"
-                                    className="w-100"
-                                    onClick={() => setTreeOpen(true)}
-                            >
-                                {category ? category.name : 'Выбрать...'}
-                            </Button>
-                        </Grid>
-                    </Grid>
+                ? <CategoryHandler
+                    id={categoryId}
+                    setId={setCategoryId}
+                />
                 : category && line('Категория:', category.name, isEditable)}
 
             {line('Наименование:', model, isEditable, e => setModel(e.target.value))}

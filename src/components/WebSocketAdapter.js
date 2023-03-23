@@ -98,7 +98,7 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
 
                 sendIsFocus(true);
 
-                if (['daily', 'transit'].includes(window.location.pathname)){
+                if (['/daily', '/transit'].includes(window.location.pathname)){
                     rest('upd')
                 }
 

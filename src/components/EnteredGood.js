@@ -1,22 +1,12 @@
-import React, {useState} from "react";
-import {Button, TextField, Typography} from "@material-ui/core";
-import Tree from "./Tree";
+import React from "react";
 import {connect} from "react-redux";
+
+import {TextField, Typography} from "@material-ui/core";
+
+import CategoryHandler from "./common/CategoryHandler";
 
 
 const EnteredGood = props => {
-
-    const [isTreeOpen, setIsTreeOpen] = useState(false)
-
-    const category = props.app.categories.find(c => c.id === props.category_id)
-
-
-    const handleTree = id => {
-
-        setIsTreeOpen(false)
-        props.setCategory_id(+id)
-
-    }
 
     const style = {
         width: '100%',
@@ -44,21 +34,10 @@ const EnteredGood = props => {
 
         <div style={style}>
 
-            {isTreeOpen
-                ? <Tree
-                    initialId={props.category_id}
-                    categories={props.app.categories}
-                    finished={id => handleTree(id)}
-                    onSelected={id => {
-                        console.log(id)
-                    }}
-                />
-                : <Button size="small"
-                          className="w-100"
-                          onClick={() => setIsTreeOpen(true)}
-                >
-                    {category ? category.name : 'Выбрать категорию...'}
-                </Button>}
+            <CategoryHandler
+                id={props.category_id}
+                setId={props.setCategory_id}
+            />
 
         </div>
 

@@ -63,17 +63,17 @@ const Reals = () => {
                             </Typography>
                         </TableCell>
                         <TableCell align="right">
-                            <Tooltip title={'Принять на реализацию'}>
-                                <IconButton style={{
-                                    padding: 0,
-                                    marginLeft: '.1rem',
-                                    marginRight: '.1rem',
-                                }}
-                                            onClick={() => setCurrentReal({})}
-                                >
-                                    <AddCircleIcon/>
-                                </IconButton>
-                            </Tooltip>
+                            {/*<Tooltip title={'Принять на реализацию'}>*/}
+                            {/*    <IconButton style={{*/}
+                            {/*        padding: 0,*/}
+                            {/*        marginLeft: '.1rem',*/}
+                            {/*        marginRight: '.1rem',*/}
+                            {/*    }}*/}
+                            {/*                onClick={() => setCurrentReal({})}*/}
+                            {/*    >*/}
+                            {/*        <AddCircleIcon/>*/}
+                            {/*    </IconButton>*/}
+                            {/*</Tooltip>*/}
                         </TableCell>
                     </TableRow>
 
