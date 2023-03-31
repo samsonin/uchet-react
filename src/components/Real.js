@@ -13,6 +13,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import rest from "./Rest"
 import CategoryHandler from "./common/CategoryHandler";
 import {intInputHandler, line} from "./common/InputHandlers";
+import {useSnackbar} from "notistack";
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -34,6 +35,8 @@ const Real = props => {
     const [cost, setCost] = useState(isNew ? 0 : props.current.good.cost)
     const [sum, setSum] = useState(isNew ? 0 : props.current.good.sum)
     const [note, setNote] = useState(isNew ? '' : props.current.note)
+
+    const {enqueueSnackbar} = useSnackbar()
 
     const doc = props.app.docs.find(d => d.name === 'real')
 
@@ -128,6 +131,13 @@ const Real = props => {
 
         if (isNew) {
 
+            let errorText
+            if (!customer.fio) errorText = 'ФИО'
+            else if (!catId) errorText = 'категорию'
+            else if (!model) errorText = 'наимменование'
+            else if (!sum) errorText = 'цену для витрины'
+            else if (!cost) errorText = 'цену комитента'
+
             const data = {
                 customer,
                 category_id: catId,
@@ -135,6 +145,8 @@ const Real = props => {
                 sum,
                 cost
             }
+
+            if (errorText) return enqueueSnackbar('введите ' + errorText, {variant: 'error'})
 
             if (imei) data.imei = imei
             if (props.app.current_stock_id) data.stock_id = props.app.current_stock_id
