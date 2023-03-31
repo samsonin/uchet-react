@@ -12,7 +12,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 
 import rest from "./Rest"
 import CategoryHandler from "./common/CategoryHandler";
-import {intInputHandler} from "./common/InputHandlers";
+import {intInputHandler, line} from "./common/InputHandlers";
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -36,6 +36,16 @@ const Real = props => {
     const [note, setNote] = useState(isNew ? '' : props.current.note)
 
     const doc = props.app.docs.find(d => d.name === 'real')
+
+    const isSame = !isNew
+        && catId === props.current.good.category_id
+        && model === props.current.good.model
+        && imei === props.current.good.imei
+        && cost === props.current.good.cost
+        && sum === props.current.good.sum
+        && note === props.current.good.note
+
+    const isWo = !isNew && !!props.current.good.wo
 
     const alias = {
         today: createDate(isNew ? '' : props.current.good.unix * 1000),
@@ -80,9 +90,11 @@ const Real = props => {
 
     const title = isNew
         ? 'Принять на реализацию'
-        : props.current.good.wo
+        : isWo
             ? 'Ваплата собственнику'
-            : 'Снять с реализации'
+            : isSame
+                ? 'Снять с реализации'
+                : 'Сохранить'
 
     const afterRes = res => {
 
@@ -101,10 +113,10 @@ const Real = props => {
     const cancel = () => rest('real/' + props.current.id, 'DELETE')
         .then(res => afterRes(res))
 
-    let wo
+    let ui_wo
 
-    if (!isNew && props.current.good.wo) {
-        wo = props.current.good.ui_wo + ' ' + toLocalTimeStr(props.current.good.out_unix)
+    if (!isNew && isWo) {
+        ui_wo = props.current.good.ui_wo + ' ' + toLocalTimeStr(props.current.good.out_unix)
     }
 
     let text = 'Договор реализации'
@@ -138,8 +150,14 @@ const Real = props => {
                 })
 
         } else {
-            setDialog(props.current.good.wo ? 'checkout' : 'cancel')
+            setDialog(isWo ? 'checkout' : 'cancel')
         }
+
+    }
+
+    const handler = (value, setFunction) => {
+
+        if (isNew) intInputHandler(value, setFunction)
 
     }
 
@@ -157,7 +175,7 @@ const Real = props => {
             </DialogTitle>
 
             <DialogContent>
-                {props.current.good.wo ? checkoutText : cancelText}
+                {isWo ? checkoutText : cancelText}
             </DialogContent>
 
             <DialogActions>
@@ -165,7 +183,7 @@ const Real = props => {
                         color="secondary">
                     Отмена
                 </Button>
-                <Button onClick={() => props.current.good.wo ? checkout() : cancel()}
+                <Button onClick={() => isWo ? checkout() : cancel()}
                         color="primary">
                     Ок
                 </Button>
@@ -174,7 +192,7 @@ const Real = props => {
         </Dialog>}
 
         <div style={{
-            padding: '0 1rem 0 0',
+            padding: '.5rem',
             background: '#fff',
             borderRadius: 3
         }}>
@@ -226,17 +244,9 @@ const Real = props => {
                                       onChange={e => isNew ? setImei(e.target.value) : {}}
             />}
 
-            <TextField label="Цена для витрины"
-                       style={fieldsStyle}
-                       value={sum}
-                       onChange={e => isNew ? intInputHandler(e.target.value, setSum) : {}}
-            />
+            {line('Цена для витрины:', sum, !isWo, e => handler(e.target.value, setSum))}
 
-            <TextField label="Цена комитента"
-                       style={fieldsStyle}
-                       value={cost}
-                       onChange={e => isNew ? intInputHandler(e.target.value, setCost) : {}}
-            />
+            {line('Цена комитента:', cost, !isWo, e => handler(e.target.value, setCost))}
 
             <TextField label="Примечание"
                        style={fieldsStyle}
@@ -244,9 +254,9 @@ const Real = props => {
                        onChange={e => isNew ? setNote(e.target.value) : {}}
             />
 
-            {!isNew && props.current.good.wo && <TextField label="Статус"
-                                                           style={fieldsStyle}
-                                                           value={wo}
+            {!isNew && isWo && <TextField label="Статус"
+                                          style={fieldsStyle}
+                                          value={ui_wo}
             />}
 
             <div style={{
@@ -255,7 +265,7 @@ const Real = props => {
                 justifyContent: 'space-around'
             }}>
                 <Button size="small"
-                        color={isNew || props.current.good.wo ? 'primary' : 'secondary'}
+                        color={isNew || isWo ? 'primary' : 'secondary'}
                         variant="contained"
                         onClick={() => action()}
                 >

@@ -40,7 +40,7 @@ const Orders = props => {
 
     const [id, setId] = useState(0)
     const [customer, setCustomer] = useState(initCustomer)
-    const [createdDate, setCreatedDate] = useState(() => today)
+    const [createdDate, setCreatedDate] = useState()
     const [createdDate2, setCreatedDate2] = useState()
     const [checkoutDate, setCheckoutDate] = useState()
     const [checkoutDate2, setCheckoutDate2] = useState()
@@ -157,18 +157,6 @@ const Orders = props => {
     const getMy = () => rest('allowedOrders')
         .then(res => afterRest(res))
 
-    const updateCustomer = (name, val) => {
-
-        setCustomer(prev => {
-
-            const newState = {...prev}
-            newState[name] = val
-            return newState
-
-        })
-
-    }
-
     const renderStatus = (stock_id, order_id, status_id) => {
 
         const status = props.app.statuses.find(s => s.id === status_id)
@@ -248,7 +236,7 @@ const Orders = props => {
 
             {!id && <CustomersSelect
                 customer={customer}
-                updateCustomer={updateCustomer}
+                setCustomer={setCustomer}
                 onlySearch={true}
             />}
 

@@ -70,17 +70,6 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         })
     }
 
-    const updateCustomer = (name, val) => {
-
-        setCustomer(prev => {
-
-            const newState = {...prev}
-            newState[name] = val
-            return newState
-
-        })
-    }
-
     // TODO уточнить в течении смены или нет
     const isToday = time => 0.5 > (new Date() - new Date(time)) / 86400000
 
@@ -356,7 +345,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         {customer
             ? <CustomersSelect
                 customer={customer}
-                updateCustomer={updateCustomer}
+                setCustomer={setCustomer}
                 disabled={!!order || !isEditable}
             />
             : null}

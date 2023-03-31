@@ -45,16 +45,22 @@ export const line = (label, value, isEditable, onChange) => {
 
     const style = {
         display: 'flex',
-        padding: '1rem 0'
+        padding: '1rem .5rem'
     }
 
     const isEd = isEditable && typeof (onChange) === 'function'
 
     if (!isEd) style.borderBottom = '1px solid lightgray'
 
+    const isInt = Number.isInteger(value)
+
+    const spanStyle = {width: isInt ? '75%' : isEd ? '40%' : '50%'}
+
     return <div style={style}>
 
-        <span style={{width: '40%',}}>{label}</span>
+        <span style={spanStyle}>
+            {label}
+        </span>
 
         {isEd
             ? <TextField fullWidth value={value || ''} onChange={onChange}/>

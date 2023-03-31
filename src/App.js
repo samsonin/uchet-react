@@ -74,7 +74,7 @@ const App = props => {
 
     const [orderBarcode, setOrderBarcode] = useState()
     const [ourBarcode, setOurBarcode] = useState()
-    // const [ourBarcode, setOurBarcode] = useState('115104006049')
+    // const [ourBarcode, setOurBarcode] = useState('112116021526')
     const [globalBarcode, setGlobalBarcode] = useState()
     const [enterPress, setEnterPress] = useState(false)
     const [scrollDown, setScrollDown] = useState(false)
