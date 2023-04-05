@@ -388,8 +388,7 @@ const GoodContent = props => {
                             <CardMedia
                                 component="img"
                                 alt={props.good.model}
-                                image={image}
-                            />
+                                image={image}                            />
                         </CardActionArea>
                         <CardActions>
                             <Button size="small" color="primary"
