@@ -478,7 +478,7 @@ const GoodContent = props => {
                 </ListSubheader>
             }>
                 {goodsForRepair.map(g => <ListItem
-                    key={'listitemkeyingoodmodalsforrepair' + g.barcode}
+                    key={'list-item-key-in-good-modals-for-repair' + g.barcode}
                 >
                     <ListItemText primary={g.model} secondary={g.remcost}/>
                     <IconButton
