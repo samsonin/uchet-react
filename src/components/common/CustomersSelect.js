@@ -16,6 +16,18 @@ export default function (props) {
     const [customers, setCustomers] = useState([])
     const [value, setValue] = useState({})
 
+    const upd = (name, val) => {
+
+        props.setCustomer(prev => {
+
+            const newState = {...prev}
+            newState[name] = val
+            return newState
+
+        })
+
+    }
+
     useEffect(() => {
 
         setValue(props.customer)
@@ -26,8 +38,9 @@ export default function (props) {
     const handlerInput = (val, reason, name) => {
 
         if (reason === 'clear') {
-            props.updateCustomer('phone_number', '')
-            props.updateCustomer('fio', '')
+            upd('phone_number', '')
+            upd('fio', '')
+            upd('id', 0)
             return
         }
 
@@ -36,7 +49,7 @@ export default function (props) {
         if (name === 'phone_number') val = phoneNumberHandler(val)
         if (name === 'fio') val = fioHandler(val)
 
-        props.updateCustomer(name, val)
+        upd(name, val)
 
         if (val.length < 6) return
 
@@ -57,7 +70,7 @@ export default function (props) {
     const handler = val => {
 
         setValue(val)
-        if (val) fields.map(f => props.updateCustomer(f, val[f]))
+        if (val) fields.map(f => upd(f, val[f]))
         setCustomers([])
 
     }

@@ -10,7 +10,7 @@ export const siteMap = isAdmin => {
         {id: 11, path: "arrival", text: "Оприходование"},
         {id: 14, path: "transit", text: "Транзит"},
         {id: 15, path: "prepaids", text: "Предоплаты"},
-        {id: 16, path: "showcase", text: "Техника"},
+        {id: 16, path: "reals", text: "Реализация"},
         {id: 17, path: "pledges", text: "Залоги"},
 
         {id: 21, path: "customers", text: "Физические лица"},
@@ -18,6 +18,7 @@ export const siteMap = isAdmin => {
         {id: 24, path: "call_records", text: "Записи разговоров"},
 
         {id: 31, path: "daily", text: "Ежедневный отчет"},
+        {id: 35, path: "sales", text: "Поиск по продажам"},
 
         {id: 53, path: "integration/prices", text: "Прайс-листы"},
 

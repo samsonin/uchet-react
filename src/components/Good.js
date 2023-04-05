@@ -18,13 +18,14 @@ export default function (props) {
     }, [])
 
     return good
-        ? <div>
-            <GoodActions
-                good={good}
-            />
-            <GoodContent
-                good={good}
-            />
+        ? <div style={{
+            backgroundColor: '#fff',
+            borderRadius: 5,
+            padding: '1rem'
+        }}
+        >
+            <GoodActions good={good}/>
+            <GoodContent good={good}/>
         </div>
         : <div>
             Good

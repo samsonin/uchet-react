@@ -13,7 +13,7 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         : ''
 
     let circularln = document.getElementById('circularln');
-    if (circularln) circularln.style.display = '';
+    if (circularln && url !== 'upd') circularln.style.display = '';
 
     let init = {
         method,

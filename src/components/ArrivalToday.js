@@ -153,18 +153,10 @@ const ArrivalToday = props => {
                 <TableHead>
 
                     <TableRow>
-                        {!isGroup && <TableCell>
-                            #
-                        </TableCell>}
-                        <TableCell>
-                            Категория
-                        </TableCell>
-                        <TableCell>
-                            Наименование
-                        </TableCell>
-                        <TableCell>
-                            Откуда
-                        </TableCell>
+                        {!isGroup && <TableCell>#</TableCell>}
+                        <TableCell>Категория</TableCell>
+                        <TableCell>Наименование</TableCell>
+                        <TableCell>Откуда</TableCell>
                         {isGroup && <TableCell>Кол-во</TableCell>}
                         <TableCell/>
                     </TableRow>
@@ -208,17 +200,11 @@ const ArrivalToday = props => {
                             let user = props.users.find(u => u.id === good.responsible_id)
                             let category = props.categories.find(c => c.id === good.category_id)
 
-                            good.stock = stock
-                                ? stock.name
-                                : ''
+                            good.stock = stock ? stock.name : ''
 
-                            good.user = user
-                                ? user.name
-                                : ''
+                            good.user = user ? user.name : ''
 
-                            good.category = category
-                                ? category.name
-                                : 'нет'
+                            good.category = category ? category.name : 'нет'
 
                             return <TableRow
                                 key={uuidv4()}
@@ -227,21 +213,12 @@ const ArrivalToday = props => {
                                     background: !isGroup && good.isInStock ? 'green' : 'white'
                                 }}
                             >
-                                {isGroup || <TableCell>
-                                    {good.id}
-                                </TableCell>}
-                                <TableCell>
-                                    {good.category}
-                                </TableCell>
-                                <TableCell>
-                                    {good.model}
-                                </TableCell>
-                                <TableCell>
-                                    {good.ui_wf}
-                                </TableCell>
-                                <TableCell>
-                                    {good.count}
-                                </TableCell>
+                                {isGroup || <TableCell>{good.id}</TableCell>}
+                                <TableCell>{good.category}</TableCell>
+                                <TableCell>{good.model}</TableCell>
+                                <TableCell>{good.ui_wf}</TableCell>
+                                <TableCell>{good.count}</TableCell>
+
                                 <TableCell>
                                     {props.current_stock_id
                                         ? <Tooltip title="штрихкод">

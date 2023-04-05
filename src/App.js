@@ -46,6 +46,11 @@ import Inventory from "./components/Inventory";
 import ArrivalToday from "./components/ArrivalToday";
 import Store from "./components/Store";
 import Zp from "./components/Zp";
+import Produce from "./components/Produce";
+import Reals from "./components/Reals";
+import {useSnackbar} from "notistack";
+import {Button} from "@material-ui/core";
+import Sales from "./components/Sales";
 
 
 const parseJwt = token => {
@@ -70,11 +75,14 @@ const App = props => {
 
     const [orderBarcode, setOrderBarcode] = useState()
     const [ourBarcode, setOurBarcode] = useState()
-    // const [ourBarcode, setOurBarcode] = useState('115104006041')
+    // const [ourBarcode, setOurBarcode] = useState('112116021526')
     const [globalBarcode, setGlobalBarcode] = useState()
     const [enterPress, setEnterPress] = useState(false)
+    const [scrollDown, setScrollDown] = useState(false)
 
     const barcode = useRef('')
+
+    const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
     const isBarcodeValid = barcode => {
 
@@ -97,6 +105,16 @@ const App = props => {
     useEffect(() => {
 
         document.addEventListener('keydown', handleKeyPress)
+
+        window.addEventListener("scroll", () => {
+
+            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+
+                setScrollDown(true)
+
+            }
+
+        }, false);
 
         window.location.search
             .replace('?', '')
@@ -193,6 +211,24 @@ const App = props => {
 
     return <>
 
+        {props.app.need_callbacks && props.app.need_callbacks.map(nc => {
+
+            const action = snackbarId => <Button onClick={() => closeSnackbar(snackbarId)}
+                                                 size="small"
+                                                 variant="outlined"
+            >
+                Ok
+            </Button>
+
+            enqueueSnackbar(nc.phone_number, {
+                variant: 'error',
+                persist: true,
+                preventDuplicate: true,
+                action
+            })
+
+        })}
+
         <Header className={'d-print-none'}/>
 
         <div className="d-flex d-print-none" id="wrapper">
@@ -240,6 +276,7 @@ const App = props => {
                             </>}
 
                             <Route exact path="/prepaids" component={Prepaids}/>
+                            <Route exact path="/reals" component={Reals}/>
                             <Route exact path="/zp" component={Zp}/>
                             <Route exact path="/showcase" component={Showcase}/>
                             <Route exact path="/showcase/buy" component={Buy}/>
@@ -251,6 +288,7 @@ const App = props => {
                                 <Route exact path="/pledges" component={Pledges}/>
                                 <Route exact path="/pledges/:id" component={Pledges}/>
                                 <Route exact path="/entities/:id" component={Entity}/>
+                                <Route exact path="/sales" component={Sales}/>
                                 <Route exact path="/order" component={Order}/>
                                 <Route exact path="/order/:stock_id/:order_id" component={Order}/>
                                 <Route path="/orders" render={props => <Orders
@@ -266,6 +304,8 @@ const App = props => {
                             <Route path="/store" render={props => <Store
                                 enterPress={enterPress}
                                 setEnterPress={setEnterPress}
+                                scrollDown={scrollDown}
+                                setScrollDown={setScrollDown}
                                 {...props}
                             />}/>
 
@@ -286,7 +326,12 @@ const App = props => {
                                     {...props}
                                 />}/>
                                 <Route path="/consignments" component={Consignments}/>
-
+                                <Route path="/produce"
+                                       render={props => <Produce
+                                           setGood={setGood}
+                                           {...props}
+                                       />}
+                                />
                             </>}
 
                             <Route path="/transit" render={props => <Transit

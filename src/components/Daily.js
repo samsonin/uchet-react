@@ -31,7 +31,7 @@ import Consignment from "./Consignment";
 import DailyModal from "./Modals/Daily";
 import {numberInputHandler} from "./common/InputHandlers";
 import TwoLineInCell from "./common/TwoLineInCell";
-import {today} from "./common/Time";
+import {setInRange, today} from "./common/Time";
 
 const mainUrl = document.location.protocol + '//' + document.location.host
 
@@ -59,7 +59,6 @@ const useStyles = makeStyles(() => ({
     }
 }))
 
-const minDate = '2020-01-01'
 
 const prepaidArray = ['предоплата']
 const salesArray = ['продажа', 'возврат', 'из залога', 'выкупили', 'продали']
@@ -94,11 +93,6 @@ const Daily = props => {
     const validStocks = props.app.stocks
         .filter(s => [2, 4].includes(props.auth.user_id) || validStockIds.includes(s.id))
 
-    const setInRange = date => date > today
-        ? today
-        : date < minDate
-            ? minDate
-            : date
 
     useEffect(() => {
 

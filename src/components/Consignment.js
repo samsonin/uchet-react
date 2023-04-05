@@ -23,15 +23,17 @@ import ClearIcon from '@material-ui/icons/Clear';
 import Button from "@material-ui/core/Button";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-
-import TreeModal from "./TreeModal";
-import rest from "../components/Rest";
-import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+
+import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
+
+import TreeModal from "./TreeModal";
+import rest from "../components/Rest";
+
 
 const emptyTr = {
     barcode: '',
@@ -527,9 +529,7 @@ const Consignment = props => {
 
             <TreeModal isOpen={state.currentTr !== false}
                        onClose={handleCategories}
-                       initialcategory_id={currentTr
-                           ? currentTr.category_id
-                           : 0}
+                       initialcategory_id={currentTr ? currentTr.category_id : 0}
             />
 
             {props.close

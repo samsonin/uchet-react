@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import {InputAdornment, List, ListItem, ListItemText} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
@@ -14,24 +14,9 @@ export const GoodSearch = ({onSelected}) => {
     const [code, setCode] = useState('')
     const [goods, setGoods] = useState([])
 
+    const isRest = useRef(false)
+
     const {enqueueSnackbar} = useSnackbar()
-
-    const searchGood = () => {
-
-        rest('goods?code=' + code)
-            .then(res => {
-                    if (res.status === 200 && res.body.length) {
-
-                        if (res.body.length === 1) onSelected(res.body[0], afterRes)
-                        else setGoods(res.body)
-
-                    } else {
-                        enqueueSnackbar('Не найдено', {variant: 'error'})
-                    }
-                }
-            )
-
-    }
 
     const afterRes = (isOk, error) => {
         if (isOk) {
@@ -40,6 +25,35 @@ export const GoodSearch = ({onSelected}) => {
         } else {
             enqueueSnackbar('ошибка ' + error, {variant: "error"})
         }
+    }
+
+    const selectHandler = g => {
+
+        if (isRest.current) return
+        isRest.current = true
+
+        onSelected(g, afterRes)
+
+    }
+
+    const searchGood = () => {
+
+        rest('goods?code=' + code)
+            .then(res => {
+
+                isRest.current = false
+
+                if (res.status === 200 && res.body.length) {
+
+                        if (res.body.length === 1) selectHandler(res.body[0])
+                        else setGoods(res.body)
+
+                    } else {
+                        enqueueSnackbar('Не найдено', {variant: 'error'})
+                    }
+                }
+            )
+
     }
 
     return <div style={{
@@ -54,7 +68,7 @@ export const GoodSearch = ({onSelected}) => {
                 <List>
                     {goods.map(g => <ListItem key={'listitemkeyinordercost' + g.barcode}
                                               button
-                                              onClick={() => onSelected(g, afterRes)}
+                                              onClick={() => selectHandler(g)}
                         >
                             <ListItemText
                                 primary={g.model}

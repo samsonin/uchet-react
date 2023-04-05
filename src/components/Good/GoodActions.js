@@ -81,7 +81,7 @@ const GoodActions = props => {
     </Tooltip>
 
     const actions = {
-        open: renderIcon('открыть в отдельной вкладке', () => props.open(), <AspectRatioIcon />),
+        open: renderIcon('открыть в отдельной вкладке', () => props.open(), <AspectRatioIcon/>),
         transit: renderIcon(props.good.wo ? 'Из транзита' : 'В транзит',
             () => transit(props.good.wo !== 't'),
             <i className="fas fa-truck"/>),
@@ -111,15 +111,30 @@ const GoodActions = props => {
 
     }
 
-    return props.good.wo
-        ? props.good.wo.indexOf('sale') > -1 && actions.check
-        : props.good.stock_id === props.app.current_stock_id && <>
-        {typeof(props.open === 'function') && actions.open}
-        {canPrintBarcode && actions.barcode}
-        {actions.transit}
-        {actions.reject}
-        {actions.repair}
-        {props.auth.admin && actions.use}
-    </>
+    return <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginRight: '2rem',
+    }}>
+
+        <span style={{fontWeight: 'bold'}}>
+                    {'#' + props.good.id}
+        </span>
+
+        <div>
+            {props.good.wo
+                ? props.good.wo.indexOf('sale') > -1 && actions.check
+                : props.good.stock_id === props.app.current_stock_id && <>
+                {typeof (props.open === 'function') && actions.open}
+                {canPrintBarcode && actions.barcode}
+                {actions.transit}
+                {actions.reject}
+                {actions.repair}
+                {props.auth.admin && actions.use}
+            </>}
+        </div>
+
+    </div>
+
 }
 export default connect(state => state)(GoodActions)

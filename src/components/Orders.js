@@ -16,11 +16,13 @@ import {useSnackbar} from "notistack";
 import rest from "../components/Rest"
 import CustomersSelect from "../components/common/CustomersSelect"
 import TwoLineInCell from "./common/TwoLineInCell";
-import {toLocalTimeStr, today} from "./common/Time"
+import {toLocalTimeStr} from "./common/Time"
 import {intInputHandler} from "./common/InputHandlers";
 import UsersSelect from "./common/UsersSelect";
 import StatusesSelect from "./common/StatusesSelect";
 import {OrderText} from "./common/OrderText"
+import StocksCheck from "./common/StocksCheck";
+import DateInterval from "./common/DateInterval";
 
 const mainUrl = document.location.protocol + '//' + document.location.host
 
@@ -35,12 +37,12 @@ const Orders = props => {
     const [parameters, setParameters] = useState(false)
 
     const [stocks, setStocks] = useState(() => props.app.stocks
-            .map(s => s.is_valid ? s.id : null)
-            .filter(s => s))
+        .map(s => s.is_valid ? s.id : null)
+        .filter(s => s))
 
     const [id, setId] = useState(0)
     const [customer, setCustomer] = useState(initCustomer)
-    const [createdDate, setCreatedDate] = useState(() => today)
+    const [createdDate, setCreatedDate] = useState()
     const [createdDate2, setCreatedDate2] = useState()
     const [checkoutDate, setCheckoutDate] = useState()
     const [checkoutDate2, setCheckoutDate2] = useState()
@@ -58,24 +60,6 @@ const Orders = props => {
     const inputRef = useRef();
 
     const position = props.app.positions.find(p => p.id === props.auth.position_id)
-
-    const handleStocks = (stockId, checked) => {
-
-        setStocks(prev => {
-
-            if (checked) {
-
-                let nextStocks = [...prev]
-                nextStocks.push(stockId)
-                return nextStocks
-
-            } else {
-
-                return prev.filter(s => s !== stockId)
-
-            }
-        })
-    }
 
     const afterRest = res => {
 
@@ -157,18 +141,6 @@ const Orders = props => {
     const getMy = () => rest('allowedOrders')
         .then(res => afterRest(res))
 
-    const updateCustomer = (name, val) => {
-
-        setCustomer(prev => {
-
-            const newState = {...prev}
-            newState[name] = val
-            return newState
-
-        })
-
-    }
-
     const renderStatus = (stock_id, order_id, status_id) => {
 
         const status = props.app.statuses.find(s => s.id === status_id)
@@ -248,62 +220,32 @@ const Orders = props => {
 
             {!id && <CustomersSelect
                 customer={customer}
-                updateCustomer={updateCustomer}
+                setCustomer={setCustomer}
                 onlySearch={true}
             />}
 
             {!id && !(customer.id || customer.fio || customer.phone_number) && <>
                 <Grid item className="w-100 m-2 p-2">
 
-                    {props.app.stocks.map(s => s.is_valid
-                        ? <FormControlLabel
-                            key={'formcntrinordersstocks' + s.id}
-                            control={<Checkbox
-                                color="primary"
-                                key={'stocksonordersseach' + s.id}
-                                checked={stocks.includes(s.id)}
-                                onChange={e => handleStocks(s.id, e.target.checked)}
-                            />}
-                            label={s.name}
-                        />
-                        : null
-                    )}
+                    <StocksCheck stocks={stocks} setStocks={setStocks}/>
 
                 </Grid>
 
-                <Grid item className="w-100 m-2 p-2">
-                    Заказ создан с
-                    <TextField
-                        type="date"
-                        className={"m-2 p-2"}
-                        value={createdDate}
-                        onChange={e => setCreatedDate(e.target.value)}
-                    />
-                    по
-                    <TextField
-                        type="date"
-                        className={"m-2 p-2"}
-                        value={createdDate2}
-                        onChange={e => setCreatedDate2(e.target.value)}
-                    />
-                </Grid>
+                <DateInterval
+                    label="Заказ создан"
+                    date1={createdDate}
+                    date2={createdDate2}
+                    setDate1={setCreatedDate}
+                    setDate2={setCreatedDate2}
+                />
 
-                <Grid item className="w-100 m-2 p-2">
-                    Заказ закрыт с
-                    <TextField
-                        type="date"
-                        className={"m-2 p-2"}
-                        value={checkoutDate}
-                        onChange={e => setCheckoutDate(e.target.value)}
-                    />
-                    по
-                    <TextField
-                        type="date"
-                        className={"m-2 p-2"}
-                        value={checkoutDate2}
-                        onChange={e => setCheckoutDate2(e.target.value)}
-                    />
-                </Grid>
+                <DateInterval
+                    label="Заказ закрыт"
+                    date1={checkoutDate}
+                    date2={checkoutDate2}
+                    setDate1={setCheckoutDate}
+                    setDate2={setCheckoutDate2}
+                />
 
                 <UsersSelect
                     user={masterId}

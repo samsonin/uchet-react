@@ -81,9 +81,9 @@ const Showcase = props => {
         >
 
             <Select style={{margin: '1rem'}}
-                value={status}
-                onChange={e => setStatus(e.target.value)}
-                label="статус"
+                    value={status}
+                    onChange={e => setStatus(e.target.value)}
+                    label="статус"
             >
                 {Object.entries(statuses)
                     .map(([index, name]) => <MenuItem key={'menuiteminshowcasestatuseskey' + index}

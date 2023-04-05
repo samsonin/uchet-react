@@ -136,7 +136,7 @@ const Prepaid = props => {
                         setPresum(res.body.presum)
                         setSum(res.body.sum)
                         setStatus(status)
-                        if (res.body.customer) fields.map(f => updateCustomer(f, res.body.customer[f]))
+                        if (res.body.customer) setCustomer(res.body.customer)
                         setNote(res.body.note)
 
                     }
@@ -245,18 +245,6 @@ const Prepaid = props => {
 
     }
 
-    const updateCustomer = (name, val) => {
-
-        setCustomer(prev => {
-
-            const newState = {...prev}
-            newState[name] = val
-            return newState
-
-        })
-
-    }
-
     const alias = {
         organization_organization: props.app.organization.organization,
         organization_legal_address: props.app.organization.legal_address,
@@ -320,8 +308,8 @@ const Prepaid = props => {
 
             <CustomersSelect
                 customer={customer}
+                setCustomer={setCustomer}
                 disabled={disabled}
-                updateCustomer={updateCustomer}
             />
 
             {id

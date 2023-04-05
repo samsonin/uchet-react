@@ -24,6 +24,7 @@ const probableKeys = [
     'organization',
     'config',
     'fields',
+    'need_callbacks',
     'docs',
     'entities',
     'providers',
