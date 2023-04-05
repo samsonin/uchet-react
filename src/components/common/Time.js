@@ -26,5 +26,10 @@ export const toLocalTimeStr = (unix, needTwoLine = false) => {
 
 }
 
+export const minDate = '2015-07-28'
+
 const full = i => i > 9 ? i : '0' + i
 export const today = (new Date()).getFullYear() + '-' + full(1 + (new Date()).getMonth()) + '-' + full((new Date()).getDate())
+
+export const setInRange = date => date > today ? today : date < minDate ? minDate : date
+
