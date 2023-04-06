@@ -327,7 +327,6 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                     : <StatusesSelect
                         status={status_id}
                         setStatus={setStatus_id}
-                        statuses={app.statuses}
                         disabled={!isEditable}
                     />}
                 <UsersSelect

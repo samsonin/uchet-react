@@ -258,7 +258,6 @@ const Orders = props => {
 
                 <StatusesSelect
                     status={statusId}
-                    statuses={props.app.statuses}
                     setStatus={setStatusId}
                     empty
                 />

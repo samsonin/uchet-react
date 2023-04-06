@@ -1,10 +1,12 @@
 import React from "react";
+import {connect} from "react-redux";
+
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 
-export default function ({statuses, status, setStatus, disabled, empty}) {
+const StatusesSelect = ({status, setStatus, disabled, empty, statuses}) => {
 
     return <FormControl variant="outlined" className={'w-100 p-1 m-1'}>
         <InputLabel id="funds-statuses-control-select-outlined-label">Статус</InputLabel>
@@ -29,3 +31,5 @@ export default function ({statuses, status, setStatus, disabled, empty}) {
     </FormControl>
 
 }
+
+export default connect(state => state.app)(StatusesSelect)
