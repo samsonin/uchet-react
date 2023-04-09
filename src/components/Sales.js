@@ -5,10 +5,17 @@ import DateInterval from "./common/DateInterval";
 import TextField from "@material-ui/core/TextField";
 import {intInputHandler} from "./common/InputHandlers";
 import UsersSelect from "./common/UsersSelect";
-import {InputAdornment} from "@material-ui/core";
+import {Button, InputAdornment} from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import ActionsSelect from "./common/ActionsSelect";
+import {useSnackbar} from "notistack";
 
+
+const style = {
+    width: '100%',
+    margin: '.5em',
+    padding: '.5em',
+}
 
 const Sales = props => {
 
@@ -19,14 +26,28 @@ const Sales = props => {
     const [date2, setDate2] = useState()
     const [action, setAction] = useState()
     const [str, setStr] = useState()
-    const [sum, setSum] = useState()
+    const [sum, setSum] = useState(0)
     const [userId, setUserId] = useState()
+    const [error, setError] = useState(false)
+
+    const {enqueueSnackbar} = useSnackbar()
+
+    const isEmpty = !(date1 || date2 || action || str || sum)
+    const find = () => {
+
+        if (isEmpty) {
+            setError(true)
+            return enqueueSnackbar('введите параметры поиска', {variant: 'error'})
+        }
+
+    }
 
     return <div
         style={{
             backgroundColor: '#fff',
             borderRadius: 5,
-            padding: '1rem'
+            padding: '.5rem',
+            paddingRight: '1rem'
         }}
     >
 
@@ -45,7 +66,25 @@ const Sales = props => {
         />
 
         <TextField
+            value={sum}
+            onChange={e => intInputHandler(e.target.value, setSum)}
+            style={style}
+            label="Сумма"
+        />
+
+        <UsersSelect
+            user={userId}
+            users={props.app.users}
+            setUser={setUserId}
+            onlyValid
+            classes="w-100"
+            label="Сотрудник"
+        />
+
+        <TextField
+            error={error}
             autoFocus
+            style={style}
             InputProps={{
                 startAdornment: (
                     <InputAdornment position="start">
@@ -57,21 +96,15 @@ const Sales = props => {
             onChange={e => setStr(e.target.value)}
         />
 
-        <TextField
-            value={sum}
-            onChange={e => intInputHandler(e.target.value, setSum)}
-            label="Сумма"
-        />
-
-        <UsersSelect
-            user={userId}
-            users={props.app.users}
-            setUser={setUserId}
-            onlyValid
-            classes="w-100 p-1 m-1"
-            label="Сотрудник"
-        />
-
+        <Button
+            disabled={isEmpty}
+            variant="contained"
+            color="primary"
+            style={style}
+            onClick={() => find()}
+        >
+            Найти
+        </Button>
 
     </div>
 
