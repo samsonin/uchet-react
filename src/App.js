@@ -288,7 +288,12 @@ const App = props => {
                                 <Route exact path="/pledges" component={Pledges}/>
                                 <Route exact path="/pledges/:id" component={Pledges}/>
                                 <Route exact path="/entities/:id" component={Entity}/>
-                                <Route exact path="/sales" component={Sales}/>
+                                <Route exact path="/sales" render={props => <Sales
+                                    enterPress={enterPress}
+                                    setEnterPress={setEnterPress}
+                                    {...props}
+                                />}/>
+
                                 <Route exact path="/order" component={Order}/>
                                 <Route exact path="/order/:stock_id/:order_id" component={Order}/>
                                 <Route path="/orders" render={props => <Orders

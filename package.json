@@ -4,10 +4,6 @@
   "description ": "CRM для мастерских по ремонту техники",
   "private": true,
   "dependencies": {
-    "@ckeditor/ckeditor5-basic-styles": "^16.0.0",
-    "@ckeditor/ckeditor5-build-classic": "^16.0.0",
-    "@ckeditor/ckeditor5-react": "^2.0.0",
-    "@ckeditor/ckeditor5-real-time-collaboration": "^16.0.0",
     "@date-io/date-fns": "^2.8.1",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.5.1",
@@ -30,8 +26,8 @@
     "uuid": "^3.4.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
     "test": "node test",
     "eject": "react-scripts eject",
     "rename": "renamer --find App-clear.js --replace App.js ./src/App-clear.js && renamer --find style.css --replace index.css ./src/style.css ",
