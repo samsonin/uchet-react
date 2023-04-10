@@ -60,11 +60,11 @@ const Sales = props => {
             return enqueueSnackbar('выберите точки', {variant: 'error'})
         }
 
-        if (date1) url += 'date1=' + date1
-        if (date2) url += 'date2=' + date2
-        if (action) url += 'action=' + action
-        if (str) url += 'str=' + str
-        if (sum) url += 'sum=' + sum
+        if (date1) url += 'date1=' + date1 + '&'
+        if (date2) url += 'date2=' + date2 + '&'
+        if (action) url += 'action=' + action + '&'
+        if (str) url += 'str=' + str + '&'
+        if (sum) url += 'sum=' + sum + '&'
 
         rest(url)
             .then(res => {
