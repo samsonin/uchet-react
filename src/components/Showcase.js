@@ -63,7 +63,7 @@ const Showcase = props => {
 
     }, [status])
 
-    const hide = id => setShowcase(showcase.filter(s => s.id !== id))
+    // const hide = id => setShowcase(showcase.filter(s => s.id !== id))
 
     return <>
 
@@ -71,7 +71,7 @@ const Showcase = props => {
             good={good}
             setGood={setGood}
             close={() => setGood({})}
-            hide={hide}
+            // hide={hide}
         />
 
         <div style={{

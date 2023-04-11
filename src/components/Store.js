@@ -23,6 +23,7 @@ import {toLocalTimeStr} from "./common/Time";
 import GoodModal from "./Modals/Good";
 import {groupAlias} from "./common/GroupAliases";
 import CategoryHandler from "./common/CategoryHandler";
+import CloseIcon from "@material-ui/icons/Close";
 
 const oftenUsedButtons = [
     {label: 'Аксессуары', catId: 6},
@@ -89,11 +90,13 @@ const Store = props => {
 
     }, [props.scrollDown])
 
+    useEffect(() => find(), [])
+
     useEffect(() => {
 
-        sendRequest()
+        if ([4, 5, 6, 999].includes(catId)) find()
 
-    }, [])
+    }, [catId])
 
     useEffect(() => {
 
@@ -156,7 +159,7 @@ const Store = props => {
 
     }
 
-    const hide = id => console.log(id)
+    // const hide = id => console.log(id)
 
     const style = {
         display: 'flex',
@@ -171,7 +174,7 @@ const Store = props => {
             good={good}
             setGood={setGood}
             close={() => setGood({})}
-            hide={hide}
+            // hide={hide}
         />
 
         <div style={style}>
@@ -191,9 +194,13 @@ const Store = props => {
                 style={{margin: '.5rem'}}
                 color={catId === b.catId ? "primary" : "default"}
                 variant={catId === b.catId ? "contained" : "outlined"}
-                onClick={() => setCatId(b.catId)}>
+                onClick={() => setCat(b.catId)}>
                 {b.label}
             </Button>)}
+
+            <IconButton onClick={() => setCat(0)}>
+                <CloseIcon />
+            </IconButton>
 
         </div>
 
