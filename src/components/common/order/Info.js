@@ -1,7 +1,7 @@
 import React, {forwardRef, useEffect, useState} from "react";
 import StatusesSelect from "../StatusesSelect";
 import Button from "@material-ui/core/Button";
-import {DialogTitle, FormControl, InputLabel, TextField} from "@material-ui/core";
+import {DialogTitle, FormControl, TextField} from "@material-ui/core";
 import {useSnackbar} from "notistack";
 
 import rest from "../../Rest"
@@ -16,6 +16,7 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Slide from "@material-ui/core/Slide";
+import {connect} from "react-redux";
 
 const fieldsStyle = {
     margin: '.4rem',
@@ -29,8 +30,11 @@ const Transition = forwardRef(function Transition(props, ref) {
 const initSum = 'Предварительная стоимость'
 const initPresum = 'Предоплата при оформлении заказа'
 
-export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
+const Info = props => {
 
+    const {order, setOrder, needPrint} = props
+    const fields = props.app.fields.allElements.filter(f => f.index === 'order' && f.is_valid && !f.is_system)
+    
     const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
     const [isRest, setIsRest] = useState(false)
@@ -73,9 +77,9 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
     // TODO уточнить в течении смены или нет
     const isToday = time => 0.5 > (new Date() - new Date(time)) / 86400000
 
-    const isWarranty = time => app.config.remont_warranty > (new Date() - new Date(time)) / 86400000
+    const isWarranty = time => props.app.config.remont_warranty > (new Date() - new Date(time)) / 86400000
 
-    const isEditable = !isRest && !order || (isAdmin || order.status_id < 6 || isToday(order.checkout_date))
+    const isEditable = !isRest && !order || (props.admin || order.status_id < 6 || isToday(order.checkout_date))
 
     // const handleTree = category_id => {
     //     setCategory_id(+category_id)
@@ -102,7 +106,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         let error = ''
 
-        if (!app.current_stock_id) error = 'Выберите точку'
+        if (!props.app.current_stock_id) error = 'Выберите точку'
         if (!(customer.id || customer.fio || customer.phone_number)) error = 'Нет заказчика'
         if (customer.phone_number && customer.phone_number.length !== 10) error = 'неправильный номер телефона'
         if (!category_id) error = 'Выберите категорию'
@@ -122,7 +126,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         needPrint.current = true
 
-        rest('orders/' + app.current_stock_id, 'POST', data)
+        rest('orders/' + props.app.current_stock_id, 'POST', data)
             .then(res => afterRest(res))
 
     }
@@ -136,7 +140,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     }
 
-    const checkoutError  = () => enqueueSnackbar('Заполните \'В чек для заказчика\'',
+    const checkoutError = () => enqueueSnackbar('Заполните \'В чек для заказчика\'',
         {variant: 'error'}
     )
 
@@ -255,7 +259,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
         needPrint.current = true
 
-        rest('orders/' + app.current_stock_id + '/' + order.id + '/warranty', 'POST', {reason})
+        rest('orders/' + props.app.current_stock_id + '/' + order.id + '/warranty', 'POST', {reason})
             .then(res => {
                 if (res.status === 200) {
                     setIsReasonOpen(false)
@@ -322,7 +326,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                                  variant="outlined"
                                  style={fieldsStyle}
                                  disabled={!isEditable}
-                                 value={app.statuses.find(s => s.id === order.status_id).name + ' ' + order.checkout_date}
+                                 value={props.app.statuses.find(s => s.id === order.status_id).name + ' ' + order.checkout_date}
                     />
                     : <StatusesSelect
                         status={status_id}
@@ -330,9 +334,9 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                         disabled={!isEditable}
                     />}
                 <UsersSelect
-                    disabled={!isEditable && (master_id > 0 && !isAdmin)}
+                    disabled={!isEditable && (master_id > 0 && !props.admin)}
                     user={master_id}
-                    users={app.users}
+                    users={props.app.users}
                     setUser={setMaster_id}
                     onlyValid
                     classes={"w-100 p-1 m-1"}
@@ -369,7 +373,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                 >
                     {categories.map(g => {
 
-                        const category = app.categories.find(c => c.id === g)
+                        const category = props.app.categories.find(c => c.id === g)
 
                         return <MenuItem key={'menu-item-key-in-info-' + g}
                                          value={g}>
@@ -415,7 +419,11 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
         {order
             ? <TextField label="В чек для заказчика"
                          disabled={!isEditable}
-                         style={fieldsStyle}
+                         variant="outlined"
+                         style={{
+                             ...fieldsStyle,
+                             marginTop: '2rem'
+                         }}
                          value={for_client}
                          onChange={e => setFor_client(e.target.value)}
             />
@@ -426,7 +434,7 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
                 ? <>
                     {isWarranty(order.checkout_date) &&
                         actionButton('Принять по гарантии', () => setIsReasonOpen(true))}
-                    {(isAdmin || isToday(order.checkout_date)) && actionButton('Открыть заказ', open)}
+                    {(props.admin || isToday(order.checkout_date)) && actionButton('Открыть заказ', open)}
                 </>
                 : <>
                     {actionButton('сохранить', save)}
@@ -436,3 +444,5 @@ export const Info = ({order, app, fields, isAdmin, setOrder, needPrint}) => {
 
     </>
 }
+
+export default connect(state => state)(Info)

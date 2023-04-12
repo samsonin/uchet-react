@@ -13,7 +13,7 @@ import rest from "../components/Rest";
 import {Payments} from "./common/order/Payments";
 import {Remarks} from "./common/order/Remarks";
 import {Costs} from "./common/order/Costs"
-import {Info} from "./common/order/Info";
+import Info from "./common/order/Info";
 import {OrderText} from "./common/OrderText"
 import {totalSum} from "./common/order/functions";
 
@@ -26,8 +26,6 @@ const useStyles = makeStyles(() => ({
 
 
 const Order = props => {
-
-    const fields = props.app.fields.allElements.filter(f => f.index === 'order' && f.is_valid && !f.is_system)
 
     const [tabId, setTabId] = useState(0)
 
@@ -97,7 +95,9 @@ const Order = props => {
         let value
         if (props.app.config[name]) {
             value = props.app.config[name]
-        } else if (fields.find(f => f.name === name)) {
+        } else if (props.app.fields.allElements
+            .filter(f => f.index === 'order' && f.is_valid && !f.is_system)
+            .find(f => f.name === name)) {
             value = order[name]
         }
 
@@ -192,11 +192,8 @@ const Order = props => {
 
         {tabId === 0 &&
             <Info order={order}
-                  isEditable={canEdit()}
                   setOrder={setOrder}
-                  app={props.app}
-                  fields={fields}
-                  isAdmin={props.auth.admin}
+                  isEditable={canEdit()}
                   needPrint={needPrint}
             />
         }
