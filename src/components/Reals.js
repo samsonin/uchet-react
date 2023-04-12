@@ -12,9 +12,11 @@ import AddCircleIcon from "@material-ui/icons/AddCircle";
 import Real from "./Real";
 import {useSnackbar} from "notistack";
 
-const Reals = () => {
+const Reals = props => {
 
-    const [currentReal, setCurrentReal] = useState()
+    const realId = +props.match.params.id
+
+    const [currentReal, setCurrentReal] = useState(() => realId === 0 ? {} : '')
     const [reals, setReals] = useState([])
 
     const {enqueueSnackbar} = useSnackbar()
@@ -49,6 +51,8 @@ const Reals = () => {
 
                     setReals(res.body)
 
+                    if (realId) setCurrentReal(res.body.find(r => r.id === realId))
+
                 }
 
             })
@@ -68,26 +72,26 @@ const Reals = () => {
         >
             <TableHead>
 
-                    <TableRow>
-                        <TableCell colSpan={3}>
-                            <Typography variant="h6">
-                                Товары на реализации
-                            </Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                            <Tooltip title={'Принять на реализацию'}>
-                                <IconButton style={{
-                                    padding: 0,
-                                    marginLeft: '.1rem',
-                                    marginRight: '.1rem',
-                                }}
-                                            onClick={() => setCurrentReal({})}
-                                >
-                                    <AddCircleIcon/>
-                                </IconButton>
-                            </Tooltip>
-                        </TableCell>
-                    </TableRow>
+                <TableRow>
+                    <TableCell colSpan={3}>
+                        <Typography variant="h6">
+                            Товары на реализации
+                        </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                        <Tooltip title={'Принять на реализацию'}>
+                            <IconButton style={{
+                                padding: 0,
+                                marginLeft: '.1rem',
+                                marginRight: '.1rem',
+                            }}
+                                        onClick={() => setCurrentReal({})}
+                            >
+                                <AddCircleIcon/>
+                            </IconButton>
+                        </Tooltip>
+                    </TableCell>
+                </TableRow>
 
                 <TableRow>
                     <TableCell>Время</TableCell>
@@ -103,10 +107,10 @@ const Reals = () => {
                         const color = 'black'
 
                         return r.good && r.customer && <TableRow key={uuid()}
-                                         style={{
-                                             cursor: 'pointer',
-                                         }}
-                                         onClick={() => setCurrentReal(r)}
+                                                                 style={{
+                                                                     cursor: 'pointer',
+                                                                 }}
+                                                                 onClick={() => setCurrentReal(r)}
                         >
                             <TableCell style={{color}}>
                                 {toLocalTimeStr(r.good.unix)}

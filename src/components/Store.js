@@ -198,14 +198,15 @@ const Store = props => {
                 {b.label}
             </Button>)}
 
-            <IconButton onClick={() => setCat(0)}>
+            <IconButton onClick={() => setCat(0)}
+                        disabled={!catId}
+            >
                 <CloseIcon />
             </IconButton>
 
         </div>
 
         {currentStock && <div style={{
-            display: 'flex',
             margin: '.5rem',
         }}>
 
@@ -217,6 +218,7 @@ const Store = props => {
                 {label: 'Оприходование', onClick: () => props.history.push('arrival')},
                 {label: 'Покупка техники', onClick: () => props.history.push('showcase/buy')},
                 {label: 'Изготовление', onClick: () => props.history.push('produce')},
+                {label: 'На реализацию', onClick: () => props.history.push('reals/0')},
             ]
                 .map(b => <Button
                     key={uuid()}
@@ -248,6 +250,9 @@ const Store = props => {
 
             <Button onClick={find}
                     disabled={isRequest.current}
+                    variant="contained"
+                    color="primary"
+                    size="small"
             >
                 Найти
             </Button>

@@ -15,7 +15,7 @@ export default function ({users, user, setUser, onlyValid, disabled, classes, la
         <Select
             labelId="funds-users-control-select-outlined-label"
             disabled={disabled}
-            value={user}
+            value={user || 0}
             onChange={e => setUser(e.target.value)}
         >
             <MenuItem key={uuidv4()}
