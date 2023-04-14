@@ -168,13 +168,13 @@ const AddCosts = props => {
         <GoodSearch onSelected={onSelected}/>
 
         {!props.barcode && <EnteredGood
-            category_id={category_id}
-            setCategory_id={setCategory_id}
-            model={model}
-            setModel={setModel}
-            imei={imei}
-            setImei={setImei}
-        />}
+                category_id={category_id}
+                setCategory_id={setCategory_id}
+                model={model}
+                setModel={setModel}
+                imei={imei}
+                setImei={setImei}
+            />}
 
         <Button
             style={{margin: '1rem'}}

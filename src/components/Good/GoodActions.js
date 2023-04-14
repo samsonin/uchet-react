@@ -34,9 +34,9 @@ const GoodActions = props => {
 
                 if (res.status === 200) {
 
-                    if (url.substring(0, 7) === 'transit' && method === 'POST') {
-                        if (typeof (props.hide) === "function") props.hide(props.good.id)
-                    }
+                    // if (url.substring(0, 7) === 'transit' && method === 'POST') {
+                    //     if (typeof (props.hide) === "function") props.hide(props.good.id)
+                    // }
 
                     if (props.close) props.close()
 

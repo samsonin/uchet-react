@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {connect} from "react-redux";
 
-import rest from './Rest'
 import {
     Table,
     TableBody,
@@ -12,13 +11,16 @@ import {
     TextField,
     InputAdornment
 } from "@material-ui/core";
-import PrepaidModal from "./Modals/Prepaid";
-import TwoLineInCell from "./common/TwoLineInCell";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import SearchIcon from '@material-ui/icons/Search';
 import CloseIcon from "@material-ui/icons/Close";
+
+import rest from './Rest'
+import PrepaidModal from "./Modals/Prepaid";
+import TwoLineInCell from "./common/TwoLineInCell";
+import {toLocalTimeStr} from "./common/Time";
 
 const Prepaids = props => {
 
@@ -45,16 +47,7 @@ const Prepaids = props => {
 
     useEffect(() => {
         getPrepaids()
-    }, [])
-
-    useEffect(() => {
-        getPrepaids()
     }, [props.app.current_stock_id])
-
-    useEffect(() => {
-
-
-    }, [search])
 
     const openPrepaid = prepaid => {
 
@@ -162,24 +155,31 @@ const Prepaids = props => {
                                 return r
 
                             })
-                            .map(p => <TableRow
-                                key={'tablerowinprepaids' + p.id + p.time}
-                                style={{
-                                    cursor: 'pointer'
-                                }}
-                                onClick={() => openPrepaid(p)}
-                            >
-                                <TableCell>
-                                    {TwoLineInCell(p.time.substring(0, 10), p.time.substring(11))}
-                                </TableCell>
-                                <TableCell>{p.item}</TableCell>
-                                <TableCell>
-                                    {p.customer
-                                        ? TwoLineInCell(p.customer.phone_number, p.customer.fio)
-                                        : null}
-                                </TableCell>
-                                <TableCell>{p.status}</TableCell>
-                            </TableRow>)
+                            .map(p => {
+
+                                const localTimeString = toLocalTimeStr(p.unix)
+                                const date = localTimeString.slice(0, -9)
+                                const time = localTimeString.slice(-8)
+
+                                return <TableRow
+                                    key={'table-row-in-prepaids' + p.id + p.time}
+                                    style={{
+                                        cursor: 'pointer'
+                                    }}
+                                    onClick={() => openPrepaid(p)}
+                                >
+                                    <TableCell>
+                                        {TwoLineInCell(date, time)}
+                                    </TableCell>
+                                    <TableCell>{p.item}</TableCell>
+                                    <TableCell>
+                                        {p.customer
+                                            ? TwoLineInCell(p.customer.phone_number, p.customer.fio)
+                                            : null}
+                                    </TableCell>
+                                    <TableCell>{p.status}</TableCell>
+                                </TableRow>
+                            })
                         : null}
                 </TableBody>
             </Table>

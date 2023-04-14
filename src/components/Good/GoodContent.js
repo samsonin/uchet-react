@@ -457,8 +457,9 @@ const GoodContent = props => {
 
             {provider && line('Поставщик:', provider.name, isEditable)}
 
-            {props.good.wf && props.good.wf.consignment_number &&
-                line('накладная: ', props.good.wf.consignment_number, isEditable)}
+            {props.good.wf && props.good.wf.consignment_number
+                ? line('накладная: ', props.good.wf.consignment_number, isEditable)
+            : ''}
 
             {props.good.wo === 't' || line('Точка:', stock ? stock.name : null, isEditable)}
 

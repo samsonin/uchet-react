@@ -11,9 +11,9 @@ import Slide from "@material-ui/core/Slide";
 import DialogActions from "@material-ui/core/DialogActions";
 
 import rest from "./Rest"
-import CategoryHandler from "./common/CategoryHandler";
 import {intInputHandler, line} from "./common/InputHandlers";
 import {useSnackbar} from "notistack";
+import EnteredGood from "./EnteredGood";
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -67,24 +67,6 @@ const Real = props => {
         remark: note
     }
 
-
-    const needImei = () => {
-
-        let cid = catId
-
-        while (cid > 4) {
-
-            const showcase = [5, 38, 39, 40, 41, 44]
-
-            if (showcase.includes(cid)) return true
-
-            cid = props.app.categories.find(c => c.id === cid).parent_id
-
-        }
-
-        return false
-
-    }
 
     const fieldsStyle = {
         margin: '.4rem',
@@ -239,22 +221,14 @@ const Real = props => {
                 setCustomer={setCustomer}
             />
 
-            <CategoryHandler
-                id={catId}
-                setId={setCatId}
+            <EnteredGood
+                category_id={catId}
+                setCategory_id={setCatId}
+                model={model}
+                setModel={setModel}
+                imei={imei}
+                setImei={setImei}
             />
-
-            <TextField label="Наименование"
-                       style={fieldsStyle}
-                       value={model}
-                       onChange={e => isNew ? setModel(e.target.value) : {}}
-            />
-
-            {needImei() && <TextField label="Imei или S/N"
-                                      style={fieldsStyle}
-                                      value={imei}
-                                      onChange={e => isNew ? setImei(e.target.value) : {}}
-            />}
 
             {line('Цена для витрины:', sum, !isWo, e => handler(e.target.value, setSum))}
 

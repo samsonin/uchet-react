@@ -276,7 +276,7 @@ const App = props => {
                             </>}
 
                             <Route exact path="/prepaids" component={Prepaids}/>
-                            <Route exact path="/reals" component={Reals}/>
+                            <Route path="/reals/:id?" component={Reals}/>
                             <Route exact path="/zp" component={Zp}/>
                             <Route exact path="/showcase" component={Showcase}/>
                             <Route exact path="/showcase/buy" component={Buy}/>

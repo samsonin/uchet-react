@@ -1,10 +1,13 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
 import {Button, Grid} from "@material-ui/core";
 
 import Tree from "../Tree";
 import {intInputHandler} from "./InputHandlers";
+
+
+//TODO добавить закрытие дерева по команде родителя
 
 const CategoryHandler = props => {
 

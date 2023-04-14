@@ -16,6 +16,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import TwoLineInCell from "./common/TwoLineInCell";
+import {toLocalTimeStr} from "./common/Time";
 
 
 const style = {
@@ -60,11 +61,11 @@ const Sales = props => {
             return enqueueSnackbar('выберите точки', {variant: 'error'})
         }
 
-        if (date1) url += 'date1=' + date1
-        if (date2) url += 'date2=' + date2
-        if (action) url += 'action=' + action
-        if (str) url += 'str=' + str
-        if (sum) url += 'sum=' + sum
+        if (date1) url += 'date1=' + date1 + '&'
+        if (date2) url += 'date2=' + date2 + '&'
+        if (action) url += 'action=' + action + '&'
+        if (str) url += 'str=' + str + '&'
+        if (sum) url += 'sum=' + sum + '&'
 
         rest(url)
             .then(res => {
@@ -83,101 +84,116 @@ const Sales = props => {
 
     const renderRow = sale => {
 
+        const stock = props.app.stocks.find(s => s.id === sale.stock_id)
+        const user = props.app.users.find(u => u.id === sale.user_id)
 
         return <TableRow>
             <TableCell>
-                {TwoLineInCell(sale.action, sale.created_at)}
+                {TwoLineInCell(sale.action, toLocalTimeStr(sale.unix))}
             </TableCell>
-            <TableCell>{sale.item}</TableCell>
+            <TableCell>
+                {TwoLineInCell(sale.item, sale.note)}
+            </TableCell>
             <TableCell>{sale.sum}</TableCell>
-            <TableCell>{sale.note}</TableCell>
-            <TableCell>{sale.user_id}</TableCell>
+            <TableCell>
+                {TwoLineInCell(stock ? stock.name : '', user ? user.name : '')}
+            </TableCell>
+
         </TableRow>
 
     }
 
-    return <div
-        style={{
+    return <>
+        <div style={{
             backgroundColor: '#fff',
             borderRadius: 5,
             padding: '.5rem',
             paddingRight: '1rem'
-        }}
-    >
+        }}>
 
-        <StocksCheck stocks={stocks} setStocks={setStocks}/>
+            <StocksCheck stocks={stocks} setStocks={setStocks}/>
 
-        <DateInterval
-            date1={date1}
-            date2={date2}
-            setDate1={setDate1}
-            setDate2={setDate2}
-        />
+            <DateInterval
+                date1={date1}
+                date2={date2}
+                setDate1={setDate1}
+                setDate2={setDate2}
+            />
 
-        <ActionsSelect
-            action={action}
-            setAction={setAction}
-        />
+            <ActionsSelect
+                action={action}
+                setAction={setAction}
+            />
 
-        <TextField
-            value={sum}
-            onChange={e => intInputHandler(e.target.value, setSum)}
-            style={style}
-            label="Сумма"
-        />
+            <TextField
+                value={sum}
+                onChange={e => intInputHandler(e.target.value, setSum)}
+                style={style}
+                label="Сумма"
+            />
 
-        <UsersSelect
-            user={userId}
-            users={props.app.users}
-            setUser={setUserId}
-            onlyValid
-            classes="w-100"
-            label="Сотрудник"
-        />
+            <UsersSelect
+                user={userId}
+                users={props.app.users}
+                setUser={setUserId}
+                onlyValid
+                classes="w-100"
+                label="Сотрудник"
+            />
 
-        <TextField
-            error={error}
-            autoFocus
-            style={style}
-            InputProps={{
-                startAdornment: (
-                    <InputAdornment position="start">
-                        <SearchIcon/>
-                    </InputAdornment>
-                ),
-            }}
-            value={str}
-            onChange={e => setStr(e.target.value)}
-        />
+            <TextField
+                error={error}
+                autoFocus
+                style={style}
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchIcon/>
+                        </InputAdornment>
+                    ),
+                }}
+                value={str}
+                onChange={e => setStr(e.target.value)}
+            />
 
-        <Button
-            disabled={isEmpty}
-            variant="contained"
-            color="primary"
-            style={style}
-            onClick={() => find()}
-        >
-            Найти
-        </Button>
+            <Button
+                disabled={isEmpty}
+                variant="contained"
+                color="primary"
+                style={style}
+                onClick={() => find()}
+            >
+                Найти
+            </Button>
 
-        {sales.length ? <Table size="small">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Действие</TableCell>
-                        <TableCell>Наименование</TableCell>
-                        <TableCell>Сумма</TableCell>
-                        <TableCell>Примечание</TableCell>
-                        <TableCell>Сотрудник</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {sales.map(s => renderRow(s))}
-                </TableBody>
-            </Table>
-            : null}
+        </div>
 
-    </div>
+        <div style={{
+            backgroundColor: '#fff',
+            borderRadius: 5,
+            marginTop: '1rem',
+            padding: '.5rem',
+            paddingRight: '1rem'
+        }}>
 
+            {sales.length ? <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Действие</TableCell>
+                            <TableCell>Наименование</TableCell>
+                            <TableCell>Сумма</TableCell>
+                            <TableCell>Сотрудник</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {sales.map(s => renderRow(s))}
+                    </TableBody>
+                </Table>
+                : null}
+
+        </div>
+
+    </>
 }
 
 export default connect(state => state)(Sales)

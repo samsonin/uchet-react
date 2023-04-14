@@ -8,14 +8,29 @@ import CategoryHandler from "./common/CategoryHandler";
 
 const EnteredGood = props => {
 
-    const style = {
-        width: '100%',
-        margin: '.5rem',
-        padding: '.5rem'
+    const needImei = () => {
+
+        let cid = props.category_id
+
+        while (cid > 4) {
+
+            const showcase = [5, 38, 39, 40, 41, 44]
+
+            if (showcase.includes(cid)) return true
+
+            cid = props.app.categories.find(c => c.id === cid).parent_id
+
+        }
+
+        return false
+
     }
 
-    const tf = (l, v, o) => <TextField variant="outlined"
-                                       style={style}
+    const tf = (l, v, o) => <TextField size="small"
+                                       style={{
+                                           width: '100%',
+                                           padding: '.3rem'
+                                       }}
                                        label={l}
                                        value={v}
                                        onChange={e => o(e.target.value)}
@@ -25,14 +40,18 @@ const EnteredGood = props => {
     return <div style={{
         border: '1px solid black',
         borderRadius: '5px',
-        padding: '.5rem'
+        margin: '.3rem',
+        padding: '.3rem'
     }}>
 
         <Typography variant="subtitle2">
-            Что изготовим:
+            Товар:
         </Typography>
 
-        <div style={style}>
+        <div style={{
+            width: '100%',
+            padding: '.3rem'
+        }}>
 
             <CategoryHandler
                 id={props.category_id}
@@ -43,7 +62,7 @@ const EnteredGood = props => {
 
         {tf("Наименование", props.model, props.setModel)}
 
-        {tf("imei", props.imei, props.setImei)}
+        {needImei() && tf("imei", props.imei, props.setImei)}
 
     </div>
 
