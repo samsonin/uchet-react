@@ -10,6 +10,8 @@ import LineWeightIcon from "@material-ui/icons/LineWeight";
 import DeleteIcon from "@material-ui/icons/Delete";
 import PrintIcon from "@material-ui/icons/Print";
 import AspectRatioIcon from '@material-ui/icons/AspectRatio';
+import HistoryIcon from '@material-ui/icons/History';
+
 import {useSnackbar} from "notistack";
 
 import rest from "../Rest";
@@ -66,6 +68,10 @@ const GoodActions = props => {
 
     const reject = () => goodRest('goods/reject/', 'DELETE', 'Списано в брак')
 
+    const history = () => {
+
+    }
+
     const passedMilliseconds = Date.now() - (props.good.unix ? props.good.unix * 1000 : Date.parse(props.good.time))
     const canPrintBarcode = props.auth.admin || 12 >= Math.round(passedMilliseconds / 3600000)
 
@@ -90,6 +96,7 @@ const GoodActions = props => {
         refund: renderIcon('Вернуть поставщику', refundHandler, <i className="fas fa-truck"/>),
         repair: renderIcon('Починить', () => props.setIsRepair(!props.isRepair), <BuildIcon/>),
         barcode: renderIcon('Штрихкод', () => PrintBarcodes([props.good.barcode]), <LineWeightIcon/>),
+        history: renderIcon('История', () => history(), <HistoryIcon />),
         use: renderIcon("В пользование", () => use(), <DeleteIcon/>),
         check: renderIcon("Копия чека", () => Print(doc, props.alias), <PrintIcon/>),
     }

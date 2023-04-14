@@ -32,6 +32,7 @@ const Good = props => {
     const classes = useStyles()
 
     const [isRepair, setIsRepair] = useState(false)
+    const [isHistory, setIsHistory] = useState(false)
 
     if (!(props.good && props.good.id)) return '';
 
@@ -74,6 +75,8 @@ const Good = props => {
                 setGood={props.setGood}
                 isRepair={isRepair}
                 setIsRepair={setIsRepair}
+                isHistory={isHistory}
+                setIsHistory={setIsHistory}
                 open={open}
                 close={props.close}
                 alias={alias}
