@@ -39,7 +39,7 @@ const Store = props => {
     const [catId, setCatId] = useState(0)
     const [error, setError] = useState(false)
     const [search, setSearch] = useState('')
-    const [isMyStock, setIsMyStock] = useState(false)
+    const [isAllStocks, setIsAllStocks] = useState(false)
     const [isPublic, setIsPublic] = useState(false)
     const [showButtons, setShowButtons] = useState(false)
 
@@ -56,7 +56,6 @@ const Store = props => {
         let url = 'goods?'
         if (catId) url += '&category_id=' + catId
         if (search) url += '&search=' + search
-        if (isMyStock && currentStock) url += '&stock_id=' + currentStock.id
         if (isPublic) url += '&is_public=1'
 
         if (limit.current > 25) url += '&limit=' + limit.current
@@ -262,8 +261,9 @@ const Store = props => {
         <div style={style}>
 
             {currentStock && <FormControlLabel control={
-                <Checkbox checked={isMyStock} onChange={() => setIsMyStock(!isMyStock)}/>}
-                                               label={"только " + currentStock.name}
+
+                <Checkbox checked={isAllStocks} onChange={() => setIsAllStocks(!isAllStocks)}/>}
+                                               label="все точки"
             />}
 
             <FormControlLabel control={
@@ -288,7 +288,8 @@ const Store = props => {
                 <TableBody>
                     {goods
                         .filter(s => !isPublic || s.public || s.parts === 'sale')
-                        .filter(s => !isMyStock || s.stock_id === currentStock.id)
+                        .filter(s => isAllStocks || s.wo === 't' || !currentStock ||
+                            (currentStock && currentStock.id === s.stock_id ))
                         .filter(s => {
 
                             if (!search || s.sum == search || s.id == search) return true
