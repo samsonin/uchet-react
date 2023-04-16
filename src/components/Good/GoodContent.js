@@ -23,6 +23,7 @@ import {groupAlias} from "../common/GroupAliases";
 import AddCosts from "../common/AddCosts";
 import {line, note} from "../common/InputHandlers";
 import CategoryHandler from "../common/CategoryHandler";
+import GoodHistory from "./GoodHistory";
 
 const woAlliases = {
     use: "В пользовании",
@@ -111,7 +112,6 @@ const GoodContent = props => {
     }, [props.good])
 
 
-    const provider = props.app.providers.find(v => +v.id === +props.good.provider_id)
     const category = props.app.categories.find(v => v.id === props.good.category_id)
     const doc = props.app.docs.find(d => d.name === 'sale_showcase')
     const stock = props.app.stocks.find(s => s.id === props.good.stock_id)
@@ -359,7 +359,9 @@ const GoodContent = props => {
         alt={props.good.model}
         width={'100%'}
         onError={() => setPicture()}
-        onChange={() => {console.log('onChange')}}
+        onChange={() => {
+            console.log('onChange')
+        }}
     />
 
     const done = good => {
@@ -374,146 +376,139 @@ const GoodContent = props => {
         ? <AddCosts barcode={props.good.barcode}
                     done={done}
         />
-        : <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-around',
-            padding: '0 1rem',
-        }}>
+        : props.isHistory
+            ? <GoodHistory good={props.good}/>
+            : <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-around',
+                padding: '0 1rem',
+            }}>
 
-            {isEditable
-                ? image
-                    ? <Card className={classes.card}>
-                        <CardActionArea>
-                            <CardMedia
-                                component="img"
-                                alt={props.good.model}
-                                image={image}                            />
-                        </CardActionArea>
-                        <CardActions>
-                            <Button size="small" color="primary"
-                                    onClick={() => setImage()}>
-                                Удалить
-                            </Button>
-                            <Button size="small" color="primary"
-                                    onClick={() => upload()}>
-                                Загрузить
-                            </Button>
-                        </CardActions>
-                    </Card>
-                    : picture
-                        ? <>
-                            {pictureRender()}
-                            <Button size="small" color="primary"
-                                    onClick={() => setPicture()}>
-                                Удалить
-                            </Button>
-                        </>
-                        : <>
-                            <div style={{
-                                width: '100%',
-                                height: '100px',
-                                backgroundColor: 'lightgray',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                border
-                            }}
-                                 onDragLeave={e => onDrag(e, false)}
-                                 onDragOver={e => onDrag(e, true)}
-                                 onDrop={e => onDrop(e)}
-                            >
-                                {isDrag
-                                    ? 'Отпустите фото, чтобы загрузить'
-                                    : 'Перетащите фото, чтобы загрузить'}
-                            </div>
-                            <input type='file' onChange={e => onManualSelect(e.target.files[0])}/>
-                        </>
-                : picture && pictureRender()}
+                {isEditable
+                    ? image
+                        ? <Card className={classes.card}>
+                            <CardActionArea>
+                                <CardMedia
+                                    component="img"
+                                    alt={props.good.model}
+                                    image={image}/>
+                            </CardActionArea>
+                            <CardActions>
+                                <Button size="small" color="primary"
+                                        onClick={() => setImage()}>
+                                    Удалить
+                                </Button>
+                                <Button size="small" color="primary"
+                                        onClick={() => upload()}>
+                                    Загрузить
+                                </Button>
+                            </CardActions>
+                        </Card>
+                        : picture
+                            ? <>
+                                {pictureRender()}
+                                <Button size="small" color="primary"
+                                        onClick={() => setPicture()}>
+                                    Удалить
+                                </Button>
+                            </>
+                            : <>
+                                <div style={{
+                                    width: '100%',
+                                    height: '100px',
+                                    backgroundColor: 'lightgray',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    border
+                                }}
+                                     onDragLeave={e => onDrag(e, false)}
+                                     onDragOver={e => onDrag(e, true)}
+                                     onDrop={e => onDrop(e)}
+                                >
+                                    {isDrag
+                                        ? 'Отпустите фото, чтобы загрузить'
+                                        : 'Перетащите фото, чтобы загрузить'}
+                                </div>
+                                <input type='file' onChange={e => onManualSelect(e.target.files[0])}/>
+                            </>
+                    : picture && pictureRender()}
 
-            {isEditable
-                ? <CategoryHandler
-                    id={categoryId}
-                    setId={setCategoryId}
-                />
-                : category && line('Категория:', category.name, isEditable)}
+                {isEditable
+                    ? <CategoryHandler
+                        id={categoryId}
+                        setId={setCategoryId}
+                    />
+                    : category && line('Категория:', category.name, isEditable)}
 
-            {line('Наименование:', model, isEditable, e => setModel(e.target.value))}
+                {line('Наименование:', model, isEditable, e => setModel(e.target.value))}
 
-            {isShowcase && line('imei, S/N', imei, isEditable, e => setImei(e.target.value))}
+                {isShowcase && line('imei, S/N', imei, isEditable, e => setImei(e.target.value))}
 
-            {isEditable && textWithButton('Номер заказа', orderId,
-                e => intInputHandler(e.target.value, setOrderId), () => toOrder(),
-                true, 'Внести в заказ')}
+                {isEditable && textWithButton('Номер заказа', orderId,
+                    e => intInputHandler(e.target.value, setOrderId), () => toOrder(),
+                    true, 'Внести в заказ')}
 
-            {isEditable && textWithButton('Цена', sum, e => intInputHandler(e.target.value, setSum),
-                () => toSale(), true, 'Продать')}
+                {isEditable && textWithButton('Цена', sum, e => intInputHandler(e.target.value, setSum),
+                    () => toSale(), true, 'Продать')}
 
-            {line("Себестоимость:", props.good.remcost ?? props.good.cost ?? 0, isEditable)}
+                {line("Себестоимость:", props.good.remcost ?? props.good.cost ?? 0, isEditable)}
 
-            {line("Время оприходования:", props.good.unix
-                ? toLocalTimeStr(props.good.unix)
-                : props.good.time, isEditable)}
 
-            {provider && line('Поставщик:', provider.name, isEditable)}
+                {props.good.wo === 't' || line('Точка:', stock ? stock.name : null, isEditable)}
 
-            {props.good.wf && props.good.wf.consignment_number
-                ? line('накладная: ', props.good.wf.consignment_number, isEditable)
-            : ''}
+                {!props.good.wo && line('Хранение', storagePlace, isEditable, e => setStoragePlace(e.target.value))}
 
-            {props.good.wo === 't' || line('Точка:', stock ? stock.name : null, isEditable)}
+                {isEditable && (!isPublic || props.auth.admin) && <IsPublicCheckBox
+                    value={isPublic}
+                    onChange={() => setIsPublic(!isPublic)}
+                />}
 
-            {!props.good.wo && line('Хранение', storagePlace, isEditable, e => setStoragePlace(e.target.value))}
+                {note('Информация для сотрудников:', privateNote, isEditable, e => setPrivateNote(e.target.value))}
 
-            {isEditable && (!isPublic || props.auth.admin) && <IsPublicCheckBox
-                value={isPublic}
-                onChange={() => setIsPublic(!isPublic)}
-            />}
+                {note('Информация для покупателей:', publicNote, isEditable, e => setPublicNote(e.target.value))}
 
-            {note('Информация для сотрудников:', privateNote, isEditable, e => setPrivateNote(e.target.value))}
+                {isEditable
+                    ? <UsersSelect
+                        users={props.app.users}
+                        user={responsibleId}
+                        setUser={setResponsibleId}
+                        onlyValid
+                        classes='w-100 m-2 p-2'
+                        label="Ответственный"
+                    />
+                    : responsible && line('Ответственный:', responsible.name, isEditable)}
 
-            {note('Информация для покупателей:', publicNote, isEditable, e => setPublicNote(e.target.value))}
+                {props.good.out_unix && ui_wo &&
+                    line('Статус:', ui_wo + ', c ' + toLocalTimeStr(props.good.out_unix), isEditable)}
 
-            {isEditable
-                ? <UsersSelect
-                    users={props.app.users}
-                    user={responsibleId}
-                    setUser={setResponsibleId}
-                    onlyValid
-                    classes='w-100 m-2 p-2'
-                    label="Ответственный"
-                />
-                : responsible && line('Ответственный:', responsible.name, isEditable)}
-
-            {props.good.out_unix && ui_wo &&
-                line('Статус:', ui_wo + ', c ' + toLocalTimeStr(props.good.out_unix), isEditable)}
-
-            {isEditable && <Fade
-                in={!isSame && isEditable}
-                timeout={300}
-                style={{margin: '1rem 0'}}
-            >
-                <Button onClick={() => save()}
-                        variant="outlined"
-                        color="secondary">
-                    Сохранить
-                </Button>
-            </Fade>}
-
-            {!isEditable && props.good.stock_id === props.app.current_stock_id && isSale(props.good.wo)
-                ? isReasonOpen
-                    ? textWithButton('Причина возврата', reason, e => setReason(e.target.value),
-                        () => refund(), false, 'Вернуть')
-                    : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
-                              className={"m-2 p-1"}
-                              variant="outlined"
-                              color="secondary">
-                        Отмена продажи
+                {isEditable && <Fade
+                    in={!isSame && isEditable}
+                    timeout={300}
+                    style={{margin: '1rem 0'}}
+                >
+                    <Button onClick={() => save()}
+                            variant="outlined"
+                            color="secondary">
+                        Сохранить
                     </Button>
-                : null
-            }
+                </Fade>}
 
-        </div>
+                {!isEditable && props.good.stock_id === props.app.current_stock_id && isSale(props.good.wo)
+                    ? isReasonOpen
+                        ? textWithButton('Причина возврата', reason, e => setReason(e.target.value),
+                            () => refund(), false, 'Вернуть')
+                        : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
+                                  className={"m-2 p-1"}
+                                  variant="outlined"
+                                  color="secondary">
+                            Отмена продажи
+                        </Button>
+                    : null
+                }
+
+            </div>
 
 }
 

@@ -381,7 +381,7 @@ const Daily = props => {
                                     <ListItemText
                                         primary={user.name}
                                     />
-                                    {canAdminChange && <ListItemSecondaryAction>
+                                    {(canAdminChange || props.auth.user_id === user.id) && <ListItemSecondaryAction>
                                         <IconButton
                                             onClick={() => employeeCheckout(user.id)}
                                         >

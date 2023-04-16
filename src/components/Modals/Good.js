@@ -93,6 +93,7 @@ const Good = props => {
             good={props.good}
             setGood={props.setGood}
             isRepair={isRepair}
+            isHistory={isHistory}
             setIsRepair={setIsRepair}
             close={props.close}
             alias={alias}

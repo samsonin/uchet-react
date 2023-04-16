@@ -68,18 +68,13 @@ const GoodActions = props => {
 
     const reject = () => goodRest('goods/reject/', 'DELETE', 'Списано в брак')
 
-    const history = () => {
+    const refund = () => {
+        // зачислить деньги в кассу или увеличить дебиторку
 
     }
 
     const passedMilliseconds = Date.now() - (props.good.unix ? props.good.unix * 1000 : Date.parse(props.good.time))
     const canPrintBarcode = props.auth.admin || 12 >= Math.round(passedMilliseconds / 3600000)
-
-    const refundHandler = () => {
-        // зачислить деньги в кассу или увеличить дебиторку
-
-    }
-
     const renderIcon = (tooltip, onClick, elem) => <Tooltip title={tooltip}>
         <IconButton onClick={onClick}>
             {elem}
@@ -87,36 +82,54 @@ const GoodActions = props => {
     </Tooltip>
 
     const actions = {
+        history: renderIcon('История', () => props.setIsHistory(!props.isHistory), <HistoryIcon/>),
         open: renderIcon('открыть в отдельной вкладке', () => props.open(), <AspectRatioIcon/>),
         transit: renderIcon(props.good.wo ? 'Из транзита' : 'В транзит',
-            () => transit(props.good.wo !== 't'),
+            () => transit(!props.good.wo),
             <i className="fas fa-truck"/>),
         reject: renderIcon('В брак', () => reject(), <ThumbDownIcon/>),
         restore: renderIcon("Восстановить", () => restore(), <RestoreFromTrashIcon/>),
-        refund: renderIcon('Вернуть поставщику', refundHandler, <i className="fas fa-truck"/>),
+        refund: renderIcon('Вернуть поставщику', refund, <i className="fas fa-truck"/>),
         repair: renderIcon('Починить', () => props.setIsRepair(!props.isRepair), <BuildIcon/>),
         barcode: renderIcon('Штрихкод', () => PrintBarcodes([props.good.barcode]), <LineWeightIcon/>),
-        history: renderIcon('История', () => history(), <HistoryIcon />),
         use: renderIcon("В пользование", () => use(), <DeleteIcon/>),
         check: renderIcon("Копия чека", () => Print(doc, props.alias), <PrintIcon/>),
     }
 
-    if (props.isRepair) return actions.repair
 
-    if (props.good.wo === 't') return actions.transit
+    const renderDiv = <div>
+        {actions.history}
+        {props.app.current_stock_id
+            ? props.good.wo === 't'
+                ? actions.transit
+                : props.app.current_stock_id === props.good.stock_id
+                    ? props.isRepair
+                        ? actions.repair
+                        : props.good.wo
+                            ? props.good.wo.indexOf('sale') > -1
+                                ? actions.check
+                                : props.good.wo === 'use'
+                                    ? actions.restore
+                                    : props.good.wo === 'reject'
+                                        ? <>
+                                            {actions.restore}
+                                            {actions.refund}
+                                        </>
+                                        : props.good.wo === 'shortage' && props.auth.admin
+                                            ? actions.restore
+                                            : ''
+                            : <>
+                                {canPrintBarcode && actions.barcode}
+                                {actions.transit}
+                                {actions.reject}
+                                {actions.repair}
+                                {props.auth.admin && actions.use}
+                            </>
+                    : ''
+            : ''
+        }
+    </div>
 
-    if (props.app.current_stock_id === props.good.stock_id) {
-
-        if (['use'].includes(props.good.wo)) return actions.restore
-
-        if (props.good.wo === 'reject') return <>
-            {actions.restore}
-            {actions.refund}
-        </>
-
-        if (['shortage'].includes(props.good.wo) && props.auth.admin) return actions.restore
-
-    }
 
     return <div style={{
         display: 'flex',
@@ -128,18 +141,7 @@ const GoodActions = props => {
                     {'#' + props.good.id}
         </span>
 
-        <div>
-            {props.good.wo
-                ? props.good.wo.indexOf('sale') > -1 && actions.check
-                : props.good.stock_id === props.app.current_stock_id && <>
-                {typeof (props.open === 'function') && actions.open}
-                {canPrintBarcode && actions.barcode}
-                {actions.transit}
-                {actions.reject}
-                {actions.repair}
-                {props.auth.admin && actions.use}
-            </>}
-        </div>
+        {renderDiv}
 
     </div>
 

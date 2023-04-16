@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
 
 import TextField from "@material-ui/core/TextField";
@@ -37,8 +37,8 @@ const Sales = props => {
     const [sum, setSum] = useState(0)
     const [userId, setUserId] = useState()
     const [error, setError] = useState(false)
-
     const [sales, setSales] = useState([])
+    const [isRest, setIsRest] = useState(false)
 
     const {enqueueSnackbar} = useSnackbar()
 
@@ -64,13 +64,25 @@ const Sales = props => {
         if (date1) url += 'date1=' + date1 + '&'
         if (date2) url += 'date2=' + date2 + '&'
         if (action) url += 'action=' + action + '&'
-        if (str) url += 'str=' + str + '&'
+        if (userId) url += 'user_id=' + userId + '&'
         if (sum) url += 'sum=' + sum + '&'
+        if (str) url += 'str=' + str + '&'
+
+        if (isRest) return
+        setIsRest(true)
 
         rest(url)
             .then(res => {
+
+                setIsRest(false)
+
                 if (res.status === 200) {
                     setSales(res.body)
+                } else if(res.status === 204){
+                    setSales([])
+                    return enqueueSnackbar('ничего не найдено', {variant: 'warning'})
+                } else {
+                    return enqueueSnackbar('ошибка запроса', {variant: 'error'})
                 }
             })
 
@@ -86,13 +98,17 @@ const Sales = props => {
 
         const stock = props.app.stocks.find(s => s.id === sale.stock_id)
         const user = props.app.users.find(u => u.id === sale.user_id)
+        const employee = props.app.users.find(u => u.id === sale.employee)
+
+        let item = sale.item
+        if (sale.action === 'зарплата' && employee) item += ' ' + employee.name
 
         return <TableRow>
             <TableCell>
                 {TwoLineInCell(sale.action, toLocalTimeStr(sale.unix))}
             </TableCell>
             <TableCell>
-                {TwoLineInCell(sale.item, sale.note)}
+                {TwoLineInCell(item, sale.note)}
             </TableCell>
             <TableCell>{sale.sum}</TableCell>
             <TableCell>
@@ -157,7 +173,7 @@ const Sales = props => {
             />
 
             <Button
-                disabled={isEmpty}
+                disabled={isEmpty || isRest}
                 variant="contained"
                 color="primary"
                 style={style}
