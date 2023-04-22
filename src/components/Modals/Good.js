@@ -59,11 +59,19 @@ const Good = props => {
 
     }
 
+    const close = () => {
+
+        setIsHistory(false)
+        setIsRepair(false)
+        props.close()
+
+    }
+
     return <Dialog
         open={!!(props.good ?? props.good.id)}
         TransitionComponent={Transition}
         keepMounted
-        onClose={() => props.close()}
+        onClose={() => close()}
         className='non-printable'
         fullWidth
     >
@@ -78,12 +86,12 @@ const Good = props => {
                 isHistory={isHistory}
                 setIsHistory={setIsHistory}
                 open={open}
-                close={props.close}
+                close={close}
                 alias={alias}
             />
 
             <IconButton aria-label="close" className={classes.closeButton}
-                        onClick={() => props.close()}>
+                        onClick={() => close()}>
                 <CloseIcon/>
             </IconButton>
 
@@ -95,7 +103,7 @@ const Good = props => {
             isRepair={isRepair}
             isHistory={isHistory}
             setIsRepair={setIsRepair}
-            close={props.close}
+            close={close}
             alias={alias}
         />
 

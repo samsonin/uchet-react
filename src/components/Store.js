@@ -200,7 +200,7 @@ const Store = props => {
             <IconButton onClick={() => setCat(0)}
                         disabled={!catId}
             >
-                <CloseIcon />
+                <CloseIcon/>
             </IconButton>
 
         </div>
@@ -233,7 +233,7 @@ const Store = props => {
         <div style={style}>
 
             <TextField
-                disabled={isRequest.current}
+                fullWidth
                 error={error}
                 autoFocus
                 InputProps={{
@@ -248,6 +248,9 @@ const Store = props => {
             />
 
             <Button onClick={find}
+                    style={{
+                        marginInline: '.3rem'
+                    }}
                     disabled={isRequest.current}
                     variant="contained"
                     color="primary"
@@ -289,7 +292,7 @@ const Store = props => {
                     {goods
                         .filter(s => !isPublic || s.public || s.parts === 'sale')
                         .filter(s => isAllStocks || s.wo === 't' || !currentStock ||
-                            (currentStock && currentStock.id === s.stock_id ))
+                            (currentStock && currentStock.id === s.stock_id))
                         .filter(s => {
 
                             if (!search || s.sum == search || s.id == search) return true
