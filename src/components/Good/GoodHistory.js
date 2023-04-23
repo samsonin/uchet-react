@@ -1,4 +1,4 @@
-import React, from "react";
+import React from "react";
 import {connect} from "react-redux";
 
 import {line} from "../common/InputHandlers";
@@ -7,6 +7,14 @@ import {Accordion, AccordionDetails, AccordionSummary, Typography} from "@materi
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import uuid from "uuid";
+
+
+const aliasses = {
+    cost: 'Себестоимость',
+    sum: 'Сумма',
+    defect: 'Неисправность',
+    storage_place: 'Хранение',
+}
 
 const GoodHistory = props => {
 
@@ -25,7 +33,7 @@ const GoodHistory = props => {
                 <Typography style={{width: '30%'}}>
                     Ремонтировали
                 </Typography>
-                {log.unix &&<Typography>
+                {log.unix && <Typography>
                     {toLocalTimeStr(log.unix)}
                 </Typography>}
             </AccordionSummary>
@@ -50,7 +58,7 @@ const GoodHistory = props => {
         const stock = props.app.stocks.find(s => s.id === log.stock_id)
 
         const dir = ['Транзит', stock ? stock.name : '']
-        if (log.action === 'to_transit') [dir[0] , dir[1]] = [dir[1] , dir[0]]
+        if (log.action === 'to_transit') [dir[0], dir[1]] = [dir[1], dir[0]]
 
         return <Accordion key={uuid()}>
             <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
@@ -76,14 +84,12 @@ const GoodHistory = props => {
 
         const user = props.app.users.find(u => u.id === log.user_id)
 
-        console.log(log)
-
         return <Accordion key={uuid()}>
             <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
                 <Typography style={{width: '30%'}}>
                     Редактирование
                 </Typography>
-                {log.unix &&<Typography>
+                {log.unix && <Typography>
                     {toLocalTimeStr(log.unix)}
                 </Typography>}
             </AccordionSummary>
@@ -91,6 +97,19 @@ const GoodHistory = props => {
                 display: 'flex',
                 flexDirection: 'column'
             }}>
+                {Object.keys(log).map(k => {
+
+                    if (['unix', 'user_id'].includes(k)) return ''
+
+                    if (['public', 'parts'].includes(k)) return ''
+
+                    const f = props.app.fields.allElements.find(e => e.index === 'good' && e.name === k)
+
+                    if (f) return line(f.value, log[k])
+
+                    if (aliasses[k])  return line(aliasses[k], log[k])
+
+                })}
                 {user && line('Запись вносил:', user.name)}
             </AccordionDetails>
         </Accordion>
