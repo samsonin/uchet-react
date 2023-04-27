@@ -107,12 +107,44 @@ const GoodHistory = props => {
 
                     if (f) return line(f.value, log[k])
 
-                    if (aliasses[k])  return line(aliasses[k], log[k])
+                    if (aliasses[k]) return line(aliasses[k], log[k])
 
                 })}
                 {user && line('Запись вносил:', user.name)}
             </AccordionDetails>
         </Accordion>
+
+    }
+
+    const zalogField = zalog => {
+
+        const user = props.app.users.find(u => u.id === zalog.user_id)
+        const stock = props.app.stocks.find(s => s.id === zalog.stock_id)
+
+        return <Accordion key={uuid()}>
+
+            <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                <Typography style={{width: '30%'}}>
+                    Из залога
+                </Typography>
+                {zalog.unix && <Typography>
+                    {toLocalTimeStr(zalog.unix)}
+                </Typography>}
+            </AccordionSummary>
+
+            <AccordionDetails style={{
+                display: 'flex',
+                flexDirection: 'column'
+            }}>
+
+                {line('Сумма', zalog.sum)}
+
+                {stock && line('Точка:', stock.name)}
+                {user && line('Оформлял:', user.name)}
+
+            </AccordionDetails>
+        </Accordion>
+
 
     }
 
@@ -141,6 +173,8 @@ const GoodHistory = props => {
         {props.good.wf && props.good.wf.consignment_number
             ? line('накладная: ', props.good.wf.consignment_number, false)
             : ''}
+
+        {props.good.wf.zalog && zalogField(props.good.wf.zalog)}
 
         {props.good.log && props.good.log.map(l => logRender(l))}
 
