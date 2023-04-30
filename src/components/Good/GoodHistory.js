@@ -6,6 +6,7 @@ import {toLocalTimeStr} from "../common/Time";
 import {Accordion, AccordionDetails, AccordionSummary, Typography} from "@material-ui/core";
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+
 import uuid from "uuid";
 
 
@@ -21,6 +22,7 @@ const GoodHistory = props => {
 
     const provider = props.app.providers.find(v => +v.id === +props.good.provider_id)
 
+    const localTimeString = props.good.unix ? toLocalTimeStr(props.good.unix) : props.good.time
 
     const remselfField = log => {
 
@@ -99,9 +101,7 @@ const GoodHistory = props => {
             }}>
                 {Object.keys(log).map(k => {
 
-                    if (['unix', 'user_id'].includes(k)) return ''
-
-                    if (['public', 'parts'].includes(k)) return ''
+                    if (['unix', 'user_id', 'public', 'parts'].includes(k)) return ''
 
                     const f = props.app.fields.allElements.find(e => e.index === 'good' && e.name === k)
 
@@ -148,6 +148,40 @@ const GoodHistory = props => {
 
     }
 
+    const customerField = ({customer, stock_id, sum, user_id}) => {
+
+        const user = props.app.users.find(u => u.id === user_id)
+        const stock = props.app.stocks.find(s => s.id === stock_id)
+
+        return <Accordion key={uuid()}>
+
+            <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                <Typography style={{width: '50%'}}>
+                    Купили у физ. лица
+                </Typography>
+                {<Typography>
+                    {localTimeString}
+                </Typography>}
+            </AccordionSummary>
+
+            <AccordionDetails style={{
+                display: 'flex',
+                flexDirection: 'column'
+            }}>
+
+                {customer && line('ФИО:' , customer.fio)}
+
+                {stock && line('Точка:', stock.name)}
+
+                {!sum || line('Сумма покупки:' , sum)}
+
+                {user && line('Оформлял:', user.name)}
+
+            </AccordionDetails>
+        </Accordion>
+
+    }
+
     const logRender = log => {
 
         if (log.remself) return remselfField(log)
@@ -164,9 +198,7 @@ const GoodHistory = props => {
         padding: '.5rem'
     }}>
 
-        {line("Время оприходования:", props.good.unix
-            ? toLocalTimeStr(props.good.unix)
-            : props.good.time, false)}
+        {!props.good.wf.customer_id && line("Время оприходования:", localTimeString, false)}
 
         {provider && line('Поставщик:', provider.name, false)}
 
@@ -175,6 +207,8 @@ const GoodHistory = props => {
             : ''}
 
         {props.good.wf.zalog && zalogField(props.good.wf.zalog)}
+
+        {!props.good.wf.customer_id || customerField(props.good.wf)}
 
         {props.good.log && props.good.log.map(l => logRender(l))}
 
