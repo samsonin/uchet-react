@@ -169,11 +169,11 @@ const GoodHistory = props => {
                 flexDirection: 'column'
             }}>
 
-                {customer && line('ФИО:' , customer.fio)}
+                {customer && line('ФИО:', customer.fio)}
 
                 {stock && line('Точка:', stock.name)}
 
-                {!sum || line('Сумма покупки:' , sum)}
+                {!sum || line('Сумма покупки:', sum)}
 
                 {user && line('Оформлял:', user.name)}
 
@@ -182,9 +182,51 @@ const GoodHistory = props => {
 
     }
 
+
+    const AccordInHistory = ({summaryLabel, responsibleLabel, detailContent, user_id, stock_id, unix}) => {
+
+        const user = props.app.users.find(u => u.id === user_id)
+        const stock = props.app.stocks.find(s => s.id === stock_id)
+
+        return <Accordion key={uuid()}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                <Typography style={{width: '30%'}}>{summaryLabel}</Typography>
+                {unix && <Typography>{toLocalTimeStr(unix)}</Typography>}
+            </AccordionSummary>
+            <AccordionDetails style={{
+                display: 'flex',
+                flexDirection: 'column'
+            }}>
+                {detailContent}
+                {user && line(responsibleLabel, user.name)}
+            </AccordionDetails>
+        </Accordion>
+
+    }
+
+
     const logRender = log => {
 
-        if (log.remself) return remselfField(log)
+
+        // if (log.remself) return remselfField(log)
+        if (log.remself) {
+
+            const master = props.app.users.find(u => u.id === log.remself.master_id)
+            const goods = props.app.users.find(u => u.id === log.remself.goods)
+
+            return AccordInHistory({
+                summaryLabel: 'Чинили',
+                responsibleLabel: 'Запись вносил',
+                detailContent: <>
+                    {log.remself.defect && line('Работа:', log.remself.defect)}
+                    {log.remself.sum && line('Сумма:', log.remself.sum)}
+                    {!!log.remself.cost && line('Себестоимость:', log.remself.cost)}
+                    {master && line('Мастер:', master.name)}
+                    {goods && goods.map(g => line(g.barcode, g.model))}
+                </>,
+                user_id: log.user_id
+            })
+        }
 
         if (log.action && log.action.indexOf('transit') > -1) return transitField(log)
 
