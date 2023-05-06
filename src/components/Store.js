@@ -89,7 +89,7 @@ const Store = props => {
 
     }, [props.scrollDown])
 
-    useEffect(() => find(), [])
+    // useEffect(() => find(), [])
 
     useEffect(() => {
 

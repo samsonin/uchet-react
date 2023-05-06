@@ -84,6 +84,7 @@ const Sales = props => {
                 } else {
                     return enqueueSnackbar('ошибка запроса', {variant: 'error'})
                 }
+
             })
 
     }
@@ -98,23 +99,18 @@ const Sales = props => {
 
         const stock = props.app.stocks.find(s => s.id === sale.stock_id)
         const user = props.app.users.find(u => u.id === sale.user_id)
-        const employee = props.app.users.find(u => u.id === sale.employee)
-
-        let item = sale.item
-        if (sale.action === 'зарплата' && employee) item += ' ' + employee.name
 
         return <TableRow>
             <TableCell>
                 {TwoLineInCell(sale.action, toLocalTimeStr(sale.unix))}
             </TableCell>
             <TableCell>
-                {TwoLineInCell(item, sale.note)}
+                {TwoLineInCell(sale.item, sale.note)}
             </TableCell>
             <TableCell>{sale.sum}</TableCell>
             <TableCell>
                 {TwoLineInCell(stock ? stock.name : '', user ? user.name : '')}
             </TableCell>
-
         </TableRow>
 
     }

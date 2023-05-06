@@ -1,5 +1,7 @@
 import React from "react";
 
+import {v4 as uuidv4} from "uuid";
+
 import {TextareaAutosize, TextField} from "@material-ui/core";
 
 export const intInputHandler = (value, setInt) => {
@@ -52,13 +54,9 @@ export const line = (label, value, isEditable, onChange) => {
 
     if (!isEd) style.borderBottom = '1px solid lightgray'
 
-    // const isInt = Number.isInteger(value)
-
-    // const spanStyle = {width: isInt ? '75%' : isEd ? '40%' : '50%'}
-
     const spanStyle = {width: label.length > 20 ? '75%' : isEd ? '40%' : '50%'}
 
-    return <div style={style}>
+    return <div style={style} key={isEd ? label + value : uuidv4()}>
 
         <span style={spanStyle}>
             {label}
