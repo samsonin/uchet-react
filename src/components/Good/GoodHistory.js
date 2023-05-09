@@ -1,13 +1,15 @@
 import React from "react";
 import {connect} from "react-redux";
 
-import {line} from "../common/InputHandlers";
-import {toLocalTimeStr} from "../common/Time";
 import {Accordion, AccordionDetails, AccordionSummary, Typography} from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 import uuid from "uuid";
-import {transitField} from "./transitField";
+
+import TransitField from "./TransitField";
+import {lineConst} from "../common/InputHandlers";
+import {toLocalTimeStr} from "../common/Time";
+import {CustomerLine} from "../customer/CustomerDivs";
 
 
 const aliasses = {
@@ -24,41 +26,6 @@ const GoodHistory = props => {
 
     const localTimeString = props.good.unix ? toLocalTimeStr(props.good.unix) : props.good.time
 
-    const editField = log => {
-
-        const user = props.app.users.find(u => u.id === log.user_id)
-
-        return <Accordion key={uuid()}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                <Typography style={{width: '30%'}}>
-                    Редактирование
-                </Typography>
-                {log.unix && <Typography>
-                    {toLocalTimeStr(log.unix)}
-                </Typography>}
-            </AccordionSummary>
-            <AccordionDetails style={{
-                display: 'flex',
-                flexDirection: 'column'
-            }}>
-                {Object.keys(log).map(k => {
-
-                    if (['unix', 'user_id'].includes(k)) return ''
-
-                    if (k === 'public') return line('Статус', log[k] ? 'Опубликован' : 'Не опубликован')
-
-                    const f = props.app.fields.allElements.find(e => e.index === 'good' && e.name === k)
-
-                    const label = f ? f.value : aliasses[k]
-
-                    return !label || line(label, log[k])
-
-                })}
-                {user && line('Запись вносил:', user.name)}
-            </AccordionDetails>
-        </Accordion>
-
-    }
 
     const zalogField = zalog => {
 
@@ -81,10 +48,10 @@ const GoodHistory = props => {
                 flexDirection: 'column'
             }}>
 
-                {line('Сумма', zalog.sum)}
+                {lineConst('Сумма', zalog.sum)}
 
-                {stock && line('Точка:', stock.name)}
-                {user && line('Оформлял:', user.name)}
+                {stock && lineConst('Точка:', stock.name)}
+                {user && lineConst('Оформлял:', user.name)}
 
             </AccordionDetails>
         </Accordion>
@@ -113,79 +80,27 @@ const GoodHistory = props => {
                 flexDirection: 'column'
             }}>
 
-                {customer && line('ФИО:', customer.fio)}
+                {customer && <CustomerLine customer={customer} />}
 
-                {stock && line('Точка:', stock.name)}
+                {stock && lineConst('Точка:', stock.name)}
 
-                {!sum || line('Сумма покупки:', sum)}
+                {!sum || lineConst('Сумма покупки:', sum)}
 
-                {user && line('Оформлял:', user.name)}
+                {user && lineConst('Оформлял:', user.name)}
 
             </AccordionDetails>
+
         </Accordion>
 
     }
 
-
-    const AccordInHistory = ({summaryLabel, responsibleLabel, detailContent, user_id, stock_id, unix}) => {
-
-        const user = props.app.users.find(u => u.id === user_id)
-        const stock = props.app.stocks.find(s => s.id === stock_id)
-
-        return <Accordion key={uuid()}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                <Typography style={{width: '30%'}}>
-                    {summaryLabel}
-                </Typography>
-                {unix && <Typography>{toLocalTimeStr(unix)}</Typography>}
-            </AccordionSummary>
-            <AccordionDetails style={{
-                display: 'flex',
-                flexDirection: 'column'
-            }}>
-                {detailContent}
-                {user && responsibleLabel && line(responsibleLabel, user.name)}
-            </AccordionDetails>
-        </Accordion>
-
-    }
-
-
-    const logRender = log => {
-
-        if (log.remself) {
-
-            const master = props.app.users.find(u => u.id === log.remself.master_id)
-            const goods = props.app.users.find(u => u.id === log.remself.goods)
-
-            return AccordInHistory({
-                summaryLabel: 'Чинили',
-                detailContent: <>
-                    {log.remself.defect && line('Работа:', log.remself.defect)}
-                    {log.remself.sum && line('Сумма:', log.remself.sum)}
-                    {!!log.remself.cost && line('Себестоимость:', log.remself.cost)}
-                    {master && line('Мастер:', master.name)}
-                    {goods && goods.map(g => line(g.barcode, g.model))}
-                </>,
-                user_id: log.user_id
-            })
-
-        }
-
-        if (log.action && log.action.indexOf('transit') > -1) {
-
-            const stock = props.app.stocks.find(s => s.id === log.stock_id)
-
-            const dir = ['Транзит', stock ? stock.name : '']
-            if (log.action === 'to_transit') [dir[0], dir[1]] = [dir[1], dir[0]]
-
-            return transitField(log)
-
-        }
-
-        return editField(log)
-
-    }
+    const wfLabel = props.good.wf
+        ? props.good.wf.customer_id
+            ? null
+            : props.good.wf.action && props.good.wf.action === 'make_good'
+                ? 'Изготавливали'
+                : 'Время оприходования'
+        : null
 
     return <div style={{
         display: 'flex',
@@ -193,22 +108,106 @@ const GoodHistory = props => {
         padding: '.5rem'
     }}>
 
-        {/*{!props.good.wf.customer_id && line("Время оприходования:", localTimeString, false)}*/}
+        {!wfLabel || lineConst(wfLabel + ':', localTimeString)}
 
-        {provider && line('Поставщик:', provider.name)}
+        {provider && lineConst('Поставщик:', provider.name)}
 
         {props.good.wf
             ? <>
-                {props.good.wf.consignment_number && line('накладная: ', props.good.wf.consignment_number)}
+                {props.good.wf.consignment_number && lineConst('накладная: ', props.good.wf.consignment_number)}
                 {props.good.wf.zalog && zalogField(props.good.wf.zalog)}
                 {!props.good.wf.customer_id || customerField(props.good.wf)}
             </>
             : ''}
 
-        {props.good.log && props.good.log.map(l => logRender(l))}
+        {props.good.log && props.good.log.map(log => {
+
+            const user = props.app.users.find(u => u.id === log.user_id)
+
+            if (log.remself) {
+
+                const master = props.app.users.find(u => u.id === log.remself.master_id)
+                const goods = props.app.users.find(u => u.id === log.remself.goods)
+
+                return <Accordion key={uuid()}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                        <Typography style={{width: '30%'}}>
+                            Чинили
+                        </Typography>
+                        {log.unix && <Typography>{toLocalTimeStr(log.unix)}</Typography>}
+                    </AccordionSummary>
+                    <AccordionDetails style={{
+                        display: 'flex',
+                        flexDirection: 'column'
+                    }}>
+                        {log.remself.defect && lineConst('Работа:', log.remself.defect)}
+                        {log.remself.sum && lineConst('Сумма:', log.remself.sum)}
+                        {!!log.remself.cost && lineConst('Себестоимость:', log.remself.cost)}
+                        {master && lineConst('Мастер:', master.name)}
+                        {goods && goods.map(g => lineConst(g.barcode, g.model))}
+                        {user && lineConst('Запись вносил:', user.name)}
+                    </AccordionDetails>
+                </Accordion>
+
+            }
+
+            if (log.action && log.action.indexOf('transit') > -1) return <TransitField log={log}/>
+
+            if (log.action && log.action === 'delGood') return <Accordion key={uuid()}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography style={{width: '30%'}}>
+                        Убирали из заказа
+                    </Typography>
+                    {log.unix && <Typography>
+                        {toLocalTimeStr(log.unix)}
+                    </Typography>}
+                </AccordionSummary>
+                <AccordionDetails style={{
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}>
+                    {lineConst('Номер заказа:', log.order_id)}
+                    {user && lineConst('Запись вносил:', user.name)}
+                </AccordionDetails>
+            </Accordion>
+
+            const details = Object.keys(log)
+                .filter(k => !['unix', 'user_id', 'parts'].includes(k))
+                .map(k => {
+
+                    if (k === 'public') return lineConst('Статус', log[k] ? 'Опубликован' : 'Не опубликован')
+
+                    const f = props.app.fields.allElements.find(e => e.index === 'good' && e.name === k)
+
+                    const label = f ? f.value : aliasses[k]
+
+                    return !label || lineConst(label, log[k])
+
+                })
+
+            return <Accordion key={uuid()}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography style={{width: '30%'}}>
+                        Редактирование
+                    </Typography>
+                    {log.unix && <Typography>
+                        {toLocalTimeStr(log.unix)}
+                    </Typography>}
+                </AccordionSummary>
+                <AccordionDetails style={{
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}>
+                    {details}
+                    {user && lineConst('Запись вносил:', user.name)}
+                </AccordionDetails>
+            </Accordion>
+
+
+        })}
 
         {props.good.out_unix && props.good.ui_wo &&
-            line('Статус:', props.good.ui_wo + ', c ' + toLocalTimeStr(props.good.out_unix))}
+            lineConst('Статус:', props.good.ui_wo + ', c ' + toLocalTimeStr(props.good.out_unix))}
 
     </div>
 

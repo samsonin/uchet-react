@@ -1,8 +1,7 @@
 import React from "react";
 
-import {v4 as uuidv4} from "uuid";
-
 import {TextareaAutosize, TextField} from "@material-ui/core";
+import uuid from "uuid";
 
 export const intInputHandler = (value, setInt) => {
 
@@ -34,7 +33,6 @@ export const fioHandler = fio => fio.replace(/[^a-zA-Zа-яёА-ЯЁ ]/g, "")
 
 export const sumField = (initValue, value, setValue, style, disabled) => <TextField
     label={Number.isInteger(value) ? initValue : <br/>}
-    // label={Number.isInteger(value) ? initValue : 'Предоплата'}
     disabled={disabled}
     style={style}
     value={value}
@@ -45,26 +43,42 @@ export const sumField = (initValue, value, setValue, style, disabled) => <TextFi
 
 export const line = (label, value, isEditable, onChange) => {
 
-    const style = {
-        display: 'flex',
-        padding: '1rem .5rem'
-    }
-
     const isEd = isEditable && typeof (onChange) === 'function'
 
-    if (!isEd) style.borderBottom = '1px solid lightgray'
+    if (!isEd) return lineConst(label, value)
 
-    const spanStyle = {width: label.length > 20 ? '75%' : isEd ? '40%' : '50%'}
+    const spanStyle = {width: label.length > 20 ? '75%' : '40%'}
 
-    return <div style={style} key={isEd ? label + value : uuidv4()}>
+    return <div style={{
+        display: 'flex',
+        padding: '1rem .5rem'
+    }}>
 
-        <span style={spanStyle}>
+        <span style={spanStyle}>{label}</span>
+
+        <TextField fullWidth value={value || ''} onChange={onChange}/>
+
+    </div>
+}
+
+export const lineConst = (label, value) => {
+
+    return <div
+        style={{
+            display: 'flex',
+            padding: '1em .5em',
+            borderBottom: '1px solid lightgray'
+        }}
+        key={uuid()}
+    >
+
+        <span style={{
+            width: label.length > 20 ? '75%' : '50%'
+        }}>
             {label}
         </span>
 
-        {isEd
-            ? <TextField fullWidth value={value || ''} onChange={onChange}/>
-            : <span style={{fontWeight: 'bold'}}>{value}</span>}
+        <span style={{fontWeight: 'bold'}}>{value}</span>
 
     </div>
 }

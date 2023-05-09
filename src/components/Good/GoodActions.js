@@ -68,10 +68,10 @@ const GoodActions = props => {
 
     const reject = () => goodRest('goods/reject/', 'DELETE', 'Списано в брак')
 
-    const refund = () => {
-        // зачислить деньги в кассу или увеличить дебиторку
+    // зачислить деньги в кассу
+    const refund = () => goodRest('goods/refund/', 'DELETE', 'Списано в брак')
 
-    }
+    const account = () => goodRest('goods/account/', 'DELETE', 'Списано в брак')
 
     const passedMilliseconds = Date.now() - (props.good.unix ? props.good.unix * 1000 : Date.parse(props.good.time))
     const canPrintBarcode = props.auth.admin || 12 >= Math.round(passedMilliseconds / 3600000)
@@ -89,7 +89,8 @@ const GoodActions = props => {
             <i className="fas fa-truck"/>),
         reject: renderIcon('В брак', () => reject(), <ThumbDownIcon/>),
         restore: renderIcon("Восстановить", () => restore(), <RestoreFromTrashIcon/>),
-        refund: renderIcon('Вернуть поставщику', refund, <i className="fas fa-truck"/>),
+        refund: renderIcon('Вернуть в кассу', refund, <i className="fas fa-truck"/>),
+        accountRefund: renderIcon('Вернуть на счет', account, <i className="fas fa-truck"/>),
         repair: renderIcon('Починить', () => props.setIsRepair(!props.isRepair), <BuildIcon/>),
         barcode: renderIcon('Штрихкод', () => PrintBarcodes([props.good.barcode]), <LineWeightIcon/>),
         use: renderIcon("В пользование", () => use(), <DeleteIcon/>),
@@ -114,6 +115,7 @@ const GoodActions = props => {
                                         ? <>
                                             {actions.restore}
                                             {actions.refund}
+                                            {actions.accountRefund}
                                         </>
                                         : props.good.wo === 'shortage' && props.auth.admin
                                             ? actions.restore

@@ -1,4 +1,5 @@
 import React from "react";
+import {connect} from "react-redux";
 
 import {Accordion, AccordionDetails, AccordionSummary, Typography} from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -7,10 +8,11 @@ import uuid from "uuid";
 
 import {toLocalTimeStr} from "../common/Time";
 
-export const transitField = log => {
+const TransitField = props => {
 
-    const user = props.app.users.find(u => u.id === log.user_id)
-    const stock = props.app.stocks.find(s => s.id === log.stock_id)
+    const {log, users, stocks} = props
+    const user = users.find(u => u.id === log.user_id)
+    const stock = stocks.find(s => s.id === log.stock_id)
 
     const dir = ['Транзит', stock ? stock.name : '']
     if (log.action === 'to_transit') [dir[0], dir[1]] = [dir[1], dir[0]]
@@ -34,3 +36,5 @@ export const transitField = log => {
     </Accordion>
 
 }
+
+export default connect(state => state.app)(TransitField)
