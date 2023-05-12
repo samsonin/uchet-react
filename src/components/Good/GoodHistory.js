@@ -153,6 +153,25 @@ const GoodHistory = props => {
 
             if (log.action && log.action.indexOf('transit') > -1) return <TransitField log={log}/>
 
+            if (log.action && log.action === 'produce') return <Accordion key={uuid()}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography style={{width: '30%'}}>
+                        Чинил другой мастер
+                    </Typography>
+                    {log.unix && <Typography>
+                        {toLocalTimeStr(log.unix)}
+                    </Typography>}
+                </AccordionSummary>
+                <AccordionDetails style={{
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}>
+                    {lineConst('Сумма:', log.sum)}
+                    {user && lineConst('Запись вносил:', user.name)}
+                </AccordionDetails>
+
+            </Accordion>
+
             if (log.action && log.action === 'delGood') return <Accordion key={uuid()}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
                     <Typography style={{width: '30%'}}>
