@@ -1,22 +1,24 @@
 import React from 'react';
 
-import EditIcon from "@material-ui/icons/Edit";
+import {Tooltip} from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
-import uuid from "uuid";
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
+import uuid from "uuid";
 
 const mainUrl = document.location.protocol + '//' + document.location.host
 
 export const CustomerLink = props => {
 
-    return <IconButton
-        onClick={
-            () => window.open(mainUrl + '/customers/' + props.id, "_blank")
-        }
-    >
-        <EditIcon/>
-    </IconButton>
-
+    return <Tooltip title={'Открыть в новом окне'}>
+        <IconButton
+            onClick={
+                () => window.open(mainUrl + '/customers/' + props.id, "_blank")
+            }
+        >
+            <OpenInNewIcon/>
+        </IconButton>
+    </Tooltip>
 }
 
 export const CustomerLine = ({customer}) => <div
