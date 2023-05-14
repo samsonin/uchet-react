@@ -1,4 +1,4 @@
-import React, {forwardRef, useState} from "react";
+import React, {forwardRef, useEffect, useState} from "react";
 import {connect} from "react-redux";
 
 import IconButton from "@material-ui/core/IconButton";
@@ -8,6 +8,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
 import {makeStyles} from "@material-ui/core/styles";
 
+import rest from "./../Rest";
 import GoodActions from "../Good/GoodActions";
 import GoodContent from "../Good/GoodContent";
 import {createDate} from "../common/Print";
@@ -34,7 +35,22 @@ const Good = props => {
     const [isRepair, setIsRepair] = useState(false)
     const [isHistory, setIsHistory] = useState(false)
 
-    if (!(props.good && props.good.id)) return '';
+    useEffect(() => {
+
+        if (props.good.barcode) {
+
+            rest('goods/' + props.good.barcode)
+                .then(res => {
+                    if (res.status === 200) {
+                        props.setGood(res.body)
+                    }
+                })
+
+        }
+
+    }, [props.good.barcode])
+
+    if (!(props.good && props.good.id && props.good.barcode)) return '';
 
     const stock = props.app.stocks.find(s => s.id === props.good.stock_id)
 

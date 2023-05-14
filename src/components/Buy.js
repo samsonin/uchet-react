@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import {useSnackbar} from "notistack";
 import Fields from "./customer/Fields";
 import rest from "./Rest";
-import {bindActionCreators} from "redux";
+
 import {
     Button,
     Checkbox,

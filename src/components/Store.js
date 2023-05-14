@@ -89,7 +89,7 @@ const Store = props => {
 
     }, [props.scrollDown])
 
-    // useEffect(() => find(), [])
+    useEffect(() => find(), [])
 
     useEffect(() => {
 
@@ -329,13 +329,9 @@ const Store = props => {
 
                             const stock = props.app.stocks.find(s => s.id === g.stock_id)
 
-                            const inTime = new Date(g.time).getTime()
-                            const outTime = new Date(g.outtime).getTime()
-                            const storageTime = new Date(g.storage_time).getTime()
+                            const checkTime = Math.max(g.out_unix || 0, g.storage_unix || 0, g.unix || 0)
 
-                            const checkTime = Math.max(inTime || 0, outTime || 0, storageTime || 0)
-
-                            const checkTimeStr = toLocalTimeStr(checkTime / 1000)
+                            const checkTimeStr = toLocalTimeStr(checkTime)
 
                             if (!g.category_id && g.group) {
                                 Object.entries(groupAlias).map(([cat, groupName]) => {
