@@ -281,7 +281,7 @@ const GoodContent = props => {
 
     if (!ui_wo && props.good.wo) {
 
-        if (props.good.wo.substring(0, 4) === 'sale') {
+        if (props.good.wo.sale_id || props.good.wo.substring(0, 4) === 'sale') {
             ui_wo = 'Продан'
         } else if (props.good.wo === 'reject') {
             ui_wo = 'В браке'

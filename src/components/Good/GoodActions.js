@@ -107,7 +107,7 @@ const GoodActions = props => {
                     ? props.isRepair
                         ? actions.repair
                         : props.good.wo
-                            ? props.good.wo.indexOf('sale') > -1
+                            ? props.good.wo.sale_id || props.good.wo.substring(0, 4) === 'sale'
                                 ? actions.check
                                 : props.good.wo === 'use'
                                     ? actions.restore
