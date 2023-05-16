@@ -35,7 +35,10 @@ const GoodHistory = props => {
 
         if (log.customer) summaryLabel = 'Купили у физ. лица'
         if (log.action) {
-            if (log.action === 'produce') summaryLabel = 'Чинили'
+            if (log.action === 'produce') {
+                summaryLabel = 'Чинили'
+                userLabel = 'Мастер'
+            }
             if (log.action === 'delGood') summaryLabel = 'Убирали из заказа'
             if (log.action === 'zalog') summaryLabel = 'Закладывали'
         } else if (log.remself || log.remself_id) {
@@ -105,7 +108,8 @@ const GoodHistory = props => {
 
         {props.good.wf
             ? <>
-                {props.good.wf.consignment_number && lineConst('накладная: ', props.good.wf.consignment_number)}
+                {props.good.wf.consignment_number > 0 &&
+                    lineConst('накладная: ', props.good.wf.consignment_number)}
                 {props.good.wf.zalog_id && acc(props.good.wf)}
                 {!props.good.wf.customer_id || acc(props.good.wf, props.good.unix)}
             </>
