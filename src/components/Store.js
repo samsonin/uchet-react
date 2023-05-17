@@ -56,6 +56,7 @@ const Store = props => {
         let url = 'goods?'
         if (catId) url += '&category_id=' + catId
         if (search) url += '&search=' + search
+        if (!isAllStocks && currentStock) url += '&stock_id=' + currentStock.id
         if (isPublic) url += '&is_public=1'
 
         if (limit.current > 25) url += '&limit=' + limit.current
@@ -96,6 +97,12 @@ const Store = props => {
         if ([4, 5, 6, 999].includes(catId)) find()
 
     }, [catId])
+
+    useEffect(() => {
+
+        if (isAllStocks) find()
+
+    }, [isAllStocks])
 
     useEffect(() => {
 
