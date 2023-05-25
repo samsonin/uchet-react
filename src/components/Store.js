@@ -35,7 +35,6 @@ const oftenUsedButtons = [
 const Store = props => {
 
     const [goods, setGoods] = useState([])
-    const [good, setGood] = useState({})
     const [catId, setCatId] = useState(0)
     const [error, setError] = useState(false)
     const [search, setSearch] = useState('')
@@ -113,16 +112,22 @@ const Store = props => {
 // eslint-disable-next-line
     }, [props.enterPress])
 
-    useEffect(() => {
+    // useEffect(() => {
+    //
+    //     if (good) {
+    //
+    //         const newGoods = goods.map(g => g.id === good.id ? good : g)
+    //         setGoods(newGoods)
+    //
+    //     }
+    //
+    // }, [good])
 
-        if (good) {
+    const setGood = barcode => {
 
-            const newGoods = goods.map(g => g.id === good.id ? good : g)
-            setGoods(newGoods)
+        rest('goods/' + barcode)
 
-        }
-
-    }, [good])
+    }
 
     const setCat = id => {
 
@@ -174,14 +179,11 @@ const Store = props => {
         opacity: showButtons ? '25%' : '100%'
     }
 
+    console.log(props.good && props.good.barcode)
+
     return <>
 
-        <GoodModal
-            good={good}
-            setGood={setGood}
-            close={() => setGood({})}
-            // hide={hide}
-        />
+        {props.app.good && props.app.good.barcode && <GoodModal />}
 
         <div style={style}>
 
@@ -328,11 +330,7 @@ const Store = props => {
                         })
                         .map(g => {
 
-                            const color = g.wo === 't'
-                                ? 'green'
-                                : g.wo === 'reject'
-                                    ? 'red'
-                                    : 'black'
+                            const color = g.wo === 't' ? 'green' : g.wo === 'reject' ? 'red' : 'black'
 
                             const stock = props.app.stocks.find(s => s.id === g.stock_id)
 
@@ -373,7 +371,7 @@ const Store = props => {
                                                  cursor: 'pointer',
                                                  opacity,
                                              }}
-                                             onClick={() => setGood(g)}
+                                             onClick={() => setGood(g.barcode)}
                             >
                                 <TableCell style={{color}}>
                                     {g.id}

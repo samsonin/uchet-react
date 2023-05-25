@@ -12,6 +12,7 @@ import rest from "./../Rest";
 import GoodActions from "../Good/GoodActions";
 import GoodContent from "../Good/GoodContent";
 import {createDate} from "../common/Print";
+import store from "../../store";
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -35,24 +36,8 @@ const Good = props => {
     const [isRepair, setIsRepair] = useState(false)
     const [isHistory, setIsHistory] = useState(false)
 
-    useEffect(() => {
-
-        if (props.good.barcode) {
-
-            rest('goods/' + props.good.barcode)
-                .then(res => {
-                    if (res.status === 200) {
-                        props.setGood(res.body)
-                    }
-                })
-
-        }
-
-    }, [props.good.barcode])
-
-    if (!(props.good && props.good.id && props.good.barcode)) return '';
-
-    const stock = props.app.stocks.find(s => s.id === props.good.stock_id)
+    const good = props.app.good
+    const stock = props.app.stocks.find(s => s.id === good.stock_id)
 
     const alias = {
         organization_organization: props.app.organization.organization,
@@ -61,30 +46,23 @@ const Good = props => {
         organization_inn: props.app.organization.inn,
         access_point_address: stock.address || '',
         access_point_phone_number: stock.phone_number || '',
-        today: createDate(props.good.wo ? props.good.outtime : null),
-        model: props.good.model,
-        imei: props.good.imei,
-        sum: props.good.sum,
-    }
-
-    const open = () => {
-
-        window.open('goods/' + props.good.barcode, "_blank")
-
-        props.close()
-
+        today: createDate(good.wo ? good.outtime : null),
+        model: good.model,
+        imei: good.imei,
+        sum: good.sum,
     }
 
     const close = () => {
 
         setIsHistory(false)
         setIsRepair(false)
-        props.close()
+
+        store.dispatch({type: 'CLOSE_GOOD'})
 
     }
 
     return <Dialog
-        open={!!(props.good ?? props.good.id)}
+        open={true}
         TransitionComponent={Transition}
         keepMounted
         onClose={() => close()}
@@ -95,13 +73,12 @@ const Good = props => {
         <DialogTitle>
 
             <GoodActions
-                good={props.good}
+                good={good}
                 setGood={props.setGood}
                 isRepair={isRepair}
                 setIsRepair={setIsRepair}
                 isHistory={isHistory}
                 setIsHistory={setIsHistory}
-                open={open}
                 close={close}
                 alias={alias}
             />
@@ -114,7 +91,7 @@ const Good = props => {
         </DialogTitle>
 
         <GoodContent
-            good={props.good}
+            good={good}
             setGood={props.setGood}
             isRepair={isRepair}
             isHistory={isHistory}

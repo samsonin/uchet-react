@@ -71,8 +71,6 @@ const parseJwt = token => {
 
 const App = props => {
 
-    const [good, setGood] = useState({})
-
     const [orderBarcode, setOrderBarcode] = useState()
     const [ourBarcode, setOurBarcode] = useState()
     // const [ourBarcode, setOurBarcode] = useState('112116021526')
@@ -141,21 +139,11 @@ const App = props => {
         if (!ourBarcode) return
 
         let path = window.location.pathname
-        if (path.substring(0, 6) === '/order') path = '/order'
 
-        if (!['/transit', '/arrival/today', '/order'].includes(path)) {
+        if (path.substring(0, 6) === '/order') return
+        if (['/transit', '/arrival/today'].includes(path)) return
 
-            rest("goods/" + ourBarcode)
-                .then(res => {
-
-                    if (res.ok && res.status === 200) {
-
-                        setGood(res.body)
-
-                    }
-                })
-
-        }
+        rest('goods/' + ourBarcode)
 
     }, [ourBarcode])
 
@@ -202,11 +190,6 @@ const App = props => {
 
     }
 
-    const closeGoodModal = () => {
-        setGood({})
-        setOurBarcode()
-    }
-
     const expire = !(+props.auth.user_id && (props.auth.expiration_time - 180 > Math.round(new Date().getTime() / 1000.0)))
 
     return <>
@@ -232,6 +215,7 @@ const App = props => {
         <Header className={'d-print-none'}/>
 
         <div className="d-flex d-print-none" id="wrapper">
+
             <Sidebar/>
 
             <div style={{
@@ -247,11 +231,7 @@ const App = props => {
                 parseJwt={parseJwt}
             />
 
-            <GoodModal
-                good={good}
-                setGood={setGood}
-                close={closeGoodModal}
-            />
+            {props.app.good && props.app.good.barcode && <GoodModal />}
 
             {!expire && <WebSocketAdapter/>}
 
@@ -333,7 +313,7 @@ const App = props => {
                                 <Route path="/consignments" component={Consignments}/>
                                 <Route path="/produce"
                                        render={props => <Produce
-                                           setGood={setGood}
+                                           // setGood={setGood}
                                            {...props}
                                        />}
                                 />

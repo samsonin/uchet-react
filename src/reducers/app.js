@@ -1,4 +1,4 @@
-import {UPD_APP} from "../constants";
+import {CLOSE_GOOD, UPD_APP} from "../constants";
 import {EXIT_APP} from "../constants";
 
 let initialState = {
@@ -17,6 +17,7 @@ let initialState = {
 const probableKeys = [
     'balance',
     'current_stock_id',
+    'good',
     'positions',
     'stocks',
     'users',
@@ -101,6 +102,12 @@ const app = (state = getItems() || initialState, action) => {
 
         window.localStorage.removeItem('app');
         return initialState
+
+    } else if (action.type === CLOSE_GOOD) {
+
+        let newState = {...state}
+        delete newState.good
+        return newState;
 
     } else {
         return state

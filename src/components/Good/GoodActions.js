@@ -5,6 +5,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import RestoreFromTrashIcon from "@material-ui/icons/RestoreFromTrash";
+import RestoreIcon from '@material-ui/icons/Restore';
 import BuildIcon from "@material-ui/icons/Build";
 import LineWeightIcon from "@material-ui/icons/LineWeight";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -17,6 +18,7 @@ import {useSnackbar} from "notistack";
 import rest from "../Rest";
 import {PrintBarcodes} from "../common/PrintBarcodes";
 import {Print} from "../common/Print";
+import store from "../../store";
 
 
 const GoodActions = props => {
@@ -34,16 +36,11 @@ const GoodActions = props => {
 
                 if (res.status === 200) {
 
-                    // if (url.substring(0, 7) === 'transit' && method === 'POST') {
-                    //     if (typeof (props.hide) === "function") props.hide(props.good.id)
-                    // }
-
-                    if (props.close) props.close()
+                    store.dispatch({type: 'CLOSE_GOOD'})
 
                     enqueueSnackbar(success, {variant: 'success'})
 
-                    if (res.body.goods) props.setGood(res.body.goods)
-                    if (res.body.good) props.setGood(res.body.good)
+                    if (res.body.goods) props.setGoods(res.body.goods)
 
                 } else {
 
@@ -70,6 +67,16 @@ const GoodActions = props => {
 
     // зачислить деньги в кассу
     const refund = () => goodRest('goods/refund/', 'DELETE', 'Списано в брак')
+    const customerRefund = () => {
+
+        rest('sales/' + props.app.current_stock_id + '/' + props.good.wo.sale_id, 'DELETE')
+            .then(res => {
+                if (res.status ===200) {
+                    store.dispatch({type: 'CLOSE_GOOD'})
+                }
+            })
+
+    }
 
     const account = () => goodRest('goods/account/', 'DELETE', 'Списано в брак')
 
@@ -81,6 +88,8 @@ const GoodActions = props => {
         </IconButton>
     </Tooltip>
 
+    // TODO найти нормальные иконки
+
     const actions = {
         history: renderIcon('История', () => props.setIsHistory(!props.isHistory), <HistoryIcon/>),
         open: renderIcon('открыть в отдельной вкладке', () => props.open(), <AspectRatioIcon/>),
@@ -89,8 +98,9 @@ const GoodActions = props => {
             <i className="fas fa-truck"/>),
         reject: renderIcon('В брак', () => reject(), <ThumbDownIcon/>),
         restore: renderIcon("Восстановить", () => restore(), <RestoreFromTrashIcon/>),
-        refund: renderIcon('Вернуть в кассу', refund, <i className="fas fa-truck"/>),
-        accountRefund: renderIcon('Вернуть на счет', account, <i className="fas fa-truck"/>),
+        saleRefund: renderIcon('Отмена продажи', customerRefund, <RestoreIcon/>),
+        refund: renderIcon('Вернуть в кассу', refund, <RestoreIcon/>),
+        accountRefund: renderIcon('Вернуть на счет', account, <RestoreIcon/>),
         repair: renderIcon('Починить', () => props.setIsRepair(!props.isRepair), <BuildIcon/>),
         barcode: renderIcon('Штрихкод', () => PrintBarcodes([props.good.barcode]), <LineWeightIcon/>),
         use: renderIcon("В пользование", () => use(), <DeleteIcon/>),
@@ -108,7 +118,10 @@ const GoodActions = props => {
                         ? actions.repair
                         : props.good.wo
                             ? props.good.wo.sale_id || props.good.wo.substring(0, 4) === 'sale'
-                                ? actions.check
+                                ? <>
+                                    {actions.check}
+                                    {props.good.wo.sale_id && actions.saleRefund}
+                                </>
                                 : props.good.wo === 'use'
                                     ? actions.restore
                                     : props.good.wo === 'reject'

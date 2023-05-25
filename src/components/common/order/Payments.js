@@ -33,7 +33,7 @@ const totalSum = payments => {
 
 }
 
-export const Payments = ({order, isEditable, updApp}) => {
+export const Payments = ({order, isEditable}) => {
 
     const [sum, setSum] = useState(0)
 
