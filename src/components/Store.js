@@ -40,6 +40,7 @@ const Store = props => {
     const [search, setSearch] = useState('')
     const [isAllStocks, setIsAllStocks] = useState(false)
     const [isPublic, setIsPublic] = useState(false)
+    const [isReject, setIsReject] = useState(false)
     const [showButtons, setShowButtons] = useState(false)
 
     const limit = useRef(25)
@@ -57,6 +58,7 @@ const Store = props => {
         if (search) url += '&search=' + search
         if (!isAllStocks && currentStock) url += '&stock_id=' + currentStock.id
         if (isPublic) url += '&is_public=1'
+        if (isReject) url += '&is_reject=1'
 
         if (limit.current > 25) url += '&limit=' + limit.current
 
@@ -283,6 +285,11 @@ const Store = props => {
                               label={"только опубликованные"}
             />
 
+            <FormControlLabel control={
+                <Checkbox checked={isReject} onChange={() => setIsReject(!isReject)}/>}
+                              label={"только брак"}
+            />
+
         </div>
 
         {goods.length
@@ -300,6 +307,7 @@ const Store = props => {
                 <TableBody>
                     {goods
                         .filter(s => !isPublic || s.public || s.parts === 'sale')
+                        .filter(g => !isReject || g.wo === 'reject')
                         .filter(s => isAllStocks || s.wo === 't' || !currentStock ||
                             (currentStock && currentStock.id === s.stock_id))
                         .filter(s => {

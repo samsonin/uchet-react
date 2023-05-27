@@ -103,7 +103,6 @@ const AddCosts = props => {
                     setCash(false)
                     setCategory_id(0)
                     setModel('')
-                    props.done(res.body.goods)
 
                     enqueueSnackbar('ok', {variant: 'success'})
 

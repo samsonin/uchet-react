@@ -67,16 +67,6 @@ const GoodActions = props => {
 
     // зачислить деньги в кассу
     const refund = () => goodRest('goods/refund/', 'DELETE', 'Списано в брак')
-    const customerRefund = () => {
-
-        rest('sales/' + props.app.current_stock_id + '/' + props.good.wo.sale_id, 'DELETE')
-            .then(res => {
-                if (res.status ===200) {
-                    store.dispatch({type: 'CLOSE_GOOD'})
-                }
-            })
-
-    }
 
     const account = () => goodRest('goods/account/', 'DELETE', 'Списано в брак')
 
@@ -98,7 +88,6 @@ const GoodActions = props => {
             <i className="fas fa-truck"/>),
         reject: renderIcon('В брак', () => reject(), <ThumbDownIcon/>),
         restore: renderIcon("Восстановить", () => restore(), <RestoreFromTrashIcon/>),
-        saleRefund: renderIcon('Отмена продажи', customerRefund, <RestoreIcon/>),
         refund: renderIcon('Вернуть в кассу', refund, <RestoreIcon/>),
         accountRefund: renderIcon('Вернуть на счет', account, <RestoreIcon/>),
         repair: renderIcon('Починить', () => props.setIsRepair(!props.isRepair), <BuildIcon/>),
@@ -118,10 +107,7 @@ const GoodActions = props => {
                         ? actions.repair
                         : props.good.wo
                             ? props.good.wo.sale_id || props.good.wo.substring(0, 4) === 'sale'
-                                ? <>
-                                    {actions.check}
-                                    {props.good.wo.sale_id && actions.saleRefund}
-                                </>
+                                ? actions.check
                                 : props.good.wo === 'use'
                                     ? actions.restore
                                     : props.good.wo === 'reject'

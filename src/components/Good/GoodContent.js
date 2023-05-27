@@ -214,13 +214,6 @@ const GoodContent = props => {
         if (data === {}) return enqueueSnackbar('нет изменений', {variant: 'error'})
 
         rest('goods/' + props.good.barcode, 'PATCH', data)
-            .then(res => {
-                if (res.status === 200) {
-
-                    if (typeof res.body.good === 'object') props.setGood(res.body.good)
-
-                }
-            })
 
     }
 
@@ -260,7 +253,6 @@ const GoodContent = props => {
                     if (res.body.good) {
 
                         setImage()
-                        props.setGood(res.body.good)
 
                     }
                 } else {
@@ -317,9 +309,7 @@ const GoodContent = props => {
 
         try {
 
-            const o = JSON.parse(wo)
-
-            return !!o.sale_id
+            return !!wo.sale_id
 
         } catch (e) {
 
