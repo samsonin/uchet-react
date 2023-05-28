@@ -12,6 +12,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import PrintIcon from "@material-ui/icons/Print";
 import AspectRatioIcon from '@material-ui/icons/AspectRatio';
 import HistoryIcon from '@material-ui/icons/History';
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 
 import {useSnackbar} from "notistack";
 
@@ -61,14 +62,14 @@ const GoodActions = props => {
 
     const use = () => goodRest('goods/', 'DELETE', 'Списано в пользование')
 
-    const restore = () => goodRest('goods/restore/', 'POST', 'Восстановлено')
+    const restore = () => goodRest('goods/restore/', 'PATCH', 'Восстановлено')
 
     const reject = () => goodRest('goods/reject/', 'DELETE', 'Списано в брак')
 
     // зачислить деньги в кассу
-    const refund = () => goodRest('goods/refund/', 'DELETE', 'Списано в брак')
+    const refund = () => goodRest('goods/refund/', 'DELETE', 'В кассе')
 
-    const account = () => goodRest('goods/account/', 'DELETE', 'Списано в брак')
+    const account = () => goodRest('goods/account/', 'DELETE', 'На счету')
 
     const passedMilliseconds = Date.now() - (props.good.unix ? props.good.unix * 1000 : Date.parse(props.good.time))
     const canPrintBarcode = props.auth.admin || 12 >= Math.round(passedMilliseconds / 3600000)
@@ -88,7 +89,7 @@ const GoodActions = props => {
             <i className="fas fa-truck"/>),
         reject: renderIcon('В брак', () => reject(), <ThumbDownIcon/>),
         restore: renderIcon("Восстановить", () => restore(), <RestoreFromTrashIcon/>),
-        refund: renderIcon('Вернуть в кассу', refund, <RestoreIcon/>),
+        refund: renderIcon('Вернуть в кассу', refund, <AttachMoneyIcon/>),
         accountRefund: renderIcon('Вернуть на счет', account, <RestoreIcon/>),
         repair: renderIcon('Починить', () => props.setIsRepair(!props.isRepair), <BuildIcon/>),
         barcode: renderIcon('Штрихкод', () => PrintBarcodes([props.good.barcode]), <LineWeightIcon/>),
