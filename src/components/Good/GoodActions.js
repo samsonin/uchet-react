@@ -13,6 +13,7 @@ import PrintIcon from "@material-ui/icons/Print";
 import AspectRatioIcon from '@material-ui/icons/AspectRatio';
 import HistoryIcon from '@material-ui/icons/History';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
+import ReceiptIcon from '@material-ui/icons/Receipt';
 
 import {useSnackbar} from "notistack";
 
@@ -90,7 +91,7 @@ const GoodActions = props => {
         reject: renderIcon('В брак', () => reject(), <ThumbDownIcon/>),
         restore: renderIcon("Восстановить", () => restore(), <RestoreFromTrashIcon/>),
         refund: renderIcon('Вернуть в кассу', refund, <AttachMoneyIcon/>),
-        accountRefund: renderIcon('Вернуть на счет', account, <RestoreIcon/>),
+        accountRefund: renderIcon('Вернуть на счет', account, <ReceiptIcon/>),
         repair: renderIcon('Починить', () => props.setIsRepair(!props.isRepair), <BuildIcon/>),
         barcode: renderIcon('Штрихкод', () => PrintBarcodes([props.good.barcode]), <LineWeightIcon/>),
         use: renderIcon("В пользование", () => use(), <DeleteIcon/>),
