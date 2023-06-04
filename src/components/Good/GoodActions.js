@@ -27,13 +27,15 @@ const GoodActions = props => {
 
     const {enqueueSnackbar} = useSnackbar()
 
+    const good = props.app.good
+
     const doc = props.app.docs.find(d => d.name === 'sale_showcase')
 
     const goodRest = (url, method, success) => {
 
-        if (!props.good.barcode) throw new Error('нет баркода')
+        if (!good.barcode) throw new Error('нет баркода')
 
-        rest(url + props.good.barcode, method)
+        rest(url + good.barcode, method)
             .then(res => {
 
                 if (res.status === 200) {
@@ -42,7 +44,7 @@ const GoodActions = props => {
 
                     enqueueSnackbar(success, {variant: 'success'})
 
-                    if (res.body.goods) props.setGoods(res.body.goods)
+                    // if (res.body.goods) props.setGoods(res.body.goods)
 
                 } else {
 
@@ -72,7 +74,7 @@ const GoodActions = props => {
 
     const account = () => goodRest('goods/account/', 'DELETE', 'На счету')
 
-    const passedMilliseconds = Date.now() - (props.good.unix ? props.good.unix * 1000 : Date.parse(props.good.time))
+    const passedMilliseconds = Date.now() - (good.unix ? good.unix * 1000 : Date.parse(good.time))
     const canPrintBarcode = props.auth.admin || 12 >= Math.round(passedMilliseconds / 3600000)
     const renderIcon = (tooltip, onClick, elem) => <Tooltip title={tooltip}>
         <IconButton onClick={onClick}>
@@ -83,17 +85,17 @@ const GoodActions = props => {
     // TODO найти нормальные иконки
 
     const actions = {
-        history: renderIcon('История', () => props.setIsHistory(!props.isHistory), <HistoryIcon/>),
+        history: renderIcon('История', () => props.setStatusId(props.statusId ? 0 : 2), <HistoryIcon/>),
         open: renderIcon('открыть в отдельной вкладке', () => props.open(), <AspectRatioIcon/>),
-        transit: renderIcon(props.good.wo ? 'Из транзита' : 'В транзит',
-            () => transit(!props.good.wo),
+        transit: renderIcon(good.wo ? 'Из транзита' : 'В транзит',
+            () => transit(!good.wo),
             <i className="fas fa-truck"/>),
         reject: renderIcon('В брак', () => reject(), <ThumbDownIcon/>),
         restore: renderIcon("Восстановить", () => restore(), <RestoreFromTrashIcon/>),
         refund: renderIcon('Вернуть в кассу', refund, <AttachMoneyIcon/>),
         accountRefund: renderIcon('Вернуть на счет', account, <ReceiptIcon/>),
-        repair: renderIcon('Починить', () => props.setIsRepair(!props.isRepair), <BuildIcon/>),
-        barcode: renderIcon('Штрихкод', () => PrintBarcodes([props.good.barcode]), <LineWeightIcon/>),
+        repair: renderIcon('Починить', () => props.setStatusId(props.statusId ? 0 : 1), <BuildIcon/>),
+        barcode: renderIcon('Штрихкод', () => PrintBarcodes([good.barcode]), <LineWeightIcon/>),
         use: renderIcon("В пользование", () => use(), <DeleteIcon/>),
         check: renderIcon("Копия чека", () => Print(doc, props.alias), <PrintIcon/>),
     }
@@ -102,23 +104,23 @@ const GoodActions = props => {
     const renderDiv = <div>
         {actions.history}
         {props.app.current_stock_id
-            ? props.good.wo === 't'
+            ? good.wo === 't'
                 ? actions.transit
-                : props.app.current_stock_id === props.good.stock_id
-                    ? props.isRepair
+                : props.app.current_stock_id === good.stock_id
+                    ? props.statusId === 1
                         ? actions.repair
-                        : props.good.wo
-                            ? props.good.wo.sale_id || props.good.wo.substring(0, 4) === 'sale'
+                        : good.wo
+                            ? good.wo.sale_id || good.wo.substring(0, 4) === 'sale'
                                 ? actions.check
-                                : props.good.wo === 'use'
+                                : good.wo === 'use'
                                     ? actions.restore
-                                    : props.good.wo === 'reject'
+                                    : good.wo === 'reject'
                                         ? <>
                                             {actions.restore}
                                             {actions.refund}
                                             {actions.accountRefund}
                                         </>
-                                        : props.good.wo === 'shortage' && props.auth.admin
+                                        : good.wo === 'shortage' && props.auth.admin
                                             ? actions.restore
                                             : ''
                             : <>
@@ -141,7 +143,7 @@ const GoodActions = props => {
     }}>
 
         <span style={{fontWeight: 'bold'}}>
-                    {'#' + props.good.id}
+                    {'#' + good.id}
         </span>
 
         {renderDiv}

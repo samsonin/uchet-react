@@ -231,7 +231,7 @@ const App = props => {
                 parseJwt={parseJwt}
             />
 
-            {props.app.good && props.app.good.barcode && <GoodModal />}
+            {!props.app.good || <GoodModal/>}
 
             {!expire && <WebSocketAdapter/>}
 

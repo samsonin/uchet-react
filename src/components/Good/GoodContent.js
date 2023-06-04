@@ -86,50 +86,52 @@ const GoodContent = props => {
     const classes = useStyles()
     const {enqueueSnackbar} = useSnackbar()
 
+    const good = props.app.good
+
     useEffect(() => {
 
         setIsReasonOpen(false)
 
-        if (props.good.picture) setPicture(props.good.picture)
+        if (good.picture) setPicture(good.picture)
 
-        if (props.good.category_id) {
-            setCategoryId(props.good.category_id)
-        } else if (props.good.group) {
+        if (good.category_id) {
+            setCategoryId(good.category_id)
+        } else if (good.group) {
             Object.entries(groupAlias).map(([cat, groupName]) => {
-                if (props.good.group === groupName) setCategoryId(+cat)
+                if (good.group === groupName) setCategoryId(+cat)
             })
         }
 
-        setModel(props.good.model)
-        if (props.good.imei) setImei(props.good.imei)
-        setSum(props.good.sum)
-        setStoragePlace(props.good.storage_place)
+        setModel(good.model)
+        if (good.imei) setImei(good.imei)
+        setSum(good.sum)
+        setStoragePlace(good.storage_place)
         setIsPublic(pb)
-        setResponsibleId(+props.good.responsible_id)
-        setPrivateNote(props.good.private_note)
-        setPublicNote(props.good.public_note)
+        setResponsibleId(+good.responsible_id)
+        setPrivateNote(good.private_note)
+        setPublicNote(good.public_note)
 
-    }, [props.good])
+    }, [good])
 
 
-    const category = props.app.categories.find(v => v.id === props.good.category_id)
+    const category = props.app.categories.find(v => v.id === good.category_id)
     const doc = props.app.docs.find(d => d.name === 'sale_showcase')
-    const stock = props.app.stocks.find(s => s.id === props.good.stock_id)
+    const stock = props.app.stocks.find(s => s.id === good.stock_id)
     const responsible = props.app.users.find(u => u.id === responsibleId)
 
-    const pb = !!props.good.public || props.good.parts === 'sale'
-    const isEditable = !props.good.wo && props.good.stock_id === props.app.current_stock_id
-    const isShowcase = props.good.barcode.toString().substring(0, 6) === '115104'
+    const pb = !!good.public || good.parts === 'sale'
+    const isEditable = !good.wo && good.stock_id === props.app.current_stock_id
+    const isShowcase = good.barcode.toString().substring(0, 6) === '115104'
 
-    const isSame = categoryId === props.good.category_id
-        && model === props.good.model
-        && (!isShowcase || imei === props.good.imei)
-        && sum === props.good.sum
-        && responsibleId === +props.good.responsible_id
-        && storagePlace === props.good.storage_place
+    const isSame = categoryId === good.category_id
+        && model === good.model
+        && (!isShowcase || imei === good.imei)
+        && sum === good.sum
+        && responsibleId === +good.responsible_id
+        && storagePlace === good.storage_place
         && isPublic === (pb)
-        && privateNote === props.good.private_note
-        && publicNote === props.good.public_note
+        && privateNote === good.private_note
+        && publicNote === good.public_note
 
     const toOrder = () => {
 
@@ -137,7 +139,7 @@ const GoodContent = props => {
             variant: 'error',
         })
 
-        rest('orders/' + props.app.current_stock_id + '/' + orderId + '/' + props.good.barcode,
+        rest('orders/' + props.app.current_stock_id + '/' + orderId + '/' + good.barcode,
             'POST')
             .then(res => {
                 if (res.status === 200) {
@@ -158,7 +160,7 @@ const GoodContent = props => {
 
     const toSale = () => {
 
-        rest('sales/' + props.app.current_stock_id + '/' + props.good.barcode + '/' + sum, 'POST')
+        rest('sales/' + props.app.current_stock_id + '/' + good.barcode + '/' + sum, 'POST')
             .then(res => {
                 if (res.status === 200) {
 
@@ -178,9 +180,9 @@ const GoodContent = props => {
 
     const refund = () => {
 
-        if (props.good.barcode && reason) {
+        if (good.barcode && reason) {
 
-            rest('sales/' + props.app.current_stock_id + '/' + props.good.barcode + '/' + reason, 'DELETE')
+            rest('sales/' + props.app.current_stock_id + '/' + good.barcode + '/' + reason, 'DELETE')
                 .then(res => {
 
                     if (res.status === 200) {
@@ -205,7 +207,7 @@ const GoodContent = props => {
 
         for (const key in aliases) {
 
-            if (eval(key) !== props.good[aliases[key]]) {
+            if (eval(key) !== good[aliases[key]]) {
                 data[aliases[key]] = eval(key)
             }
 
@@ -213,7 +215,7 @@ const GoodContent = props => {
 
         if (data === {}) return enqueueSnackbar('нет изменений', {variant: 'error'})
 
-        rest('goods/' + props.good.barcode, 'PATCH', data)
+        rest('goods/' + good.barcode, 'PATCH', data)
 
     }
 
@@ -245,7 +247,7 @@ const GoodContent = props => {
             return enqueueSnackbar('тип файла должен быть jpg или gif', {variant: 'error'})
         }
 
-        rest('goods/picture/' + props.good.barcode, 'POST', file, true)
+        rest('goods/picture/' + good.barcode, 'POST', file, true)
             .then(res => {
 
                 if (res.status === 200) {
@@ -269,21 +271,21 @@ const GoodContent = props => {
 
     const border = isDrag ? '3px dashed black' : '3px black'
 
-    let ui_wo = props.good.ui_wo
+    let ui_wo = good.ui_wo
 
-    if (!ui_wo && props.good.wo) {
+    if (!ui_wo && good.wo) {
 
-        if (props.good.wo.sale_id || props.good.wo.substring(0, 4) === 'sale') {
+        if (good.wo.sale_id || good.wo.substring(0, 4) === 'sale') {
             ui_wo = 'Продан'
-        } else if (props.good.wo === 'reject') {
+        } else if (good.wo === 'reject') {
             ui_wo = 'В браке'
-        } else if (props.good.wo === 't') {
+        } else if (good.wo === 't') {
             ui_wo = 'В транзите'
         } else {
 
             try {
 
-                const wo = JSON.parse(props.good.wo);
+                const wo = JSON.parse(good.wo);
 
                 ui_wo = wo.remid
                     ? 'В заказ ' + wo.remid
@@ -291,7 +293,7 @@ const GoodContent = props => {
                         ? 'Продан'
                         : wo.action && wo.action === 'remself'
                             ? 'Для витрины'
-                            : woAlliases[props.good.wo]
+                            : woAlliases[good.wo]
 
             } catch (e) {
 
@@ -345,8 +347,8 @@ const GoodContent = props => {
     </div>
 
     const pictureRender = () => <img
-        src={'https://uchet.store/uploads/' + props.good.picture}
-        alt={props.good.model}
+        src={'https://uchet.store/uploads/' + good.picture}
+        alt={good.model}
         width={'100%'}
         onError={() => setPicture()}
         onChange={() => {
@@ -354,20 +356,12 @@ const GoodContent = props => {
         }}
     />
 
-    const done = good => {
-
-        props.setIsRepair(false)
-
-        if (good) props.setGood(good)
-
-    }
-
-    return props.isRepair
-        ? <AddCosts barcode={props.good.barcode}
-                    done={done}
+    return props.statusId === 1
+        ? <AddCosts barcode={good.barcode}
+                    done={() => props.setStatusId(0)}
         />
-        : props.isHistory
-            ? <GoodHistory good={props.good}/>
+        : props.statusId === 2
+            ? <GoodHistory good={good}/>
             : <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -381,7 +375,7 @@ const GoodContent = props => {
                             <CardActionArea>
                                 <CardMedia
                                     component="img"
-                                    alt={props.good.model}
+                                    alt={good.model}
                                     image={image}/>
                             </CardActionArea>
                             <CardActions>
@@ -443,12 +437,12 @@ const GoodContent = props => {
                 {isEditable && textWithButton('Цена', sum, e => intInputHandler(e.target.value, setSum),
                     () => toSale(), true, 'Продать')}
 
-                {line("Себестоимость:", props.good.remcost ?? props.good.cost ?? 0, isEditable)}
+                {line("Себестоимость:", good.remcost ?? good.cost ?? 0, isEditable)}
 
 
-                {props.good.wo === 't' || line('Точка:', stock ? stock.name : null, isEditable)}
+                {good.wo === 't' || line('Точка:', stock ? stock.name : null, isEditable)}
 
-                {!props.good.wo && line('Хранение', storagePlace, isEditable, e => setStoragePlace(e.target.value))}
+                {!good.wo && line('Хранение', storagePlace, isEditable, e => setStoragePlace(e.target.value))}
 
                 {isEditable && (!isPublic || props.auth.admin) && <IsPublicCheckBox
                     value={isPublic}
@@ -470,8 +464,8 @@ const GoodContent = props => {
                     />
                     : responsible && line('Ответственный:', responsible.name, isEditable)}
 
-                {props.good.out_unix && ui_wo &&
-                    line('Статус:', ui_wo + ', c ' + toLocalTimeStr(props.good.out_unix), isEditable)}
+                {good.out_unix && ui_wo &&
+                    line('Статус:', ui_wo + ', c ' + toLocalTimeStr(good.out_unix), isEditable)}
 
                 {isEditable && <Fade
                     in={!isSame && isEditable}
@@ -485,7 +479,7 @@ const GoodContent = props => {
                     </Button>
                 </Fade>}
 
-                {!isEditable && props.good.stock_id === props.app.current_stock_id && isSale(props.good.wo)
+                {!isEditable && good.stock_id === props.app.current_stock_id && isSale(good.wo)
                     ? isReasonOpen
                         ? textWithButton('Причина возврата', reason, e => setReason(e.target.value),
                             () => refund(), false, 'Вернуть')

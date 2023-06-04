@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useState} from "react";
+import React, {forwardRef, useState} from "react";
 import {connect} from "react-redux";
 
 import IconButton from "@material-ui/core/IconButton";
@@ -8,7 +8,6 @@ import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
 import {makeStyles} from "@material-ui/core/styles";
 
-import rest from "./../Rest";
 import GoodActions from "../Good/GoodActions";
 import GoodContent from "../Good/GoodContent";
 import {createDate} from "../common/Print";
@@ -33,36 +32,36 @@ const Good = props => {
 
     const classes = useStyles()
 
-    const [isRepair, setIsRepair] = useState(false)
-    const [isHistory, setIsHistory] = useState(false)
+    // 0 - normal
+    // 1 - repair
+    // 2 - history
+    const [statusId, setStatusId] = useState(0)
 
     const good = props.app.good
     const stock = props.app.stocks.find(s => s.id === good.stock_id)
 
     const alias = {
-        organization_organization: props.app.organization.organization,
-        organization_name: props.app.organization.name,
-        organization_legal_address: props.app.organization.legal_address,
-        organization_inn: props.app.organization.inn,
-        access_point_address: stock.address || '',
-        access_point_phone_number: stock.phone_number || '',
-        today: createDate(good.wo ? good.outtime : null),
-        model: good.model,
-        imei: good.imei,
-        sum: good.sum,
-    }
+            organization_organization: props.app.organization.organization,
+            organization_name: props.app.organization.name,
+            organization_legal_address: props.app.organization.legal_address,
+            organization_inn: props.app.organization.inn,
+            access_point_address: stock.address || '',
+            access_point_phone_number: stock.phone_number || '',
+            today: createDate(good.wo ? good.outtime : null),
+            model: good.model,
+            imei: good.imei,
+            sum: good.sum,
+        }
 
     const close = () => {
 
-        setIsHistory(false)
-        setIsRepair(false)
-
+        setStatusId(0)
         store.dispatch({type: 'CLOSE_GOOD'})
 
     }
 
     return <Dialog
-        open={true}
+        open={!!good}
         TransitionComponent={Transition}
         keepMounted
         onClose={() => close()}
@@ -73,12 +72,8 @@ const Good = props => {
         <DialogTitle>
 
             <GoodActions
-                good={good}
-                setGood={props.setGood}
-                isRepair={isRepair}
-                setIsRepair={setIsRepair}
-                isHistory={isHistory}
-                setIsHistory={setIsHistory}
+                statusId={statusId}
+                setStatusId={setStatusId}
                 close={close}
                 alias={alias}
             />
@@ -91,11 +86,8 @@ const Good = props => {
         </DialogTitle>
 
         <GoodContent
-            good={good}
-            setGood={props.setGood}
-            isRepair={isRepair}
-            isHistory={isHistory}
-            setIsRepair={setIsRepair}
+            statusId={statusId}
+            setStatusId={setStatusId}
             close={close}
             alias={alias}
         />

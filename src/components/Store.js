@@ -181,11 +181,9 @@ const Store = props => {
         opacity: showButtons ? '25%' : '100%'
     }
 
-    console.log(props.good && props.good.barcode)
-
     return <>
 
-        {props.app.good && props.app.good.barcode && <GoodModal />}
+        {!props.app.good || <GoodModal/>}
 
         <div style={style}>
 

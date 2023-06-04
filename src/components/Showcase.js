@@ -67,7 +67,7 @@ const Showcase = props => {
 
     return <>
 
-        {props.app.good && props.app.good.barcode && <GoodModal/>}
+        {!props.app.good || <GoodModal/>}
 
         <div style={{
             display: 'flex',
