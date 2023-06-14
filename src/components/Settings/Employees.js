@@ -1,9 +1,5 @@
 import React, {useState} from "react";
-import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
-import {upd_app,} from "../../actions/actionCreator";
-
-import {useSnackbar} from 'notistack';
 
 import {
     Fab,
@@ -19,10 +15,12 @@ import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddIcon from "@material-ui/icons/Add";
 import {makeStyles} from "@material-ui/core/styles";
+import InputAdornment from "@material-ui/core/InputAdornment";
+
+import {useSnackbar} from 'notistack';
 
 import request from '../Request'
 import AuthControl from '../../components/AuthControl';
-import InputAdornment from "@material-ui/core/InputAdornment";
 
 let authControl = new AuthControl();
 
@@ -34,9 +32,6 @@ const useStyles = makeStyles({
     },
     ml45: {
         marginLeft: "45% !important",
-    },
-    ml35: {
-        marginLeft: "35% !important",
     },
     hoverGrid: {
         boxShadow: "none",
@@ -50,11 +45,6 @@ const useStyles = makeStyles({
         },
     },
 });
-const mapDispatchToProps = dispatch =>
-    bindActionCreators(
-        {upd_app},
-        dispatch
-    );
 
 const Employees = props => {
 
@@ -84,9 +74,6 @@ const Employees = props => {
                 if (data.result) {
 
                     setStatus(0)
-
-                    const {upd_app} = props;
-                    upd_app({users: data.users})
 
                 } else {
 
@@ -118,12 +105,6 @@ const Employees = props => {
 
         request({action: 'addEmployee'}, '/settings', props.auth.jwt)
             .then(data => {
-
-                if (data.result) {
-                    const {upd_app} = props;
-                    upd_app({users: data.users})
-
-                }
 
             })
     }
@@ -239,4 +220,4 @@ const Employees = props => {
     </>
 }
 
-export default connect((state) => state, mapDispatchToProps)(Employees);
+export default connect(state => state)(Employees);

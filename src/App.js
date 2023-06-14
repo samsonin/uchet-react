@@ -22,7 +22,6 @@ import Transit from "./components/Transit";
 import FundsFlow from "./components/FundsFlow";
 import rest from "./components/Rest";
 import GoodModal from "./components/Modals/Good";
-import Good from "./components/Good"
 import Config from "./components/Settings/Config";
 import Organization from "./components/Settings/Organization";
 import Employees from "./components/Settings/Employees";
@@ -294,7 +293,7 @@ const App = props => {
                                 {...props}
                             />}/>
 
-                            <Route exact path="/goods/:barcode" component={Good}/>
+                            {/*<Route exact path="/goods/:barcode" component={Good}/>*/}
 
                             <Route exact path="/arrival/today"
                                    render={props => <ArrivalToday

@@ -20,7 +20,6 @@ import uuid from "uuid";
 import rest from "../components/Rest";
 import TwoLineInCell from "./common/TwoLineInCell";
 import {toLocalTimeStr} from "./common/Time";
-import GoodModal from "./Modals/Good";
 import {groupAlias} from "./common/GroupAliases";
 import CategoryHandler from "./common/CategoryHandler";
 import CloseIcon from "@material-ui/icons/Close";
@@ -182,8 +181,6 @@ const Store = props => {
     }
 
     return <>
-
-        {!props.app.good || <GoodModal/>}
 
         <div style={style}>
 

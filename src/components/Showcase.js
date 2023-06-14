@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
-import GoodModal from "./Modals/Good";
 import rest from "../components/Rest";
 import TableHead from "@material-ui/core/TableHead";
 import {InputAdornment, Table, TableBody, TableCell, TableRow, TextField} from "@material-ui/core";
@@ -66,8 +65,6 @@ const Showcase = props => {
     // const hide = id => setShowcase(showcase.filter(s => s.id !== id))
 
     return <>
-
-        {!props.app.good || <GoodModal/>}
 
         <div style={{
             display: 'flex',
