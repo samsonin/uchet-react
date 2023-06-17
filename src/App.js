@@ -50,6 +50,7 @@ import Reals from "./components/Reals";
 import {useSnackbar} from "notistack";
 import {Button} from "@material-ui/core";
 import Sales from "./components/Sales";
+import Users from "./components/Settings/Users";
 
 
 const parseJwt = token => {
@@ -328,7 +329,7 @@ const App = props => {
                                 <Route path="/funds" component={FundsFlow}/>
 
                                 <Route path="/settings/organization" component={Organization}/>
-                                <Route path="/settings/employees" component={Employees}/>
+                                <Route path="/settings/employees" component={Users}/>
                                 <Route exact path="/settings/stocks" component={Stocks}/>
                                 {props.app.users && props.app.stocks && props.app.stockusers
                                     ? <Route exact path="/settings/stocks/:id" component={Stock}/>
