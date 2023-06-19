@@ -17,6 +17,7 @@ export const
     INIT_USER = 'INIT_USER',
     UPD_APP = 'UPD_APP',
     CLOSE_GOOD = 'CLOSE_GOOD',
+    DELETE_GOOD = 'DELETE_GOOD',
     EXIT_APP = 'EXIT_APP',
 
     SERVER = isLocalhost ?

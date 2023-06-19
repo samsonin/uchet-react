@@ -23,6 +23,7 @@ import {toLocalTimeStr} from "./common/Time";
 import {groupAlias} from "./common/GroupAliases";
 import CategoryHandler from "./common/CategoryHandler";
 import CloseIcon from "@material-ui/icons/Close";
+import store from "../store";
 
 const oftenUsedButtons = [
     {label: 'Аксессуары', catId: 6},
@@ -113,22 +114,27 @@ const Store = props => {
 // eslint-disable-next-line
     }, [props.enterPress])
 
-    // useEffect(() => {
-    //
-    //     if (good) {
-    //
-    //         const newGoods = goods.map(g => g.id === good.id ? good : g)
-    //         setGoods(newGoods)
-    //
-    //     }
-    //
-    // }, [good])
+    useEffect(() => {
+        if (props.app.good) {
 
-    const setGood = barcode => {
+            const newGoods = goods.map(g => g.barcode === props.app.good.barcode ? props.app.good : g)
+            setGoods(newGoods)
 
-        rest('goods/' + barcode)
+        }
+    }, [props.app.good])
 
-    }
+    useEffect(() => {
+        if (props.app.needDeleteBarcode) {
+
+            store.dispatch({type: 'DELETE_GOOD'})
+
+            const newGoods = goods.filter(g => g.barcode !== props.app.needDeleteBarcode)
+            setGoods(newGoods)
+
+        }
+    }, [props.app.needDeleteBarcode])
+
+    const setGood = barcode => rest('goods/' + barcode)
 
     const setCat = id => {
 

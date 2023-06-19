@@ -53,10 +53,14 @@ const Good = props => {
             sum: good.sum,
         }
 
-    const close = () => {
+    const close = (barcode = '') => {
 
         setStatusId(0)
         store.dispatch({type: 'CLOSE_GOOD'})
+        if (barcode) store.dispatch({
+            type: 'DELETE_GOOD',
+            barcode
+        })
 
     }
 
@@ -74,7 +78,6 @@ const Good = props => {
             <GoodActions
                 statusId={statusId}
                 setStatusId={setStatusId}
-                close={close}
                 alias={alias}
             />
 

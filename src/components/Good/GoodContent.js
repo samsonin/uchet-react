@@ -145,7 +145,7 @@ const GoodContent = props => {
                 if (res.status === 200) {
 
                     enqueueSnackbar('В заказе')
-                    props.close()
+                    props.close(good.barcode)
 
                 } else {
 
@@ -164,7 +164,7 @@ const GoodContent = props => {
             .then(res => {
                 if (res.status === 200) {
 
-                    props.close()
+                    props.close(good.barcode)
 
                     if (isShowcase) Print(doc, props.alias)
                     else enqueueSnackbar('продано!', {variant: 'success'})

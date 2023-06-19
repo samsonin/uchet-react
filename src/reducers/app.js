@@ -1,4 +1,4 @@
-import {CLOSE_GOOD, UPD_APP} from "../constants";
+import {CLOSE_GOOD, DELETE_GOOD, UPD_APP} from "../constants";
 import {EXIT_APP} from "../constants";
 
 let initialState = {
@@ -109,10 +109,19 @@ const app = (state = getItems() || initialState, action) => {
         delete newState.good
         return newState;
 
+    } else if (action.type === DELETE_GOOD) {
+
+        let newState = {...state}
+
+        if (action.barcode) newState.needDeleteBarcode = action.barcode
+        else delete newState.needDeleteBarcode
+
+        return newState
+
     } else {
         return state
     }
 
-};
+}
 
 export default app;
