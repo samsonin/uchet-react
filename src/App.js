@@ -82,6 +82,8 @@ const App = props => {
 
     const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
+    let path = window.location.pathname
+
     const isBarcodeValid = barcode => {
 
         const checkInt = +barcode.slice(-1)
@@ -137,8 +139,6 @@ const App = props => {
     useEffect(() => {
 
         if (!ourBarcode) return
-
-        let path = window.location.pathname
 
         if (path.substring(0, 6) === '/order') return
         if (['/transit', '/arrival/today'].includes(path)) return
@@ -231,7 +231,7 @@ const App = props => {
                 parseJwt={parseJwt}
             />
 
-            {!props.app.good || <GoodModal/>}
+            {!props.app.good || path.substring(0, 8) === '/transit' || <GoodModal/>}
 
             {!expire && <WebSocketAdapter/>}
 

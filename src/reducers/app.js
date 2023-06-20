@@ -95,7 +95,11 @@ const app = (state = getItems() || initialState, action) => {
 
         }
 
-        window.localStorage.setItem('app', JSON.stringify(newState));
+        const newStorage = {...newState}
+        delete newStorage.good
+
+        // window.localStorage.setItem('app', JSON.stringify(newStorage));
+
         return newState;
 
     } else if (action.type === EXIT_APP) {
