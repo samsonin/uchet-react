@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import {connect} from "react-redux";
+
 import TableHead from "@material-ui/core/TableHead";
 import {
     FormControlLabel,
@@ -11,9 +12,11 @@ import {
     TableRow,
     TextField
 } from "@material-ui/core";
+import SearchIcon from "@material-ui/icons/Search";
+
 import TwoLineInCell from "../common/TwoLineInCell";
 import uuid from "uuid";
-import SearchIcon from "@material-ui/icons/Search";
+import rest from "../Rest";
 
 
 const Users = props => {
@@ -21,6 +24,15 @@ const Users = props => {
     const [isAll, setIsAll] = useState(false)
     const [search, setSearch] = useState('')
 
+    const validChange = userId => {
+
+        const user = props.app.users.find(u => u.id === userId)
+
+        if (!user) return
+
+        rest('users/' + userId, user.is_valid ? 'DELETE' : 'POST')
+
+    }
 
     return <>
 
@@ -111,7 +123,9 @@ const Users = props => {
                                     label={u.is_valid ? "Работает" : "Уволен"}
                                     control={
                                         <Switch checked={u.is_valid}
-                                                color="primary"/>}
+                                                color="primary"
+                                                onChange={() => validChange(u.id)}
+                                        />}
                                 />
                             </TableCell>
                         </TableRow>

@@ -24,6 +24,7 @@ import {groupAlias} from "./common/GroupAliases";
 import CategoryHandler from "./common/CategoryHandler";
 import CloseIcon from "@material-ui/icons/Close";
 import store from "../store";
+import {makeGroup} from "../Models/Good";
 
 const oftenUsedButtons = [
     {label: 'Аксессуары', catId: 6},
@@ -38,6 +39,7 @@ const Store = props => {
     const [catId, setCatId] = useState(0)
     const [error, setError] = useState(false)
     const [search, setSearch] = useState('')
+    const [isGroup, setIsGroup] = useState(false)
     const [isAllStocks, setIsAllStocks] = useState(false)
     const [isPublic, setIsPublic] = useState(false)
     const [isReject, setIsReject] = useState(false)
@@ -186,6 +188,12 @@ const Store = props => {
         opacity: showButtons ? '25%' : '100%'
     }
 
+    const goodsView = isGroup
+        ? makeGroup(goods)
+        : goods
+
+    console.log(goodsView)
+
     return <>
 
         <div style={style}>
@@ -275,6 +283,13 @@ const Store = props => {
 
         <div style={style}>
 
+
+            <FormControlLabel
+                control={<Checkbox
+                    checked={isGroup} onChange={() => setIsGroup(!isGroup)}/>}
+                label="Сгруппировать"
+            />
+
             {currentStock && <FormControlLabel control={
 
                 <Checkbox checked={isAllStocks} onChange={() => setIsAllStocks(!isAllStocks)}/>}
@@ -293,20 +308,22 @@ const Store = props => {
 
         </div>
 
-        {goods.length
+        {goodsView.length
             ? <Table size="small"
                      style={{background: 'white'}}
             >
                 <TableHead>
                     <TableRow>
-                        <TableCell>#</TableCell>
+                        {isGroup || <TableCell>#</TableCell>}
                         <TableCell>Товар</TableCell>
                         <TableCell>Цена / Себестоимость</TableCell>
-                        <TableCell>Хранение</TableCell>
+                        <TableCell>
+                            {isGroup ? 'Кол-во' : 'Хранение'}
+                        </TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {goods
+                    {goodsView
                         .filter(s => !isPublic || s.public || s.parts === 'sale')
                         .filter(g => !isReject || g.wo === 'reject')
                         .filter(s => isAllStocks || s.wo === 't' || !currentStock ||
@@ -382,9 +399,9 @@ const Store = props => {
                                              }}
                                              onClick={() => setGood(g.barcode)}
                             >
-                                <TableCell style={{color}}>
+                                {isGroup || <TableCell style={{color}}>
                                     {g.id}
-                                </TableCell>
+                                </TableCell>}
                                 <TableCell style={{color}}>
                                     {TwoLineInCell(g.model, description)}
                                 </TableCell>
@@ -392,7 +409,7 @@ const Store = props => {
                                     {TwoLineInCell(g.sum, g.remcost || g.cost)}
                                 </TableCell>
                                 <TableCell style={{color}}>
-                                    {storage}
+                                    {isGroup ? g.count : storage}
                                 </TableCell>
                             </TableRow>
                         })}

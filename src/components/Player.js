@@ -16,8 +16,7 @@ export const Player = ({recordingId}) => {
   return loaded
     ? <audio
       src={SERVER + '/records/' + recordingId + '?jwt=' + jwt}
-      controls
-      // crossOrigin="use-credentials"
+      // controls={crossorigin: 'use-credentials'}
     />
     : <IconButton onClick={() => setLoaded(true)}>
       <PlayArrowIcon/>

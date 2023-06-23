@@ -17,6 +17,7 @@ import {PrintBarcodes} from "./common/PrintBarcodes";
 import SearchIcon from "@material-ui/icons/Search";
 import CloseIcon from "@material-ui/icons/Close";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
+import {makeGroup} from "../Models/Good";
 
 
 const ArrivalToday = props => {
@@ -53,48 +54,6 @@ const ArrivalToday = props => {
         }))
 
     }, [props.newScan])
-
-    const makeGroup = goods => {
-
-        const group = []
-
-        if (goods.length) {
-
-            let nextGood
-
-            goods.map(g => {
-
-                if (nextGood && nextGood.category_id === g.category_id && nextGood.model === g.model) {
-
-                    nextGood.barcodes.push(g.barcode)
-                    nextGood.count++
-
-                } else {
-
-                    if (nextGood) group.push(nextGood)
-
-                    nextGood = {
-                        barcodes: [g.barcode],
-                        category_id: g.category_id,
-                        model: g.model,
-                        stock_id: g.stock_id,
-                        ui_wf: g.ui_wf,
-                        count: 1
-                    }
-
-                }
-
-                return g
-
-            })
-
-            group.push(nextGood)
-
-        }
-
-        return group
-
-    }
 
     const goodsView = isGroup
         ? makeGroup(goods)
