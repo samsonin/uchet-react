@@ -192,7 +192,9 @@ const Store = props => {
         ? makeGroup(goods)
         : goods
 
-    console.log(goodsView)
+    const transitBarcodes = props.app.transit
+        ? props.app.transit.map(g => g.barcode.toString())
+        : []
 
     return <>
 
@@ -324,7 +326,7 @@ const Store = props => {
                 </TableHead>
                 <TableBody>
                     {goodsView
-                        .filter(s => !isPublic || s.public || s.parts === 'sale')
+                        // .filter(s => !isPublic || s.public || s.parts === 'sale')
                         .filter(g => !isReject || g.wo === 'reject')
                         .filter(s => isAllStocks || s.wo === 't' || !currentStock ||
                             (currentStock && currentStock.id === s.stock_id))
@@ -356,7 +358,9 @@ const Store = props => {
                         })
                         .map(g => {
 
-                            const color = g.wo === 't' ? 'green' : g.wo === 'reject' ? 'red' : 'black'
+                            const color = transitBarcodes.includes(g.barcode)
+                                ? 'green'
+                                : g.wo === 'reject' ? 'red' : 'black'
 
                             const stock = props.app.stocks.find(s => s.id === g.stock_id)
 

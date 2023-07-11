@@ -44,8 +44,6 @@ const GoodActions = props => {
 
                     enqueueSnackbar(success, {variant: 'success'})
 
-                    // if (res.body.goods) props.setGoods(res.body.goods)
-
                 } else {
 
                     enqueueSnackbar('ошибка ' + res.status, {variant: 'error'})

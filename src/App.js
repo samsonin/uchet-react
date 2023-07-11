@@ -262,9 +262,9 @@ const App = props => {
                             <Route exact path="/showcase/buy" component={Buy}/>
                             <Route exact path="/inventory" component={Inventory}/>
                             <Route exact path="/customers" component={Customers}/>
-                            <Route exact path="/customers/:id" component={Customer}/>
                             <Route exact path="/entities" component={Entities}/>
                             {props.app.fields.allElements && <>
+                                <Route exact path="/customers/:id" component={Customer}/>
                                 <Route exact path="/pledges" component={Pledges}/>
                                 <Route exact path="/pledges/:id" component={Pledges}/>
                                 <Route exact path="/entities/:id" component={Entity}/>

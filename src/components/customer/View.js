@@ -67,8 +67,7 @@ const View = props => {
             : null}
 
         <Grid item xs={12}>
-            {
-                props.allElements
+            {props.allElements
                     .filter(field => field.index === 'customer' && field.is_valid)
                     .filter(field => isDetails || ['fio', 'phone_number'].includes(field.name))
                     .map(field => {

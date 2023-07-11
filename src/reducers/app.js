@@ -86,6 +86,12 @@ const app = (state = getItems() || initialState, action) => {
 
                 } else {
 
+                    if (k === 'good' && window.location.pathname === '/transit') {
+
+                        return k
+
+                    }
+
                     newState[k] = action.data[k]
 
                 }
