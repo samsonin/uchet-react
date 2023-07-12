@@ -118,13 +118,17 @@ const AddCosts = props => {
 
     const onSelected = (good, afterRes) => {
 
-        setGoods(prev => {
+        if (props.barcode !== good.barcode) {
 
-            const next = [...prev]
-            next.push(good)
-            return next
+            setGoods(prev => {
 
-        })
+                const next = [...prev]
+                next.push(good)
+                return next
+
+            })
+
+        }
 
         afterRes(true)
 
@@ -167,13 +171,13 @@ const AddCosts = props => {
         <GoodSearch onSelected={onSelected}/>
 
         {!props.barcode && <EnteredGood
-                category_id={category_id}
-                setCategory_id={setCategory_id}
-                model={model}
-                setModel={setModel}
-                imei={imei}
-                setImei={setImei}
-            />}
+            category_id={category_id}
+            setCategory_id={setCategory_id}
+            model={model}
+            setModel={setModel}
+            imei={imei}
+            setImei={setImei}
+        />}
 
         <Button
             style={{margin: '1rem'}}
