@@ -55,7 +55,7 @@ let date = getStr(dateObj.getDate())
 
 let searchDate = dateObj.getFullYear() + '-' + month + '-' + date
 
-export const Records = () => {
+export const Records = props => {
 
   const [data, setData] = useState()
 
@@ -132,7 +132,7 @@ export const Records = () => {
                 <TableCell>{getTime(v.created_at)}</TableCell>
                 <TableCell>{v.phone_number}</TableCell>
                 <TableCell>
-                  <Player recordingId={v.recording_id}/>
+                  <Player recordingId={v.recording_id} orgId={props.orgId} sign={v.sign} />
                 </TableCell>
               </TableRow>)
               : <TableRow>

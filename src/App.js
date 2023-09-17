@@ -192,6 +192,8 @@ const App = props => {
 
     const expire = !(+props.auth.user_id && (props.auth.expiration_time - 180 > Math.round(new Date().getTime() / 1000.0)))
 
+    const orgId = props.auth.organization_id
+
     return <>
 
         {props.app.need_callbacks && props.app.need_callbacks.map(nc => {
@@ -283,7 +285,12 @@ const App = props => {
                                 />}
                                 />                            </>}
 
-                            <Route path="/call_records" component={Records}/>
+                            <Route path="/call_records"
+                                   render={props => <Records
+                                       orgId={orgId}
+                                       {...props}
+                                   />}
+                            />
                             {props.app.users[0] && <Route path="/queue" component={Queue}/>}
 
                             <Route path="/store" render={props => <Store

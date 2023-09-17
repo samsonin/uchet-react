@@ -6,19 +6,19 @@ import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import {SERVER} from '../constants';
 
 
-export const Player = ({recordingId}) => {
+export const Player = ({recordingId, orgId, sign}) => {
 
-  const [loaded, setLoaded] = useState(false)
+    const [loaded, setLoaded] = useState(false)
 
-  let jwt = JSON.parse(window.localStorage.getItem('auth')).jwt;
-  if (typeof jwt !== "string") return false;
+    let jwt = JSON.parse(window.localStorage.getItem('auth')).jwt;
+    if (typeof jwt !== "string") return false;
 
-  return loaded
-    ? <audio
-      src={SERVER + '/records/' + recordingId + '?jwt=' + jwt}
-      // controls={crossorigin: 'use-credentials'}
-    />
-    : <IconButton onClick={() => setLoaded(true)}>
-      <PlayArrowIcon/>
-    </IconButton>
+    return loaded
+        ? <audio
+            controls
+            src={SERVER + '/records/' + recordingId + '/' + orgId + '/' + sign}
+        />
+        : <IconButton onClick={() => setLoaded(true)}>
+            <PlayArrowIcon/>
+        </IconButton>
 }

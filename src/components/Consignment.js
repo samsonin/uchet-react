@@ -364,16 +364,12 @@ const Consignment = props => {
 
         setProductNameLoading(true)
 
-        rest('products?name=' + name)
+        rest('goods?names&search=' + name)
             .then(res => {
 
                 setProductNameLoading(false)
 
-                if (res.status === 200) {
-
-                    setProductOption(res.body)
-
-                }
+                if (res.status === 200) setProductOption(res.status === 200 ? res.body : [])
 
             })
 
