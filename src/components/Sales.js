@@ -44,6 +44,8 @@ const Sales = props => {
 
     const isEmpty = !(date1 || date2 || action || str || sum)
 
+    let total = 0
+
     const find = () => {
 
         if (isEmpty) {
@@ -99,6 +101,8 @@ const Sales = props => {
 
         const stock = props.app.stocks.find(s => s.id === sale.stock_id)
         const user = props.app.users.find(u => u.id === sale.user_id)
+
+        total += sale.sum
 
         return <TableRow>
             <TableCell>
@@ -199,6 +203,14 @@ const Sales = props => {
                     </TableHead>
                     <TableBody>
                         {sales.map(s => renderRow(s))}
+
+                        <TableRow>
+                            <TableCell></TableCell>
+                            <TableCell>Всего</TableCell>
+                            <TableCell>{total}</TableCell>
+                            <TableCell></TableCell>
+                        </TableRow>
+
                     </TableBody>
                 </Table>
                 : null}
