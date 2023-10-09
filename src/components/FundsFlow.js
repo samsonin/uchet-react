@@ -17,7 +17,7 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import TableBody from "@material-ui/core/TableBody";
 
-import StocksSelect from "./common/StocksSelect";
+import StocksCheck from "./common/StocksCheck";
 
 const useStyles = makeStyles(() => ({
     typography: {
@@ -38,7 +38,9 @@ export default connect(state => state)(props => {
 
     const classes = useStyles();
 
-    const [stock, setStock] = useState(() => props.app.current_stock_id)
+    const [stocks, setStocks] = useState(() => props.app.stocks
+        .map(s => s.is_valid ? s.id : null)
+        .filter(s => s))
     const [dateFrom, setDateFrom] = useState(() => today)
     const [dateTo, setDateTo] = useState(() => today)
 
@@ -46,9 +48,10 @@ export default connect(state => state)(props => {
     const [actual, setActual] = useState(false)
 
     const [data, setData] = useState(null)
-    const [proceeds, setProceeds] = useState(0)
-    const [cashless, setCashless] = useState(0)
-    const [handed, setHanded] = useState(0)
+
+    let proceeds = 0
+    let cashless = 0
+    let handed = 0
 
     const setInRange = date => date > today
         ? today
@@ -72,31 +75,21 @@ export default connect(state => state)(props => {
 
         setActual(false)
 
-    }, [stock, dateFrom, dateTo])
+    }, [stocks, dateFrom, dateTo])
 
-    useEffect(() => {
-
-        let p = 0, c = 0, h = 0
-
-        if (!data) return
-
-        data.forEach(d => {
-            p += d.proceeds
-            c += d.cashless
-            h += d.handed
-        })
-
-        setProceeds(p)
-        setCashless(c)
-        setHanded(h)
-
-    }, [data])
 
     const getReport = () => {
 
         setRequesting(true)
 
-        rest('daily/' + stock + '/' + dateFrom + '/' + dateTo)
+        let url = 'funds/' + dateFrom + '/' + dateTo + '?'
+
+        if (stocks) stocks.map(s => {
+            if (s) url += 'stock_ids[]=' + s + '&'
+        })
+
+
+        rest(url)
             .then(res => {
 
                 setRequesting(false)
@@ -104,10 +97,6 @@ export default connect(state => state)(props => {
                 if (res.ok) {
 
                     setActual(true)
-
-                    if (stock) {
-                        return setData(res.body)
-                    }
 
                     let totalData = []
 
@@ -143,17 +132,25 @@ export default connect(state => state)(props => {
     useEffect(() => getReport(), [])
 
     const renderBody = () => data && data.length
-        ? data.map(d => <TableRow
-            key={'table-row-key-in-funds' + d.id}
-        >
-            {['date', 'morning', 'proceeds', 'cashless', 'handed', `evening`]
+        ? data.map(d => {
+
+            proceeds += d.proceeds
+            cashless += d.cashless
+            handed += d.handed
+
+            return <TableRow
+                key={'table-row-key-in-funds' + d.id}
+            >
+                {['date', 'morning', 'proceeds', 'cashless', 'handed', `evening`]
                     .map(v => <TableCell>{d[v]}</TableCell>)}
-        </TableRow>)
+            </TableRow>
+        })
         : <TableRow>
             <TableCell colSpan={6}>
                 Нет данных
             </TableCell>
         </TableRow>
+
 
     return props.auth.admin
         ? <>
@@ -164,22 +161,16 @@ export default connect(state => state)(props => {
                 Движение денежных средств
             </Typography>
 
+            <StocksCheck
+                stocks={stocks}
+                setStocks={setStocks}
+                disabled={requesting}
+            />
+
             <Grid container
                   justify={'center'}
                   alignItems={'center'}
             >
-
-                <Grid item>
-
-                    <StocksSelect
-                        stocks={props.app.stocks}
-                        stock={stock}
-                        setStock={setStock}
-                        disabled={requesting}
-                        classes={classes.controls}
-                    />
-
-                </Grid>
 
                 <Grid item>
 
@@ -219,7 +210,7 @@ export default connect(state => state)(props => {
 
                     <Button
                         variant="contained"
-                        disabled={requesting || actual}
+                        disabled={requesting || actual || !stocks.length}
                         className={classes.controls}
                         startIcon={<CachedIcon/>}
                         onClick={() => getReport()}
@@ -233,6 +224,7 @@ export default connect(state => state)(props => {
 
             <TableContainer component={Paper}>
                 <Table size="small">
+
                     <TableHead>
                         <TableRow>
                             <TableCell>дата</TableCell>
@@ -243,6 +235,7 @@ export default connect(state => state)(props => {
                             <TableCell>на вечер</TableCell>
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
 
                         {renderBody()}
