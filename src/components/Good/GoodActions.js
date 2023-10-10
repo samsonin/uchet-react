@@ -5,7 +5,6 @@ import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import RestoreFromTrashIcon from "@material-ui/icons/RestoreFromTrash";
-import RestoreIcon from '@material-ui/icons/Restore';
 import BuildIcon from "@material-ui/icons/Build";
 import LineWeightIcon from "@material-ui/icons/LineWeight";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -14,6 +13,7 @@ import AspectRatioIcon from '@material-ui/icons/AspectRatio';
 import HistoryIcon from '@material-ui/icons/History';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import ReceiptIcon from '@material-ui/icons/Receipt';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 import {useSnackbar} from "notistack";
 
@@ -141,7 +141,15 @@ const GoodActions = props => {
     }}>
 
         <span style={{fontWeight: 'bold'}}>
-                    {'#' + good.id}
+
+                {'#' + good.id}
+
+            <IconButton onClick={() => navigator.clipboard.writeText(good.id)
+                .then(() => enqueueSnackbar('скопировано: ' + good.id, {variant: 'success'}))
+            }>
+                <FileCopyIcon/>
+            </IconButton>
+
         </span>
 
         {renderDiv}
