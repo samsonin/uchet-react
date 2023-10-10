@@ -78,8 +78,6 @@ const initCustomer = {
     fio: '',
 }
 
-const fields = ['id', 'fio', 'phone_number']
-
 const initPrepaid = 'Предоплата'
 const initSum = 'Окончательная стоимость'
 

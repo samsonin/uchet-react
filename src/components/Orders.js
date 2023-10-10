@@ -108,6 +108,7 @@ const Orders = props => {
 
         if (stocks) stocks.map(s => {
             if (s) url += 'stock_ids[]=' + s + '&'
+            return s
         })
 
         if (masterId) url += 'master_id=' + masterId + '&'
@@ -125,6 +126,7 @@ const Orders = props => {
 
             ['createdDate', 'createdDate2', 'checkoutDate', 'checkoutDate2'].map(v => {
                 if (eval(v)) url += v + '=' + eval(v) + '&'
+                return v
             })
 
         }

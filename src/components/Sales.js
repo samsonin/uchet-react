@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
 import TextField from "@material-ui/core/TextField";
@@ -58,6 +58,7 @@ const Sales = props => {
         if (stocks) {
             stocks.map(s => {
                 if (s) url += 'stock_ids[]=' + s + '&'
+                return s
             })
         } else {
             return enqueueSnackbar('выберите точки', {variant: 'error'})

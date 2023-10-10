@@ -1,4 +1,4 @@
-import React, {createElement} from 'react';
+import React from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -87,6 +87,8 @@ function yandex(org_id, month, cost) {
         input.value = i.value
 
         form.append(input)
+
+        return i
 
     })
 

@@ -222,7 +222,7 @@ const Inventory = props => {
                 {goods.length
                     ? goods.filter(g => !props.app.current_stock_id || props.app.current_stock_id === g.stock_id)
                         .filter(g => {
-
+// eslint-disable-next-line
                             if (!search || g.sum == search || g.id == search) return true
 
                             const model = g.model.toLowerCase()

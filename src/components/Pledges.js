@@ -81,7 +81,7 @@ const Pledges = props => {
 
             })
 
-    }, [])
+    })
 
     const addPledge = pledge => {
 
@@ -198,6 +198,7 @@ const Pledges = props => {
                                     if (imei.indexOf(s) < 0 && model.indexOf(s) < 0) {
                                         r = false
                                     }
+                                    return s
 
                                 })
 

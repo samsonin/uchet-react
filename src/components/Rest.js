@@ -1,4 +1,4 @@
-import {SERVER, NEW_SERVER, UPD_APP} from '../constants';
+import {SERVER, NEW_SERVER} from '../constants';
 import store from '../store'
 
 
