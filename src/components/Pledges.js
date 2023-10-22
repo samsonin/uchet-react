@@ -81,7 +81,7 @@ const Pledges = props => {
 
             })
 
-    })
+    }, [])
 
     const addPledge = pledge => {
 
