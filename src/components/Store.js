@@ -61,15 +61,12 @@ const Store = props => {
         if (!isAllStocks && currentStock) url += '&stock_id=' + currentStock.id
         if (isPublic) url += '&is_public=1'
         if (isReject) url += '&is_reject=1'
-
-        if (limit.current > 25) url += '&limit=' + limit.current
+        if (!isGroup && limit.current > 0) url += '&limit=' + limit.current
 
         rest(url)
             .then(res => {
                 isRequest.current = false
                 if (res.status === 200) {
-
-                    if (goods.length === res.body.length) limit.current = 0
 
                     setGoods(res.body)
 
@@ -78,38 +75,41 @@ const Store = props => {
 
     }
 
+    useEffect(() => sendRequest(), [])
+
     useEffect(() => {
 
         if (props.scrollDown) {
 
             props.setScrollDown(false)
-
-            if (limit.current > 0) {
-                limit.current += 25
-                sendRequest()
-            }
+            limit.current += 25
+            sendRequest()
 
         }
 
     }, [props.scrollDown])
 
-    useEffect(() => find(), [])
-
     useEffect(() => {
 
-        if ([4, 5, 6, 999].includes(catId)) find()
+        if ([4, 5, 6, 999].includes(catId)) sendRequest()
 
     }, [catId])
 
     useEffect(() => {
 
-        if (isAllStocks) find()
+        if (isGroup) sendRequest()
+
+    }, [isGroup])
+
+    useEffect(() => {
+
+        if (isAllStocks) sendRequest()
 
     }, [isAllStocks])
 
     useEffect(() => {
 
-        if (props.enterPress) find()
+        if (props.enterPress) sendRequest()
 
         if (typeof (props.setEnterPress) === 'function') props.setEnterPress(false)
 
@@ -136,6 +136,10 @@ const Store = props => {
         }
     }, [props.app.needDeleteBarcode])
 
+    useEffect(() => {
+        limit.current = 25
+    }, [search])
+
     const setGood = barcode => rest('goods/' + barcode)
 
     const setCat = id => {
@@ -161,13 +165,6 @@ const Store = props => {
 
         }
 
-
-    }
-
-    const find = () => {
-
-        limit.current = 25
-        sendRequest()
 
     }
 
@@ -269,7 +266,7 @@ const Store = props => {
                 onChange={e => searchHandle(e.target.value)}
             />
 
-            <Button onClick={find}
+            <Button onClick={() => sendRequest()}
                     style={{
                         marginInline: '.3rem'
                     }}
@@ -299,8 +296,11 @@ const Store = props => {
             />}
 
             <FormControlLabel control={
-                <Checkbox checked={isPublic} onChange={() => setIsPublic(!isPublic)}/>}
+                <Checkbox checked={isPublic}
+                          disabled={true}
+                          onChange={() => setIsPublic(!isPublic)}/>}
                               label={"только опубликованные"}
+
             />
 
             <FormControlLabel control={
@@ -316,7 +316,7 @@ const Store = props => {
             >
                 <TableHead>
                     <TableRow>
-                        {isGroup || <TableCell>#</TableCell>}
+                        {isGroup ? '' : <TableCell>#</TableCell>}
                         <TableCell>Товар</TableCell>
                         <TableCell>Цена / Себестоимость</TableCell>
                         <TableCell>
@@ -396,21 +396,34 @@ const Store = props => {
                                 ? '50%'
                                 : '100%'
 
+                            const sumText = isGroup && (g.minSum !== g.maxSum)
+                                ? g.minSum + ' - ' + g.maxSum
+                                : g.sum
+
+                            // const costText = isGroup && (g.minCost !== g.maxCost)
+                            //     ? g.minCost + ' - ' + g.maxCost
+                            //     : g.remcost || g.cost
+
+                            const costText = g.remcost || g.cost
+
                             return <TableRow key={uuid()}
                                              style={{
                                                  cursor: 'pointer',
                                                  opacity,
                                              }}
-                                             onClick={() => setGood(g.barcode)}
+                                             onClick={() => isGroup ? '' : setGood(g.barcode)}
                             >
-                                {isGroup || <TableCell style={{color}}>
-                                    {g.id}
-                                </TableCell>}
+                                {isGroup
+                                    ? ''
+                                    : <TableCell style={{color}}>
+                                        {g.id}
+                                    </TableCell>
+                                }
                                 <TableCell style={{color}}>
                                     {TwoLineInCell(g.model, description)}
                                 </TableCell>
                                 <TableCell style={{color}}>
-                                    {TwoLineInCell(g.sum, g.remcost || g.cost)}
+                                    {TwoLineInCell(sumText, costText)}
                                 </TableCell>
                                 <TableCell style={{color}}>
                                     {isGroup ? g.count : storage}

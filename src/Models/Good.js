@@ -13,6 +13,9 @@ export const makeGroup = goods => {
                 nextGood.barcodes.push(g.barcode)
                 nextGood.count++
 
+                if (g.sum < nextGood.sum) nextGood.minSum = g.sum
+                if (g.sum > nextGood.sum) nextGood.maxSum = g.sum
+
             } else {
 
                 if (nextGood) group.push(nextGood)
@@ -25,6 +28,8 @@ export const makeGroup = goods => {
                     cost: g.cost,
                     remcost: g.remcost,
                     sum: g.sum,
+                    minSum: g.sum,
+                    maxSum: g.sum,
                     ui_wf: g.ui_wf,
                     count: 1
                 }
