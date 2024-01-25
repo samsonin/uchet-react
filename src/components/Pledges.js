@@ -110,6 +110,8 @@ const Pledges = props => {
 
     }
 
+    let total = 0
+
     return currentPledge
         ? <Pledge
             current={currentPledge}
@@ -205,21 +207,33 @@ const Pledges = props => {
                             return r
 
                         })
-                        .map(p => <TableRow style={{
-                            cursor: 'pointer',
-                        }}
-                                            key={uuid()}
-                                            onClick={() => setCurrentPledge(p)}
-                        >
-                            {[props.app.current_stock_id ? null : p.stockName,
-                                TwoLineInCell(p.model, p.imei),
-                                p.ransomdate,
-                                p.sum2]
-                                .map(c => c && <TableCell key={uuid()}
-                                                          style={{color: p.isDelay ? 'red' : 'black'}}>
-                                    {c}
-                                </TableCell>)}
-                        < /TableRow>)}
+                        .map(p => {
+
+                            total += p.sum2
+
+                            return <TableRow style={{
+                                cursor: 'pointer',
+                            }}
+                                             key={uuid()}
+                                             onClick={() => setCurrentPledge(p)}
+                            >
+                                {[props.app.current_stock_id ? null : p.stockName,
+                                    TwoLineInCell(p.model, p.imei),
+                                    p.ransomdate,
+                                    p.sum2]
+                                    .map(c => c && <TableCell key={uuid()}
+                                                              style={{color: p.isDelay ? 'red' : 'black'}}>
+                                        {c}
+                                    </TableCell>)}
+                            < /TableRow>
+                        })}
+                    {total > 0 && <TableRow>
+                        <TableCell align={"right"} colSpan={3}>Итого</TableCell>
+                        <TableCell>
+                            <span style={{fontWeight: 'bold'}}>{total}</span>
+                        </TableCell>
+
+                    </TableRow>}
                 </TableBody>
             </Table>
         </div>
