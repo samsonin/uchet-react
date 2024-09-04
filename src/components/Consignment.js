@@ -187,7 +187,7 @@ const Consignment = props => {
         : res.body.error === 'stock not allowed'
             ? 'Доступ для пользователя запрещен'
             : res.body.error === 'already spent'
-                ? 'Продуция уже использована'
+                ? 'Продукция уже использована'
                 : 'Ошибка: ' + res.body.error
 
     const addConsignment = () => {
