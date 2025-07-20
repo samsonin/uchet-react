@@ -337,7 +337,7 @@ const GoodContent = props => {
         />
 
         <Button onClick={onClick}
-                disabled={!value}
+                disabled={!value && text != 'Списать' }
                 style={{
                     margin: '2rem auto 0 auto',
                 }}
@@ -435,7 +435,7 @@ const GoodContent = props => {
                     true, 'Внести в заказ')}
 
                 {isEditable && textWithButton('Цена', sum, e => intInputHandler(e.target.value, setSum),
-                    () => toSale(), true, 'Продать')}
+                    () => toSale(), true, sum > 0 ? 'Продать' : 'Списать')}
 
                 {line("Себестоимость:", good.remcost ?? good.cost ?? 0, isEditable)}
 

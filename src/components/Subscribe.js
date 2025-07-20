@@ -1,15 +1,15 @@
 import React from 'react';
-import {makeStyles} from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import CardContent from "@material-ui/core/CardContent";
-import Typography from "@material-ui/core/Typography";
 import CardActions from '@material-ui/core/CardActions';
 import CardHeader from "@material-ui/core/CardHeader";
 import Button from '@material-ui/core/Button';
-import {connect} from "react-redux";
+import { connect } from "react-redux";
+import Link from '@material-ui/core/Link';
+import Typography from '@material-ui/core/Typography';
 
-// import {Yoo, Tinkoff} from '../images/logos'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -45,9 +45,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const subscribes = [
-    {month: 1, monthText: "1 месяц", cost: 3, profit: 0},
-    {month: 6, monthText: "6 месяцев", cost: 2, profit: 12},
-    {month: 12, monthText: "12 месяцев", cost: 1.5, profit: 18}
+    { month: 1, monthText: "1 месяц", cost: 3, profit: 0 },
+    { month: 6, monthText: "6 месяцев", cost: 2, profit: 12 },
+    { month: 12, monthText: "12 месяцев", cost: 1.5, profit: 18 }
 ];
 
 let dollar = 0;
@@ -70,13 +70,13 @@ function yandex(org_id, month, cost) {
     if (!subscribe) return
 
     const inputs = [
-        {name: "receiver", value: "410012390556672"},
-        {name: "quickpay-form", value: "shop"},
-        {name: "successURL", value: "https://uchet.store"},
-        {name: "targets", value: "Продление подписки в Uchet.store на " + subscribe.monthText},
-        {name: "paymentType", value: "AC"},
-        {name: "label", value: btoa(JSON.stringify({org_id, action: 'addSubscribe'}))},
-        {name: "sum", value: month * cost * dollar}
+        { name: "receiver", value: "410012390556672" },
+        { name: "quickpay-form", value: "shop" },
+        { name: "successURL", value: "https://uchet.store" },
+        { name: "targets", value: "Продление подписки в Uchet.store на " + subscribe.monthText },
+        { name: "paymentType", value: "AC" },
+        { name: "label", value: btoa(JSON.stringify({ org_id, action: 'addSubscribe' })) },
+        { name: "sum", value: month * cost * dollar }
     ]
 
     inputs.map(i => {
@@ -97,14 +97,14 @@ function yandex(org_id, month, cost) {
 
 }
 
-const Subscribe = ({organization_id}) => {
+const Subscribe = ({ organization_id }) => {
 
     const classes = useStyles();
 
     function subHeader(profit) {
         return profit > 0 ?
             <span className="text-danger hr-bold">выгода ${profit}</span> :
-            <br/>
+            <br />
     }
 
     return (
@@ -118,8 +118,8 @@ const Subscribe = ({organization_id}) => {
                         <CardHeader
                             title={v.monthText}
                             subheader={subHeader(v.profit)}
-                            titleTypographyProps={{align: 'center'}}
-                            subheaderTypographyProps={{align: 'center'}}
+                            titleTypographyProps={{ align: 'center' }}
+                            subheaderTypographyProps={{ align: 'center' }}
                             className={classes.cardHeader}
                         />
                         <CardContent className={classes.cardBody}>
@@ -132,8 +132,8 @@ const Subscribe = ({organization_id}) => {
                         </CardContent>
                         <CardActions className={classes.cardBody}>
                             <Button variant="outlined"
-                                    className={classes.button}
-                                    onClick={() => yandex(organization_id, v.month, v.cost)}>
+                                className={classes.button}
+                                onClick={() => yandex(organization_id, v.month, v.cost)}>
                                 Продлить
                             </Button>
                         </CardActions>
@@ -154,9 +154,14 @@ const Subscribe = ({organization_id}) => {
                         Уважаемые пользователи!
                     </Typography>
                     <Typography variant="body1">
-                        В случае невозможности оплатить подписку,
-                        Вы можете перевести деньги на карту Сбербанка 4276500031174871 Иван Николаевич С.,
-                        в рублях по курсу ЦБ РФ, в комментарии укажите логин для входа в Uchet.store
+                        В случае невозможности оплатить подписку, свяжитесь с нами в Telegram:&nbsp;
+                        <Link
+                            href="https://t.me/samsonin80"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            @samsonin80
+                        </Link>
                     </Typography>
                 </div>
             </Grid>

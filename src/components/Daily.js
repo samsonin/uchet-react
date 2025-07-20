@@ -1,11 +1,11 @@
-import React, {useEffect, useState} from "react";
-import {connect} from "react-redux";
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
 
 import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
 import StocksSelect from "./common/StocksSelect";
-import {makeStyles} from "@material-ui/core/styles";
-import {Paper, Typography} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import { Paper, Typography } from "@material-ui/core";
 import TableContainer from "@material-ui/core/TableContainer";
 import Table from "@material-ui/core/Table";
 import TableHead from "@material-ui/core/TableHead";
@@ -21,17 +21,16 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import List from "@material-ui/core/List";
-import {useSnackbar} from "notistack";
-import uuid from "uuid";
+import { useSnackbar } from "notistack";
 
 import rest from "../components/Rest"
 import SaleModal from './Modals/Sale'
 import PrepaidModal from './Modals/Prepaid'
 import Consignment from "./Consignment";
 import DailyModal from "./Modals/Daily";
-import {numberInputHandler} from "./common/InputHandlers";
+import { numberInputHandler } from "./common/InputHandlers";
 import TwoLineInCell from "./common/TwoLineInCell";
-import {setInRange, today} from "./common/Time";
+import { setInRange, today } from "./common/Time";
 
 const mainUrl = document.location.protocol + '//' + document.location.host
 
@@ -84,7 +83,7 @@ const Daily = props => {
     const [isConsignmentOpen, setIsConsignmentOpen] = useState(false)
 
     const classes = useStyles()
-    const {enqueueSnackbar} = useSnackbar()
+    const { enqueueSnackbar } = useSnackbar()
 
     const validStockIds = props.app.stockusers
         .filter(su => su.user_id === props.auth.user_id)
@@ -109,7 +108,7 @@ const Daily = props => {
                     setLocalDaily(res.body)
                 } else {
                     setLocalDaily(null)
-                    enqueueSnackbar(date + ' не работали', {variant: 'error'})
+                    enqueueSnackbar(date + ' не работали', { variant: 'error' })
                 }
 
             })
@@ -130,11 +129,11 @@ const Daily = props => {
 
             local && local(0)
 
-            enqueueSnackbar(text || 'ok', {variant: 'success'})
+            enqueueSnackbar(text || 'ok', { variant: 'success' })
 
         } else {
 
-            enqueueSnackbar('ошибка', {variant: 'error'})
+            enqueueSnackbar('ошибка', { variant: 'error' })
 
         }
 
@@ -156,9 +155,9 @@ const Daily = props => {
 
     }
 
-    const cashlessHandler = () => cashlessRest({cashless})
+    const cashlessHandler = () => cashlessRest({ cashless })
 
-    const cashlessHandlerAdd = () => cashlessRest({cashless: daily.cashless + +cashless})
+    const cashlessHandlerAdd = () => cashlessRest({ cashless: daily.cashless + +cashless })
 
     const handedHandler = () => handedRest(handed)
 
@@ -168,7 +167,7 @@ const Daily = props => {
 
         const employees = daily.employees.filter(e => e !== employee_id)
 
-        rest('daily/' + stock, 'PATCH', {employees})
+        rest('daily/' + stock, 'PATCH', { employees })
             .then(afterRes)
 
     }
@@ -205,7 +204,7 @@ const Daily = props => {
 
             } else if (row.action === '0' || (row.action === 'расход' && row.wf.rem_id)) {
 
-                return window.open(mainUrl + '/order/' + stock + '/' + row.wf.rem_id, "_blank")
+                if (stock && row.wf.rem_id) return window.open(mainUrl + '/order/' + stock + '/' + row.wf.rem_id, "_blank")
 
             } else if (['продали', 'вернули', 'купили', 'покупка', 'возврат'].includes(row.action)) {
 
@@ -260,7 +259,7 @@ const Daily = props => {
             : []
 
         let sum = 0;
-// eslint-disable-next-line
+        // eslint-disable-next-line
         answer.map(s => {
             sum += s.sum
         })
@@ -329,8 +328,8 @@ const Daily = props => {
             />}
 
             <Grid container
-                  justify={'center'}
-                  alignItems={'center'}
+                justify={'center'}
+                alignItems={'center'}
             >
                 <Grid item xs={6}>
 
@@ -374,7 +373,7 @@ const Daily = props => {
                                 const user = props.app.users.find(u => u.id === e)
 
                                 return user && <ListItem
-                                    key={uuid()}
+                                    key={'ListItem-users' + user.id}
                                     component={Paper}
                                     className="m-1"
                                 >
@@ -385,7 +384,7 @@ const Daily = props => {
                                         <IconButton
                                             onClick={() => employeeCheckout(user.id)}
                                         >
-                                            <ExitToAppIcon/>
+                                            <ExitToAppIcon />
                                         </IconButton>
                                     </ListItemSecondaryAction>}
                                 </ListItem>
@@ -431,9 +430,9 @@ const Daily = props => {
                         },
                     ]
                         .map(t => date !== today && t.rows === imprests
-                            ? <div key={uuid()}/>
-                            : <div key={uuid()}
-                                   style={{margin: '0 1rem 0 0'}}
+                            ? <div key={'key-in-titles-daily-tables' + t.title} />
+                            : <div key={'key-in-titles-daily-tables' + t.title}
+                                style={{ margin: '0 1rem 0 0' }}
                             >
                                 <TableContainer
                                     className={classes.table}
@@ -451,9 +450,9 @@ const Daily = props => {
                                                     {canChange
                                                         ? <Tooltip title={t.addText}>
                                                             <IconButton className={classes.icon}
-                                                                        onClick={() => handler(t.title)}
+                                                                onClick={() => handler(t.title)}
                                                             >
-                                                                <AddCircleIcon/>
+                                                                <AddCircleIcon />
                                                             </IconButton>
                                                         </Tooltip>
                                                         : ''}
@@ -463,51 +462,54 @@ const Daily = props => {
                                         <TableHead>
                                             <TableRow>
                                                 {t.titles.map(t => <TableCell
-                                                    key={uuid()}
+                                                    key={'titles-in-daily-rows' + t}
                                                 >{t}</TableCell>)}
                                             </TableRow>
                                         </TableHead>
 
                                         <TableBody>
-                                            {t.rows.map(row => <TableRow
-                                                key={uuid()}
-                                                style={{
-                                                    cursor: 'pointer'
-                                                }}
-                                                onClick={() => handler(t.title, row)}
-                                            >
-                                                {t.rowsValues.map(v => {
+                                            {t.rows.map(row => {
 
-                                                    let value = row[v]
+                                                return <TableRow
+                                                    key={'table-row-in-daily-' + row.id + row.created_at}
+                                                    style={{
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    onClick={() => handler(t.title, row)}
+                                                >
+                                                    {t.rowsValues.map((v,index) => {
 
-                                                    const user = props.app.users.find(u => u.id === row.ui_user_id)
+                                                        let value = row[v]
 
-                                                    const userName = user ? user.name : row.ui_user_id
+                                                        const user = props.app.users.find(u => u.id === row.ui_user_id)
 
-                                                    if (v === 'ui_user_id') value = userName
+                                                        const userName = user ? user.name : row.ui_user_id
 
-                                                    if (row.action === 'зарплата' && v === 'note') {
+                                                        if (v === 'ui_user_id') value = userName
 
-                                                        return <TableCell key={uuid()}>
-                                                            {TwoLineInCell(userName, row.note)}
+                                                        if (row.action === 'зарплата' && v === 'note') {
+
+                                                            return <TableCell key={`${row.item}-${v}-${index}`}>
+                                                                {TwoLineInCell(userName, row.note)}
+                                                            </TableCell>
+
+                                                        }
+
+                                                        return <TableCell
+                                                            key={`${row.item}-${v}-${index}`}
+                                                        >
+                                                            {row.work && row.action !== 'расход'
+                                                                ? v === 'item'
+                                                                    ? TwoLineInCell(row.item, row.work)
+                                                                    : value
+                                                                : v === 'id'
+                                                                    ? ''
+                                                                    : value}
                                                         </TableCell>
 
-                                                    }
-
-                                                    return <TableCell
-                                                        key={uuid()}
-                                                    >
-                                                        {row.work && row.action !== 'расход'
-                                                            ? v === 'item'
-                                                                ? TwoLineInCell(row.item, row.work)
-                                                                : value
-                                                            : v === 'id'
-                                                                ? ''
-                                                                : value}
-                                                    </TableCell>
-
-                                                })}
-                                            </TableRow>)}
+                                                    })}
+                                                </TableRow>
+                                            })}
                                         </TableBody>
 
                                         <TableHead>
@@ -526,7 +528,7 @@ const Daily = props => {
                             </div>)}
 
 
-                    {daily && <div style={{margin: '0 1rem 0 0'}}>
+                    {daily && <div style={{ margin: '0 1rem 0 0' }}>
                         <TableContainer
                             className={classes.table}
                             component={Paper}
@@ -534,9 +536,9 @@ const Daily = props => {
                             <Table size="small">
                                 <TableBody>
                                     {[
-                                        {text: 'Остаток на утро:', value: daily.morning},
-                                        {text: 'Выручка:', value: daily.proceeds},
-                                        {text: 'Подотчеты:', value: imprestsSum},
+                                        { text: 'Остаток на утро:', value: daily.morning },
+                                        { text: 'Выручка:', value: daily.proceeds },
+                                        { text: 'Подотчеты:', value: imprestsSum },
                                         {
                                             text: 'Безнал:', value: daily.cashless,
                                             localValue: cashless,
@@ -551,7 +553,7 @@ const Daily = props => {
                                             click: canAdminChange && handedHandler,
                                             clickAdd: canAdminChange && handedHandlerAdd
                                         },
-                                        {text: 'Остаток:', value: daily.evening},
+                                        { text: 'Остаток:', value: daily.evening },
                                     ].map(l => (date === today || l.text !== 'Подотчеты:') && <TableRow
                                         key={'table-row-in-daily-' + l.text}
                                     >
@@ -578,14 +580,14 @@ const Daily = props => {
                                                 onClick={l.click}
                                                 disabled={l.value === l.localValue}
                                             >
-                                                <SaveOutlinedIcon/>
+                                                <SaveOutlinedIcon />
                                             </IconButton>
                                             <IconButton
                                                 className={classes.icon}
                                                 onClick={l.clickAdd}
                                                 disabled={l.localValue === 0}
                                             >
-                                                <AddCircleIcon/>
+                                                <AddCircleIcon />
                                             </IconButton>
 
                                         </TableCell>}

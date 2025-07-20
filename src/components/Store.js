@@ -1,5 +1,5 @@
-import React, {useEffect, useRef, useState} from "react";
-import {connect} from "react-redux";
+import React, { useEffect, useRef, useState, useMemo } from "react";
+import { connect } from "react-redux";
 import {
     Button,
     Checkbox, FormControlLabel,
@@ -15,65 +15,81 @@ import TableHead from "@material-ui/core/TableHead";
 import SearchIcon from "@material-ui/icons/Search";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
-import uuid from "uuid";
 
-import rest from "../components/Rest";
+import rest from "./Rest";
 import TwoLineInCell from "./common/TwoLineInCell";
-import {toLocalTimeStr} from "./common/Time";
-import {groupAlias} from "./common/GroupAliases";
+import { toLocalTimeStr } from "./common/Time";
+import { groupAlias } from "./common/GroupAliases";
 import CategoryHandler from "./common/CategoryHandler";
 import CloseIcon from "@material-ui/icons/Close";
 import store from "../store";
-import {makeGroup} from "../Models/Good";
+import { makeGroup } from "../Models/Good";
 
 const oftenUsedButtons = [
-    {label: 'Аксессуары', catId: 6},
-    {label: 'Запчасти', catId: 4},
-    {label: 'Техника', catId: 5},
-    {label: 'Расходники', catId: 999},
+    { label: 'Аксессуары', catId: 6 },
+    { label: 'Запчасти', catId: 4 },
+    { label: 'Техника', catId: 5 },
+    { label: 'Расходники', catId: 999 },
 ]
 
 const Store = props => {
+    const [goods, setGoods] = useState([]);
+    const [catId, setCatId] = useState(0);
+    const [error, setError] = useState(false);
+    const [search, setSearch] = useState('');
+    const [isGroup, setIsGroup] = useState(false);
+    const [isAllStocks, setIsAllStocks] = useState(false);
+    const [isPublic, setIsPublic] = useState(false);
+    const [isReject, setIsReject] = useState(false);
+    const [showButtons, setShowButtons] = useState(false);
 
-    const [goods, setGoods] = useState([])
-    const [catId, setCatId] = useState(0)
-    const [error, setError] = useState(false)
-    const [search, setSearch] = useState('')
-    const [isGroup, setIsGroup] = useState(false)
-    const [isAllStocks, setIsAllStocks] = useState(false)
-    const [isPublic, setIsPublic] = useState(false)
-    const [isReject, setIsReject] = useState(false)
-    const [showButtons, setShowButtons] = useState(false)
+    const limit = useRef(25);
+    const isRequest = useRef(false);
+    const currentStock = props.app.stocks.find(s => s.id === props.app.current_stock_id);
 
-    const limit = useRef(25)
-    const isRequest = useRef(false)
+    const goodsView = isGroup ? makeGroup(goods) : goods;
 
-    const currentStock = props.app.stocks.find(s => s.id === props.app.current_stock_id)
+    const transitBarcodes = useMemo(() => (
+        props.app.transit ? props.app.transit.map(g => g.barcode.toString()) : []
+    ), [props.app.transit]);
+
+    const filteredGoods = useMemo(() => {
+        const lowerSearch = search.toLowerCase().split(' ');
+
+        return goodsView
+            .filter(g => !isReject || g.wo === 'reject')
+            .filter(g => isAllStocks || g.wo === 't' || !currentStock || currentStock.id === g.stock_id)
+            .filter(g => {
+                if (!search || g.sum == search || g.id == search) return true;
+
+                const model = g.model.toLowerCase();
+                const imei = g.imei?.toLowerCase();
+
+                return lowerSearch.every(part =>
+                    model.includes(part) || (imei && imei.includes(part))
+                );
+            });
+    }, [goodsView, isReject, isAllStocks, currentStock, search]);
 
     const sendRequest = () => {
+        if (isRequest.current) return;
+        isRequest.current = true;
 
-        if (isRequest.current) return
-        isRequest.current = true
+        let url = 'goods?';
+        if (catId) url += '&category_id=' + catId;
+        if (search) url += '&search=' + search;
+        if (!isAllStocks && currentStock) url += '&stock_id=' + currentStock.id;
+        if (isPublic) url += '&is_public=1';
+        if (isReject) url += '&is_reject=1';
+        if (!isGroup && limit.current > 0) url += '&limit=' + limit.current;
 
-        let url = 'goods?'
-        if (catId) url += '&category_id=' + catId
-        if (search) url += '&search=' + search
-        if (!isAllStocks && currentStock) url += '&stock_id=' + currentStock.id
-        if (isPublic) url += '&is_public=1'
-        if (isReject) url += '&is_reject=1'
-        if (!isGroup && limit.current > 0) url += '&limit=' + limit.current
-
-        rest(url)
-            .then(res => {
-                isRequest.current = false
-                if (res.status === 200) {
-
-                    setGoods(res.body)
-
-                }
-            })
-
-    }
+        rest(url).then(res => {
+            isRequest.current = false;
+            if (res.status === 200) {
+                setGoods(res.body);
+            }
+        });
+    };
 
     useEffect(() => sendRequest(), [])
 
@@ -113,7 +129,7 @@ const Store = props => {
 
         if (typeof (props.setEnterPress) === 'function') props.setEnterPress(false)
 
-// eslint-disable-next-line
+        // eslint-disable-next-line
     }, [props.enterPress])
 
     useEffect(() => {
@@ -128,7 +144,7 @@ const Store = props => {
     useEffect(() => {
         if (props.app.needDeleteBarcode) {
 
-            store.dispatch({type: 'DELETE_GOOD'})
+            store.dispatch({ type: 'DELETE_GOOD' })
 
             const newGoods = goods.filter(g => g.barcode !== props.app.needDeleteBarcode)
             setGoods(newGoods)
@@ -139,8 +155,6 @@ const Store = props => {
     useEffect(() => {
         limit.current = 25
     }, [search])
-
-    const setGood = barcode => rest('goods/' + barcode)
 
     const setCat = id => {
 
@@ -176,8 +190,6 @@ const Store = props => {
 
     }
 
-    // const hide = id => console.log(id)
-
     const style = {
         display: 'flex',
         justifyContent: 'space-around',
@@ -185,88 +197,138 @@ const Store = props => {
         opacity: showButtons ? '25%' : '100%'
     }
 
-    const goodsView = isGroup
-        ? makeGroup(goods)
-        : goods
+    const setGood = barcode => rest('goods/' + barcode);
 
-    const transitBarcodes = props.app.transit
-        ? props.app.transit.map(g => g.barcode.toString())
-        : []
+    const renderRow = g => {
+        const color = transitBarcodes.includes(g.barcode)
+            ? 'green'
+            : g.wo === 'reject' ? 'red' : 'black';
 
-    return <>
+        const stock = props.app.stocks.find(s => s.id === g.stock_id);
+        const checkTime = Math.max(g.out_unix || 0, g.storage_unix || 0, g.unix || 0);
+        const checkTimeStr = toLocalTimeStr(checkTime);
 
-        <div style={style}>
+        if (!g.category_id && g.group) {
+            Object.entries(groupAlias).forEach(([cat, groupName]) => {
+                if (g.group === groupName) g.category_id = +cat;
+            });
+        }
 
-            <CategoryHandler
-                id={catId}
-                setId={setCat}
-            />
+        const category = g.category_id
+            ? props.app.categories.find(c => c.id === g.category_id)
+            : null;
 
-        </div>
+        const storage = g.wo === 't'
+            ? TwoLineInCell('Транзит', checkTimeStr)
+            : g.wo === 'reject'
+                ? TwoLineInCell('брак', checkTimeStr)
+                : !stock || g.stock_id === props.app.current_stock_id
+                    ? TwoLineInCell(g.storage_place, checkTimeStr)
+                    : TwoLineInCell(stock.name, g.storage_place || checkTimeStr);
 
-        <div style={style}>
+        let description = category?.name || '';
+        if (g.imei) description = description ? description + ', ' + g.imei : g.imei;
 
-            {oftenUsedButtons.map(b => <Button
-                key={uuid()}
-                size="small"
-                style={{margin: '.5rem'}}
-                color={catId === b.catId ? "primary" : "default"}
-                variant={catId === b.catId ? "contained" : "outlined"}
-                onClick={() => setCat(b.catId)}>
-                {b.label}
-            </Button>)}
+        const opacity = g.wo === 't' || props.app.current_stock_id !== g.stock_id ? '50%' : '100%';
+        const sumText = isGroup && (g.minSum !== g.maxSum) ? `${g.minSum} - ${g.maxSum}` : g.sum;
+        const costText = g.remcost || g.cost;
 
-            <IconButton onClick={() => setCat(0)}
-                        disabled={!catId}
+        return (
+            <TableRow
+                key={g.barcode}
+                style={{ cursor: 'pointer', opacity }}
+                onClick={() => isGroup ? null : setGood(g.barcode)}
             >
-                <CloseIcon/>
-            </IconButton>
+                {!isGroup && <TableCell style={{ color }}>{g.id}</TableCell>}
+                <TableCell style={{ color }}>
+                    {TwoLineInCell(g.model, description)}
+                </TableCell>
+                <TableCell style={{ color }}>
+                    {TwoLineInCell(sumText, costText)}
+                </TableCell>
+                <TableCell style={{ color }}>
+                    {isGroup ? g.count : storage}
+                </TableCell>
+            </TableRow>
+        );
+    };
 
-        </div>
+    return (
+        <>
+            <div style={style}>
 
-        {currentStock && <div style={{
-            margin: '.5rem',
-        }}>
+                <CategoryHandler
+                    id={catId}
+                    setId={setCat}
+                />
 
-            <IconButton onClick={() => setShowButtons(!showButtons)}>
-                {showButtons ? <RemoveCircleIcon/> : <AddCircleIcon/>}
-            </IconButton>
+            </div>
 
-            {showButtons && [
-                {label: 'Оприходование', onClick: () => props.history.push('arrival')},
-                {label: 'Покупка техники', onClick: () => props.history.push('showcase/buy')},
-                {label: 'Изготовление', onClick: () => props.history.push('produce')},
-                {label: 'На реализацию', onClick: () => props.history.push('reals/0')},
-            ]
-                .map(b => <Button
-                    key={uuid()}
+            <div style={style}>
+
+                {oftenUsedButtons.map(b => < Button
+                    key={'button-name-in-store-' + b.catId + b.label}
                     size="small"
-                    style={{margin: '.5rem'}}
-                    variant="outlined"
-                    onClick={b.onClick}>
+                    style={{ margin: '.5rem' }
+                    }
+                    color={catId === b.catId ? "primary" : "default"}
+                    variant={catId === b.catId ? "contained" : "outlined"}
+                    onClick={() => setCat(b.catId)}>
                     {b.label}
                 </Button>)}
 
-        </div>}
+                <IconButton onClick={() => setCat(0)}
+                    disabled={!catId}
+                >
+                    <CloseIcon />
+                </IconButton>
 
-        <div style={style}>
+            </div >
 
-            <TextField
-                fullWidth
-                error={error}
-                autoFocus
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <SearchIcon/>
-                        </InputAdornment>
-                    ),
-                }}
-                value={search}
-                onChange={e => searchHandle(e.target.value)}
-            />
+            {currentStock && <div style={{
+                margin: '.5rem',
+            }}>
 
-            <Button onClick={() => sendRequest()}
+                <IconButton onClick={() => setShowButtons(!showButtons)}>
+                    {showButtons ? <RemoveCircleIcon /> : <AddCircleIcon />}
+                </IconButton>
+
+                {showButtons && [
+                    { label: 'Оприходование', onClick: () => props.history.push('arrival') },
+                    { label: 'Покупка техники', onClick: () => props.history.push('showcase/buy') },
+                    { label: 'Изготовление', onClick: () => props.history.push('produce') },
+                    { label: 'На реализацию', onClick: () => props.history.push('reals/0') },
+                ]
+                    .map(b => <Button
+                        key={'label-in-store-' + b.label}
+                        size="small"
+                        style={{ margin: '.5rem' }}
+                        variant="outlined"
+                        onClick={b.onClick}>
+                        {b.label}
+                    </Button>)}
+
+            </div>
+            }
+
+            <div style={style}>
+
+                <TextField
+                    fullWidth
+                    error={error}
+                    autoFocus
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                    value={search}
+                    onChange={e => searchHandle(e.target.value)}
+                />
+
+                <Button onClick={() => sendRequest()}
                     style={{
                         marginInline: '.3rem'
                     }}
@@ -274,175 +336,69 @@ const Store = props => {
                     variant="contained"
                     color="primary"
                     size="small"
-            >
-                Найти
-            </Button>
+                >
+                    Найти
+                </Button>
 
-        </div>
+            </div>
 
-        <div style={style}>
-
-
-            <FormControlLabel
-                control={<Checkbox
-                    checked={isGroup} onChange={() => setIsGroup(!isGroup)}/>}
-                label="Сгруппировать"
-            />
-
-            {currentStock && <FormControlLabel control={
-
-                <Checkbox checked={isAllStocks} onChange={() => setIsAllStocks(!isAllStocks)}/>}
-                                               label="все точки"
-            />}
-
-            <FormControlLabel control={
-                <Checkbox checked={isPublic}
-                          disabled={true}
-                          onChange={() => setIsPublic(!isPublic)}/>}
-                              label={"только опубликованные"}
-
-            />
-
-            <FormControlLabel control={
-                <Checkbox checked={isReject} onChange={() => setIsReject(!isReject)}/>}
-                              label={"только брак"}
-            />
-
-        </div>
-
-        {goodsView.length
-            ? <Table size="small"
-                     style={{background: 'white'}}
-            >
-                <TableHead>
-                    <TableRow>
-                        {isGroup ? '' : <TableCell>#</TableCell>}
-                        <TableCell>Товар</TableCell>
-                        <TableCell>Цена / Себестоимость</TableCell>
-                        <TableCell>
-                            {isGroup ? 'Кол-во' : 'Хранение'}
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {goodsView
-                        // .filter(s => !isPublic || s.public || s.parts === 'sale')
-                        .filter(g => !isReject || g.wo === 'reject')
-                        .filter(s => isAllStocks || s.wo === 't' || !currentStock ||
-                            (currentStock && currentStock.id === s.stock_id))
-                        .filter(s => {
-
-                            if (!search || s.sum == search || s.id == search) return true
-
-                            const model = s.model.toLowerCase()
-
-                            const imei = s.imei && s.imei.toLowerCase()
-
-                            let r = true
-
-                            search.toLowerCase()
-                                .split(' ')
-                                .map(s => {
-
-                                    if (model.indexOf(s) < 0) {
-
-                                        r = imei && imei.indexOf(s) > -1
-
-                                    }
-
-                                })
-
-                            return r
+            <div style={style}>
 
 
-                        })
-                        .map(g => {
+                <FormControlLabel
+                    control={<Checkbox
+                        checked={isGroup} onChange={() => setIsGroup(!isGroup)} />}
+                    label="Сгруппировать"
+                />
 
-                            const color = transitBarcodes.includes(g.barcode)
-                                ? 'green'
-                                : g.wo === 'reject' ? 'red' : 'black'
+                {currentStock && <FormControlLabel control={
 
-                            const stock = props.app.stocks.find(s => s.id === g.stock_id)
+                    <Checkbox checked={isAllStocks} onChange={() => setIsAllStocks(!isAllStocks)} />}
+                    label="все точки"
+                />}
 
-                            const checkTime = Math.max(g.out_unix || 0, g.storage_unix || 0, g.unix || 0)
+                <FormControlLabel control={
+                    <Checkbox checked={isPublic}
+                        disabled={true}
+                        onChange={() => setIsPublic(!isPublic)} />}
+                    label={"только опубликованные"}
 
-                            const checkTimeStr = toLocalTimeStr(checkTime)
+                />
 
-                            if (!g.category_id && g.group) {
-                                Object.entries(groupAlias).map(([cat, groupName]) => {
-                                    if (g.group === groupName) g.category_id = +cat
-                                })
-                            }
+                <FormControlLabel control={
+                    <Checkbox checked={isReject} onChange={() => setIsReject(!isReject)} />}
+                    label={"только брак"}
+                />
 
-                            const category = g.category_id
-                                ? props.app.categories.find(c => c.id === g.category_id)
-                                : null
+            </div>
 
-                            const storage = g.wo === 't'
-                                ? TwoLineInCell('Транзит', checkTimeStr)
-                                : g.wo === 'reject'
-                                    ? TwoLineInCell('брак', checkTimeStr)
-                                    : !stock || g.stock_id === props.app.current_stock_id
-                                        ? TwoLineInCell(g.storage_place, checkTimeStr)
-                                        : TwoLineInCell(stock.name, g.storage_place || checkTimeStr)
+            {filteredGoods.length ? (
+                <Table size="small" style={{ background: 'white' }}>
+                    <TableHead>
+                        <TableRow>
+                            {!isGroup && <TableCell>#</TableCell>}
+                            <TableCell>Товар</TableCell>
+                            <TableCell>Цена / Себестоимость</TableCell>
+                            <TableCell>{isGroup ? 'Кол-во' : 'Хранение'}</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {filteredGoods.map(renderRow)}
 
-                            let description
-                            if (category) description = category.name
-                            if (g.imei) description = description
-                                ? description + ', ' + g.imei
-                                : g.imei
-
-                            const opacity = g.wo === 't' || props.app.current_stock_id !== g.stock_id
-                                ? '50%'
-                                : '100%'
-
-                            const sumText = isGroup && (g.minSum !== g.maxSum)
-                                ? g.minSum + ' - ' + g.maxSum
-                                : g.sum
-
-                            // const costText = isGroup && (g.minCost !== g.maxCost)
-                            //     ? g.minCost + ' - ' + g.maxCost
-                            //     : g.remcost || g.cost
-
-                            const costText = g.remcost || g.cost
-
-                            return <TableRow key={uuid()}
-                                             style={{
-                                                 cursor: 'pointer',
-                                                 opacity,
-                                             }}
-                                             onClick={() => isGroup ? '' : setGood(g.barcode)}
-                            >
-                                {isGroup
-                                    ? ''
-                                    : <TableCell style={{color}}>
-                                        {g.id}
-                                    </TableCell>
-                                }
-                                <TableCell style={{color}}>
-                                    {TwoLineInCell(g.model, description)}
-                                </TableCell>
-                                <TableCell style={{color}}>
-                                    {TwoLineInCell(sumText, costText)}
-                                </TableCell>
-                                <TableCell style={{color}}>
-                                    {isGroup ? g.count : storage}
+                        {isRequest.current && (
+                            <TableRow>
+                                <TableCell colSpan={4}>
+                                    <LinearProgress />
                                 </TableCell>
                             </TableRow>
-                        })}
+                        )}
+                    </TableBody>
+                </Table>
+            ) : (
+                'Нет данных'
+            )}
+        </>
+    );
+};
 
-                    {isRequest.current && <TableRow>
-                        <TableCell colSpan={4}>
-                            <LinearProgress/>
-                        </TableCell>
-                    </TableRow>}
-
-                </TableBody>
-            </Table>
-            : 'Нет данных'}
-
-    </>
-
-}
-
-export default connect(state => state)(Store)
+export default connect(state => state)(Store);
