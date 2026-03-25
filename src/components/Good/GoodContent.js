@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from "react";
-import {connect} from "react-redux";
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
 
 import {
     Button,
@@ -10,18 +10,18 @@ import {
     Fade,
     TextField,
 } from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
-import {useSnackbar} from "notistack";
+import { makeStyles } from "@material-ui/core/styles";
+import { useSnackbar } from "notistack";
 
-import {intInputHandler} from "../common/InputHandlers";
-import {toLocalTimeStr} from "../common/Time";
+import { intInputHandler } from "../common/InputHandlers";
+import { toLocalTimeStr } from "../common/Time";
 import UsersSelect from "../common/UsersSelect";
 import IsPublicCheckBox from "../common/IsPublicCheckBox";
 import rest from "../Rest";
-import {Print} from "../common/Print";
-import {groupAlias} from "../common/GroupAliases";
+import { Print } from "../common/Print";
+import { groupAlias } from "../common/GroupAliases";
 import AddCosts from "../common/AddCosts";
-import {line, note} from "../common/InputHandlers";
+import { line, note } from "../common/InputHandlers";
 import CategoryHandler from "../common/CategoryHandler";
 import GoodHistory from "./GoodHistory";
 
@@ -84,7 +84,7 @@ const GoodContent = props => {
     const [isReasonOpen, setIsReasonOpen] = useState(false)
 
     const classes = useStyles()
-    const {enqueueSnackbar} = useSnackbar()
+    const { enqueueSnackbar } = useSnackbar()
 
     const good = props.app.good
 
@@ -167,11 +167,11 @@ const GoodContent = props => {
                     props.close(good.barcode)
 
                     if (isShowcase) Print(doc, props.alias)
-                    else enqueueSnackbar('продано!', {variant: 'success'})
+                    else enqueueSnackbar('продано!', { variant: 'success' })
 
                 } else {
 
-                    enqueueSnackbar('не удалось продать', {variant: 'error'})
+                    enqueueSnackbar('не удалось продать', { variant: 'error' })
 
                 }
             })
@@ -186,12 +186,12 @@ const GoodContent = props => {
                 .then(res => {
 
                     if (res.status === 200) {
-                        enqueueSnackbar('возврат записан', {variant: 'success'})
+                        enqueueSnackbar('возврат записан', { variant: 'success' })
                         setReason('')
                         setIsReasonOpen(false)
                         props.close()
                     } else {
-                        enqueueSnackbar('не удалось вернуть', {variant: 'error'})
+                        enqueueSnackbar('не удалось вернуть', { variant: 'error' })
                     }
 
                 })
@@ -201,7 +201,7 @@ const GoodContent = props => {
 
     const save = () => {
 
-        if (isSame) return enqueueSnackbar('нет изменений', {variant: 'error'})
+        if (isSame) return enqueueSnackbar('нет изменений', { variant: 'error' })
 
         const data = {}
 
@@ -213,7 +213,7 @@ const GoodContent = props => {
 
         }
 
-        if (data === {}) return enqueueSnackbar('нет изменений', {variant: 'error'})
+        if (data === {}) return enqueueSnackbar('нет изменений', { variant: 'error' })
 
         rest('goods/' + good.barcode, 'PATCH', data)
 
@@ -241,10 +241,10 @@ const GoodContent = props => {
 
     const upload = () => {
 
-        if (file.size > 500000) return enqueueSnackbar('файл не должен превышеть 500Kb', {variant: 'error'})
+        if (file.size > 500000) return enqueueSnackbar('файл не должен превышеть 500Kb', { variant: 'error' })
 
         if (!['image/gif', 'image/jpeg'].includes(file.type)) {
-            return enqueueSnackbar('тип файла должен быть jpg или gif', {variant: 'error'})
+            return enqueueSnackbar('тип файла должен быть jpg или gif', { variant: 'error' })
         }
 
         rest('goods/picture/' + good.barcode, 'POST', file, true)
@@ -258,7 +258,7 @@ const GoodContent = props => {
 
                     }
                 } else {
-                    enqueueSnackbar('ошибка ' + res.status, {variant: 'error'})
+                    enqueueSnackbar('ошибка ' + res.status, { variant: 'error' })
                 }
 
             })
@@ -326,28 +326,40 @@ const GoodContent = props => {
         reader.readAsDataURL(f)
     }
 
-    const textWithButton = (label, value, onChange, onClick, isPrimary, text) => <div style={{width: '100%'}}>
+    const textWithButton = (label, value, onChange, onClick, isPrimary, text) => <div style={{ width: '100%' }}>
         <TextField label={label}
-                   style={{
-                       margin: '1rem .3rem',
-                       width: '40%'
-                   }}
-                   value={value}
-                   onChange={onChange}
+            style={{
+                margin: '1rem .3rem',
+                width: '40%'
+            }}
+            value={value}
+            onChange={onChange}
         />
 
         <Button onClick={onClick}
-                disabled={!value && text != 'Списать' }
-                style={{
-                    margin: '2rem auto 0 auto',
-                }}
-                color={isPrimary ? "primary" : "secondary"}>
+            disabled={!value && text != 'Списать'}
+            style={{
+                margin: '2rem auto 0 auto',
+            }}
+            color={isPrimary ? "primary" : "secondary"}>
             {text}
         </Button>
     </div>
 
+    const isFullUrl = (url) => {
+        try {
+            return new URL(url).protocol.startsWith('http');
+        } catch {
+            return false;
+        }
+    };
+
     const pictureRender = () => <img
-        src={'https://uchet.store/uploads/' + good.picture}
+        src={
+            isFullUrl(good.picture)
+                ? good.picture
+                : 'https://uchet.store/uploads/' + good.picture
+        }
         alt={good.model}
         width={'100%'}
         onError={() => setPicture()}
@@ -358,10 +370,10 @@ const GoodContent = props => {
 
     return props.statusId === 1
         ? <AddCosts barcode={good.barcode}
-                    done={() => props.setStatusId(0)}
+            done={() => props.setStatusId(0)}
         />
         : props.statusId === 2
-            ? <GoodHistory good={good}/>
+            ? <GoodHistory good={good} />
             : <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -376,15 +388,15 @@ const GoodContent = props => {
                                 <CardMedia
                                     component="img"
                                     alt={good.model}
-                                    image={image}/>
+                                    image={image} />
                             </CardActionArea>
                             <CardActions>
                                 <Button size="small" color="primary"
-                                        onClick={() => setImage()}>
+                                    onClick={() => setImage()}>
                                     Удалить
                                 </Button>
                                 <Button size="small" color="primary"
-                                        onClick={() => upload()}>
+                                    onClick={() => upload()}>
                                     Загрузить
                                 </Button>
                             </CardActions>
@@ -393,7 +405,7 @@ const GoodContent = props => {
                             ? <>
                                 {pictureRender()}
                                 <Button size="small" color="primary"
-                                        onClick={() => setPicture()}>
+                                    onClick={() => setPicture()}>
                                     Удалить
                                 </Button>
                             </>
@@ -407,15 +419,15 @@ const GoodContent = props => {
                                     alignItems: 'center',
                                     border
                                 }}
-                                     onDragLeave={e => onDrag(e, false)}
-                                     onDragOver={e => onDrag(e, true)}
-                                     onDrop={e => onDrop(e)}
+                                    onDragLeave={e => onDrag(e, false)}
+                                    onDragOver={e => onDrag(e, true)}
+                                    onDrop={e => onDrop(e)}
                                 >
                                     {isDrag
                                         ? 'Отпустите фото, чтобы загрузить'
                                         : 'Перетащите фото, чтобы загрузить'}
                                 </div>
-                                <input type='file' onChange={e => onManualSelect(e.target.files[0])}/>
+                                <input type='file' onChange={e => onManualSelect(e.target.files[0])} />
                             </>
                     : picture && pictureRender()}
 
@@ -470,11 +482,11 @@ const GoodContent = props => {
                 {isEditable && <Fade
                     in={!isSame && isEditable}
                     timeout={300}
-                    style={{margin: '1rem 0'}}
+                    style={{ margin: '1rem 0' }}
                 >
                     <Button onClick={() => save()}
-                            variant="outlined"
-                            color="secondary">
+                        variant="outlined"
+                        color="secondary">
                         Сохранить
                     </Button>
                 </Fade>}
@@ -484,9 +496,9 @@ const GoodContent = props => {
                         ? textWithButton('Причина возврата', reason, e => setReason(e.target.value),
                             () => refund(), false, 'Вернуть')
                         : <Button onClick={() => setIsReasonOpen(!isReasonOpen)}
-                                  className={"m-2 p-1"}
-                                  variant="outlined"
-                                  color="secondary">
+                            className={"m-2 p-1"}
+                            variant="outlined"
+                            color="secondary">
                             Отмена продажи
                         </Button>
                     : null
