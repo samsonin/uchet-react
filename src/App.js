@@ -1,11 +1,11 @@
-import React, {useEffect, useRef, useState} from "react";
-import {Route} from "react-router-dom";
-import {connect} from "react-redux";
+import React, { useEffect, useRef, useState } from "react";
+import { Route } from "react-router-dom";
+import { connect } from "react-redux";
 
 import "./index.css";
 import Header from "./components/Header";
 import Customers from "./components/Customers";
-import {Customer} from "./components/common/Customer";
+import { Customer } from "./components/common/Customer";
 import Entities from "./components/Entities";
 import Entity from "./components/Entity";
 import Sidebar from "./components/Sidebar";
@@ -25,18 +25,19 @@ import GoodModal from "./components/Modals/Good";
 import Config from "./components/Settings/Config";
 import Organization from "./components/Settings/Organization";
 import Employees from "./components/Settings/Employees";
+import Invites from "./components/Settings/Invites";
 import Stocks from "./components/Settings/Stocks";
 import Stock from "./components/Settings/Stock"
 import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
-import {Records} from "./components/Records";
+import { Records } from "./components/Records";
 // import Docs from "./components/Settings/Docs";
 import Daily from "./components/Daily";
 import LoginModal from "./components/LoginModal";
 import Prepaids from "./components/Prepaids";
-import {bindActionCreators} from "redux";
-import {init_user} from "./actions/actionCreator";
+import { bindActionCreators } from "redux";
+import { init_user } from "./actions/actionCreator";
 import Showcase from "./components/Showcase";
 import Prices from "./components/Prices";
 import Pledges from "./components/Pledges";
@@ -47,8 +48,8 @@ import Store from "./components/Store";
 import Zp from "./components/Zp";
 import Produce from "./components/Produce";
 import Reals from "./components/Reals";
-import {useSnackbar} from "notistack";
-import {Button} from "@material-ui/core";
+import { useSnackbar } from "notistack";
+import { Button } from "@material-ui/core";
 import Sales from "./components/Sales";
 import Users from "./components/Settings/Users";
 
@@ -80,7 +81,7 @@ const App = props => {
 
     const barcode = useRef('')
 
-    const {enqueueSnackbar, closeSnackbar} = useSnackbar()
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar()
 
     let path = window.location.pathname
 
@@ -133,7 +134,7 @@ const App = props => {
                 }
             })
 
-// eslint-disable-next-line
+        // eslint-disable-next-line
     }, [])
 
     useEffect(() => {
@@ -199,8 +200,8 @@ const App = props => {
         {props.app.need_callbacks && props.app.need_callbacks.map(nc => {
 
             const action = snackbarId => <Button onClick={() => closeSnackbar(snackbarId)}
-                                                 size="small"
-                                                 variant="outlined"
+                size="small"
+                variant="outlined"
             >
                 Ok
             </Button>
@@ -214,17 +215,17 @@ const App = props => {
 
         })}
 
-        <Header className={'d-print-none'}/>
+        <Header className={'d-print-none'} />
 
         <div className="d-flex d-print-none" id="wrapper">
 
-            <Sidebar/>
+            <Sidebar />
 
             <div style={{
                 borderWidth: '0 0 0 2px',
                 borderStyle: 'solid',
                 color: '#ff8cb0'
-            }}/>
+            }} />
 
             <LoginModal
                 isOpen={!+props.auth.user_id}
@@ -233,51 +234,51 @@ const App = props => {
                 parseJwt={parseJwt}
             />
 
-            {!props.app.good || path.substring(0, 8) === '/transit' || <GoodModal/>}
+            {!props.app.good || path.substring(0, 8) === '/transit' || <GoodModal />}
 
-            {!expire && <WebSocketAdapter/>}
+            {!expire && <WebSocketAdapter />}
 
             {+props.auth.user_id
                 ? expire
-                    ? <Subscribe/>
+                    ? <Subscribe />
                     : <div className="m-2 p-2">
 
                         <form onSubmit={e => e.preventDefault()}>
 
-                            <Route exact path="/" component={Main}/>
-                            <Route exact path="/settings" component={Settings}/>
-                            <Route path="/subscribe" component={Subscribe}/>
+                            <Route exact path="/" component={Main} />
+                            <Route exact path="/settings" component={Settings} />
+                            <Route path="/subscribe" component={Subscribe} />
 
                             {props.app.stocks[0] && <>
                                 <Route path="/daily"
-                                       render={props => <Daily
-                                           setOurBarcode={setOurBarcode}
-                                           {...props}
-                                       />}
+                                    render={props => <Daily
+                                        setOurBarcode={setOurBarcode}
+                                        {...props}
+                                    />}
                                 />
                             </>}
 
-                            <Route exact path="/prepaids" component={Prepaids}/>
-                            <Route path="/reals/:id?" component={Reals}/>
-                            <Route exact path="/zp" component={Zp}/>
-                            <Route exact path="/showcase" component={Showcase}/>
-                            <Route exact path="/showcase/buy" component={Buy}/>
-                            <Route exact path="/inventory" component={Inventory}/>
-                            <Route exact path="/customers" component={Customers}/>
-                            <Route exact path="/entities" component={Entities}/>
+                            <Route exact path="/prepaids" component={Prepaids} />
+                            <Route path="/reals/:id?" component={Reals} />
+                            <Route exact path="/zp" component={Zp} />
+                            <Route exact path="/showcase" component={Showcase} />
+                            <Route exact path="/showcase/buy" component={Buy} />
+                            <Route exact path="/inventory" component={Inventory} />
+                            <Route exact path="/customers" component={Customers} />
+                            <Route exact path="/entities" component={Entities} />
                             {props.app.fields.allElements && <>
-                                <Route exact path="/customers/:id" component={Customer}/>
-                                <Route exact path="/pledges" component={Pledges}/>
-                                <Route exact path="/pledges/:id" component={Pledges}/>
-                                <Route exact path="/entities/:id" component={Entity}/>
+                                <Route exact path="/customers/:id" component={Customer} />
+                                <Route exact path="/pledges" component={Pledges} />
+                                <Route exact path="/pledges/:id" component={Pledges} />
+                                <Route exact path="/entities/:id" component={Entity} />
                                 <Route exact path="/sales" render={props => <Sales
                                     enterPress={enterPress}
                                     setEnterPress={setEnterPress}
                                     {...props}
-                                />}/>
+                                />} />
 
-                                <Route exact path="/order" component={Order}/>
-                                <Route exact path="/order/:stock_id/:order_id" component={Order}/>
+                                <Route exact path="/order" component={Order} />
+                                <Route exact path="/order/:stock_id/:order_id" component={Order} />
                                 <Route path="/orders" render={props => <Orders
                                     enterPress={enterPress}
                                     setEnterPress={setEnterPress}
@@ -286,12 +287,12 @@ const App = props => {
                                 />                            </>}
 
                             <Route path="/call_records"
-                                   render={props => <Records
-                                       orgId={orgId}
-                                       {...props}
-                                   />}
+                                render={props => <Records
+                                    orgId={orgId}
+                                    {...props}
+                                />}
                             />
-                            {props.app.users[0] && <Route path="/queue" component={Queue}/>}
+                            {props.app.users[0] && <Route path="/queue" component={Queue} />}
 
                             <Route path="/store" render={props => <Store
                                 enterPress={enterPress}
@@ -299,16 +300,16 @@ const App = props => {
                                 scrollDown={scrollDown}
                                 setScrollDown={setScrollDown}
                                 {...props}
-                            />}/>
+                            />} />
 
                             {/*<Route exact path="/goods/:barcode" component={Good}/>*/}
 
                             <Route exact path="/arrival/today"
-                                   render={props => <ArrivalToday
-                                       newScan={ourBarcode}
-                                       setOurBarcode={setOurBarcode}
-                                       {...props}
-                                   />}/>
+                                render={props => <ArrivalToday
+                                    newScan={ourBarcode}
+                                    setOurBarcode={setOurBarcode}
+                                    {...props}
+                                />} />
 
                             {!props.app.current_stock_id || <>
                                 <Route exact path="/arrival" render={props => <Consignment
@@ -316,13 +317,13 @@ const App = props => {
                                     enterPress={enterPress}
                                     setEnterPress={setEnterPress}
                                     {...props}
-                                />}/>
-                                <Route path="/consignments" component={Consignments}/>
+                                />} />
+                                <Route path="/consignments" component={Consignments} />
                                 <Route path="/produce"
-                                       render={props => <Produce
-                                           // setGood={setGood}
-                                           {...props}
-                                       />}
+                                    render={props => <Produce
+                                        // setGood={setGood}
+                                        {...props}
+                                    />}
                                 />
                             </>}
 
@@ -330,34 +331,35 @@ const App = props => {
                                 newScan={ourBarcode}
                                 setOurBarcode={setOurBarcode}
                                 {...props}
-                            />}/>
+                            />} />
 
                             {props.auth.admin && <>
-                                <Route path="/funds" component={FundsFlow}/>
+                                <Route path="/funds" component={FundsFlow} />
 
-                                <Route path="/settings/organization" component={Organization}/>
-                                <Route path="/settings/employees" component={Users}/>
-                                <Route exact path="/settings/stocks" component={Stocks}/>
+                                <Route path="/settings/invites" component={Invites} />
+                                <Route path="/settings/organization" component={Organization} />
+                                <Route path="/settings/employees" component={Users} />
+                                <Route exact path="/settings/stocks" component={Stocks} />
                                 {props.app.users && props.app.stocks && props.app.stockusers
-                                    ? <Route exact path="/settings/stocks/:id" component={Stock}/>
+                                    ? <Route exact path="/settings/stocks/:id" component={Stock} />
                                     : null
                                 }
-                                <Route path="/settings/config" component={Config}/>
-                                <Route path="/settings/fields" component={Fields}/>
+                                <Route path="/settings/config" component={Config} />
+                                <Route path="/settings/fields" component={Fields} />
                                 {/*<Route path="/settings/docs" component={Docs}/>*/}
                                 <Route path="/integration/mango"
-                                       component={() => <IntegrationMango
-                                           org_id={props.auth.organization_id}
-                                           vpbx_api_key={'секретный ключ'}
-                                           vpbx_api_salt={'секретная соль'}
-                                           // keyHandle={keyHandle}
-                                           // saltHandle={saltHandle}
-                                       />}
+                                    component={() => <IntegrationMango
+                                        org_id={props.auth.organization_id}
+                                        vpbx_api_key={'секретный ключ'}
+                                        vpbx_api_salt={'секретная соль'}
+                                    // keyHandle={keyHandle}
+                                    // saltHandle={saltHandle}
+                                    />}
                                 />
-                                <Route path="/integration/sms_ru" component={IntegrationSmsRu}/>
+                                <Route path="/integration/sms_ru" component={IntegrationSmsRu} />
                             </>}
 
-                            <Route path="/integration/prices" component={Prices}/>
+                            <Route path="/integration/prices" component={Prices} />
 
                         </form>
 

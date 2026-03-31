@@ -1,5 +1,5 @@
-import React, {useState} from "react";
-import {connect} from "react-redux";
+import React, { useState } from "react";
+import { connect } from "react-redux";
 
 import TableHead from "@material-ui/core/TableHead";
 import {
@@ -17,6 +17,9 @@ import SearchIcon from "@material-ui/icons/Search";
 import TwoLineInCell from "../common/TwoLineInCell";
 import uuid from "uuid";
 import rest from "../Rest";
+
+import { Link } from 'react-router-dom';
+import { MDBBtn } from "mdbreact";
 
 
 const Users = props => {
@@ -48,7 +51,7 @@ const Users = props => {
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">
-                            <SearchIcon/>
+                            <SearchIcon />
                         </InputAdornment>
                     ),
                 }}
@@ -59,17 +62,26 @@ const Users = props => {
             <FormControlLabel control={
 
                 <Switch checked={isAll}
-                        color="primary"
-                        onChange={() => setIsAll(!isAll)}
+                    color="primary"
+                    onChange={() => setIsAll(!isAll)}
                 />
             }
-                              label="включая уволенных"
+                label="включая уволенных"
             />
 
-        </div>
+            <Link to={"/settings/invites/add"}>
+                < MDBBtn className="btn-l btn-block"
+                    color="mdb-color"
+                >
+                    Пригласить пользователя
+                </MDBBtn>
+            </Link>
+
+
+        </div >
 
         <Table size="small"
-               style={{background: 'white'}}
+            style={{ background: 'white' }}
         >
             <TableHead>
                 <TableRow>
@@ -123,8 +135,8 @@ const Users = props => {
                                     label={u.is_valid ? "Работает" : "Уволен"}
                                     control={
                                         <Switch checked={u.is_valid}
-                                                color="primary"
-                                                onChange={() => validChange(u.id)}
+                                            color="primary"
+                                            onChange={() => validChange(u.id)}
                                         />}
                                 />
                             </TableCell>

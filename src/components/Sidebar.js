@@ -1,11 +1,11 @@
 import React from "react";
-import {connect} from "react-redux";
-import {Link} from "react-router-dom";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 
-import {makeStyles} from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Button from "@material-ui/core/Button";
 
-import {siteMap} from "./SiteMap";
+import { siteMap } from "./SiteMap";
 
 
 const useStyles = makeStyles({
@@ -41,16 +41,16 @@ const Sidebar = props => {
     }
 
     return <div id="sidebar-wrapper"
-                className="bg-light border-right">
+        className="bg-light border-right">
         <div className={classes.list}>
 
             {[
-                {name: 'Услуги', arr: [1, 2, 3]},
-                {name: 'ТМЦ', arr: [10, 11, 14, 15, 16, 17, 19]},
-                {name: 'Контрагенты', arr: [21, 22, 24]},
-                {name: 'Аналитика', arr: [31, 32, 33, 35]},
-                {name: 'Настройки', arr: [41, 42, 43, 46, 47, 48]},
-                {name: 'Интеграции', arr: [51, 52, 53]},
+                { name: 'Услуги', arr: [1, 2, 3] },
+                { name: 'ТМЦ', arr: [10, 11, 14, 15, 16, 17, 19] },
+                { name: 'Контрагенты', arr: [21, 22, 24] },
+                { name: 'Аналитика', arr: [31, 32, 33, 35] },
+                { name: 'Настройки', arr: [40, 41, 42, 43, 46, 47, 48] },
+                { name: 'Интеграции', arr: [51, 52, 53] },
             ].map(v => siteMap(props.admin).find(sm => v.arr.includes(sm.id))
                 ? <div key={'sidebararrkey' + v.name}>
                     <Button
@@ -61,17 +61,17 @@ const Sidebar = props => {
                     </Button>
                     <div className="List-item hideBlock">
                         {v.arr.map(id => {
-                                let obj = siteMap(props.admin).find(v => v.id === id)
-                                return obj
-                                    ? <div className="link_items"
-                                           key={"mdblnksdbkey" + id}
-                                    >
-                                        <Link to={'/' + obj.path}>
-                                            {obj.text}
-                                        </Link>
-                                    </div>
-                                    : null
-                            }
+                            let obj = siteMap(props.admin).find(v => v.id === id)
+                            return obj
+                                ? <div className="link_items"
+                                    key={"mdblnksdbkey" + id}
+                                >
+                                    <Link to={'/' + obj.path}>
+                                        {obj.text}
+                                    </Link>
+                                </div>
+                                : null
+                        }
                         )}
                     </div>
                 </div>

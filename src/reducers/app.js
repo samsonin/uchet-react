@@ -1,10 +1,11 @@
-import {CLOSE_GOOD, DELETE_GOOD, UPD_APP} from "../constants";
-import {EXIT_APP} from "../constants";
+import { CLOSE_GOOD, DELETE_GOOD, UPD_APP } from "../constants";
+import { EXIT_APP } from "../constants";
 
 let initialState = {
     balance: 0,
     stocks: [],
     users: [],
+    invites: [],
     orders: [],
     organization: [],
     config: [],
@@ -21,6 +22,7 @@ const probableKeys = [
     'positions',
     'stocks',
     'users',
+    'invites',
     'stockusers',
     'organization',
     'config',
@@ -57,7 +59,7 @@ const app = (state = getItems() || initialState, action) => {
 
     if (action.type === UPD_APP) {
 
-        let newState = {...state}
+        let newState = { ...state }
 
         if (typeof (action.data) === 'object') {
 
@@ -101,7 +103,7 @@ const app = (state = getItems() || initialState, action) => {
 
         }
 
-        const newStorage = {...newState}
+        const newStorage = { ...newState }
         delete newStorage.good
 
         // window.localStorage.setItem('app', JSON.stringify(newStorage));
@@ -115,13 +117,13 @@ const app = (state = getItems() || initialState, action) => {
 
     } else if (action.type === CLOSE_GOOD) {
 
-        let newState = {...state}
+        let newState = { ...state }
         delete newState.good
         return newState;
 
     } else if (action.type === DELETE_GOOD) {
 
-        let newState = {...state}
+        let newState = { ...state }
 
         if (action.barcode) newState.needDeleteBarcode = action.barcode
         else delete newState.needDeleteBarcode
