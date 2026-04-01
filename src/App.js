@@ -3,6 +3,7 @@ import { Route } from "react-router-dom";
 import { connect } from "react-redux";
 
 import "./index.css";
+
 import Header from "./components/Header";
 import Customers from "./components/Customers";
 import { Customer } from "./components/common/Customer";

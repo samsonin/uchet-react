@@ -1,4 +1,4 @@
-import React, {forwardRef, useState} from "react";
+import React, { forwardRef, useState, useEffect } from "react";
 
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -6,16 +6,18 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import Slide from "@material-ui/core/Slide";
-import {useSnackbar} from "notistack";
-import {connect} from "react-redux";
-import {TextField} from "@material-ui/core";
+import { useSnackbar } from "notistack";
+import { connect } from "react-redux";
+import { TextField } from "@material-ui/core";
 import doubleRequest from "./doubleRequest";
 import rest from "./Rest";
-import {bindActionCreators} from "redux";
-import {init_user} from "../actions/actionCreator";
+import { bindActionCreators } from "redux";
+import { init_user } from "../actions/actionCreator";
 import License from "./License";
 import Privacy from "./Privacy";
-import {makeStyles} from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
+import {SERVER} from '../constants';
+
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -51,9 +53,24 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const [requesting, setRequesting] = useState(false)
 
-    const {enqueueSnackbar} = useSnackbar()
+    const { enqueueSnackbar } = useSnackbar()
 
     const classes = useStyles()
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
+
+        if (token) {
+            init(token);
+            window.location.href = "/";
+        }
+
+    }, [])``
+
+    const handleGoogleLogin = () => {
+        window.location.href = SERVER + '/auth/social/google/redirect';
+    };
 
     const isLoginValid = login => {
 
@@ -103,7 +120,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     init(res)
                 } catch (e) {
                     enqueueSnackbar('Неправильный логин или пароль',
-                        {variant: 'error'}
+                        { variant: 'error' }
                     )
                 }
             })
@@ -121,7 +138,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
         if (requesting) return
         setRequesting(true)
 
-        doubleRequest({login}, 'codes')
+        doubleRequest({ login }, 'codes')
             .then(res => {
 
                 setRequesting(false)
@@ -137,7 +154,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const sendRegisterCode = () => {
 
-        rest('codes/register', 'POST', {login})
+        rest('codes/register', 'POST', { login })
             .then(res => res.status === 200
                 ? setStatus('register')
                 : enqueueSnackbar('ошибка: ' + res.body.error, {
@@ -190,28 +207,28 @@ export default connect(state => state, mapDispatchToProps)(props => {
         if (n === 'privacy') return <DialogContentText
             key={'fieldkeyinloginmodal' + n}
         >
-            <br/>
+            <br />
             Нажимая "Запросить код", вы принимаете
             <span
                 className={classes.span}
                 onClick={() => setStatus('license')}
             >
-            Пользовательское соглашение
-        </span>
+                Пользовательское соглашение
+            </span>
             и даете согласие на
             <span
                 className={classes.span}
                 onClick={() => setStatus('privacy')}
             >
-            обработку персональных данных
-        </span>
+                обработку персональных данных
+            </span>
         </DialogContentText>
 
         const fields = {
-            name: {l: 'Ваше имя', a: e => setName(e.target.value), v: name},
-            password: {l: 'Пароль', a: e => setPassword(e.target.value), v: password},
-            password2: {l: 'Повторить пароль', a: e => setPassword2(e.target.value), v: password2},
-            code: {l: 'Код из сообщения', a: e => setCode(e.target.value), v: code},
+            name: { l: 'Ваше имя', a: e => setName(e.target.value), v: name },
+            password: { l: 'Пароль', a: e => setPassword(e.target.value), v: password },
+            password2: { l: 'Повторить пароль', a: e => setPassword2(e.target.value), v: password2 },
+            code: { l: 'Код из сообщения', a: e => setCode(e.target.value), v: code },
         }
 
         return n === 'login'
@@ -243,24 +260,24 @@ export default connect(state => state, mapDispatchToProps)(props => {
     const colors = ['default', 'primary', 'secondary']
 
     const buttons = {
-        signIn: {a: () => signIn(), color: 1, text: 'Вход'},
-        back: {a: () => setStatus('signIn'), color: 2, text: 'Назад'},
-        preRestore: {a: () => pre('preRestore'), color: 2, text: 'Забыли пароль?'},
-        restore: {a: () => sendRestoreCode(), color: 1, text: 'Запросить код восстановления'},
-        restoreConfirm: {a: () => confirm('Пароль изменен!'), color: 1, text: 'Подтвердить'},
-        preRegister: {a: () => pre('preRegister'), color: 1, text: 'Регистрация'},
-        register: {a: () => sendRegisterCode('register'), color: 1, text: 'Запросить код регистрации'},
+        signIn: { a: () => signIn(), color: 1, text: 'Вход' },
+        back: { a: () => setStatus('signIn'), color: 2, text: 'Назад' },
+        preRestore: { a: () => pre('preRestore'), color: 2, text: 'Забыли пароль?' },
+        restore: { a: () => sendRestoreCode(), color: 1, text: 'Запросить код восстановления' },
+        restoreConfirm: { a: () => confirm('Пароль изменен!'), color: 1, text: 'Подтвердить' },
+        preRegister: { a: () => pre('preRegister'), color: 1, text: 'Регистрация' },
+        register: { a: () => sendRegisterCode('register'), color: 1, text: 'Запросить код регистрации' },
         registerConfirm: {
             a: () => confirm('Поздравляем, Вы зарегистрированны!'), color: 1,
             text: 'Зарегистрироваться'
         },
-        demo: {a: () => signIn(true), color: 0, text: 'Демо'},
+        demo: { a: () => signIn(true), color: 0, text: 'Демо' },
     }
 
     const renderButton = name => <Button onClick={buttons[name].a}
-                                         color={colors[buttons[name].color]}
-                                         key={'buttonskeyinloginmodal' + name}
-                                         disabled={requesting}
+        color={colors[buttons[name].color]}
+        key={'buttonskeyinloginmodal' + name}
+        disabled={requesting}
     >
         {buttons[name].text}
     </Button>
@@ -287,11 +304,11 @@ export default connect(state => state, mapDispatchToProps)(props => {
             buttons: ['back', 'registerConfirm']
         },
         privacy: {
-            fields: [<Privacy/>],
+            fields: [<Privacy />],
             buttons: ['back', 'preRegister']
         },
         license: {
-            fields: [<License/>],
+            fields: [<License />],
             buttons: ['back', 'preRegister']
         },
     }
@@ -308,8 +325,8 @@ export default connect(state => state, mapDispatchToProps)(props => {
             className={classes.title}
         >
             <img src="https://uchet.store/src/images/uchet.gif"
-                 width="120"
-                 alt="Uchet.store"/>
+                width="120"
+                alt="Uchet.store" />
         </div>
 
         <DialogContent>
@@ -319,6 +336,28 @@ export default connect(state => state, mapDispatchToProps)(props => {
         <DialogActions className="m-2 p-2">
             {statuses[status].buttons.map(b => renderButton(b))}
         </DialogActions>
+
+        {status === 'signIn' && (
+            <Button
+                onClick={handleGoogleLogin}
+                disabled={requesting}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    border: '1px solid #ccc',
+                    borderRadius: '6px',
+                    background: '#fff'
+                }}
+            >
+                <img
+                    src="https://www.svgrepo.com/show/355037/google.svg"
+                    width="20"
+                    alt="google"
+                />
+                Вход через Google
+            </Button>
+        )}
 
     </Dialog>
 })
