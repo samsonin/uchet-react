@@ -12,17 +12,26 @@ import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import DeleteCircleIcon from "@material-ui/icons/Delete";
+import { useSnackbar } from "notistack";
 
 import rest from "../../components/Rest";
 import InviteModal from "../../components/Modals/Invite";
 
 const Invites = props => {
 
-
     const [isInviteOpen, setIsInviteOpen] = useState(false)
     const [invite, setInvite] = useState(null);
 
-    const addInvite = invite => {
+    const { enqueueSnackbar } = useSnackbar()
+
+    const addInvite = () => {
+
+        if (props.app.invites.length > 9) {
+            return enqueueSnackbar("Максимальное количество приглашений - 10", {
+                variant: 'error'
+            })
+        }
+
         setInvite({});
         setIsInviteOpen(true);
     };
@@ -56,6 +65,7 @@ const Invites = props => {
         <Table size="small" style={{ background: 'white' }}>
             <TableHead>
                 <TableRow>
+                    <TableCell>Имя</TableCell>
                     <TableCell>Тип контакта</TableCell>
                     <TableCell>Контакт</TableCell>
                     <TableCell>Должность</TableCell>
@@ -78,6 +88,7 @@ const Invites = props => {
                             style={{ cursor: 'pointer' }}
                             onClick={() => editInvite(i)}
                         >
+                            <TableCell>{i.name}</TableCell>
                             <TableCell>{i.type}</TableCell>
                             <TableCell>{i.value}</TableCell>
                             <TableCell>

@@ -20,6 +20,8 @@ export const siteMap = isAdmin => {
         { id: 31, path: "daily", text: "Ежедневный отчет" },
         { id: 35, path: "sales", text: "Поиск по продажам" },
 
+        { id: 40, path: "settings/personal", text: "Личные данные" },
+
         { id: 53, path: "integration/prices", text: "Прайс-листы" },
 
     ]
@@ -33,10 +35,10 @@ export const siteMap = isAdmin => {
             { id: 32, path: "funds", text: "Движение денег" },
             { id: 33, path: "zp", text: "Зарплата" },
 
-            { id: 40, path: "settings/invites", text: "Приглашения" },
             { id: 41, path: "settings/organization", text: "Организация" },
             { id: 42, path: "settings/employees", text: "Сотрудники" },
             { id: 43, path: "settings/stocks", text: "Точки" },
+            { id: 45, path: "settings/invites", text: "Приглашения" },
             { id: 46, path: "settings/config", text: "Условия" },
             { id: 47, path: "settings/fields", text: "Поля" },
             { id: 48, path: "settings/docs", text: "Документы" },

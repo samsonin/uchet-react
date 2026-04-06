@@ -150,7 +150,7 @@ const NavbarPage = props => {
             </MDBCardHeader>
 
             <MDBDropdownItem>
-                <MDBNavLink to="/settings" className="text-dark">
+                <MDBNavLink to="/settings/personal" className="text-dark">
                     Настройки
                 </MDBNavLink>
             </MDBDropdownItem>

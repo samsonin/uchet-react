@@ -16,7 +16,7 @@ import { init_user } from "../actions/actionCreator";
 import License from "./License";
 import Privacy from "./Privacy";
 import { makeStyles } from "@material-ui/core/styles";
-import {SERVER} from '../constants';
+import { SERVER } from '../constants';
 
 
 
@@ -66,7 +66,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
             window.location.href = "/";
         }
 
-    }, [])``
+    }, [])
 
     const handleGoogleLogin = () => {
         window.location.href = SERVER + '/auth/social/google/redirect';

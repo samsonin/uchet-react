@@ -11,7 +11,7 @@ import Entities from "./components/Entities";
 import Entity from "./components/Entity";
 import Sidebar from "./components/Sidebar";
 import Main from "./components/Main";
-import Settings from "./components/Settings";
+import Personal from "./components/Settings/Personal";
 import Subscribe from "./components/Subscribe";
 import Queue from "./components/Queue";
 import WebSocketAdapter from "./components/WebSocketAdapter";
@@ -247,7 +247,7 @@ const App = props => {
                         <form onSubmit={e => e.preventDefault()}>
 
                             <Route exact path="/" component={Main} />
-                            <Route exact path="/settings" component={Settings} />
+                            <Route exact path="/settings/personal" component={Personal} />
                             <Route path="/subscribe" component={Subscribe} />
 
                             {props.app.stocks[0] && <>

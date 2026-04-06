@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useState } from "react";
 import { connect } from "react-redux";
 
 import Slide from "@material-ui/core/Slide";
@@ -26,28 +26,102 @@ const InviteModal = props => {
     const { isOpen, close, invite } = props;
 
     const [disabled, setDisabled] = useState(false);
+    const [name, setName] = useState("");
     const [type, setType] = useState("email");
     const [value, setValue] = useState("");
     const [positionId, setPositionId] = useState("");
 
+    const [nameError, setNameError] = useState("");
+    const [valueError, setValueError] = useState("");
+
     useEffect(() => {
         if (invite) {
+            setName(invite.name || "");
             setType(invite.type || "email");
             setValue(invite.value || "");
-            setPositionId(invite.position_id || "");
+            setPositionId(invite.position_id || props.app.positions?.[0]?.id || "");
         } else {
+            setName("");
             setType("email");
             setValue("");
             setPositionId(props.app.positions?.[0]?.id || "");
         }
+
+        setNameError("");
+        setValueError("");
     }, [invite, isOpen, props.app.positions]);
 
+    const validateName = currentName => {
+        const trimmed = (currentName || "").trim();
+
+        if (!trimmed) {
+            return "Имя обязательно";
+        }
+
+        if (trimmed.length < 2) {
+            return "Имя должно быть не короче 2 символов";
+        }
+
+        return "";
+    };
+
+    const validateValue = (currentType, currentValue) => {
+        const trimmed = (currentValue || "").trim();
+
+        if (!trimmed) {
+            return "Контактные данные обязательны";
+        }
+
+        if (currentType === "email") {
+            const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRe.test(trimmed)) {
+                return "Введите корректный email";
+            }
+        }
+
+        if (currentType === "phone") {
+            const normalized = trimmed.replace(/[\s\-()+]/g, "");
+            const phoneRe = /^\d{10,15}$/;
+            if (!phoneRe.test(normalized)) {
+                return "Введите корректный телефон";
+            }
+        }
+
+        if (currentType === "telegram") {
+            const telegramRe = /^@?[a-zA-Z0-9_]{5,32}$/;
+            if (!telegramRe.test(trimmed)) {
+                return "Введите корректный Telegram username";
+            }
+        }
+
+        return "";
+    };
+
+    const validateForm = () => {
+        const nextNameError = validateName(name);
+        const nextValueError = validateValue(type, value);
+
+        setNameError(nextNameError);
+        setValueError(nextValueError);
+
+        return !nextNameError && !nextValueError;
+    };
+
+    const isFormValid = useMemo(() => {
+        return !validateName(name) && !validateValue(type, value);
+    }, [name, type, value]);
+
     const save = () => {
+        if (!validateForm()) {
+            return;
+        }
+
         setDisabled(true);
 
         const data = {
+            name: name.trim(),
             type,
-            value,
+            value: value.trim(),
             position_id: positionId
         };
 
@@ -93,12 +167,34 @@ const InviteModal = props => {
                     Заполните данные приглашения.
                 </DialogContentText>
 
+                <TextField
+                    label="Имя"
+                    fullWidth
+                    margin="dense"
+                    disabled={disabled}
+                    value={name}
+                    onChange={e => {
+                        setName(e.target.value);
+                        if (nameError) {
+                            setNameError(validateName(e.target.value));
+                        }
+                    }}
+                    error={!!nameError}
+                    helperText={nameError}
+                />
+
                 <FormControl fullWidth margin="dense" disabled={disabled}>
                     <InputLabel id="invite-type-label">Тип контакта</InputLabel>
                     <Select
                         labelId="invite-type-label"
                         value={type}
-                        onChange={e => setType(e.target.value)}
+                        onChange={e => {
+                            const nextType = e.target.value;
+                            setType(nextType);
+                            if (valueError || value) {
+                                setValueError(validateValue(nextType, value));
+                            }
+                        }}
                     >
                         {CONTACT_TYPES.map(item => (
                             <MenuItem key={item} value={item}>
@@ -109,12 +205,32 @@ const InviteModal = props => {
                 </FormControl>
 
                 <TextField
-                    label="Контактные данные"
+                    label={
+                        type === "email"
+                            ? "Email"
+                            : type === "phone"
+                                ? "Телефон"
+                                : "Telegram"
+                    }
+                    placeholder={
+                        type === "email"
+                            ? "example@mail.com"
+                            : type === "phone"
+                                ? "+79991234567"
+                                : "@username"
+                    }
                     fullWidth
                     margin="dense"
                     disabled={disabled}
                     value={value}
-                    onChange={e => setValue(e.target.value)}
+                    onChange={e => {
+                        setValue(e.target.value);
+                        if (valueError) {
+                            setValueError(validateValue(type, e.target.value));
+                        }
+                    }}
+                    error={!!valueError}
+                    helperText={valueError}
                 />
 
                 <FormControl fullWidth margin="dense" disabled={disabled}>
@@ -141,7 +257,7 @@ const InviteModal = props => {
                 <Button
                     onClick={save}
                     color="primary"
-                    disabled={disabled}
+                    disabled={disabled || !isFormValid}
                 >
                     {invite && invite.id ? "Сохранить" : "Создать"}
                 </Button>
