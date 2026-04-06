@@ -10,12 +10,15 @@ import {
     DialogTitle,
     TextField
 } from "@material-ui/core";
+import { useSnackbar } from "notistack";
 
 import rest from "../Rest";
 
 const RESEND_TIMEOUT = 60;
 
 const Personal = props => {
+    const { enqueueSnackbar } = useSnackbar();
+
     const auth = props.auth;
     const user = props.app.users.find(u => u.id === auth.user_id);
 
@@ -101,102 +104,6 @@ const Personal = props => {
         return "";
     };
 
-    const requestEmailChange = () => {
-        const err = validateEmail(email);
-        setEmailError(err);
-        if (err) return;
-
-        setSavingEmail(true);
-
-        rest("users/me/email/request-change", "POST", {
-            email: email.trim()
-        })
-            .then(res => {
-                if (res.status === 200) {
-                    setEmailStep(2);
-                    setEmailCode("");
-                    setEmailCodeError("");
-                    setEmailResendLeft(RESEND_TIMEOUT);
-                }
-            })
-            .finally(() => {
-                setSavingEmail(false);
-            });
-    };
-
-    const confirmEmailChange = () => {
-        if (!emailCode.trim()) {
-            setEmailCodeError("Введите код подтверждения");
-            return;
-        }
-
-        setConfirmingEmail(true);
-
-        rest("users/me/email/confirm-change", "POST", {
-            email: email.trim(),
-            code: emailCode.trim()
-        })
-            .then(res => {
-                if (res.status === 200) {
-                    setEmailStep(1);
-                    setEmailCode("");
-                    setEmailCodeError("");
-                    setEmailResendLeft(0);
-                }
-            })
-            .finally(() => {
-                setConfirmingEmail(false);
-            });
-    };
-
-    const requestPhoneChange = () => {
-        const err = validatePhone(phone);
-        setPhoneError(err);
-        if (err) return;
-
-        setSavingPhone(true);
-
-        rest("users/me/phone/request-change", "POST", {
-            phone_number: phone.trim()
-        })
-            .then(res => {
-                if (res.status === 200) {
-                    setPhoneStep(2);
-                    setPhoneCode("");
-                    setPhoneCodeError("");
-                    setPhoneResendLeft(RESEND_TIMEOUT);
-                }
-            })
-            .finally(() => {
-                setSavingPhone(false);
-            });
-    };
-
-    const confirmPhoneChange = () => {
-        if (!phoneCode.trim()) {
-            setPhoneCodeError("Введите код подтверждения");
-            return;
-        }
-
-        setConfirmingPhone(true);
-
-        rest("users/me/phone/confirm-change", "POST", {
-            phone_number: phone.trim(),
-            code: phoneCode.trim()
-        })
-            .then(res => {
-                if (res.status === 200) {
-                    setPhoneStep(1);
-                    setPhoneCode("");
-                    setPhoneCodeError("");
-                    setPhoneResendLeft(0);
-                }
-            })
-            .finally(() => {
-                setConfirmingPhone(false);
-            });
-    };
-
     const validatePassword = () => {
         let ok = true;
 
@@ -230,6 +137,157 @@ const Personal = props => {
         return ok;
     };
 
+    const requestEmailChange = () => {
+        const err = validateEmail(email);
+        setEmailError(err);
+        if (err) return;
+
+        setSavingEmail(true);
+
+        rest("users/me/email/request-change", "POST", {
+            email: email.trim()
+        })
+            .then(res => {
+
+                console.log(res.body, res.body?.ok)
+
+                if (res.body?.ok) {
+                    enqueueSnackbar(
+                        res.body.message || "Код отправлен на новый email",
+                        { variant: "success" }
+                    );
+
+                    setEmailStep(2);
+                    setEmailCode("");
+                    setEmailCodeError("");
+                    setEmailResendLeft(res.body.resend_timeout || RESEND_TIMEOUT);
+                } else {
+                    enqueueSnackbar(
+                        res.body?.message || "Ошибка отправки кода",
+                        { variant: "error" }
+                    );
+                }
+            })
+            // .catch(() => {
+            //     enqueueSnackbar("Ошибка сети", { variant: "error" });
+            // })
+            .finally(() => {
+                setSavingEmail(false);
+            });
+    };
+
+    const confirmEmailChange = () => {
+        if (!emailCode.trim()) {
+            setEmailCodeError("Введите код подтверждения");
+            return;
+        }
+
+        setConfirmingEmail(true);
+
+        rest("users/me/email/confirm-change", "POST", {
+            email: email.trim(),
+            code: emailCode.trim()
+        })
+            .then(res => {
+                if (res.body?.ok) {
+                    enqueueSnackbar(
+                        res.body.message || "Email успешно изменён",
+                        { variant: "success" }
+                    );
+
+                    setEmailStep(1);
+                    setEmailCode("");
+                    setEmailCodeError("");
+                    setEmailResendLeft(0);
+                } else {
+                    enqueueSnackbar(
+                        res.body?.message || "Ошибка подтверждения email",
+                        { variant: "error" }
+                    );
+                }
+            })
+            .catch(() => {
+                enqueueSnackbar("Ошибка сети", { variant: "error" });
+            })
+            .finally(() => {
+                setConfirmingEmail(false);
+            });
+    };
+
+    const requestPhoneChange = () => {
+        const err = validatePhone(phone);
+        setPhoneError(err);
+        if (err) return;
+
+        setSavingPhone(true);
+
+        rest("users/me/phone/request-change", "POST", {
+            phone_number: phone.trim()
+        })
+            .then(res => {
+                if (res.body?.ok) {
+                    enqueueSnackbar(
+                        res.body.message || "Код отправлен на новый номер",
+                        { variant: "success" }
+                    );
+
+                    setPhoneStep(2);
+                    setPhoneCode("");
+                    setPhoneCodeError("");
+                    setPhoneResendLeft(res.body.resend_timeout || RESEND_TIMEOUT);
+                } else {
+                    enqueueSnackbar(
+                        res.body?.message || "Ошибка отправки кода",
+                        { variant: "error" }
+                    );
+                }
+            })
+            .catch(() => {
+                enqueueSnackbar("Ошибка сети", { variant: "error" });
+            })
+            .finally(() => {
+                setSavingPhone(false);
+            });
+    };
+
+    const confirmPhoneChange = () => {
+        if (!phoneCode.trim()) {
+            setPhoneCodeError("Введите код подтверждения");
+            return;
+        }
+
+        setConfirmingPhone(true);
+
+        rest("users/me/phone/confirm-change", "POST", {
+            phone_number: phone.trim(),
+            code: phoneCode.trim()
+        })
+            .then(res => {
+                if (res.body?.ok) {
+                    enqueueSnackbar(
+                        res.body.message || "Телефон успешно изменён",
+                        { variant: "success" }
+                    );
+
+                    setPhoneStep(1);
+                    setPhoneCode("");
+                    setPhoneCodeError("");
+                    setPhoneResendLeft(0);
+                } else {
+                    enqueueSnackbar(
+                        res.body?.message || "Ошибка подтверждения телефона",
+                        { variant: "error" }
+                    );
+                }
+            })
+            .catch(() => {
+                enqueueSnackbar("Ошибка сети", { variant: "error" });
+            })
+            .finally(() => {
+                setConfirmingPhone(false);
+            });
+    };
+
     const changePassword = () => {
         if (!validatePassword()) return;
 
@@ -240,14 +298,27 @@ const Personal = props => {
             new_password: newPassword
         })
             .then(res => {
-                if (res.status === 200) {
+                if (res.body?.ok) {
+                    enqueueSnackbar(
+                        res.body.message || "Пароль успешно изменён",
+                        { variant: "success" }
+                    );
+
                     setCurrentPassword("");
                     setNewPassword("");
                     setRepeatPassword("");
                     setCurrentPasswordError("");
                     setNewPasswordError("");
                     setRepeatPasswordError("");
+                } else {
+                    enqueueSnackbar(
+                        res.body?.message || "Ошибка смены пароля",
+                        { variant: "error" }
+                    );
                 }
+            })
+            .catch(() => {
+                enqueueSnackbar("Ошибка сети", { variant: "error" });
             })
             .finally(() => {
                 setSavingPassword(false);
@@ -257,9 +328,20 @@ const Personal = props => {
     const linkGoogle = () => {
         rest("auth/social/google/connect", "GET")
             .then(res => {
-                if (res.status === 200 && res.data?.url) {
-                    window.location.href = res.data.url;
+                if (res.body?.ok && res.body?.url) {
+                    enqueueSnackbar("Перенаправление в Google...", {
+                        variant: "info"
+                    });
+                    window.location.href = res.body.url;
+                } else {
+                    enqueueSnackbar(
+                        res.body?.message || "Ошибка привязки Google",
+                        { variant: "error" }
+                    );
                 }
+            })
+            .catch(() => {
+                enqueueSnackbar("Ошибка сети", { variant: "error" });
             });
     };
 
@@ -270,9 +352,21 @@ const Personal = props => {
 
         rest("users/me", "DELETE")
             .then(res => {
-                if (res.status === 200) {
+                if (res.body?.ok) {
+                    enqueueSnackbar(
+                        res.body.message || "Аккаунт удалён",
+                        { variant: "success" }
+                    );
                     window.location.href = "/";
+                } else {
+                    enqueueSnackbar(
+                        res.body?.message || "Ошибка удаления аккаунта",
+                        { variant: "error" }
+                    );
                 }
+            })
+            .catch(() => {
+                enqueueSnackbar("Ошибка сети", { variant: "error" });
             })
             .finally(() => {
                 setDeleting(false);
@@ -314,7 +408,9 @@ const Personal = props => {
                         onChange={e => {
                             setEmailCode(e.target.value);
                             if (emailCodeError) {
-                                setEmailCodeError(e.target.value.trim() ? "" : "Введите код подтверждения");
+                                setEmailCodeError(
+                                    e.target.value.trim() ? "" : "Введите код подтверждения"
+                                );
                             }
                         }}
                     />
@@ -394,7 +490,9 @@ const Personal = props => {
                         onChange={e => {
                             setPhoneCode(e.target.value);
                             if (phoneCodeError) {
-                                setPhoneCodeError(e.target.value.trim() ? "" : "Введите код подтверждения");
+                                setPhoneCodeError(
+                                    e.target.value.trim() ? "" : "Введите код подтверждения"
+                                );
                             }
                         }}
                     />
@@ -459,7 +557,9 @@ const Personal = props => {
                     onChange={e => {
                         setCurrentPassword(e.target.value);
                         if (currentPasswordError) {
-                            setCurrentPasswordError(e.target.value ? "" : "Введите текущий пароль");
+                            setCurrentPasswordError(
+                                e.target.value ? "" : "Введите текущий пароль"
+                            );
                         }
                     }}
                 />
@@ -475,9 +575,13 @@ const Personal = props => {
                     onChange={e => {
                         setNewPassword(e.target.value);
                         if (newPasswordError) {
-                            if (!e.target.value) setNewPasswordError("Введите новый пароль");
-                            else if (e.target.value.length < 6) setNewPasswordError("Новый пароль должен быть не короче 6 символов");
-                            else setNewPasswordError("");
+                            if (!e.target.value) {
+                                setNewPasswordError("Введите новый пароль");
+                            } else if (e.target.value.length < 6) {
+                                setNewPasswordError("Новый пароль должен быть не короче 6 символов");
+                            } else {
+                                setNewPasswordError("");
+                            }
                         }
                     }}
                 />
@@ -493,9 +597,13 @@ const Personal = props => {
                     onChange={e => {
                         setRepeatPassword(e.target.value);
                         if (repeatPasswordError) {
-                            if (!e.target.value) setRepeatPasswordError("Повторите новый пароль");
-                            else if (newPassword !== e.target.value) setRepeatPasswordError("Пароли не совпадают");
-                            else setRepeatPasswordError("");
+                            if (!e.target.value) {
+                                setRepeatPasswordError("Повторите новый пароль");
+                            } else if (newPassword !== e.target.value) {
+                                setRepeatPasswordError("Пароли не совпадают");
+                            } else {
+                                setRepeatPasswordError("");
+                            }
                         }
                     }}
                 />
