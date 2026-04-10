@@ -21,6 +21,7 @@ const Personal = props => {
 
     const auth = props.auth;
     const user = props.app.users.find(u => u.id === auth.user_id);
+    const isGoogleLinked = user?.google_linked;
 
     const [email, setEmail] = useState(user?.email || "");
     const [emailCode, setEmailCode] = useState("");
@@ -345,12 +346,35 @@ const Personal = props => {
             });
     };
 
+    const unlinkGoogle = () => {
+        rest("auth/social/google/disconnect", "POST")
+            .then(res => {
+                if (res.body?.ok) {
+                    enqueueSnackbar(
+                        res.body.message || "Google успешно отвязан",
+                        { variant: "success" }
+                    );
+                } else {
+                    enqueueSnackbar(
+                        res.body?.message || "Ошибка отвязки Google",
+                        { variant: "error" }
+                    );
+                }
+            })
+            .catch(() => {
+                enqueueSnackbar("Ошибка сети", { variant: "error" });
+            });
+    };
+
+
     const deleteAccount = () => {
-        if (deleteConfirm !== "УДАЛИТЬ") return;
+        if (!deleteConfirm) return;
 
         setDeleting(true);
 
-        rest("users/me", "DELETE")
+        rest("users/me", "DELETE", {
+            current_password: deleteConfirm
+        })
             .then(res => {
                 if (res.body?.ok) {
                     enqueueSnackbar(
@@ -623,12 +647,28 @@ const Personal = props => {
             <div style={{ marginTop: 32 }}>
                 <h2>Внешние сервисы</h2>
 
-                <Button
-                    variant="contained"
-                    onClick={linkGoogle}
-                >
-                    Привязать Google
-                </Button>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    {isGoogleLinked ? (
+                        <>
+                            <span>Google привязан</span>
+
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+                                onClick={unlinkGoogle}
+                            >
+                                Отвязать
+                            </Button>
+                        </>
+                    ) : (
+                        <Button
+                            variant="contained"
+                            onClick={linkGoogle}
+                        >
+                            Привязать Google
+                        </Button>
+                    )}
+                </div>
             </div>
 
             <div style={{ marginTop: 32 }}>
@@ -653,12 +693,13 @@ const Personal = props => {
 
                 <DialogContent>
                     <DialogContentText>
-                        Это действие нельзя отменить. Для подтверждения введите: УДАЛИТЬ
+                        Это действие нельзя отменить. Для подтверждения введите текущий пароль и нажмите "Удалить аккаунт".
                     </DialogContentText>
 
                     <TextField
-                        label="Подтверждение"
+                        label="Текущий пароль"
                         fullWidth
+                        type="password"
                         margin="dense"
                         value={deleteConfirm}
                         onChange={e => setDeleteConfirm(e.target.value)}
@@ -679,7 +720,7 @@ const Personal = props => {
                     <Button
                         color="secondary"
                         onClick={deleteAccount}
-                        disabled={deleting || deleteConfirm !== "УДАЛИТЬ"}
+                        disabled={deleting || !deleteConfirm}
                     >
                         Удалить аккаунт
                     </Button>

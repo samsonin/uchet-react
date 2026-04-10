@@ -1,4 +1,4 @@
-import {SERVER, NEW_SERVER} from '../constants';
+import {SERVER} from '../constants';
 import store from '../store'
 
 
@@ -41,11 +41,7 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
 
     }
 
-    let server = !jwt || JSON.parse(window.localStorage.getItem('auth')).organization_id > 1000
-        ? NEW_SERVER
-        : SERVER;
-
-    return fetch(server + '/' + url, init)
+    return fetch(SERVER + '/' + url, init)
         .then(res => {
 
             if (res.status === 401) {
