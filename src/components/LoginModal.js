@@ -16,6 +16,7 @@ import License from "./License";
 import Privacy from "./Privacy";
 import { makeStyles } from "@material-ui/core/styles";
 import { SERVER } from '../constants';
+import logo from '../images/logo.png';
 
 
 
@@ -24,14 +25,340 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const useStyles = makeStyles((theme) => ({
+    dialogPaper: {
+        borderRadius: 20,
+        overflow: 'hidden',
+        background: '#ffffff',
+        boxShadow: '0 24px 70px rgba(15, 23, 42, 0.2)',
+    },
+    hero: {
+        position: 'relative',
+        padding: '40px 32px',
+        color: '#fff',
+        background: 'radial-gradient(circle at top, rgba(255,255,255,0.22), transparent 32%), linear-gradient(160deg, #0f172a 0%, #1d4ed8 58%, #38bdf8 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        minHeight: 560,
+        [theme.breakpoints.down('sm')]: {
+            minHeight: 'auto',
+            padding: '28px 24px',
+        },
+    },
+    heroGlow: {
+        position: 'absolute',
+        width: 220,
+        height: 220,
+        right: -80,
+        top: -40,
+        borderRadius: '50%',
+        background: 'rgba(255,255,255,0.18)',
+        filter: 'blur(10px)',
+        pointerEvents: 'none',
+    },
+    brandRow: {
+        position: 'relative',
+        zIndex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+    },
+    brandMark: {
+        width: 52,
+        height: 52,
+        borderRadius: 16,
+        background: 'rgba(255,255,255,0.16)',
+        border: '1px solid rgba(255,255,255,0.18)',
+        backdropFilter: 'blur(14px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        flexShrink: 0,
+    },
+    brandImage: {
+        width: 34,
+        height: 34,
+        objectFit: 'contain',
+    },
+    brandLabel: {
+        fontSize: 12,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        opacity: 0.72,
+        marginBottom: 4,
+    },
+    brandTitle: {
+        fontSize: 24,
+        fontWeight: 700,
+        lineHeight: 1.15,
+    },
+    heroContent: {
+        position: 'relative',
+        zIndex: 1,
+        marginTop: 40,
+        maxWidth: 260,
+        [theme.breakpoints.down('sm')]: {
+            marginTop: 28,
+            maxWidth: 'none',
+        },
+    },
+    heroEyebrow: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '6px 12px',
+        borderRadius: 999,
+        background: 'rgba(255,255,255,0.14)',
+        border: '1px solid rgba(255,255,255,0.18)',
+        fontSize: 12,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        marginBottom: 18,
+    },
+    heroHeading: {
+        margin: 0,
+        fontSize: 36,
+        lineHeight: 1.05,
+        fontWeight: 700,
+    },
+    heroText: {
+        marginTop: 16,
+        fontSize: 15,
+        lineHeight: 1.7,
+        color: 'rgba(255,255,255,0.82)',
+    },
+    heroFooter: {
+        position: 'relative',
+        zIndex: 1,
+        display: 'grid',
+        gap: 12,
+        marginTop: 32,
+    },
+    metricCard: {
+        padding: '14px 16px',
+        borderRadius: 18,
+        background: 'rgba(255,255,255,0.12)',
+        border: '1px solid rgba(255,255,255,0.16)',
+        backdropFilter: 'blur(12px)',
+    },
+    metricTitle: {
+        fontSize: 12,
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+        opacity: 0.68,
+        marginBottom: 6,
+    },
+    metricText: {
+        fontSize: 15,
+        lineHeight: 1.5,
+    },
+    formPane: {
+        padding: '28px 30px 24px',
+        display: 'flex',
+        flexDirection: 'column',
+        [theme.breakpoints.down('sm')]: {
+            padding: '24px 18px 20px',
+        },
+    },
+    formTop: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 16,
+        marginBottom: 16,
+    },
+    brandCompact: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        minWidth: 0,
+    },
+    logoCompact: {
+        width: 56,
+        height: 56,
+        objectFit: 'contain',
+        display: 'block',
+        flexShrink: 0,
+    },
+    screenTitle: {
+        fontSize: 22,
+        fontWeight: 700,
+        color: '#0f172a',
+    },
+    statusChip: {
+        display: 'none',
+    },
     title: {
-        margin: '1rem',
-        alignSelf: 'center',
+        margin: 0,
+        fontSize: 22,
+        fontWeight: 700,
+        color: '#0f172a',
+    },
+    subtitle: {
+        display: 'none',
+    },
+    closeButton: {
+        minWidth: 'auto',
+        padding: 0,
+        color: '#94a3b8',
+        fontSize: 28,
+        lineHeight: 1,
+    },
+    content: {
+        padding: '0 !important',
+        display: 'grid',
+        gap: 12,
+        minHeight: 0,
+    },
+    scrollContent: {
+        maxHeight: 'min(58vh, 520px)',
+        overflowY: 'auto',
+        paddingRight: '10px !important',
+        borderTop: '1px solid #eef2f7',
+        borderBottom: '1px solid #eef2f7',
+        paddingTop: '14px !important',
+        paddingBottom: '14px !important',
+        color: '#334155',
+        lineHeight: 1.7,
+        fontSize: 14,
+        whiteSpace: 'pre-wrap',
+    },
+    field: {
+        '& .MuiInputBase-root': {
+            borderRadius: 12,
+            background: '#fff',
+        },
+        '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#d7deea',
+        },
+        '& .MuiInputLabel-root': {
+            color: '#64748b',
+        },
     },
     span: {
-        margin: 10,
+        margin: '0 6px',
         cursor: 'pointer',
-        textDecoration: 'underline'
+        textDecoration: 'underline',
+        textDecorationColor: 'rgba(29, 78, 216, 0.35)',
+        color: '#1d4ed8',
+        fontWeight: 600,
+    },
+    legalText: {
+        margin: 0,
+        padding: '4px 2px 0',
+        color: '#64748b',
+        lineHeight: 1.7,
+        fontSize: 14,
+    },
+    inviteCard: {
+        border: '1px solid #dbe4f0',
+        borderRadius: 14,
+        padding: 14,
+        marginTop: 10,
+        background: '#f8fbff',
+    },
+    inviteOrg: {
+        fontSize: 15,
+        fontWeight: 700,
+        color: '#0f172a',
+    },
+    inviteRole: {
+        marginTop: 6,
+        color: '#64748b',
+    },
+    inviteDate: {
+        marginTop: 6,
+        color: '#94a3b8',
+        fontSize: 13,
+    },
+    inviteActions: {
+        marginTop: 14,
+        display: 'flex',
+        gap: 8,
+    },
+    standaloneCard: {
+        marginTop: 14,
+        padding: 14,
+        borderRadius: 14,
+        background: '#ffffff',
+        border: '1px solid #dbe4f0',
+    },
+    standaloneTitle: {
+        fontSize: 15,
+        fontWeight: 700,
+        color: '#0f172a',
+        marginBottom: 10,
+    },
+    standaloneButton: {
+        marginTop: 10,
+        width: '100%',
+    },
+    actions: {
+        padding: 0,
+        marginTop: 18,
+        display: 'grid',
+        gap: 10,
+    },
+    actionsRow: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 8,
+        padding: 0,
+    },
+    primaryAction: {
+        borderRadius: 12,
+        minHeight: 42,
+        padding: '9px 16px',
+        background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #38bdf8 100%)',
+        boxShadow: '0 10px 20px rgba(37, 99, 235, 0.22)',
+        color: '#fff',
+        '&:hover': {
+            background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 55%, #0ea5e9 100%)',
+        },
+    },
+    secondaryAction: {
+        borderRadius: 12,
+        minHeight: 42,
+        padding: '9px 16px',
+        background: '#eef4ff',
+        color: '#1d4ed8',
+        '&:hover': {
+            background: '#dceaff',
+        },
+    },
+    ghostAction: {
+        borderRadius: 12,
+        minHeight: 42,
+        padding: '9px 16px',
+        background: '#fff',
+        border: '1px solid #d7deea',
+        color: '#334155',
+        '&:hover': {
+            background: '#f8fafc',
+        },
+    },
+    googleButton: {
+        borderRadius: 12,
+        minHeight: 44,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        border: '1px solid #d7deea',
+        background: '#fff',
+        color: '#0f172a',
+        textTransform: 'none',
+        fontWeight: 600,
+        '&:hover': {
+            background: '#f8fafc',
+        },
+    },
+    googleIcon: {
+        width: 20,
+        height: 20,
+    },
+    helperText: {
+        display: 'none',
     },
 }))
 
@@ -46,8 +373,28 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     // const [mode, setMode] = useState("register"); // register | invites
     const [invites, setInvites] = useState([
-        { id: 1, organization_name: "Организация 1", position_name: "Должность 1" },
-        { id: 2, organization_name: "Организация 2", position_name: "Должность 2" },
+        {
+            id: 1,
+            name: "Ivan Email Invite",
+            organization_name: "Ремонтная мастерская",
+            organization_id: 1,
+            position_id: 2,
+            position_name: "Мастер",
+            type: "email",
+            value: "user@example.com",
+            created_at: "2026-04-11 13:18:41"
+        },
+        {
+            id: 2,
+            name: "Ivan Phone Invite",
+            organization_name: "Сервисный центр",
+            organization_id: 3,
+            position_id: 3,
+            position_name: "Администратор",
+            type: "phone",
+            value: "9638365726",
+            created_at: "2026-04-11 13:19:12"
+        }
     ]);
 
     const [name, setName] = useState('')
@@ -55,6 +402,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
     const [password, setPassword] = useState('')
     const [password2, setPassword2] = useState('')
     const [code, setCode] = useState('')
+    const [organizationName, setOrganizationName] = useState('')
 
     const [requesting, setRequesting] = useState(false)
 
@@ -62,15 +410,44 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const classes = useStyles()
 
+    const statusMeta = {
+        signIn: {
+            title: 'Вход',
+        },
+        preRestore: {
+            title: 'Восстановление пароля',
+        },
+        restore: {
+            title: 'Новый пароль',
+        },
+        preRegister: {
+            title: 'Регистрация',
+        },
+        register: {
+            title: 'Подтверждение',
+        },
+        privacy: {
+            title: 'Персональные данные',
+        },
+        license: {
+            title: 'Пользовательское соглашение',
+        },
+        invites: {
+            title: 'Приглашения',
+        },
+    }
+
+    const currentMeta = statusMeta[status] || statusMeta.signIn
+    const isLegalScreen = ['privacy', 'license'].includes(status)
+
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const token = params.get("token");
-        const inviteId = params.get("invite_id");
-        const referal = params.get("referral");
 
         if (token) {
             init(token);
             window.location.href = "/";
+            return;
         }
 
         // if (inviteId) {
@@ -177,29 +554,110 @@ export default connect(state => state, mapDispatchToProps)(props => {
             });
     }
 
+    const readAuthResponse = async res => {
+        if (!res) return { data: null, text: '' };
+
+        const text = await res.text();
+
+        try {
+            return { data: JSON.parse(text), text };
+        } catch (e) {
+            return { data: null, text };
+        }
+    }
+
     const acceptInvite = inviteId => {
+        if (requesting) return
+        setRequesting(true)
+
         authRequest({
             invite_id: inviteId,
+            register_mode: 'invite',
             name,
             login,
+            code,
             password
-        }, "auth/register/by-invite")
-            .then(res => {
-                if (res.data?.ok) {
+        }, "register")
+            .then(async res => {
+                const { data, text } = await readAuthResponse(res);
+
+                if (!res) {
+                    enqueueSnackbar("Ошибка принятия приглашения", { variant: "error" });
+                    return;
+                }
+
+                if (res?.status === 200 || res?.status === 201) {
+                    const token = data?.token || text;
+
+                    if (init(token)) {
+                        setStatus('signIn');
+                    }
+
                     enqueueSnackbar(
-                        res.data.message || "Вы успешно присоединились к организации",
+                        data?.message || "Вы успешно присоединились к организации",
                         { variant: "success" }
                     );
-                    // close();
+
                     return;
                 }
 
                 enqueueSnackbar(
-                    res.data?.message || "Ошибка принятия приглашения",
+                    data?.message || data?.error || "Ошибка принятия приглашения",
                     { variant: "error" }
                 );
             })
+            .finally(() => setRequesting(false))
 
+    };
+
+    const registerStandalone = () => {
+        const trimmedOrganizationName = organizationName.trim();
+
+        if (!trimmedOrganizationName) {
+            enqueueSnackbar("Введите название организации", { variant: "error" });
+            return;
+        }
+
+        if (requesting) return
+        setRequesting(true)
+
+        authRequest({
+            register_mode: 'standalone',
+            organization_name: trimmedOrganizationName,
+            name,
+            login,
+            code,
+            password
+        }, "register")
+            .then(async res => {
+                const { data, text } = await readAuthResponse(res);
+
+                if (!res) {
+                    enqueueSnackbar("Ошибка регистрации", { variant: "error" });
+                    return;
+                }
+
+                if (res?.status === 200 || res?.status === 201) {
+                    const token = data?.token || text;
+
+                    if (init(token)) {
+                        setStatus('signIn');
+                    }
+
+                    enqueueSnackbar(
+                        data?.message || "Вы успешно зарегистрировались",
+                        { variant: "success" }
+                    );
+
+                    return;
+                }
+
+                enqueueSnackbar(
+                    data?.message || data?.error || "Ошибка регистрации",
+                    { variant: "error" }
+                );
+            })
+            .finally(() => setRequesting(false))
     };
 
     const confirm = (successText) => {
@@ -217,30 +675,37 @@ export default connect(state => state, mapDispatchToProps)(props => {
             code,
             password
         }, status)
-            .then(res => {
+            .then(async res => {
+                const { data, text } = await readAuthResponse(res);
 
                 setRequesting(false)
 
-                if (res.status === 200) {
+                if (!res) {
+                    enqueueSnackbar('Ошибка сети', {
+                        variant: 'error'
+                    })
+                    return;
+                }
+
+                if (res.status === 200 || res.status === 201) {
+                    if (data?.mode === 'invites' || data?.mode === 'choose_registration_mode') {
+                        setInvites(data.invites || []);
+                        setStatus('invites');
+                        return;
+                    }
+
+                    const token = data?.token || text;
 
                     enqueueSnackbar(successText, {
                         variant: 'success'
                     })
 
-                    init(res.text())
+                    init(token)
 
                     return setStatus('signIn')
-
-                } else if (res.data?.error === "INVITES_FOUND") {
-
-                    console.log("INVITES_FOUND", res.data.invites)
-
-                    setStatus('invites');
-                    setInvites(res.data.invites || []);
-                    return;
                 }
 
-                enqueueSnackbar('ошибка: ' + res, {
+                enqueueSnackbar('ошибка: ' + (data?.message || data?.error || res.status), {
                     variant: 'error'
                 })
 
@@ -252,8 +717,8 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
         if (n === 'privacy') return <DialogContentText
             key={'fieldkeyinloginmodal' + n}
+            className={classes.legalText}
         >
-            <br />
             Нажимая "Запросить код", вы принимаете
             <span
                 className={classes.span}
@@ -291,6 +756,8 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 margin="dense"
                 label="Номер телефона или email"
                 fullWidth
+                variant="outlined"
+                className={classes.field}
                 value={login}
                 onChange={e => setLogin(e.target.value)}
                 error={!isLoginValid(login)}
@@ -303,6 +770,8 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 margin="dense"
                 label={fields[n].l}
                 fullWidth
+                variant="outlined"
+                className={classes.field}
                 value={fields[n].v}
                 onChange={fields[n].a}
             />
@@ -329,6 +798,14 @@ export default connect(state => state, mapDispatchToProps)(props => {
         color={colors[buttons[name].color]}
         key={'buttonskeyinloginmodal' + name}
         disabled={requesting}
+        variant={buttons[name].color === 1 ? 'contained' : 'text'}
+        className={
+            buttons[name].color === 1
+                ? classes.primaryAction
+                : name === 'back'
+                    ? classes.ghostAction
+                    : classes.secondaryAction
+        }
     >
         {buttons[name].text}
     </Button>
@@ -336,22 +813,18 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const Invite = ({ invite }) => (
         <div
-            key={invite.invite_id}
-            style={{
-                border: "1px solid #ddd",
-                borderRadius: 8,
-                padding: 12,
-                marginTop: 12
-            }}
+            key={invite.id || invite.invite_id}
+            className={classes.inviteCard}
         >
-            <div><b>{invite.organization_name}</b></div>
-            <div>{invite.position_name || "Без должности"}</div>
+            <div className={classes.inviteOrg}>{invite.organization_name}</div>
+            <div className={classes.inviteRole}>{invite.position_name || "Без должности"}</div>
+            <div className={classes.inviteDate}>Создано: {invite.created_at || "дата не указана"}</div>
 
-            <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
+            <div className={classes.inviteActions}>
                 <Button
                     variant="contained"
-                    color="primary"
-                    onClick={() => acceptInvite(invite.invite_id)}
+                    className={classes.primaryAction}
+                    onClick={() => acceptInvite(invite.id || invite.invite_id)}
                 >
                     Принять приглашение
                 </Button>
@@ -362,6 +835,30 @@ export default connect(state => state, mapDispatchToProps)(props => {
     const Invites = () => (
         <div>
             {invites.length > 0 ? invites.map(i => <Invite invite={i} />) : <div>Приглашений нет</div>}
+
+            <div className={classes.standaloneCard}>
+                <div className={classes.standaloneTitle}>Зарегистрироваться отдельно</div>
+
+                <TextField
+                    label="Название организации"
+                    fullWidth
+                    margin="dense"
+                    variant="outlined"
+                    className={classes.field}
+                    disabled={requesting}
+                    value={organizationName}
+                    onChange={e => setOrganizationName(e.target.value)}
+                />
+
+                <Button
+                    variant="contained"
+                    className={`${classes.primaryAction} ${classes.standaloneButton}`}
+                    disabled={requesting}
+                    onClick={registerStandalone}
+                >
+                    Зарегистрироваться отдельно
+                </Button>
+            </div>
         </div>
     )
 
@@ -379,11 +876,11 @@ export default connect(state => state, mapDispatchToProps)(props => {
             buttons: ['back', 'restoreConfirm']
         },
         preRegister: {
-            fields: ['name', 'login', 'password', 'password2', 'privacy'],
+            fields: ['name', 'login', 'privacy'],
             buttons: ['back', 'register',]
         },
         register: {
-            fields: ['name', 'login', 'code'],
+            fields: ['name', 'login', 'code', 'password', 'password2'],
             buttons: ['back', 'registerConfirm']
         },
         privacy: {
@@ -406,43 +903,53 @@ export default connect(state => state, mapDispatchToProps)(props => {
         keepMounted
         onClose={() => props.close()}
         onKeyPress={keyPress}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{ className: classes.dialogPaper }}
     >
+        <div className={classes.formPane}>
+            <div className={classes.formTop}>
+                <div className={classes.brandCompact}>
+                    <img
+                        src={logo}
+                        alt="Uchet.store"
+                        className={classes.logoCompact}
+                    />
+                    <div className={classes.screenTitle}>{currentMeta.title}</div>
+                </div>
 
-        <div
-            className={classes.title}
-        >
-            <img src="https://uchet.store/src/images/uchet.gif"
-                width="120"
-                alt="Uchet.store" />
+                <Button
+                    onClick={() => props.close()}
+                    className={classes.closeButton}
+                >
+                    ×
+                </Button>
+            </div>
+
+            <DialogContent className={`${classes.content} ${isLegalScreen ? classes.scrollContent : ''}`}>
+                {statuses[status].fields.map(f => typeof f === 'string' ? renderField(f) : f)}
+            </DialogContent>
+
+            <div className={classes.actions}>
+                <DialogActions className={classes.actionsRow}>
+                    {statuses[status].buttons.map(b => renderButton(b))}
+                </DialogActions>
+
+                {status !== 'invites' ? <Button
+                        onClick={handleGoogleLogin}
+                        disabled={requesting}
+                        className={classes.googleButton}
+                    >
+                        <img
+                            src="https://www.svgrepo.com/show/355037/google.svg"
+                            alt="google"
+                            className={classes.googleIcon}
+                        />
+                        Вход через Google
+                    </Button>
+                    : null
+                }
+            </div>
         </div>
-
-        <DialogContent>
-            {statuses[status].fields.map(f => typeof f === 'string' ? renderField(f) : f)}
-        </DialogContent>
-
-        <DialogActions className="m-2 p-2">
-            {statuses[status].buttons.map(b => renderButton(b))}
-        </DialogActions>
-
-        <Button
-            onClick={handleGoogleLogin}
-            disabled={requesting}
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                border: '1px solid #ccc',
-                borderRadius: '6px',
-                background: '#fff'
-            }}
-        >
-            <img
-                src="https://www.svgrepo.com/show/355037/google.svg"
-                width="20"
-                alt="google"
-            />
-            Вход через Google
-        </Button>
-
     </Dialog>
 })

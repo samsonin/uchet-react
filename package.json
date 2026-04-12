@@ -30,14 +30,15 @@
     "uuid": "^3.4.0"
   },
   "scripts": {
-    "start": "set \"NODE_OPTIONS=--openssl-legacy-provider\" && react-scripts start",
-    "build": "set \"NODE_OPTIONS=--openssl-legacy-provider\" && react-scripts build",
+    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
     "test": "node test",
     "eject": "react-scripts eject",
     "rename": "renamer --find App-clear.js --replace App.js ./src/App-clear.js && renamer --find style.css --replace index.css ./src/style.css ",
     "remove-demo": "rimraf ./src/assets ./src/components ./src/pages ./src/Routes.js ./src/App.js ./src/index.css && npm run rename"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "renamer": "^1.1.4",
     "rimraf": "^2.7.1"
   },

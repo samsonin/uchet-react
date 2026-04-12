@@ -29,22 +29,28 @@ const InviteModal = props => {
     const [name, setName] = useState("");
     const [type, setType] = useState("email");
     const [value, setValue] = useState("");
-    const [positionId, setPositionId] = useState("");
+    const [positionName, setPositionName] = useState("");
 
     const [nameError, setNameError] = useState("");
     const [valueError, setValueError] = useState("");
 
     useEffect(() => {
+        const defaultPositionName = props.app.positions?.[0]?.name || "";
+
         if (invite) {
+            const invitePositionName = invite.position_name
+                || props.app.positions?.find(position => position.id === invite.position_id)?.name
+                || defaultPositionName;
+
             setName(invite.name || "");
             setType(invite.type || "email");
             setValue(invite.value || "");
-            setPositionId(invite.position_id || props.app.positions?.[0]?.id || "");
+            setPositionName(invitePositionName);
         } else {
             setName("");
             setType("email");
             setValue("");
-            setPositionId(props.app.positions?.[0]?.id || "");
+            setPositionName(defaultPositionName);
         }
 
         setNameError("");
@@ -122,7 +128,7 @@ const InviteModal = props => {
             name: name.trim(),
             type,
             value: value.trim(),
-            position_id: positionId
+            position_name: positionName
         };
 
         const request = invite && invite.id
@@ -237,11 +243,11 @@ const InviteModal = props => {
                     <InputLabel id="invite-position-label">Должность</InputLabel>
                     <Select
                         labelId="invite-position-label"
-                        value={positionId}
-                        onChange={e => setPositionId(e.target.value)}
+                        value={positionName}
+                        onChange={e => setPositionName(e.target.value)}
                     >
                         {props.app.positions?.map(position => (
-                            <MenuItem key={position.id} value={position.id}>
+                            <MenuItem key={position.id} value={position.name}>
                                 {position.name}
                             </MenuItem>
                         ))}

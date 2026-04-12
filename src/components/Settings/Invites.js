@@ -92,7 +92,7 @@ const Invites = props => {
                             <TableCell>{i.type}</TableCell>
                             <TableCell>{i.value}</TableCell>
                             <TableCell>
-                                {props.app.positions.find(p => p.id === i.position_id)?.name || 'Не указана'}
+                                {i.position_name || props.app.positions.find(p => p.id === i.position_id)?.name || 'Не указана'}
                             </TableCell>
                             <TableCell align="right" onClick={e => e.stopPropagation()}>
                                 <Tooltip title="Удалить приглашение">
