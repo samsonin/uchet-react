@@ -356,6 +356,7 @@ const useStyles = makeStyles((theme) => ({
     googleIcon: {
         width: 20,
         height: 20,
+        marginRight: 8,
     },
     helperText: {
         display: 'none',
@@ -369,33 +370,10 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 export default connect(state => state, mapDispatchToProps)(props => {
 
     // signIn, preRestore, restore, preRegister, register, privacy, license, invites
-    const [status, setStatus] = useState('invites')
+    const [status, setStatus] = useState('signIn')
 
     // const [mode, setMode] = useState("register"); // register | invites
-    const [invites, setInvites] = useState([
-        {
-            id: 1,
-            name: "Ivan Email Invite",
-            organization_name: "Ремонтная мастерская",
-            organization_id: 1,
-            position_id: 2,
-            position_name: "Мастер",
-            type: "email",
-            value: "user@example.com",
-            created_at: "2026-04-11 13:18:41"
-        },
-        {
-            id: 2,
-            name: "Ivan Phone Invite",
-            organization_name: "Сервисный центр",
-            organization_id: 3,
-            position_id: 3,
-            position_name: "Администратор",
-            type: "phone",
-            value: "9638365726",
-            created_at: "2026-04-11 13:19:12"
-        }
-    ]);
+    const [invites, setInvites] = useState([]);
 
     const [name, setName] = useState('')
     const [login, setLogin] = useState('')
@@ -403,6 +381,8 @@ export default connect(state => state, mapDispatchToProps)(props => {
     const [password2, setPassword2] = useState('')
     const [code, setCode] = useState('')
     const [organizationName, setOrganizationName] = useState('')
+    const [oauthState, setOauthState] = useState('')
+    const [availableRegistrationModes, setAvailableRegistrationModes] = useState([])
 
     const [requesting, setRequesting] = useState(false)
 
@@ -439,14 +419,64 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const currentMeta = statusMeta[status] || statusMeta.signIn
     const isLegalScreen = ['privacy', 'license'].includes(status)
+    const isOAuthRegistration = Boolean(oauthState)
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const token = params.get("token");
+        const state = params.get("state");
 
         if (token) {
             init(token);
             window.location.href = "/";
+            return;
+        }
+
+        if (window.location.pathname === '/oauth-register' && state) {
+            setOauthState(state);
+            setRequesting(true);
+
+            fetch(`${SERVER}/auth/social/register-data?state=${encodeURIComponent(state)}`, {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache',
+            })
+                .then(async res => {
+                    const { data, text } = await readAuthResponse(res);
+
+                    if (!res || (res.status !== 200 && res.status !== 201)) {
+                        enqueueSnackbar(data?.message || data?.error || 'Ошибка регистрации через Google', {
+                            variant: 'error'
+                        });
+                        return;
+                    }
+
+                    const authToken = data?.token || text;
+
+                    if (authToken && init(authToken)) {
+                        window.location.href = '/';
+                        return;
+                    }
+
+                    if (data?.email) setLogin(data.email);
+                    if (data?.name) setName(data.name);
+
+                    if (data?.mode === 'invites' || data?.mode === 'choose_registration_mode') {
+                        setAvailableRegistrationModes(data.available_modes || []);
+                        setInvites(data.invites || []);
+                        setStatus('invites');
+                        return;
+                    }
+
+                    enqueueSnackbar(data?.message || 'Не удалось продолжить регистрацию через Google', {
+                        variant: 'error'
+                    });
+                })
+                .catch(() => enqueueSnackbar('Ошибка сети при регистрации через Google', {
+                    variant: 'error'
+                }))
+                .finally(() => setRequesting(false));
+
             return;
         }
 
@@ -566,18 +596,38 @@ export default connect(state => state, mapDispatchToProps)(props => {
         }
     }
 
+    const finishAuth = token => {
+        if (!init(token)) return false;
+
+        if (isOAuthRegistration) {
+            window.location.href = '/';
+            return true;
+        }
+
+        setStatus('signIn');
+        return true;
+    }
+
     const acceptInvite = inviteId => {
         if (requesting) return
         setRequesting(true)
 
-        authRequest({
-            invite_id: inviteId,
-            register_mode: 'invite',
-            name,
-            login,
-            code,
-            password
-        }, "register")
+        const requestData = isOAuthRegistration
+            ? {
+                state: oauthState,
+                register_mode: 'invite',
+                invite_id: inviteId,
+            }
+            : {
+                invite_id: inviteId,
+                register_mode: 'invite',
+                name,
+                login,
+                code,
+                password
+            };
+
+        authRequest(requestData, isOAuthRegistration ? "auth/social/register" : "register")
             .then(async res => {
                 const { data, text } = await readAuthResponse(res);
 
@@ -589,9 +639,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 if (res?.status === 200 || res?.status === 201) {
                     const token = data?.token || text;
 
-                    if (init(token)) {
-                        setStatus('signIn');
-                    }
+                    finishAuth(token);
 
                     enqueueSnackbar(
                         data?.message || "Вы успешно присоединились к организации",
@@ -613,7 +661,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
     const registerStandalone = () => {
         const trimmedOrganizationName = organizationName.trim();
 
-        if (!trimmedOrganizationName) {
+        if (!isOAuthRegistration && !trimmedOrganizationName) {
             enqueueSnackbar("Введите название организации", { variant: "error" });
             return;
         }
@@ -621,14 +669,21 @@ export default connect(state => state, mapDispatchToProps)(props => {
         if (requesting) return
         setRequesting(true)
 
-        authRequest({
-            register_mode: 'standalone',
-            organization_name: trimmedOrganizationName,
-            name,
-            login,
-            code,
-            password
-        }, "register")
+        const requestData = isOAuthRegistration
+            ? {
+                state: oauthState,
+                register_mode: 'standalone',
+            }
+            : {
+                register_mode: 'standalone',
+                organization_name: trimmedOrganizationName,
+                name,
+                login,
+                code,
+                password
+            };
+
+        authRequest(requestData, isOAuthRegistration ? "auth/social/register" : "register")
             .then(async res => {
                 const { data, text } = await readAuthResponse(res);
 
@@ -640,9 +695,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 if (res?.status === 200 || res?.status === 201) {
                     const token = data?.token || text;
 
-                    if (init(token)) {
-                        setStatus('signIn');
-                    }
+                    finishAuth(token);
 
                     enqueueSnackbar(
                         data?.message || "Вы успешно зарегистрировались",
@@ -836,10 +889,10 @@ export default connect(state => state, mapDispatchToProps)(props => {
         <div>
             {invites.length > 0 ? invites.map(i => <Invite invite={i} />) : <div>Приглашений нет</div>}
 
-            <div className={classes.standaloneCard}>
+            {(!isOAuthRegistration || availableRegistrationModes.includes('standalone')) && <div className={classes.standaloneCard}>
                 <div className={classes.standaloneTitle}>Зарегистрироваться отдельно</div>
 
-                <TextField
+                {!isOAuthRegistration && <TextField
                     label="Название организации"
                     fullWidth
                     margin="dense"
@@ -848,7 +901,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     disabled={requesting}
                     value={organizationName}
                     onChange={e => setOrganizationName(e.target.value)}
-                />
+                />}
 
                 <Button
                     variant="contained"
@@ -858,7 +911,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 >
                     Зарегистрироваться отдельно
                 </Button>
-            </div>
+            </div>}
         </div>
     )
 
@@ -936,17 +989,17 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 </DialogActions>
 
                 {status !== 'invites' ? <Button
-                        onClick={handleGoogleLogin}
-                        disabled={requesting}
-                        className={classes.googleButton}
-                    >
-                        <img
-                            src="https://www.svgrepo.com/show/355037/google.svg"
-                            alt="google"
-                            className={classes.googleIcon}
-                        />
-                        Вход через Google
-                    </Button>
+                    onClick={handleGoogleLogin}
+                    disabled={requesting}
+                    className={classes.googleButton}
+                >
+                    <img
+                        src="https://www.svgrepo.com/show/355037/google.svg"
+                        alt="google"
+                        className={classes.googleIcon}
+                    />
+                    Вход через Google
+                </Button>
                     : null
                 }
             </div>

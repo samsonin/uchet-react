@@ -225,7 +225,7 @@ const App = props => {
             <div style={{
                 borderWidth: '0 0 0 2px',
                 borderStyle: 'solid',
-                color: '#ff8cb0'
+                color: '#dde5ef'
             }} />
 
             <LoginModal

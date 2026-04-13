@@ -32,6 +32,7 @@
   "scripts": {
     "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
     "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
+    "deploy": "node scripts/deploy.js",
     "test": "node test",
     "eject": "react-scripts eject",
     "rename": "renamer --find App-clear.js --replace App.js ./src/App-clear.js && renamer --find style.css --replace index.css ./src/style.css ",

@@ -1,23 +1,13 @@
-import React, {useEffect, useState} from "react";
-import {connect} from "react-redux";
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
 
-import {Grid, InputLabel, Paper, TextField} from "@material-ui/core";
+import { Grid, InputLabel, Paper, TextField } from "@material-ui/core";
 import FormControl from "@material-ui/core/FormControl";
 import FilledInput from "@material-ui/core/FilledInput/FilledInput";
 import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import rest from "../Rest";
-import {BottomButtons} from "../common/BottomButtons";
-
-const dadataInit = {
-    method: "POST",
-    mode: "cors",
-    headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": "Token " + process.env.DADATA_TOKEN
-    }
-}
+import { BottomButtons } from "../common/BottomButtons";
 
 const orgFields = [
     'name',
@@ -31,12 +21,14 @@ const orgFields = [
     'settlement_number',
 ]
 
+const toStringValue = value => value === null || value === undefined ? '' : value.toString()
+
 const initialState = props => {
 
     let newState = {}
 
     orgFields.map(f => {
-        newState[f] = props[f].toString()
+        newState[f] = toStringValue(props[f])
         return f;
     })
 
@@ -60,7 +52,7 @@ const Organization = props => {
         let isEqual = true;
 
         orgFields.map(f => {
-            if (state[f] !== props[f].toString()) {
+            if (toStringValue(state[f]) !== toStringValue(props[f])) {
                 isEqual = false;
                 // console.log(f, state[f], props[f])
             }
@@ -71,79 +63,110 @@ const Organization = props => {
 
     }, [state, props])
 
-    const dadataRequest = query => {
+    const dadataRequest = (query, isCancelled = () => false) => {
+
+        if (!query) {
+            setOptions([])
+            return Promise.resolve()
+        }
 
         setLoading(true)
 
-        fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/party',
-            {
-                ...dadataInit,
-                body: JSON.stringify({query})
-            })
-            .then(response => response.json())
-            .then(result => {
+        return rest('dadata/party', 'POST', { query })
+            .then(res => {
+                if (isCancelled()) return
 
-                setOptions(result.suggestions.map(v => ({
-                    inn: v.data.inn,
-                    ogrn: v.data.ogrn,
-                    kpp: v.data.kpp || '0',
-                    organization: v.value,
-                    legal_address: v.data.address.unrestricted_value,
-                    okved: v.data.okved,
+                if (!res?.ok) {
+                    setOptions([])
+                    return
+                }
+
+                setOptions((res.body?.suggestions || []).map(v => ({
+                    inn: v.inn || v.data?.inn || '',
+                    ogrn: v.ogrn || v.data?.ogrn || '',
+                    kpp: v.kpp || v.data?.kpp || '0',
+                    organization: v.organization || v.value || '',
+                    legal_address: v.legal_address || v.data?.address?.unrestricted_value || '',
+                    okved: v.okved || v.data?.okved || '',
                 })));
 
             })
-            .catch(error => console.log("error", error))
-            .finally(() => setLoading(false))
+            .catch(error => {
+                if (!isCancelled()) console.log("error", error)
+            })
+            .finally(() => {
+                if (!isCancelled()) setLoading(false)
+            })
 
     }
 
     useEffect(() => {
 
-        if (!innOpen || state.inn.length < 5) {
+        if (!innOpen || toStringValue(state.inn).length < 5) {
             setOptions([])
             return undefined;
         }
 
-        dadataRequest(state.inn)
+        let cancelled = false
+
+        dadataRequest(state.inn, () => cancelled)
+
+        return () => {
+            cancelled = true
+        }
 
     }, [innOpen, state.inn])
 
     useEffect(() => {
 
-        if (!ogrnOpen || state.ogrn.length < 5) {
+        if (!ogrnOpen || toStringValue(state.ogrn).length < 5) {
             setOptions([])
             return undefined;
         }
 
-        dadataRequest(state.ogrn)
+        let cancelled = false
+
+        dadataRequest(state.ogrn, () => cancelled)
+
+        return () => {
+            cancelled = true
+        }
 
     }, [ogrnOpen, state.ogrn])
 
     useEffect(() => {
 
-        fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/bank',
-            {
-                ...dadataInit,
-                body: JSON.stringify({
-                    query: state.bank_code,
-                })
-            })
-            .then(response => response.json())
-            .then(result => {
+        if (!state.bank_code || toStringValue(state.bank_code).length < 5) {
+            setState(prev => prev.bank_name ? { ...prev, bank_name: '' } : prev)
+            return undefined
+        }
+
+        let cancelled = false
+
+        rest('dadata/bank', 'POST', { query: state.bank_code })
+            .then(res => {
+                if (cancelled || !res?.ok) return
 
                 setState(prev => {
 
-                    let bank_name = typeof result.suggestions[0] === 'undefined'
-                        ? 'Банк'
-                        : result.suggestions[0].unrestricted_value
+                    const bank = res.body?.suggestions?.[0]
 
-                    return {...prev, bank_name}
+                    let bank_name = typeof bank === 'undefined'
+                        ? 'Банк'
+                        : bank.unrestricted_value || bank.name || bank.value || ''
+
+                    return { ...prev, bank_name }
 
                 })
 
             })
-            .catch(error => console.log("error", error));
+            .catch(error => {
+                if (!cancelled) console.log("error", error)
+            });
+
+        return () => {
+            cancelled = true
+        }
 
     }, [state.bank_code])
 
@@ -156,6 +179,8 @@ const Organization = props => {
             state
         ).then(res => {
 
+            if (!res?.ok || !res?.body?.organization) return
+
             let newState = initialState(res.body.organization);
 
             newState.bank_name = state.bank_name;
@@ -166,7 +191,7 @@ const Organization = props => {
 
     }
 
-    const updateFields = newObject => setState(prev => ({...prev, ...newObject}))
+    const updateFields = newObject => setState(prev => ({ ...prev, ...newObject }))
 
     const renderField = v => {
         return <FormControl
@@ -180,22 +205,22 @@ const Organization = props => {
             </InputLabel>
             <FilledInput
                 value={state[v.fieldName] || ''}
-                onChange={e => updateFields({[v.fieldName]: e.target.value})}
+                onChange={e => updateFields({ [v.fieldName]: e.target.value })}
             />
         </FormControl>
     }
 
     return <Grid container
-                 component={Paper}
-                 direction="row"
-                 className="m-2 p-3"
+        component={Paper}
+        direction="row"
+        className="m-2 p-3"
     >
 
-        {renderField({label: 'Название', fieldName: 'name'})}
+        {renderField({ label: 'Название', fieldName: 'name' })}
 
         <Autocomplete
             className="w-100 m-1"
-            value={{inn: state.inn}}
+            value={{ inn: state.inn }}
             // open={innOpen}
             onOpen={() => {
                 setInnOpen(true);
@@ -211,12 +236,12 @@ const Organization = props => {
             getOptionSelected={(option, value) => {
                 return true;
             }}
-            getOptionLabel={option => option.inn}
-            renderOption={option => option.inn + ' ' + option.organization}
+            getOptionLabel={option => toStringValue(option?.inn)}
+            renderOption={option => `${toStringValue(option?.inn)} ${toStringValue(option?.organization)}`}
             options={options}
             loading={loading}
             onInputChange={(_, v) => {
-                updateFields({inn: v})
+                updateFields({ inn: v })
             }}
             renderInput={params => (<TextField
                 {...params}
@@ -227,7 +252,7 @@ const Organization = props => {
                     ...params.InputProps,
                     endAdornment: (
                         <React.Fragment>
-                            {loading ? <CircularProgress color="inherit" size={20}/> : null}
+                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
                             {params.InputProps.endAdornment}
                         </React.Fragment>
                     )
@@ -237,7 +262,7 @@ const Organization = props => {
 
         <Autocomplete
             className="w-100 m-1"
-            value={{ogrn: state.ogrn}}
+            value={{ ogrn: state.ogrn }}
             // open={innOpen}
             onOpen={() => {
                 setOgrnOpen(true);
@@ -253,12 +278,12 @@ const Organization = props => {
             getOptionSelected={(option, value) => {
                 return true;
             }}
-            getOptionLabel={option => option.ogrn}
-            renderOption={option => option.ogrn + ' ' + option.organization}
+            getOptionLabel={option => toStringValue(option?.ogrn)}
+            renderOption={option => `${toStringValue(option?.ogrn)} ${toStringValue(option?.organization)}`}
             options={options}
             loading={loading}
             onInputChange={(_, v) => {
-                updateFields({ogrn: v})
+                updateFields({ ogrn: v })
             }}
             renderInput={params => (<TextField
                 {...params}
@@ -269,7 +294,7 @@ const Organization = props => {
                     ...params.InputProps,
                     endAdornment: (
                         <React.Fragment>
-                            {loading ? <CircularProgress color="inherit" size={20}/> : null}
+                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
                             {params.InputProps.endAdornment}
                         </React.Fragment>
                     )
@@ -278,13 +303,13 @@ const Organization = props => {
         />
 
         {[
-            {label: 'КПП', fieldName: 'kpp'},
-            {label: 'Юридическое наименование', fieldName: 'organization'},
-            {label: 'Юридический адрес', fieldName: 'legal_address'},
-            {label: 'ОКВЕД', fieldName: 'okved'},
-            {label: 'БИК', fieldName: 'bank_code'},
-            {label: 'Банк', fieldName: 'bank_name'},
-            {label: 'Расчетный счет', fieldName: 'settlement_number'},
+            { label: 'КПП', fieldName: 'kpp' },
+            { label: 'Юридическое наименование', fieldName: 'organization' },
+            { label: 'Юридический адрес', fieldName: 'legal_address' },
+            { label: 'ОКВЕД', fieldName: 'okved' },
+            { label: 'БИК', fieldName: 'bank_code' },
+            { label: 'Банк', fieldName: 'bank_name' },
+            { label: 'Расчетный счет', fieldName: 'settlement_number' },
         ].map(v => renderField(v))}
 
         {BottomButtons(save, cancel, disabled)}

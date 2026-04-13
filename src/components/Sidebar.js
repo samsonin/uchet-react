@@ -12,13 +12,21 @@ const useStyles = makeStyles({
     list: {
         width: '15rem',
         marginTop: '1rem',
+        padding: '0 0.75rem 1rem',
     },
     button: {
-        marginRight: -14,
         width: '100%',
+        minHeight: 42,
         marginBottom: 10,
-        backgroundColor: '#2bbbad',
-        color: 'white',
+        borderRadius: 8,
+        backgroundColor: '#0f9f8f',
+        color: '#ffffff',
+        boxShadow: '0 10px 20px rgba(15, 159, 143, 0.18)',
+        fontWeight: 700,
+        '&:hover': {
+            backgroundColor: '#087f73',
+            boxShadow: '0 12px 24px rgba(15, 159, 143, 0.22)',
+        },
     },
 });
 

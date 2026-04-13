@@ -1,50 +1,71 @@
-import React, {useEffect, useState} from "react";
-import {connect} from 'react-redux';
-import {bindActionCreators} from "redux";
+import React, { useEffect, useState } from "react";
+import { connect } from 'react-redux';
+import { bindActionCreators } from "redux";
 import {
     MDBNavbar, MDBNavbarBrand, MDBNavbarNav, MDBNavItem, MDBNavLink, MDBNavbarToggler, MDBCollapse, MDBDropdown,
     MDBDropdownToggle, MDBDropdownMenu, MDBDropdownItem, MDBIcon, MDBBtn, MDBCardHeader
 } from "mdbreact";
-import {init_user, upd_app, exit_app} from "../actions/actionCreator";
-import {Button, IconButton} from "@material-ui/core";
+import { init_user, upd_app, exit_app } from "../actions/actionCreator";
+import { Button, IconButton } from "@material-ui/core";
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import BalanceModal from "./BalanceModal";
 import rest from './Rest'
-import {toLocalTimeStr} from "./common/Time";
+import { toLocalTimeStr } from "./common/Time";
 
 
 const NavbarPage = props => {
 
     const [balanceModalOpen, setBalanceModalOpen] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
+    const [sidebarOpen, setSidebarOpen] = useState(false)
 
     useEffect(() => {
 
         // если больше 12 часов выходим
         if ((Date.now() - props.auth.time) > 43200000) exit()
 
-// eslint-disable-next-line
+        syncSidebarState()
+        window.addEventListener('resize', syncSidebarState)
+
+        return () => window.removeEventListener('resize', syncSidebarState)
+
+        // eslint-disable-next-line
     }, [])
+
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches
+
+    const isSidebarVisible = wrapper => wrapper.classList.contains('sidebar-open')
+        || (!wrapper.classList.contains('sidebar-hidden') && isDesktop())
+
+    const syncSidebarState = () => {
+
+        const wrapper = document.querySelector('#wrapper');
+        if (!wrapper) return
+
+        setSidebarOpen(isSidebarVisible(wrapper))
+
+    }
 
     const toggleClick = () => {
 
         const wrapper = document.querySelector('#wrapper');
-        const toggle_icon = document.querySelector('#toggle_icon');
+        if (!wrapper) return
 
-        wrapper.classList.toggle('toggled');
+        const shouldHide = isSidebarVisible(wrapper)
 
-        toggle_icon.classList.value = wrapper.classList.value === 'd-flex toggled'
-            ? 'fas fa-angle-double-right'
-            : 'fas fa-angle-double-left'
+        wrapper.classList.remove('sidebar-open', 'sidebar-hidden')
+        wrapper.classList.add(shouldHide ? 'sidebar-hidden' : 'sidebar-open')
+
+        setSidebarOpen(!shouldHide)
 
     }
 
     const toggleCollapse = () => setIsOpen(!isOpen)
 
-    const pointChange = e => props.upd_app({current_stock_id: +e.target.value})
+    const pointChange = e => props.upd_app({ current_stock_id: +e.target.value })
 
-    const pointExit = () => props.upd_app({current_stock_id: 0})
+    const pointExit = () => props.upd_app({ current_stock_id: 0 })
 
     const newDay = () => rest('daily/' + props.app.current_stock_id, 'POST')
 
@@ -82,12 +103,13 @@ const NavbarPage = props => {
                     </strong>
 
                     {(props.auth.admin || isSale) && props.app.daily &&
-                    !props.app.daily.find(d => d.employees.includes(props.auth.user_id))
+                        !props.app.daily.find(d => d.employees.includes(props.auth.user_id))
                         ? <Button
                             variant="outlined"
                             style={{
                                 margin: '1rem',
-                                color: '#fff'
+                                color: '#087f73',
+                                borderColor: 'rgba(15, 159, 143, 0.42)'
                             }}
                             onClick={() => newDay()}
                         >
@@ -99,11 +121,11 @@ const NavbarPage = props => {
                         variant="outlined"
                         className="ml-2"
                         style={{
-                            color: '#fff'
+                            color: '#087f73'
                         }}
                         onClick={pointExit}
                     >
-                        <ExitToAppIcon/>
+                        <ExitToAppIcon />
                     </IconButton>}
                 </>
                 : <MDBDropdown>
@@ -172,24 +194,35 @@ const NavbarPage = props => {
 
     return <MDBNavbar color="default-color" dark expand="md">
         <MDBNavbarBrand>
-            <MDBNavLink to="/">
-                <strong className="white-text">Uchet.store</strong>
+            <MDBNavLink to="/" className="header-brand-link">
+                <span className="header-brand-text">Uchet</span>
             </MDBNavLink>
         </MDBNavbarBrand>
-        <button id="menu-toggle" onClick={toggleClick} className="btn btn-sm mx-2">
-            <i id="toggle_icon" className="fas fa-angle-double-left"/>
+        <button
+            id="menu-toggle"
+            onClick={toggleClick}
+            className={`header-sidebar-toggle mx-2 ${sidebarOpen ? 'is-active' : ''}`}
+            type="button"
+            aria-label={sidebarOpen ? "Скрыть боковую панель" : "Показать боковую панель"}
+            title={sidebarOpen ? "Скрыть боковую панель" : "Показать боковую панель"}
+        >
+            <span className="menu-toggle-lines" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+            </span>
         </button>
         <MDBNavbarNav left>
             <MDBNavItem className={"mx-3"}>
                 {accessPoints()}
             </MDBNavItem>
         </MDBNavbarNav>
-        <MDBNavbarToggler onClick={toggleCollapse}/>
+        <MDBNavbarToggler onClick={toggleCollapse} />
         <MDBCollapse id="navbarCollapse3" isOpen={isOpen} navbar className="text-right">
             <MDBNavbarNav right>
                 {props.auth.organization_id === 1 && <MDBNavItem>
                     <MDBNavLink className="waves-effect waves-light" to="/zp">
-                        <i className="fas fa-coins"/>
+                        <i className="fas fa-coins" />
                         {props.app.zp || 0}
                     </MDBNavLink>
                 </MDBNavItem>}
@@ -201,7 +234,7 @@ const NavbarPage = props => {
                 <MDBNavItem>
                     <MDBDropdown>
                         <MDBDropdownToggle nav caret>
-                            <MDBIcon icon="user"/>
+                            <MDBIcon icon="user" />
                         </MDBDropdownToggle>
                         {auth_menu()}
                     </MDBDropdown>
