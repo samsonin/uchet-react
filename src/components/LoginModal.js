@@ -541,17 +541,28 @@ export default connect(state => state, mapDispatchToProps)(props => {
             login,
             password
         }, 'login')
-            .then(res => res.text())
-            .then(res => {
+            .then(async res => {
+                if (!res) {
+                    enqueueSnackbar('Ошибка сети. Сервер временно недоступен', {
+                        variant: 'error'
+                    });
+                    return;
+                }
 
-                setRequesting(false)
+                const text = await res.text();
 
-                if (!init(res)) {
+                if (!res.ok || !init(text)) {
                     enqueueSnackbar('Неправильный логин или пароль',
                         { variant: 'error' }
                     )
                 }
             })
+            .catch(() => {
+                enqueueSnackbar('Ошибка сети. Сервер временно недоступен', {
+                    variant: 'error'
+                });
+            })
+            .finally(() => setRequesting(false))
 
     }
 

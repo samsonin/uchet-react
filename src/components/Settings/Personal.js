@@ -13,6 +13,7 @@ import {
 import { useSnackbar } from "notistack";
 
 import rest from "../Rest";
+import { SERVER } from "../../constants";
 
 const RESEND_TIMEOUT = 60;
 
@@ -327,23 +328,15 @@ const Personal = props => {
     };
 
     const linkGoogle = () => {
-        rest("auth/social/google/connect", "GET")
-            .then(res => {
-                if (res.body?.ok && res.body?.url) {
-                    enqueueSnackbar("Перенаправление в Google...", {
-                        variant: "info"
-                    });
-                    window.location.href = res.body.url;
-                } else {
-                    enqueueSnackbar(
-                        res.body?.message || "Ошибка привязки Google",
-                        { variant: "error" }
-                    );
-                }
-            })
-            .catch(() => {
-                enqueueSnackbar("Ошибка сети", { variant: "error" });
-            });
+        const storedAuth = JSON.parse(window.localStorage.getItem('auth') || '{}');
+        const token = auth.jwt || storedAuth.jwt;
+
+        if (!token) {
+            enqueueSnackbar("Ошибка авторизации", { variant: "error" });
+            return;
+        }
+
+        window.location.href = `${SERVER}/auth/social/google/connect?token=${encodeURIComponent(token)}`;
     };
 
     const unlinkGoogle = () => {

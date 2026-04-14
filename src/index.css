@@ -507,6 +507,16 @@
 
     .non-printable { display: none; }
 
+    .SnackbarContainer-root,
+    .SnackbarItem-root,
+    .MuiSnackbar-root,
+    [class*="SnackbarContainer"],
+    [class*="SnackbarItem"],
+    [class*="MuiSnackbar"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
     .printable {
         display: block !important;
         padding: 0;

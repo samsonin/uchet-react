@@ -16,8 +16,6 @@ import Circularln from './components/CircularIndeterminate';
 
 // import registerServiceWorker from './registerServiceWorker';
 
-require('dotenv').config();
-
 
 const root = createRoot(document.getElementById('root'));
 
