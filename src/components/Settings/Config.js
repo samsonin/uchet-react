@@ -1,321 +1,232 @@
-import React from "react";
-import {bindActionCreators} from "redux";
-import {connect} from "react-redux";
-import {
-    closeSnackbar,
-    enqueueSnackbar,
-    upd_app,
-} from "../../actions/actionCreator";
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
 import {
     Card,
-    CardHeader,
-    CardContent,
-    Collapse,
     CardActions,
-    TextField,
-    FormControl,
-    InputAdornment,
-    Typography,
-    FormControlLabel,
+    CardContent,
+    CardHeader,
     Checkbox,
+    Collapse,
+    FormControlLabel,
     Grid,
+    InputAdornment,
+    TextField,
 } from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
+import { useSnackbar } from "notistack";
+
+import rest from "../Rest";
 
 const useStyles = makeStyles({
+    root: {
+        width: "100%",
+        margin: "0.5rem",
+    },
     card: {
-        marginBottom: "10px",
+        marginBottom: 10,
     },
     cardHeader: {
         backgroundColor: "#F7F7F7",
-        width: "100%",
         borderBottom: "1px solid #e9ecef",
     },
-
-    adornment: {
-        backgroundColor: "#E9ECEF",
-        color: "black",
-        height: "100%",
-        width: "50px",
-        textAlign: "center",
-        padding: 10,
+    field: {
+        width: "100%",
     },
 });
 
-const mapDispatchToProps = (dispatch) =>
-    bindActionCreators(
-        {
-            enqueueSnackbar,
-            closeSnackbar,
-            upd_app,
-        },
-        dispatch
-    );
+const sections = [
+    {
+        title: "Ремонт",
+        fields: [
+            { name: "rem_sum", label: "Стоимость ремонта по умолчанию", end: "RUR" },
+            { name: "rem_assessed_value", label: "Оценочная стоимость оборудования", end: "RUR" },
+            { name: "remont_warranty", label: "Срок гарантии", end: "дней" },
+            { name: "free_save", label: "Срок бесплатного хранения после ремонта", end: "дней" },
+            { name: "cost_after_free", label: "Стоимость хранения после бесплатного срока", end: "RUR" },
+            { name: "prepayment", label: "Предоплата", end: "RUR" },
+            { name: "time_remont", label: "Срок ремонта", end: "дней" },
+            { name: "days_after_finished_notification", label: "Уведомление после готовности", end: "дней" },
+        ],
+    },
+    {
+        title: "Залог",
+        fields: [
+            { name: "zalog_min_sum", label: "Минимальная переплата за залог", end: "RUR" },
+            { name: "zalog_day_percent", label: "Ежедневный процент за залог", end: "%" },
+        ],
+    },
+    {
+        title: "Зарплата за заказы",
+        fields: [
+            { name: "zp_for_take", label: "Включить зарплату за приемку", type: "checkbox" },
+            { name: "zp_take_min_sum", label: "Минимальная сумма выгодного заказа", end: "RUR" },
+            { name: "zp_for_take_sum", label: "Сумма за прием заказа по точкам", end: "RUR", type: "text" },
+            { name: "zp_add_part", label: "Сумма за внесение запчастей", end: "RUR" },
+            { name: "zp_for_checkout", label: "Включить зарплату за закрытие", type: "checkbox" },
+            { name: "zp_saler_per", label: "Процент за закрытие заказа", end: "%" },
+            { name: "zp_master_per", label: "Процент мастеру за выполнение заказа", end: "%" },
+            { name: "zp_repeat_per", label: "Уменьшение процента мастеру при гарантии", end: "%" },
+            { name: "zp_daily_min", label: "Минимальная зарплата продавца-приемщика в день", end: "RUR" },
+        ],
+    },
+    {
+        title: "Зарплата за товары",
+        fields: [
+            { name: "zp_salary_buy", label: "За покупку техники", end: "RUR" },
+            { name: "zp_salary_zalog", label: "За залог", end: "RUR" },
+            { name: "zp_salary_sell", label: "За продажу техники", end: "%" },
+            { name: "zp_salary_goods", label: "За продажу аксессуаров", end: "%" },
+        ],
+    },
+    {
+        title: "Гарантийные обязательства",
+        fields: [
+            { name: "goods_phones_warranty", label: "Гарантийный срок при продаже техники", end: "дней" },
+            { name: "goods_accessories_warranty", label: "Гарантийный срок при продаже остальных товаров", end: "дней" },
+        ],
+    },
+    {
+        title: "Помощь",
+        fields: [
+            { name: "need_help", label: "Показывать подсказки", type: "checkbox" },
+        ],
+    },
+];
 
-const SimpleCard = ({title, children}) => {
-    const [expanded, setExpanded] = React.useState(true);
+const toStringValue = value => value === null || value === undefined ? "" : value.toString();
 
-    const handleExpandClick = () => {
-        setExpanded(!expanded);
-    };
-    const classes = useStyles();
+const isChecked = value => value === true || value === 1 || value === "1";
 
-    return (
-        <Card className={classes.card}>
-            <CardActions
-                onClick={handleExpandClick}
-                aria-expanded={expanded}
-                style={{padding: 0}}
-            >
-                <CardHeader
-                    title={title}
-                    className={classes.cardHeader}
-                    titleTypographyProps={{variant: "subtitle1"}}
-                />
-            </CardActions>
-            <Collapse in={expanded} timeout="auto" unmountOnExit>
-                <CardContent>
-                    <Grid container spacing={1}>
-                        {children}
-                    </Grid>
-                </CardContent>
-            </Collapse>
-        </Card>
-    );
+// TODO: Add a dedicated editor for JSON config values, for example salaries by stock.
+const isJsonValue = value => {
+    if (typeof value !== "string") return false;
+
+    const v = value.trim();
+    return (v.startsWith("{") && v.endsWith("}")) || (v.startsWith("[") && v.endsWith("]"));
 };
-const CustomInputWithLabel = ({title, defVal, end, fullWidth, width}) => {
+
+const SimpleCard = ({ title, children }) => {
+    const [expanded, setExpanded] = useState(true);
     const classes = useStyles();
 
-    return (
-        <FormControl margin="normal">
-            <Typography variant="subtitle1" gutterBottom>
-                {title}
-            </Typography>
-            <TextField
-                defaultValue={defVal}
-                type="number"
-                InputProps={{
-                    endAdornment: (
-                        <InputAdornment
-                            position="end"
-                            variant="filled"
-                            className={classes.adornment}
-                        >
-                            {end}
-                        </InputAdornment>
-                    ),
-                    style: {
-                        height: "30px",
-                        color: "gray",
-                        paddingRight: 0,
-                        marginRight: 40,
-                        minWidth: width ? "0" : "400px",
-                        width: width,
-                    },
-                }}
-                variant="outlined"
-                size="small"
-                fullWidth={fullWidth}
+    return <Card className={classes.card}>
+        <CardActions
+            onClick={() => setExpanded(prev => !prev)}
+            aria-expanded={expanded}
+            style={{ padding: 0 }}
+        >
+            <CardHeader
+                title={title}
+                className={classes.cardHeader}
+                titleTypographyProps={{ variant: "subtitle1" }}
             />
-        </FormControl>
-    );
+        </CardActions>
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+            <CardContent>
+                <Grid container spacing={2}>
+                    {children}
+                </Grid>
+            </CardContent>
+        </Collapse>
+    </Card>;
 };
 
-const Config = ({app}) => {
-    const requestSettings = () => {
-        //ф-я отсуствовала я добавил заглушку чтобы приложение не крашилось
+const ConfigField = ({ field, value, disabled, onChange, onSave }) => {
+    const classes = useStyles();
+
+    if (field.type === "checkbox") {
+        return <Grid item xs={12} sm={6}>
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={isChecked(value)}
+                        onChange={event => onSave(field.name, event.target.checked ? "1" : "0")}
+                        color="primary"
+                        disabled={disabled}
+                    />
+                }
+                label={field.label}
+            />
+        </Grid>;
     }
-    const [state, setState] = React.useState({
-        checkedA: false,
-        checkedB: false,
-        checkedF: false,
-        checkedG: false,
-    });
-    const handleChange = (event) => {
-        setState({...state, [event.target.name]: event.target.checked});
-    };
-    return (
-        <>
-            <form id="form_app_settings">
-                <SimpleCard title="Ремонт">
-                    <Grid item md xs={4} sm={3}>
-                        <CustomInputWithLabel
-                            title="Стоимость ремонта по умолчанию"
-                            defVal={800}
-                            end="RUR"
-                        />
-                        <CustomInputWithLabel
-                            title="Оценочная стоимость оборудования"
-                            defVal={100}
-                            end="RUR"
-                        />
-                        <CustomInputWithLabel
-                            title="Срок гарантии"
-                            defVal={30}
-                            end="дней"
-                        />
-                        <CustomInputWithLabel
-                            title="Срок бесплатного хранения после ремонта"
-                            defVal={60}
-                            end="дней"
-                        />
-                        <CustomInputWithLabel title="Предоплата" defVal={0} end="RUR"/>
-                        <CustomInputWithLabel title="Срок ремонта" defVal={60} end="дней"/>
-                    </Grid>
-                </SimpleCard>
-                <SimpleCard title="Залог">
-                    <Grid item md xs={4} sm={3}>
-                        <CustomInputWithLabel
-                            title="Минимальная переплата за залог"
-                            defVal={500}
-                            end="RUR"
-                        />
-                        <CustomInputWithLabel
-                            title="Ежедневный процент за залог"
-                            defVal={5}
-                            end="5"
-                        />
-                    </Grid>
-                </SimpleCard>
-                <SimpleCard title="Зарплата">
-                    <Grid item>
-                        <Typography variant="h6">За заказы</Typography>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={state.checkedA}
-                                    onChange={handleChange}
-                                    name="checkedA"
-                                    color="primary"
-                                />
-                            }
-                            label="Включить зарплату за приемку в себестоимость заказа и считать непосредственно тому кто принял"
-                        />
-                        <CustomInputWithLabel
-                            title="Минимальная сумма с которой считать что заказ выгодный и с него платить за приемку"
-                            defVal={800}
-                            end="RUR"
-                            fullWidth={true}
-                        />
-                        <br/>
-                        <CustomInputWithLabel
-                            title="   Cумма за прием заказа (по точкам)"
-                            defVal={0}
-                            end="RUR"
-                        />
 
-                        <CustomInputWithLabel
-                            title="Сумма за внесение запчастей"
-                            defVal={150}
-                            end="%"
-                        />
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={state.checkedB}
-                                    onChange={handleChange}
-                                    name="checkedB"
-                                    color="primary"
-                                />
-                            }
-                            label="Включить зарплату за закрытие в себестоимость заказа и начислить тому кто непосредственно закрыл"
-                        />
-                        <br/>
-                        <CustomInputWithLabel
-                            title="Процент за закрытие заказа"
-                            defVal={2}
-                            end="%"
-                        />
-                        <CustomInputWithLabel
-                            title="Процент мастеру за выполнение заказа"
-                            defVal={35}
-                            end="%"
-                        />
-                        <CustomInputWithLabel
-                            title="Уменьшение процента мастеру за выполнение заказа при повторном обращении по гарантии"
-                            defVal={2}
-                            end="%"
-                            fullWidth={true}
-                        />
-
-                        <Typography variant="h6">За товары</Typography>
-
-                        <CustomInputWithLabel
-                            width={220}
-                            title="За покупку техники"
-                            defVal={50}
-                            end="RUR"
-                        />
-                        <CustomInputWithLabel
-                            width={220}
-                            title="За залог"
-                            defVal={75}
-                            end="RUR"
-                        />
-
-                        <CustomInputWithLabel
-                            width={220}
-                            title="За продажу техники"
-                            defVal={25}
-                            end="%"
-                        />
-
-                        <CustomInputWithLabel
-                            width={220}
-                            title="За продажу аксессуаров"
-                            defVal={25}
-                            end="%"
-                        />
-                        <Typography variant="h6">За выход</Typography>
-                        <CustomInputWithLabel
-                            title="Минимальная зарпалата продавца-приемщика в день"
-                            defVal={200}
-                            end="RUR"
-                        />
-                    </Grid>
-                </SimpleCard>
-
-                <SimpleCard title="Локация">
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={state.checkedC}
-                                onChange={handleChange}
-                                name="checkedC"
-                                color="primary"
-                            />
-                        }
-                        label="Привязать сотрудника к точке"
-                    />
-
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={state.checkedD}
-                                onChange={handleChange}
-                                name="checkedD"
-                                color="primary"
-                            />
-                        }
-                        label="Проверять локацию при авторизации на точке"
-                    />
-                </SimpleCard>
-
-                <SimpleCard title="Гарантийные обязательства">
-                    <CustomInputWithLabel
-                        title="Гарантийный срок при продаже техники"
-                        defVal={14}
-                        end="дней"
-                    />
-                    <CustomInputWithLabel
-                        title="Гарантийный срок при продаже остальных товаров"
-                        defVal={14}
-                        end="дней"
-                    />
-                </SimpleCard>
-            </form>
-        </>
-    );
+    return <Grid item xs={12} sm={6}>
+        <TextField
+            label={field.label}
+            value={toStringValue(value)}
+            type={field.type === "text" ? "text" : "number"}
+            variant="outlined"
+            size="small"
+            fullWidth
+            className={classes.field}
+            disabled={disabled}
+            onChange={event => onChange(field.name, event.target.value)}
+            onBlur={() => onSave(field.name)}
+            InputProps={field.end ? {
+                endAdornment: <InputAdornment position="end">{field.end}</InputAdornment>,
+            } : undefined}
+        />
+    </Grid>;
 };
 
-export default connect((state) => state, mapDispatchToProps)(Config);
+const Config = props => {
+    const classes = useStyles();
+    const { enqueueSnackbar } = useSnackbar();
+    const config = props.config || {};
+    const [localConfig, setLocalConfig] = useState(config);
+    const [requesting, setRequesting] = useState(false);
+
+    useEffect(() => {
+        setLocalConfig(config);
+    }, [config]);
+
+    const updateField = (name, value) => {
+        setLocalConfig(prev => ({ ...prev, [name]: value }));
+    };
+
+    const saveField = (name, value = localConfig[name]) => {
+        const nextValue = toStringValue(value);
+
+        if (requesting) return;
+        if (toStringValue(config[name]) === nextValue) return;
+
+        setRequesting(true);
+        setLocalConfig(prev => ({ ...prev, [name]: nextValue }));
+
+        rest("config", "PATCH", { [name]: nextValue })
+            .then(res => {
+                if (res.status < 300) {
+                    enqueueSnackbar("Настройки сохранены", { variant: "success" });
+                    return;
+                }
+
+                setLocalConfig(config);
+                enqueueSnackbar("Ошибка сохранения настроек", { variant: "error" });
+            })
+            .catch(() => {
+                setLocalConfig(config);
+                enqueueSnackbar("Ошибка сети", { variant: "error" });
+            })
+            .finally(() => setRequesting(false));
+    };
+
+    return <div className={classes.root}>
+        {sections.map(section => <SimpleCard
+            title={section.title}
+            key={"settings-config-section-" + section.title}
+        >
+            {section.fields
+                .filter(field => !isJsonValue(localConfig[field.name]))
+                .map(field => <ConfigField
+                    key={"settings-config-field-" + field.name}
+                    field={field}
+                    value={localConfig[field.name]}
+                    disabled={requesting}
+                    onChange={updateField}
+                    onSave={saveField}
+                />)}
+        </SimpleCard>)}
+    </div>;
+};
+
+export default connect(state => state.app)(Config);

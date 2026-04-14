@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Route } from "react-router-dom";
+import { Redirect, Route } from "react-router-dom";
 import { connect } from "react-redux";
 
 import "./index.css";
@@ -146,6 +146,7 @@ const App = props => {
         if (['/transit', '/arrival/today'].includes(path)) return
 
         rest('goods/' + ourBarcode)
+        setOurBarcode()
 
     }, [ourBarcode])
 
@@ -247,6 +248,12 @@ const App = props => {
                         <form onSubmit={e => e.preventDefault()}>
 
                             <Route exact path="/" component={Main} />
+                            <Route exact path="/profile"
+                                render={props => <Redirect to={{
+                                    pathname: "/settings/personal",
+                                    search: props.location.search
+                                }} />}
+                            />
                             <Route exact path="/settings/personal" component={Personal} />
                             <Route path="/subscribe" component={Subscribe} />
 

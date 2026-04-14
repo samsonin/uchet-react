@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { connect } from 'react-redux';
 import { bindActionCreators } from "redux";
 import {
@@ -20,6 +20,20 @@ const NavbarPage = props => {
     const [isOpen, setIsOpen] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
+    const app = props.app || {}
+    const appStocks = app.stocks || []
+    const appStockusers = app.stockusers || []
+    const currentStockId = app.current_stock_id
+    const updApp = props.upd_app
+
+    const allowedStockIds = useMemo(() => appStockusers
+        .filter(su => su.user_id === props.auth.user_id)
+        .map(su => su.stock_id), [appStockusers, props.auth.user_id])
+
+    const validStocks = useMemo(() => appStocks
+        .filter(stock => stock.is_valid && allowedStockIds.includes(stock.id)),
+        [appStocks, allowedStockIds])
+
     useEffect(() => {
 
         // если больше 12 часов выходим
@@ -32,6 +46,16 @@ const NavbarPage = props => {
 
         // eslint-disable-next-line
     }, [])
+
+    useEffect(() => {
+        if (validStocks.length !== 1) return
+
+        const stockId = +validStocks[0].id
+
+        if (+currentStockId !== stockId) {
+            updApp({ current_stock_id: stockId })
+        }
+    }, [currentStockId, updApp, validStocks])
 
     const isDesktop = () => window.matchMedia('(min-width: 768px)').matches
 
@@ -73,20 +97,6 @@ const NavbarPage = props => {
 
         if (!props.app) return '';
 
-        let allowedStocks = []
-
-        if (props.app.stockusers) {
-            props.app.stockusers.map(su => {
-                if (su.user_id === props.auth.user_id) {
-                    allowedStocks.push(su.stock_id)
-                }
-                return su
-            })
-        }
-
-        const validStocks = props.app.stocks
-            .filter(stock => stock.is_valid && allowedStocks.includes(stock.id))
-
         const position = props.app.positions
             ? props.app.positions.find(p => p.id === props.auth.position_id)
             : null
@@ -94,6 +104,7 @@ const NavbarPage = props => {
         const isSale = position && position.is_sale
 
         const currentStock = validStocks.find(stock => +stock.id === props.app.current_stock_id)
+        const canSelectStock = validStocks.length > 1
 
         return validStocks
             ? props.app.current_stock_id
@@ -117,7 +128,7 @@ const NavbarPage = props => {
                         </Button>
                         : ''}
 
-                    {props.app.current_stock_id && <IconButton
+                    {props.app.current_stock_id && canSelectStock && <IconButton
                         variant="outlined"
                         className="ml-2"
                         style={{
@@ -128,7 +139,8 @@ const NavbarPage = props => {
                         <ExitToAppIcon />
                     </IconButton>}
                 </>
-                : <MDBDropdown>
+                : canSelectStock
+                    ? <MDBDropdown>
                     <MDBDropdownToggle nav caret>
                         <div className="d-none d-md-inline">Выбрать точку</div>
                     </MDBDropdownToggle>
@@ -142,6 +154,7 @@ const NavbarPage = props => {
                         </MDBDropdownItem>)}
                     </MDBDropdownMenu>
                 </MDBDropdown>
+                    : ''
             : ''
     }
 

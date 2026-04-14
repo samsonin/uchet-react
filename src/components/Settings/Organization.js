@@ -74,8 +74,9 @@ const initialState = props => {
 
 const Organization = props => {
     const classes = useStyles()
+    const organization = props.organization || {}
 
-    const [state, setState] = useState(() => initialState(props))
+    const [state, setState] = useState(() => initialState(organization))
     const [disabled, setDisabled] = useState(true)
 
     const [innOpen, setInnOpen] = useState(false)
@@ -83,6 +84,7 @@ const Organization = props => {
 
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState([]);
+    const [bankCodeTouched, setBankCodeTouched] = useState(false);
 
     const validationErrors = Object.keys(lengthValidation).reduce((acc, fieldName) => ({
         ...acc,
@@ -92,11 +94,16 @@ const Organization = props => {
     const hasValidationErrors = Object.values(validationErrors).some(Boolean)
 
     useEffect(() => {
+        setBankCodeTouched(false)
+        setState(initialState(organization))
+    }, [organization])
+
+    useEffect(() => {
 
         let isEqual = true;
 
         orgFields.map(f => {
-            if (toStringValue(state[f]) !== toStringValue(props[f])) {
+            if (toStringValue(state[f]) !== toStringValue(organization[f])) {
                 isEqual = false;
                 // console.log(f, state[f], props[f])
             }
@@ -105,7 +112,7 @@ const Organization = props => {
 
         setDisabled(isEqual || hasValidationErrors)
 
-    }, [state, props, hasValidationErrors])
+    }, [state, organization, hasValidationErrors])
 
     const dadataRequest = (query, isCancelled = () => false) => {
 
@@ -180,6 +187,8 @@ const Organization = props => {
 
     useEffect(() => {
 
+        if (!bankCodeTouched) return undefined
+
         const bankCode = toStringValue(state.bank_code).replace(/\D/g, '')
 
         if (bankCode.length !== 9) {
@@ -246,9 +255,12 @@ const Organization = props => {
             cancelled = true
         }
 
-    }, [state.bank_code])
+    }, [bankCodeTouched, state.bank_code])
 
-    const cancel = () => setState(initialState(props))
+    const cancel = () => {
+        setBankCodeTouched(false)
+        setState(initialState(organization))
+    }
 
     const save = () => {
 
@@ -263,6 +275,7 @@ const Organization = props => {
 
             newState.bank_name = state.bank_name;
 
+            setBankCodeTouched(false)
             setState(newState)
 
         })
@@ -288,7 +301,11 @@ const Organization = props => {
                 variant="outlined"
                 className={classes.field}
                 value={state[v.fieldName] || ''}
-                onChange={e => updateFields({ [v.fieldName]: e.target.value })}
+                onChange={e => {
+                    if (v.fieldName === 'bank_code') setBankCodeTouched(true)
+
+                    updateFields({ [v.fieldName]: e.target.value })
+                }}
                 error={Boolean(errorText)}
                 helperText={errorText}
                 inputProps={rule?.maxLength ? { maxLength: rule.maxLength } : undefined}
@@ -444,4 +461,4 @@ const Organization = props => {
 
 }
 
-export default connect(state => state.app.organization)(Organization);
+export default connect(state => state.app)(Organization);

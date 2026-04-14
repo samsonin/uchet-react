@@ -3,13 +3,19 @@ import { connect } from "react-redux";
 
 import {
     Button,
+    Card,
+    CardContent,
+    CardHeader,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Grid,
+    Typography,
     TextField
 } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import { useSnackbar } from "notistack";
 
 import rest from "../Rest";
@@ -17,14 +23,57 @@ import { SERVER } from "../../constants";
 
 const RESEND_TIMEOUT = 60;
 
+const useStyles = makeStyles({
+    root: {
+        width: "100%",
+        maxWidth: 760,
+        margin: "0.5rem",
+    },
+    card: {
+        marginBottom: 10,
+    },
+    cardHeader: {
+        backgroundColor: "#F7F7F7",
+        borderBottom: "1px solid #e9ecef",
+    },
+    actions: {
+        display: "flex",
+        gap: 8,
+        flexWrap: "wrap",
+        marginTop: 12,
+    },
+    serviceRow: {
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        flexWrap: "wrap",
+    },
+    dangerHeader: {
+        backgroundColor: "#F7F7F7",
+        borderBottom: "1px solid #e9ecef",
+        color: "#b00020",
+    },
+});
+
 const Personal = props => {
+    const classes = useStyles();
     const { enqueueSnackbar } = useSnackbar();
 
     const auth = props.auth;
     const user = props.app.users.find(u => u.id === auth.user_id);
-    const isGoogleLinked = user?.google_linked;
+    const history = props.history;
+    const locationSearch = props.location?.search || "";
+    const userName = user?.name || "";
+    const userEmail = user?.email || "";
+    const userPhone = user?.phone_number || "";
+    const userGoogleLinked = !!user?.google_linked;
+    const [googleLinked, setGoogleLinked] = useState(userGoogleLinked);
 
-    const [email, setEmail] = useState(user?.email || "");
+    const [name, setName] = useState(userName);
+    const [savingName, setSavingName] = useState(false);
+    const [nameError, setNameError] = useState("");
+
+    const [email, setEmail] = useState(userEmail);
     const [emailCode, setEmailCode] = useState("");
     const [emailStep, setEmailStep] = useState(1);
     const [savingEmail, setSavingEmail] = useState(false);
@@ -33,7 +82,7 @@ const Personal = props => {
     const [emailError, setEmailError] = useState("");
     const [emailCodeError, setEmailCodeError] = useState("");
 
-    const [phone, setPhone] = useState(user?.phone_number || "");
+    const [phone, setPhone] = useState(userPhone);
     const [phoneCode, setPhoneCode] = useState("");
     const [phoneStep, setPhoneStep] = useState(1);
     const [savingPhone, setSavingPhone] = useState(false);
@@ -55,12 +104,30 @@ const Personal = props => {
     const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
-        setEmail(user?.email || "");
-    }, [user?.email]);
+        setName(userName);
+    }, [userName]);
 
     useEffect(() => {
-        setPhone(user?.phone_number || "");
-    }, [user?.phone_number]);
+        setEmail(userEmail);
+    }, [userEmail]);
+
+    useEffect(() => {
+        setPhone(userPhone);
+    }, [userPhone]);
+
+    useEffect(() => {
+        setGoogleLinked(userGoogleLinked);
+    }, [userGoogleLinked]);
+
+    useEffect(() => {
+        const search = new URLSearchParams(locationSearch);
+
+        if (search.get("google_connected") === "1") {
+            setGoogleLinked(true);
+            enqueueSnackbar("Google успешно привязан", { variant: "success" });
+            history.replace("/settings/personal");
+        }
+    }, [enqueueSnackbar, history, locationSearch]);
 
     useEffect(() => {
         if (emailResendLeft <= 0) return;
@@ -106,6 +173,15 @@ const Personal = props => {
         return "";
     };
 
+    const validateName = value => {
+        const v = (value || "").trim();
+
+        if (!v) return "Имя обязательно";
+        if (v.length < 2) return "Имя должно быть не короче 2 символов";
+
+        return "";
+    };
+
     const validatePassword = () => {
         let ok = true;
 
@@ -137,6 +213,45 @@ const Personal = props => {
         }
 
         return ok;
+    };
+
+    const changeName = () => {
+        const err = validateName(name);
+        setNameError(err);
+        if (err) return;
+
+        const nextName = name.trim();
+
+        if (nextName === userName) {
+            return;
+        }
+
+        setSavingName(true);
+
+        rest("users/me", "PATCH", {
+            name: nextName
+        })
+            .then(res => {
+                if (res.ok || res.body?.ok) {
+                    setName(nextName);
+                    enqueueSnackbar(
+                        res.body?.message || "Имя успешно изменено",
+                        { variant: "success" }
+                    );
+                    rest("upd");
+                } else {
+                    enqueueSnackbar(
+                        res.body?.message || "Ошибка изменения имени",
+                        { variant: "error" }
+                    );
+                }
+            })
+            .catch(() => {
+                enqueueSnackbar("Ошибка сети", { variant: "error" });
+            })
+            .finally(() => {
+                setSavingName(false);
+            });
     };
 
     const requestEmailChange = () => {
@@ -343,6 +458,7 @@ const Personal = props => {
         rest("auth/social/google/disconnect", "POST")
             .then(res => {
                 if (res.body?.ok) {
+                    setGoogleLinked(false);
                     enqueueSnackbar(
                         res.body.message || "Google успешно отвязан",
                         { variant: "success" }
@@ -391,13 +507,56 @@ const Personal = props => {
     };
 
     return (
-        <div style={{ padding: 20, maxWidth: 720 }}>
-            <h1>Личные настройки</h1>
+        <div className={classes.root}>
+            <Card className={classes.card}>
+                <CardHeader
+                    title="Личные настройки"
+                    subheader={userEmail}
+                    className={classes.cardHeader}
+                    titleTypographyProps={{ variant: "h5" }}
+                />
+                <CardContent>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField
+                                label="Имя"
+                                fullWidth
+                                margin="dense"
+                                value={name}
+                                error={!!nameError}
+                                helperText={nameError}
+                                onChange={e => {
+                                    setName(e.target.value);
+                                    if (nameError) {
+                                        setNameError(validateName(e.target.value));
+                                    }
+                                }}
+                            />
 
-            <h3>Имя: {user?.name}</h3>
+                            <div className={classes.actions}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={changeName}
+                                    disabled={savingName || name.trim() === userName}
+                                >
+                                    Сохранить имя
+                                </Button>
+                            </div>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
 
-            <div style={{ marginTop: 24 }}>
-                <h2>Изменение email</h2>
+            <Card className={classes.card}>
+                <CardHeader
+                    title="Изменение email"
+                    className={classes.cardHeader}
+                    titleTypographyProps={{ variant: "subtitle1" }}
+                />
+                <CardContent>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
 
                 <TextField
                     label="Новый email"
@@ -433,7 +592,7 @@ const Personal = props => {
                     />
                 )}
 
-                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div className={classes.actions}>
                     {emailStep === 1 ? (
                         <Button
                             variant="contained"
@@ -476,10 +635,20 @@ const Personal = props => {
                         </>
                     )}
                 </div>
-            </div>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
 
-            <div style={{ marginTop: 32 }}>
-                <h2>Изменение телефона</h2>
+            <Card className={classes.card}>
+                <CardHeader
+                    title="Изменение телефона"
+                    className={classes.cardHeader}
+                    titleTypographyProps={{ variant: "subtitle1" }}
+                />
+                <CardContent>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
 
                 <TextField
                     label="Новый телефон"
@@ -515,7 +684,7 @@ const Personal = props => {
                     />
                 )}
 
-                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div className={classes.actions}>
                     {phoneStep === 1 ? (
                         <Button
                             variant="contained"
@@ -558,10 +727,20 @@ const Personal = props => {
                         </>
                     )}
                 </div>
-            </div>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
 
-            <div style={{ marginTop: 32 }}>
-                <h2>Смена пароля</h2>
+            <Card className={classes.card}>
+                <CardHeader
+                    title="Смена пароля"
+                    className={classes.cardHeader}
+                    titleTypographyProps={{ variant: "subtitle1" }}
+                />
+                <CardContent>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
 
                 <TextField
                     label="Текущий пароль"
@@ -625,7 +804,7 @@ const Personal = props => {
                     }}
                 />
 
-                <div style={{ marginTop: 12 }}>
+                <div className={classes.actions}>
                     <Button
                         variant="contained"
                         color="primary"
@@ -635,15 +814,23 @@ const Personal = props => {
                         Изменить пароль
                     </Button>
                 </div>
-            </div>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
 
-            <div style={{ marginTop: 32 }}>
-                <h2>Внешние сервисы</h2>
+            <Card className={classes.card}>
+                <CardHeader
+                    title="Внешние сервисы"
+                    className={classes.cardHeader}
+                    titleTypographyProps={{ variant: "subtitle1" }}
+                />
+                <CardContent>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    {isGoogleLinked ? (
+                <div className={classes.serviceRow}>
+                    {googleLinked ? (
                         <>
-                            <span>Google привязан</span>
+                            <Typography variant="body1">Google привязан</Typography>
 
                             <Button
                                 variant="outlined"
@@ -662,10 +849,16 @@ const Personal = props => {
                         </Button>
                     )}
                 </div>
-            </div>
+                </CardContent>
+            </Card>
 
-            <div style={{ marginTop: 32 }}>
-                <h2 style={{ color: "#b00020" }}>Опасная зона</h2>
+            <Card className={classes.card}>
+                <CardHeader
+                    title="Опасная зона"
+                    className={classes.dangerHeader}
+                    titleTypographyProps={{ variant: "subtitle1" }}
+                />
+                <CardContent>
 
                 <Button
                     variant="contained"
@@ -674,7 +867,8 @@ const Personal = props => {
                 >
                     Удалить аккаунт
                 </Button>
-            </div>
+                </CardContent>
+            </Card>
 
             <Dialog
                 open={deleteOpen}
