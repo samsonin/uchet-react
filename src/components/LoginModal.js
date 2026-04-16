@@ -17,6 +17,7 @@ import Privacy from "./Privacy";
 import { makeStyles } from "@material-ui/core/styles";
 import { SERVER } from '../constants';
 import logo from '../images/logo.png';
+import googleIcon from '../images/google.svg';
 
 
 
@@ -523,13 +524,11 @@ export default connect(state => state, mapDispatchToProps)(props => {
         return true;
     }
 
-    const keyPress = e => {
-        if (e && e.key === 'Enter') {
+    const submitCurrent = e => {
+        if (e) e.preventDefault();
 
-            const func = eval(status)
-            if (typeof func === "function") func()
-
-        }
+        const func = eval(status)
+        if (typeof func === "function") func()
     }
 
     const signIn = () => {
@@ -966,12 +965,11 @@ export default connect(state => state, mapDispatchToProps)(props => {
         TransitionComponent={Transition}
         keepMounted
         onClose={() => props.close()}
-        onKeyPress={keyPress}
         fullWidth
         maxWidth="xs"
         PaperProps={{ className: classes.dialogPaper }}
     >
-        <div className={classes.formPane}>
+        <form className={classes.formPane} onSubmit={submitCurrent}>
             <div className={classes.formTop}>
                 <div className={classes.brandCompact}>
                     <img
@@ -1000,12 +998,13 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 </DialogActions>
 
                 {status !== 'invites' ? <Button
+                    type="button"
                     onClick={handleGoogleLogin}
                     disabled={requesting}
                     className={classes.googleButton}
                 >
                     <img
-                        src="https://www.svgrepo.com/show/355037/google.svg"
+                        src={googleIcon}
                         alt="google"
                         className={classes.googleIcon}
                     />
@@ -1014,6 +1013,6 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     : null
                 }
             </div>
-        </div>
+        </form>
     </Dialog>
 })

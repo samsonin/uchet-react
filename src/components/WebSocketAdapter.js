@@ -74,8 +74,9 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
             };
 
             ws.onerror = e => {
-
-                console.log('error', e)
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log('WebSocket error', e)
+                }
 
             }
 
