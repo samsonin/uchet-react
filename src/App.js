@@ -33,7 +33,7 @@ import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
 import { Records } from "./components/Records";
-// import Docs from "./components/Settings/Docs";
+import Docs from "./components/Settings/Docs";
 import Daily from "./components/Daily";
 import LoginModal from "./components/LoginModal";
 import Prepaids from "./components/Prepaids";
@@ -354,7 +354,7 @@ const App = props => {
                                 }
                                 <Route path="/settings/config" component={Config} />
                                 <Route path="/settings/fields" component={Fields} />
-                                {/*<Route path="/settings/docs" component={Docs}/>*/}
+                                <Route path="/settings/docs" component={Docs} />
                                 <Route path="/integration/mango"
                                     component={() => <IntegrationMango
                                         org_id={props.auth.organization_id}

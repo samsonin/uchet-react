@@ -368,6 +368,13 @@ const mapDispatchToProps = dispatch => bindActionCreators({
     init_user,
 }, dispatch);
 
+const socialProviders = [
+    { id: 'google', label: 'Google' },
+    { id: 'vk', label: 'VK' },
+    { id: 'yandex', label: 'Yandex' },
+    { id: 'sber', label: 'Sber' },
+];
+
 export default connect(state => state, mapDispatchToProps)(props => {
 
     // signIn, preRestore, restore, preRegister, register, privacy, license, invites
@@ -446,7 +453,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     const { data, text } = await readAuthResponse(res);
 
                     if (!res || (res.status !== 200 && res.status !== 201)) {
-                        enqueueSnackbar(data?.message || data?.error || 'Ошибка регистрации через Google', {
+                        enqueueSnackbar(data?.message || data?.error || 'Ошибка регистрации через соцсервис', {
                             variant: 'error'
                         });
                         return;
@@ -469,11 +476,11 @@ export default connect(state => state, mapDispatchToProps)(props => {
                         return;
                     }
 
-                    enqueueSnackbar(data?.message || 'Не удалось продолжить регистрацию через Google', {
+                    enqueueSnackbar(data?.message || 'Не удалось продолжить регистрацию через соцсервис', {
                         variant: 'error'
                     });
                 })
-                .catch(() => enqueueSnackbar('Ошибка сети при регистрации через Google', {
+                .catch(() => enqueueSnackbar('Ошибка сети при регистрации через соцсервис', {
                     variant: 'error'
                 }))
                 .finally(() => setRequesting(false));
@@ -499,8 +506,8 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     }, [])
 
-    const handleGoogleLogin = () => {
-        window.location.href = SERVER + '/auth/social/google/redirect';
+    const handleSocialLogin = provider => {
+        window.location.href = `${SERVER}/auth/social/${provider}/redirect`;
     };
 
     const isLoginValid = login => {
@@ -997,19 +1004,20 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     {statuses[status].buttons.map(b => renderButton(b))}
                 </DialogActions>
 
-                {status !== 'invites' ? <Button
+                {status !== 'invites' ? socialProviders.map(provider => <Button
+                    key={'social-login-' + provider.id}
                     type="button"
-                    onClick={handleGoogleLogin}
+                    onClick={() => handleSocialLogin(provider.id)}
                     disabled={requesting}
                     className={classes.googleButton}
                 >
-                    <img
+                    {provider.id === 'google' && <img
                         src={googleIcon}
                         alt="google"
                         className={classes.googleIcon}
-                    />
-                    Вход через Google
-                </Button>
+                    />}
+                    Вход через {provider.label}
+                </Button>)
                     : null
                 }
             </div>

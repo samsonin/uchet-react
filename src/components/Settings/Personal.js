@@ -23,6 +23,25 @@ import { SERVER } from "../../constants";
 
 const RESEND_TIMEOUT = 60;
 
+const socialProviders = [
+    { id: "google", label: "Google" },
+    { id: "vk", label: "VK" },
+    { id: "yandex", label: "Yandex" },
+    { id: "sber", label: "Sber" },
+];
+
+const getSocialLinks = user => socialProviders.reduce((result, provider) => ({
+    ...result,
+    [provider.id]: !!user?.[`${provider.id}_linked`],
+}), {});
+
+const socialErrors = {
+    GOOGLE_ALREADY_LINKED: "Google уже привязан к другому пользователю",
+    VK_ALREADY_LINKED: "VK уже привязан к другому пользователю",
+    YANDEX_ALREADY_LINKED: "Yandex уже привязан к другому пользователю",
+    SBER_ALREADY_LINKED: "Sber уже привязан к другому пользователю",
+};
+
 const useStyles = makeStyles({
     root: {
         width: "100%",
@@ -48,6 +67,20 @@ const useStyles = makeStyles({
         gap: 12,
         flexWrap: "wrap",
     },
+    serviceList: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+    },
+    serviceItem: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        flexWrap: "wrap",
+        padding: "10px 0",
+        borderBottom: "1px solid #eef1f5",
+    },
     dangerHeader: {
         backgroundColor: "#F7F7F7",
         borderBottom: "1px solid #e9ecef",
@@ -66,8 +99,7 @@ const Personal = props => {
     const userName = user?.name || "";
     const userEmail = user?.email || "";
     const userPhone = user?.phone_number || "";
-    const userGoogleLinked = !!user?.google_linked;
-    const [googleLinked, setGoogleLinked] = useState(userGoogleLinked);
+    const [linkedProviders, setLinkedProviders] = useState(getSocialLinks(user));
 
     const [name, setName] = useState(userName);
     const [savingName, setSavingName] = useState(false);
@@ -116,15 +148,48 @@ const Personal = props => {
     }, [userPhone]);
 
     useEffect(() => {
-        setGoogleLinked(userGoogleLinked);
-    }, [userGoogleLinked]);
+        setLinkedProviders(getSocialLinks(user));
+    }, [user]);
+
+    useEffect(() => {
+        rest("users/me")
+            .then(res => {
+                if (!res.ok || !res.body) return;
+
+                setLinkedProviders(prev => socialProviders.reduce((result, provider) => ({
+                    ...result,
+                    [provider.id]: res.body[`${provider.id}_linked`] === undefined
+                        ? prev[provider.id]
+                        : !!res.body[`${provider.id}_linked`],
+                }), {}));
+            });
+    }, []);
 
     useEffect(() => {
         const search = new URLSearchParams(locationSearch);
 
-        if (search.get("google_connected") === "1") {
-            setGoogleLinked(true);
-            enqueueSnackbar("Google успешно привязан", { variant: "success" });
+        let handled = false;
+
+        socialProviders.forEach(provider => {
+            const value = search.get(`${provider.id}_connected`);
+
+            if (value === "1") {
+                handled = true;
+                setLinkedProviders(prev => ({ ...prev, [provider.id]: true }));
+                enqueueSnackbar(`${provider.label} успешно привязан`, { variant: "success" });
+            }
+
+            if (value === "0") {
+                handled = true;
+                setLinkedProviders(prev => ({ ...prev, [provider.id]: false }));
+                enqueueSnackbar(
+                    socialErrors[search.get("error")] || `Ошибка привязки ${provider.label}`,
+                    { variant: "error" }
+                );
+            }
+        });
+
+        if (handled) {
             history.replace("/settings/personal");
         }
     }, [enqueueSnackbar, history, locationSearch]);
@@ -442,30 +507,42 @@ const Personal = props => {
             });
     };
 
-    const linkGoogle = () => {
-        const storedAuth = JSON.parse(window.localStorage.getItem('auth') || '{}');
-        const token = auth.jwt || storedAuth.jwt;
+    const getToken = () => {
+        let storedAuth = {};
+
+        try {
+            storedAuth = JSON.parse(window.localStorage.getItem('auth') || '{}');
+        } catch (e) {
+            storedAuth = {};
+        }
+
+        return auth.jwt || storedAuth.jwt;
+    };
+
+    const linkProvider = provider => {
+        const token = getToken();
 
         if (!token) {
             enqueueSnackbar("Ошибка авторизации", { variant: "error" });
             return;
         }
 
-        window.location.href = `${SERVER}/auth/social/google/connect?token=${encodeURIComponent(token)}`;
+        window.location.href = `${SERVER}/auth/social/${provider.id}/connect?token=${encodeURIComponent(token)}`;
     };
 
-    const unlinkGoogle = () => {
-        rest("auth/social/google/disconnect", "POST")
+    const unlinkProvider = provider => {
+        rest(`auth/social/${provider.id}/disconnect`, "POST")
             .then(res => {
                 if (res.body?.ok) {
-                    setGoogleLinked(false);
+                    setLinkedProviders(prev => ({ ...prev, [provider.id]: false }));
                     enqueueSnackbar(
-                        res.body.message || "Google успешно отвязан",
+                        res.body.message || `${provider.label} успешно отвязан`,
                         { variant: "success" }
                     );
+                    rest("upd");
                 } else {
                     enqueueSnackbar(
-                        res.body?.message || "Ошибка отвязки Google",
+                        res.body?.message || `Ошибка отвязки ${provider.label}`,
                         { variant: "error" }
                     );
                 }
@@ -827,27 +904,36 @@ const Personal = props => {
                 />
                 <CardContent>
 
-                <div className={classes.serviceRow}>
-                    {googleLinked ? (
-                        <>
-                            <Typography variant="body1">Google привязан</Typography>
+                <div className={classes.serviceList}>
+                    {socialProviders.map(provider => {
+                        const linked = !!linkedProviders[provider.id];
 
-                            <Button
-                                variant="outlined"
-                                color="secondary"
-                                onClick={unlinkGoogle}
-                            >
-                                Отвязать
-                            </Button>
-                        </>
-                    ) : (
-                        <Button
-                            variant="contained"
-                            onClick={linkGoogle}
+                        return <div
+                            className={classes.serviceItem}
+                            key={"profile-social-" + provider.id}
                         >
-                            Привязать Google
-                        </Button>
-                    )}
+                            <Typography variant="body1">
+                                {provider.label}: {linked ? "привязан" : "не привязан"}
+                            </Typography>
+
+                            {linked ? (
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    onClick={() => unlinkProvider(provider)}
+                                >
+                                    Отвязать
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="contained"
+                                    onClick={() => linkProvider(provider)}
+                                >
+                                    Привязать
+                                </Button>
+                            )}
+                        </div>;
+                    })}
                 </div>
                 </CardContent>
             </Card>

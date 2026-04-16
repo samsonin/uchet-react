@@ -1,649 +1,433 @@
-import React, {Component, useEffect, useState} from 'react';
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import request from "./../Request";
-import {connect} from "react-redux";
-import {bindActionCreators} from "redux";
-import {upd_app} from "../../actions/actionCreator";
+import React, { useEffect, useMemo, useState } from "react";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import {
+    Button,
+    ButtonGroup,
+    Card,
+    CardContent,
+    CardHeader,
+    Divider,
+    Grid,
+    List,
+    ListItem,
+    ListItemText,
+    TextField,
+    Typography,
+} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import { useSnackbar } from "notistack";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import TextAlign from "@tiptap/extension-text-align";
+import Table from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
+import { Node, mergeAttributes } from "@tiptap/core";
 
-import CKEditor from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import '@ckeditor/ckeditor5-build-classic/build/translations/ru.js';
-import Grid from "@material-ui/core/Grid";
-import Button from "@material-ui/core/Button";
-import InputLabel from "@material-ui/core/InputLabel";
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Collapse from '@material-ui/core/Collapse';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import AddIcon from '@material-ui/icons/Add';
+import { upd_app } from "../../actions/actionCreator";
+import rest from "../Rest";
+import request from "../Request";
 
-import rest from './../Rest'
+const useStyles = makeStyles({
+    root: {
+        width: "100%",
+        margin: "0.5rem",
+    },
+    card: {
+        marginBottom: 10,
+    },
+    cardHeader: {
+        backgroundColor: "#F7F7F7",
+        borderBottom: "1px solid #e9ecef",
+    },
+    list: {
+        maxHeight: "calc(100vh - 180px)",
+        overflow: "auto",
+    },
+    toolbar: {
+        display: "flex",
+        gap: 8,
+        flexWrap: "wrap",
+        marginBottom: 12,
+    },
+    variables: {
+        display: "flex",
+        gap: 8,
+        flexWrap: "wrap",
+        marginTop: 12,
+    },
+    editor: {
+        border: "1px solid #d9dfe7",
+        borderRadius: 4,
+        minHeight: 440,
+        padding: 14,
+        background: "#fff",
+        "& .ProseMirror": {
+            minHeight: 410,
+            outline: "none",
+        },
+        "& table": {
+            borderCollapse: "collapse",
+            width: "100%",
+        },
+        "& td, & th": {
+            border: "1px solid #999",
+            padding: 4,
+        },
+        "& input[type='button']": {
+            border: "1px solid #9aa7b5",
+            borderRadius: 4,
+            background: "#eef3f8",
+            color: "#263238",
+            padding: "2px 6px",
+            margin: "0 2px",
+        },
+    },
+});
+
+const TemplateVariable = Node.create({
+    name: "templateVariable",
+    group: "inline",
+    inline: true,
+    atom: true,
+
+    addAttributes() {
+        return {
+            name: {
+                default: "",
+                parseHTML: element => element.getAttribute("name") || "",
+            },
+            value: {
+                default: "",
+                parseHTML: element => element.getAttribute("value") || "",
+            },
+        };
+    },
+
+    parseHTML() {
+        return [
+            {
+                tag: "input[type='button']",
+            },
+        ];
+    },
+
+    renderHTML({ HTMLAttributes }) {
+        return ["input", mergeAttributes(HTMLAttributes, { type: "button" })];
+    },
+});
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     upd_app
 }, dispatch);
 
-let serverDocs = {};
+const getDocsSource = appDocs => Array.isArray(appDocs)
+    ? appDocs
+    : appDocs?.docs || [];
 
-const monthes = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
+const getDocId = doc => doc?.id;
+const getDocName = doc => doc?.name || doc?.doc_name || "";
+const getDocTitle = doc => doc?.title || doc?.doc_title || "";
+const getDocText = doc => doc?.text || doc?.doc_text || "";
+
+const updateDocShape = (doc, title, text) => ({
+    ...doc,
+    ...(doc.title !== undefined ? { title } : {}),
+    ...(doc.doc_title !== undefined ? { doc_title: title } : {}),
+    ...(doc.text !== undefined ? { text } : {}),
+    ...(doc.doc_text !== undefined ? { doc_text: text } : {}),
+});
 
 const Docs = props => {
+    const classes = useStyles();
+    const { enqueueSnackbar } = useSnackbar();
 
-    const [buttonListIsOpen, setButtonListIsOpen] = useState({})
-    const [currentDocument, setCurrentDocument] = useState(6)
-    // const [docs, setDocs] = useState([])
-    const [editor, setEditor] = useState({})
+    const docs = useMemo(() => getDocsSource(props.app.docs), [props.app.docs]);
+    const fields = props.app.fields?.allElements || [];
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [title, setTitle] = useState("");
+    const [savedHtml, setSavedHtml] = useState("");
+    const [dirty, setDirty] = useState(false);
+    const [saving, setSaving] = useState(false);
 
-    const [providerId, setProviderId] = useState(() => {
-        return props.app.providers[0].id
-    })
-    const [orderId, setOrderId] = useState()
-    const [customerId, setCustomerId] = useState()
-    const [goodId, setGoodId] = useState()
+    const currentDoc = docs[currentIndex] || docs[0];
 
-    // const [providerIds, setProviderIds] = useState([])
-    const [orderIds, setOrderIds] = useState([])
-    const [customerIds, setCustomerIds] = useState([])
-    const [goodIds, setGoodIds] = useState([])
-
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Underline,
+            TextAlign.configure({
+                types: ["heading", "paragraph"],
+            }),
+            Table.configure({
+                resizable: true,
+            }),
+            TableRow,
+            TableHeader,
+            TableCell,
+            TemplateVariable,
+        ],
+        content: "",
+        onUpdate: ({ editor }) => {
+            setDirty(editor.getHTML() !== savedHtml);
+        },
+    });
 
     useEffect(() => {
-
-        if (props.app.current_stock_id) {
-
-            rest('docs/' + props.app.current_stock_id)
-                .then(data => {
-
-                    // console.log(data)
-
-                })
-
+        if (!docs.length) {
+            setCurrentIndex(0);
+            return;
         }
 
-    }, [props.app.current_stock_id])
+        if (!docs[currentIndex]) {
+            setCurrentIndex(0);
+        }
+    }, [currentIndex, docs]);
 
-    const handleOrderChange = orderId => {
+    useEffect(() => {
+        if (!editor || !currentDoc) return;
 
-        rest('orders/' + props.app.current_stock_id + '/' + orderId)
-            .then(data => {
+        const text = getDocText(currentDoc);
+        const nextTitle = getDocTitle(currentDoc);
 
-                // console.log(data)
+        setTitle(nextTitle);
+        setSavedHtml(text);
+        setDirty(false);
+        editor.commands.setContent(text || "", false);
+    }, [currentDoc, editor]);
 
-            })
-    }
+    const updateDocsInStore = (nextDoc, html) => {
+        const nextDocs = docs.map((doc, index) => index === currentIndex
+            ? updateDocShape(nextDoc, title.trim(), html)
+            : doc
+        );
 
-    const handleCustomerChange = e => {
+        const source = props.app.docs;
 
-        request({
-            action: 'getCustomer',
-            stockId: props.app.current_stock_id,
-            customerId: e.target.value,
-        }, '/settings', props.auth.jwt)
-            .then(data => {
+        props.upd_app({
+            docs: Array.isArray(source)
+                ? nextDocs
+                : { ...source, docs: nextDocs }
+        });
+    };
 
-                if (data.result) {
-                    let newDocs = props.app.docs;
-                    newDocs.currentCustomer = data.currentCustomer;
-                    updPropsDocs(newDocs);
-                }
-            })
+    const fallbackSave = (doc, html) => request({
+        action: "saveDoc",
+        name: getDocName(doc),
+        text: html,
+    }, "/settings", props.auth.jwt);
 
-    }
+    const saveDoc = async () => {
+        if (!editor || !currentDoc) return;
 
-    const handleProviderChange = e => {
+        const html = editor.getHTML();
 
-        request({
-            action: 'getProvider',
-            stockId: props.app.current_stock_id,
-            providerId: e.target.value,
-        }, '/settings', props.auth.jwt)
-            .then(data => {
+        if (!html || html === "<p></p>") {
+            enqueueSnackbar("Документ пустой", { variant: "error" });
+            return;
+        }
 
-                if (data.result) {
-                    let newDocs = props.app.docs;
-                    newDocs.currentProvider = data.currentProvider;
-                    updPropsDocs(newDocs);
-                }
-            })
-    }
-
-    const handleGoodChange = (e) => {
-
-        request({
-            action: 'getGood',
-            goodId: e.target.value,
-        }, '/settings', props.auth.jwt)
-            .then(data => {
-
-                if (data.result) {
-                    let newDocs = props.app.docs;
-                    newDocs.currentGood = data.currentGood;
-                    updPropsDocs(newDocs);
-                }
-            })
-
-    }
-
-    const inputToA = html => {
+        setSaving(true);
 
         try {
-
-            let offset = html.indexOf('<input');
-
-            while (offset !== -1) {
-
-                let offset2 = html.indexOf('>', offset);
-                let beforeStr = html.slice(0, offset);
-                let afterStr = html.slice(offset2 + 1);
-
-                let div = document.createElement('div');
-                div.innerHTML = html.slice(offset, offset2 + 1);       //<input type="button" name="date1" value="дата приема">
-                let inputs = div.getElementsByTagName('input');
-
-                if (inputs.length === 1) {
-
-                    let name = inputs[0].getAttribute("name");
-                    let value = 'НЕИЗВЕСТНАЯ ПЕРЕМЕННАЯ';
-                    for (let val in props.app.fields.allElements) {
-                        props.app.fields.allElements[val].map(v => {
-                            if (v.name === name) value = v.value;
-                        })
-                    }
-                    if (value === 'НЕИЗВЕСТНАЯ ПЕРЕМЕННАЯ') console.log(name, value)
-
-                    value = value.charAt(0).toUpperCase() + value.substring(1).toLowerCase();
-                    inputs[0].replaceWith(createA(value));
-                } else {
-                    console.log(html)
-                }
-                html = beforeStr + div.innerHTML + afterStr;
-
-                offset = html.indexOf('<input');
-
-            }
-        } catch (e) {
-        }
-        return html;
-
-    }
-
-    const aToInput = (html, needValues = false) => {
-
-        let offset = html.indexOf('<a ');
-        while (offset !== -1) {
-
-            let offset2 = html.indexOf('</a>', offset);
-            let beforeStr = html.slice(0, offset);
-            let afterStr = html.slice(offset2 + 4);
-
-            let div = document.createElement('div');
-            div.innerHTML = html.slice(offset, offset2 + 4);       //<input type="button" name="date1" value="дата приема">
-
-            let as = div.getElementsByTagName('a');
-            let strongs = as[0].getElementsByTagName('strong');
-            let value = strongs.length > 0 ? strongs[0].innerHTML : as[0].innerHTML;
-            value = value.toLowerCase().trim();
-
-            let [name, probablyName, probablyValue] = ['', '', ''];
-            for (let val in props.app.fields.allElements) {
-                props.app.fields.allElements[val].map(v => {
-                    let needValue = v.value.toLowerCase().trim();
-                    if (needValue === value) name = v.name;
-                    else if (value.indexOf(needValue) !== -1) {
-                        console.log('значение с лишней строкой', value);
-                        probablyName = v.name;
-                        probablyValue = needValue;
-                    }
+            const id = getDocId(currentDoc);
+            const res = id
+                ? await rest("docs/" + id, "PATCH", {
+                    name: getDocName(currentDoc),
+                    title: title.trim(),
+                    text: html,
                 })
-            }
-            // console.log(name, value)
-            if (name === '') {
-                if (probablyName !== '') {
-                    [name, value] = [probablyName, probablyValue]
-                } else {
-                    console.log('value', value)
-                    console.log('html', html)
-                    return false
-                }
+                : { status: 404 };
+
+            if (res.status >= 200 && res.status < 300 && res.body?.ok !== false) {
+                updateDocsInStore(currentDoc, html);
+                setSavedHtml(html);
+                setDirty(false);
+                enqueueSnackbar(res.body?.message || "Документ сохранен", { variant: "success" });
+                return;
             }
 
-            if (needValues) {
+            const fallback = await fallbackSave(currentDoc, html);
 
-                let span = document.createElement('span');
-                let value = '';
-                let currentStock = props.app.stocks.find(v => props.app.current_stock_id === +v.id);
-                let date = new Date();
-
-                const orderIndexes = ['id', 'visual_defects', 'for_client', 'sum', 'sum2', 'defect', 'password'];
-                if (orderIndexes.indexOf(name) !== -1) {
-                    value = props.app.docs.currentOrder[name];
-                }
-                const customerIndexes = ['fio', 'phone_number', 'referalId', 'birthday', 'birthPlace', 'doc_sn', 'doc_date', 'doc_division_name', 'doc_division_code', 'address'];
-                if (customerIndexes.indexOf(name) !== -1) {
-                    value = props.app.docs.currentCustomer[name];
-                }
-
-                const providerIndexes = ['name'];
-                if (providerIndexes.indexOf(name) !== -1) {
-                    value = props.app.docs.currentProvider[name];
-                }
-
-                const configIndexes = ['free_save', 'cost_after_free', 'days_after_finished_notification', 'remont_warranty', 'time_remont'];
-                if (configIndexes.indexOf(name) !== -1) {
-                    value = props.app.config[name];
-                }
-                const goodIndexes = ['group', 'model', 'imei', 'cost'];
-                if (goodIndexes.indexOf(name) !== -1) {
-                    value = props.app.docs.currentGood[name];
-                }
-
-                switch (name) {
-                    case 'today' :
-                        value = date.getDate() + ' ' + monthes[date.getMonth()].toLowerCase() + ' ' + date.getFullYear() + 'г.';
-                        break;
-                    case 'orderTime' :
-                        value = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
-                        break;
-                    case 'created_at' :
-                        value = date.getDate() + ' ' + monthes[date.getMonth()].toLowerCase() + ' ' + date.getFullYear() + 'г. ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
-                        break;
-                    case 'key' :
-                        // TODO убрать заглушку
-                        value = 'uchet.store/c?298y;54opj;3;';
-                        break;
-                    case 'sbso' :
-                        value = 'sbso';
-                        break;
-                    case 'prepaid' :
-                        value = 0;
-                        try {
-                            let json = JSON.parse(props.app.docs.currentOrder.json);
-                            value = json.payments[0].sum;
-                        } catch (e) {
-                        }
-                        break;
-                    case 'equipment' :
-                        value = 'equipment';
-                        break;
-                    // case 'master_id' :
-                    //     value = props.app.users.find(v => +v.id === +currentOrder.master_id).name;
-                    //     break;
-
-                    case 'remark' :
-                        try {
-                            value = JSON.parse(props.app.docs.currentOrder.remark)[0]['remark'];
-                        } catch (e) {
-                        }
-                        break;
-
-                    // Showcase
-                    case 'visualDefect' :
-                        value = 'visualDefect';
-                        break;
-                    case 'ransomdate' :
-                        value = '2020-01-31';
-                        break;
-                    case 'warranty' :
-                        value = props.app.config.goods_phones_warranty;
-                        break;
-                    case 'organization_legal_address' :
-                        value = props.app.organization.legal_address;
-                        break;
-                    case 'organization_ogrn' :
-                        value = props.app.organization.ogrn;
-                        break;
-                    case 'organization_inn' :
-                        value = props.app.organization.inn;
-                        break;
-                    case 'organization_kpp' :
-                        value = props.app.organization.kpp;
-                        break;
-                    case 'organization_organization' :
-                        value = props.app.organization.organization;
-                        break;
-                    case 'access_point_phone_number' :
-                        value = currentStock.phone_number;
-                        break;
-                    case 'access_point_address' :
-                        value = currentStock.address;
-                        break;
-                    case 'all_model' :
-                        value = 'all_model';
-                        break;
-                    case 'name_sale' :
-                        value = 'name_sale';
-                        break;
-                    default:
-                        break;
-                }
-
-                span.innerHTML = value;
-                as[0].replaceWith(span);
-
-            } else {
-                let input = document.createElement('input');
-                input.setAttribute('type', 'button');
-                input.setAttribute('name', name);
-                input.setAttribute('value', value);
-                as[0].replaceWith(input);
+            if (fallback?.result || fallback?.ok) {
+                updateDocsInStore(currentDoc, html);
+                setSavedHtml(html);
+                setDirty(false);
+                enqueueSnackbar("Документ сохранен", { variant: "success" });
+                return;
             }
 
-            html = beforeStr + div.innerHTML + afterStr;
-
-            offset = html.indexOf('<a ');
-
+            enqueueSnackbar(fallback?.message || res.body?.message || "Ошибка сохранения документа", {
+                variant: "error",
+            });
+        } catch (error) {
+            enqueueSnackbar("Ошибка сети", { variant: "error" });
+        } finally {
+            setSaving(false);
         }
+    };
 
-        // console.log(html)
-        // console.log('needValues', needValues)
+    const insertVariable = field => {
+        if (!editor) return;
 
-        return html;
-
-    }
-
-    const updProps = (isNeedUpdate, newText = false) => {
-
-        let newDocs = props.app.docs;
-        newDocs.isNeedUpdate = isNeedUpdate;
-        if (newText !== false) newDocs.docs[currentDocument].doc_text = newText;
-        updPropsDocs(newDocs);
-
-    }
-
-    const updPropsDocs = newDocs => {
-        const {upd_app} = props;
-        upd_app({docs: newDocs});
-    }
-
-    const saveDoc = () => {
-
-        let name = props.app.docs.docs[currentDocument].doc_name;
-        let textA = editor.getData();
-        let text = aToInput(textA);
-
-        if (!text) {
-            console.log('U\'re try save blank')
-            return false;
-        }
-
-
-        request({
-            action: 'saveDoc',
-            name,
-            text
-        }, '/settings', props.auth.jwt)
-            .then(data => {
-
-                if (data.result) {
-
-                    serverDocs[currentDocument] = textA;
-                    updProps(false, textA);
-
-                }
+        editor
+            .chain()
+            .focus()
+            .insertContent({
+                type: "templateVariable",
+                attrs: {
+                    name: field.name,
+                    value: field.value || field.name,
+                },
             })
+            .run();
+    };
 
+    const selectDoc = index => {
+        if (dirty && !window.confirm("Есть несохраненные изменения. Перейти к другому документу?")) {
+            return;
+        }
+
+        setCurrentIndex(index);
+    };
+
+    if (!docs.length) {
+        return <div className={classes.root}>
+            <Card className={classes.card}>
+                <CardHeader
+                    title="Документы"
+                    className={classes.cardHeader}
+                    titleTypographyProps={{ variant: "h5" }}
+                />
+                <CardContent>
+                    <Typography>Документы еще не загружены.</Typography>
+                </CardContent>
+            </Card>
+        </div>;
     }
 
-    const createA = (v, needStr = false) => {
-
-        let a = document.createElement('a');
-        let div = document.createElement('div');
-        a.innerHTML = v;
-        a.href = v;
-        div.append(a);
-        return needStr ? div.innerHTML : a;
-
-    }
-
-    const insertVariable = (name, value, index) => {
-
-        console.log(name, value, index)
-
-        // let strA = createA(value, true);
-        // let editor = editor;
-        // let position = editor.model.document.selection.anchor;
-        // editor.model.change(writer => writer.insert(strA, position))
-
-    }
-
-    const buttonListToggle = index => {
-
-        setButtonListIsOpen(prev => {
-
-            let newState = {...prev}
-
-            newState[index] = !newState[index]
-
-            return newState
-        });
-
-    }
-
-    const renderButtons = () => {
-
-        return Object.entries(props.app.fields.alliases)
-            .map(([index, name]) =>
-
-                <List component="nav"
-                      key={'listdocsnavliehrv' + index}>
-                    <ListItem button onClick={() => buttonListToggle(index)}>
-                        <ListItemText primary={name}/>
-                        {buttonListIsOpen[index]
-                            ? <ExpandMore/>
-                            : <ExpandLess/>}
-                    </ListItem>
-
-                    <Collapse in={buttonListIsOpen[index]} timeout="auto" unmountOnExit>
-                        <List component="div" disablePadding>
-                            {Object.values(props.app.fields.allElements)
-                                .filter(el => el.index === index)
-                                .map(v => v.is_valid
-                                    ? <ListItem button className=""
-                                                key={'listkeydocskjhrv' + v.value}
-                                                onClick={_ => insertVariable(v.name, v.value, index)}
-                                    >
-                                        <ListItemIcon>
-                                            <AddIcon/>
-                                        </ListItemIcon>
-                                        <ListItemText primary={v.value}/>
-                                    </ListItem>
-                                    : null
-                                )}
-
-                        </List>
-                    </Collapse>
-
-                </List>
-            )
-
-    }
-
-    if (+props.app.current_stock_id === 0) return <h3>Выберите точку</h3>;
-    if (!props.app.docs.docs) return <h3>Получаем данные...</h3>;
-
-    return (
-        <div className="App">
-
-            <FormControl variant="outlined">
-                <Select
-                    value={currentDocument}
-                    onChange={e => setCurrentDocument(e.target.value)}
-                    className="m-2 w-100"
-                    autoWidth
-                >
-                    {props.app.docs.docs
-                        .map((v, i) => <MenuItem value={i}
-                                                 key={"sdocsSelectKey" + v.id}>
-                            {v.doc_title}
-                        </MenuItem>)}
-                </Select>
-            </FormControl>
-
-            <Grid container spacing={2}>
-
-                <Grid item xs={9}>
-
-                    <CKEditor
-                        editor={ClassicEditor}
-                        config={
-                            {language: 'ru'}
-                        }
-                        data={props.app.docs.docs[currentDocument].doc_text}
-                        onChange={(event, editor) => {
-
-                            let data = editor.getData();
-                            if (!serverDocs[currentDocument]) serverDocs[currentDocument] = data;
-                            let needUpdate = false;
-
-                            let offset0 = data.indexOf('&nbsp;</a>');
-                            while (offset0 !== -1) {
-
-                                // TODO убрать любой символ за ссылку
-
-                                let beforeStr = data.slice(0, offset0);
-                                let afterStr = data.slice(offset0 + 10);
-                                let middleStr = "</a>&nbsp;";
-                                data = beforeStr + middleStr + afterStr;
-                                offset0 = data.indexOf('&nbsp;</a>');
-                            }
-
-                            offset0 = data.indexOf('&lt;');
-                            while (offset0 !== -1) {
-                                let offset1 = data.indexOf('&gt;', offset0);
-                                let beforeStr = data.slice(0, offset0);
-                                let middleStr = data.slice(offset0 + 4, offset1);
-                                let afterStr = data.slice(offset1 + 4);
-                                data = beforeStr + "<" + middleStr + ">" + afterStr;
-                                offset0 = data.indexOf('&lt;');
-                                needUpdate = true;
-                            }
-
-                            // updProps(serverDocs[currentDocument] !== editor.getData())
-                            updProps((serverDocs[currentDocument] !== editor.getData()) || needUpdate, data)
-
-                        }}
-                        onInit={editor => {
-                            setEditor(editor)
-                        }}
-                        onBlur={(event, editor) => {
-
-                        }}
-                        onFocus={(event, editor) => {
-
-                        }}
+    return <div className={classes.root}>
+        <Grid container spacing={2}>
+            <Grid item xs={12} md={3}>
+                <Card className={classes.card}>
+                    <CardHeader
+                        title="Документы"
+                        className={classes.cardHeader}
+                        titleTypographyProps={{ variant: "h6" }}
                     />
-
-                    <Button variant="contained" color="primary"
-                            disabled={!props.app.docs.isNeedUpdate}
-                            onClick={() => saveDoc()} className="m-1">
-                        Сохранить
-                    </Button>
-
-                    <h3>Результат:</h3>
-
-                    <FormControl variant="outlined" className="m-2">
-                        <InputLabel>
-                            {props.app.fields.alliases.remont}
-                        </InputLabel>
-                        <Select
-                            value={orderId}
-                            onChange={e => setOrderId(e.target.value)}
-                            className="m-2 w-100"
-                            autoWidth
+                    <List className={classes.list}>
+                        {docs.map((doc, index) => <ListItem
+                            button
+                            selected={index === currentIndex}
+                            onClick={() => selectDoc(index)}
+                            key={"settings-doc-" + (getDocId(doc) || index)}
                         >
-                            {orderIds.map(v =>
-                                <MenuItem value={v} key={"sdocsSelectOrder" + v}>
-                                    {v}
-                                </MenuItem>)}
-                        </Select>
-                    </FormControl>
-
-                    <FormControl variant="outlined" className="m-2">
-                        <InputLabel>
-                            {props.app.fields.alliases.customer}
-                        </InputLabel>
-                        <Select
-                            value={props.app.docs.currentCustomer.id}
-                            onChange={handleCustomerChange}
-                            className="m-2 w-100"
-                            autoWidth
-                        >
-                            {props.app.docs.customerIds.map(v =>
-                                <MenuItem value={v} key={"sdocsSelectOrder" + v}>
-                                    {v}
-                                </MenuItem>)}
-                        </Select>
-                    </FormControl>
-
-                    <FormControl variant="outlined" className="m-2">
-                        <InputLabel>
-                            {props.app.fields.alliases.providers}
-                        </InputLabel>
-                        <Select
-                            value={props.app.docs.currentProvider.id}
-                            onChange={handleProviderChange}
-                            className="m-2 w-100"
-                            autoWidth
-                        >
-                            {props.app.docs.providerIds.map(v =>
-                                <MenuItem value={v} key={"sdocsSelectOrder" + v}>
-                                    {v}
-                                </MenuItem>)}
-                        </Select>
-                    </FormControl>
-
-                    <FormControl variant="outlined" className="m-2">
-                        <InputLabel>
-                            {props.app.fields.alliases.good}
-                        </InputLabel>
-                        <Select
-                            value={props.app.docs.currentGood.id}
-                            onChange={handleGoodChange}
-                            className="m-2 w-100"
-                            autoWidth
-                        >
-                            {props.app.docs.goodIds.map(v =>
-                                <MenuItem value={v} key={"sdocsSelectOrder" + v}>
-                                    {v}
-                                </MenuItem>)}
-                        </Select>
-                    </FormControl>
-
-                    <CKEditor
-                        editor={ClassicEditor}
-                        disabled={true}
-                        config={
-                            {
-                                toolbar: [],
-                                removePlugins: ['Heading', 'Link'],
-                                isReadOnly: true,
-                            }
-                        }
-                        data={
-                            Object.keys(editor).length === 0
-                                ? ''
-                                : aToInput(editor.getData(), true)
-                        }
-                    />
-
-                </Grid>
-
-                <Grid item xs={3}>
-
-                    {renderButtons()}
-
-                </Grid>
-
+                            <ListItemText
+                                primary={getDocTitle(doc) || getDocName(doc)}
+                                secondary={getDocName(doc)}
+                            />
+                        </ListItem>)}
+                    </List>
+                </Card>
             </Grid>
 
-        </div>
-    )
+            <Grid item xs={12} md={9}>
+                <Card className={classes.card}>
+                    <CardHeader
+                        title="Редактирование документа"
+                        subheader={getDocName(currentDoc)}
+                        className={classes.cardHeader}
+                        titleTypographyProps={{ variant: "h5" }}
+                    />
+                    <CardContent>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                                <TextField
+                                    label="Название"
+                                    value={title}
+                                    onChange={event => {
+                                        setTitle(event.target.value);
+                                        setDirty(true);
+                                    }}
+                                    fullWidth
+                                    variant="outlined"
+                                    size="small"
+                                />
+                            </Grid>
 
-}
+                            <Grid item xs={12}>
+                                <div className={classes.toolbar}>
+                                    <ButtonGroup size="small" variant="outlined">
+                                        <Button onClick={() => editor?.chain().focus().toggleBold().run()}>B</Button>
+                                        <Button onClick={() => editor?.chain().focus().toggleItalic().run()}>I</Button>
+                                        <Button onClick={() => editor?.chain().focus().toggleUnderline().run()}>U</Button>
+                                    </ButtonGroup>
+
+                                    <ButtonGroup size="small" variant="outlined">
+                                        <Button onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>H2</Button>
+                                        <Button onClick={() => editor?.chain().focus().toggleBulletList().run()}>Список</Button>
+                                        <Button onClick={() => editor?.chain().focus().toggleOrderedList().run()}>1.2.</Button>
+                                    </ButtonGroup>
+
+                                    <ButtonGroup size="small" variant="outlined">
+                                        <Button onClick={() => editor?.chain().focus().setTextAlign("left").run()}>Лево</Button>
+                                        <Button onClick={() => editor?.chain().focus().setTextAlign("center").run()}>Центр</Button>
+                                        <Button onClick={() => editor?.chain().focus().setTextAlign("right").run()}>Право</Button>
+                                    </ButtonGroup>
+
+                                    <ButtonGroup size="small" variant="outlined">
+                                        <Button onClick={() => editor?.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run()}>
+                                            Таблица
+                                        </Button>
+                                        <Button onClick={() => editor?.chain().focus().addRowAfter().run()}>+ строка</Button>
+                                        <Button onClick={() => editor?.chain().focus().addColumnAfter().run()}>+ колонка</Button>
+                                    </ButtonGroup>
+
+                                    <ButtonGroup size="small" variant="outlined">
+                                        <Button onClick={() => editor?.chain().focus().undo().run()}>Назад</Button>
+                                        <Button onClick={() => editor?.chain().focus().redo().run()}>Вперед</Button>
+                                    </ButtonGroup>
+                                </div>
+
+                                <EditorContent editor={editor} className={classes.editor} />
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle2">Переменные</Typography>
+                                <div className={classes.variables}>
+                                    {fields
+                                        .filter(field => field.is_valid !== false)
+                                        .map(field => <Button
+                                            key={"settings-doc-field-" + field.id}
+                                            size="small"
+                                            variant="outlined"
+                                            onMouseDown={event => event.preventDefault()}
+                                            onClick={() => insertVariable(field)}
+                                        >
+                                            {field.value || field.name}
+                                        </Button>)}
+                                </div>
+                            </Grid>
+                        </Grid>
+
+                        <Divider style={{ margin: "16px 0" }} />
+
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            disabled={!dirty || saving}
+                            onClick={saveDoc}
+                        >
+                            Сохранить
+                        </Button>
+                    </CardContent>
+                </Card>
+            </Grid>
+        </Grid>
+    </div>;
+};
 
 export default connect(state => state, mapDispatchToProps)(Docs);
