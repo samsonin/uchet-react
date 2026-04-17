@@ -18,6 +18,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { SERVER } from '../constants';
 import logo from '../images/logo.png';
 import googleIcon from '../images/google.svg';
+import telegramIcon from '../images/telegram.svg';
+import yandexIcon from '../images/yandex.svg';
 
 
 
@@ -338,26 +340,55 @@ const useStyles = makeStyles((theme) => ({
             background: '#f8fafc',
         },
     },
-    googleButton: {
-        borderRadius: 12,
-        minHeight: 44,
+    socialSection: {
+        marginTop: 2,
+        paddingTop: 12,
+        borderTop: '1px solid #eef2f7',
+    },
+    socialTitle: {
+        margin: '0 0 10px',
+        color: '#64748b',
+        fontSize: 13,
+        fontWeight: 700,
+        letterSpacing: '0.04em',
+        textTransform: 'uppercase',
+    },
+    socialGrid: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,
+        overflowX: 'auto',
+        padding: '2px 0 4px',
+    },
+    socialButton: {
+        width: 44,
+        minWidth: 44,
+        height: 44,
+        borderRadius: 14,
+        padding: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         border: '1px solid #d7deea',
-        background: '#fff',
+        background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
         color: '#0f172a',
         textTransform: 'none',
         fontWeight: 600,
+        fontSize: 13,
+        boxShadow: '0 8px 18px rgba(15, 23, 42, 0.08)',
+        transition: 'box-shadow 140ms ease, border-color 140ms ease, background 140ms ease',
         '&:hover': {
-            background: '#f8fafc',
+            background: '#ffffff',
+            borderColor: '#b8c4d6',
+            boxShadow: '0 12px 24px rgba(15, 23, 42, 0.12)',
         },
     },
-    googleIcon: {
-        width: 20,
-        height: 20,
-        marginRight: 8,
+    socialIcon: {
+        width: 24,
+        height: 24,
+        objectFit: 'contain',
+        flexShrink: 0,
     },
     helperText: {
         display: 'none',
@@ -369,10 +400,12 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 const socialProviders = [
-    { id: 'google', label: 'Google' },
-    { id: 'vk', label: 'VK' },
-    { id: 'yandex', label: 'Yandex' },
-    { id: 'sber', label: 'Sber' },
+    { id: 'google', label: 'Google', icon: googleIcon },
+    // { id: 'apple', label: 'Apple', icon: appleIcon },
+    { id: 'telegram', label: 'Telegram', icon: telegramIcon },
+    // { id: 'vk', label: 'VK', icon: vkIcon },
+    { id: 'yandex', label: 'Yandex', icon: yandexIcon },
+    // { id: 'sber', label: 'Sber', icon: sberIcon },
 ];
 
 export default connect(state => state, mapDispatchToProps)(props => {
@@ -509,6 +542,12 @@ export default connect(state => state, mapDispatchToProps)(props => {
     const handleSocialLogin = provider => {
         window.location.href = `${SERVER}/auth/social/${provider}/redirect`;
     };
+
+    const renderSocialIcon = provider => <img
+        src={provider.icon}
+        alt=""
+        className={classes.socialIcon}
+    />
 
     const isLoginValid = login => {
 
@@ -1004,22 +1043,22 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     {statuses[status].buttons.map(b => renderButton(b))}
                 </DialogActions>
 
-                {status !== 'invites' ? socialProviders.map(provider => <Button
-                    key={'social-login-' + provider.id}
-                    type="button"
-                    onClick={() => handleSocialLogin(provider.id)}
-                    disabled={requesting}
-                    className={classes.googleButton}
-                >
-                    {provider.id === 'google' && <img
-                        src={googleIcon}
-                        alt="google"
-                        className={classes.googleIcon}
-                    />}
-                    Вход через {provider.label}
-                </Button>)
-                    : null
-                }
+                {status !== 'invites' ? <div className={classes.socialSection}>
+                    <div className={classes.socialTitle}>Продолжить с</div>
+                    <div className={classes.socialGrid}>
+                        {socialProviders.map(provider => <Button
+                            key={'social-login-' + provider.id}
+                            type="button"
+                            aria-label={`Продолжить с ${provider.label}`}
+                            title={`Продолжить с ${provider.label}`}
+                            onClick={() => handleSocialLogin(provider.id)}
+                            disabled={requesting}
+                            className={classes.socialButton}
+                        >
+                            {renderSocialIcon(provider)}
+                        </Button>)}
+                    </div>
+                </div> : null}
             </div>
         </form>
     </Dialog>

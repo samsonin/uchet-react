@@ -2,11 +2,10 @@ import React, {Component} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 
-import {MDBBtn} from "mdbreact";
-
 import AuthControl from './AuthControl';
 import request from "./Request";
 import {closeSnackbar, enqueueSnackbar} from "../actions/actionCreator";
+import { UiButton } from "./common/Ui";
 
 let authControl = new AuthControl();
 
@@ -170,13 +169,13 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
           'Текущий пароль') :
         ''}
       {this.state.isUserNamePasswordAsk ?
-        <MDBBtn color="danger" onClick={() => {
+        <UiButton color="danger" onClick={() => {
           this.setState({isUserNamePasswordAsk: false});
         }}>
           Отмена
-        </MDBBtn> :
+        </UiButton> :
         ''}
-      <MDBBtn color="blue" onClick={this.userNameHandler}>Изменить имя пользователя</MDBBtn>
+      <UiButton color="blue" onClick={this.userNameHandler}>Изменить имя пользователя</UiButton>
 
       {authControl.renderEmailDiv(
         '',
@@ -198,11 +197,11 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
           'Подтверждение Email') : ''
       }
       {(this.state.isEmailPasswordAsk || this.state.isEmailConfirm) ?
-        <MDBBtn color="danger" onClick={() => this.setState({
+        <UiButton color="danger" onClick={() => this.setState({
           isEmailPasswordAsk: false,
           isEmailConfirm: false
-        })}>Отмена</MDBBtn> : ''}
-      <MDBBtn color="blue" onClick={this.emailHandler}>Изменить email</MDBBtn>
+        })}>Отмена</UiButton> : ''}
+      <UiButton color="blue" onClick={this.emailHandler}>Изменить email</UiButton>
 
       {authControl.renderPhoneNumberDiv(
         '',
@@ -224,11 +223,11 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
           'Подтверждение номера телефона') : ''
       }
       {(this.state.isPhoneNumberPasswordAsk || this.state.isPhoneNumberConfirm) ?
-        <MDBBtn color="danger" onClick={() => this.setState({
+        <UiButton color="danger" onClick={() => this.setState({
           isPhoneNumberPasswordAsk: false,
           isPhoneNumberConfirm: false
-        })}>Отмена</MDBBtn> : ''}
-      <MDBBtn color="blue" onClick={this.phoneNunberHandler}>Изменить номер телефона</MDBBtn>
+        })}>Отмена</UiButton> : ''}
+      <UiButton color="blue" onClick={this.phoneNunberHandler}>Изменить номер телефона</UiButton>
 
       {authControl.renderPasswordDiv(
         '',
@@ -252,13 +251,13 @@ export default connect(state => (state), mapDispatchToProps)(class extends Compo
           'Текущий пароль') :
         ''}
       {this.state.isPasswordPasswordAsk ?
-        <MDBBtn color="danger" onClick={() => {
+        <UiButton color="danger" onClick={() => {
           this.setState({isPasswordPasswordAsk: false});
         }}>
           Отмена
-        </MDBBtn> :
+        </UiButton> :
         ''}
-      <MDBBtn color="blue" onClick={this.passwordHandler}>Изменить пароль</MDBBtn>
+      <UiButton color="blue" onClick={this.passwordHandler}>Изменить пароль</UiButton>
 
     </div>;
 

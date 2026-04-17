@@ -243,7 +243,7 @@ const App = props => {
             {+props.auth.user_id
                 ? expire
                     ? <Subscribe />
-                    : <div className="m-2 p-2">
+                    : <div className="app-content m-2 p-2">
 
                         <form onSubmit={e => e.preventDefault()}>
 

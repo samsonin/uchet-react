@@ -22,6 +22,7 @@ import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from "@material-ui/core/styles";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
+import StoreIcon from "@material-ui/icons/Store";
 
 const useStyles = makeStyles({
     root: {
@@ -112,7 +113,7 @@ const Stocks = props => {
         >
                             <ListItemIcon className={classes.stockIcon}>
                                 <Typography variant="h6">
-                                    <i className="fas fa-store" />
+                                    <StoreIcon />
                                 </Typography>
                             </ListItemIcon>
                             <ListItemText primary={stock.name} />

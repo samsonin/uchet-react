@@ -13,10 +13,10 @@ import {connect} from "react-redux";
 import IconButton from "@material-ui/core/IconButton";
 import CheckIcon from '@material-ui/icons/Check';
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
 import TextField from "@material-ui/core/TextField/TextField";
 import {useSnackbar} from "notistack";
 import {v4 as uuidv4} from 'uuid';
+import { UiButton, UiModal } from "./common/Ui";
 
 
 const Transit = props => {
@@ -93,42 +93,39 @@ const Transit = props => {
     return props.transit
         ? <>
 
-            <MDBContainer>
-                <MDBModal isOpen={infoOpen} toggle={() => setInfoOpen(false)}>
-                    <MDBModalHeader toggle={() => setInfoOpen(false)}>
-                        {'#' + good.id}
-                    </MDBModalHeader>
-                    <MDBModalBody>
-                        {[
-                            {label: 'Наименование', value: good.model},
-                            {label: 'Откуда', value: good.stock},
-                            {label: 'Идентификатор', value: good.imei},
-                            {label: 'Время передачи в транзит', value: good.outtime},
-                            {label: 'Ответственный', value: good.user},
-                        ].map(f => f.value
-                            ? <TextField
-                                key={uuidv4()}
-                                style={{
-                                    width: '100%',
-                                    padding: '1rem',
-                                }}
-                                label={f.label}
-                                value={f.value}
-                            />
-                            : '')}
-                    </MDBModalBody>
-                    <MDBModalFooter>
-                        <MDBBtn color="secondary" onClick={() => setInfoOpen(false)}>
-                            Отмена
-                        </MDBBtn>
-                        {props.current_stock_id
-                            ? <MDBBtn color="primary" onClick={_ => fromTransit(_, good)}>
-                                Принять
-                            </MDBBtn>
-                            : ''}
-                    </MDBModalFooter>
-                </MDBModal>
-            </MDBContainer>
+            <UiModal
+                isOpen={infoOpen}
+                onClose={() => setInfoOpen(false)}
+                title={'#' + good.id}
+                footer={<>
+                    <UiButton color="secondary" onClick={() => setInfoOpen(false)}>
+                        Отмена
+                    </UiButton>
+                    {props.current_stock_id
+                        ? <UiButton color="primary" onClick={_ => fromTransit(_, good)}>
+                            Принять
+                        </UiButton>
+                        : ''}
+                </>}
+            >
+                {[
+                    {label: 'Наименование', value: good.model},
+                    {label: 'Откуда', value: good.stock},
+                    {label: 'Идентификатор', value: good.imei},
+                    {label: 'Время передачи в транзит', value: good.outtime},
+                    {label: 'Ответственный', value: good.user},
+                ].map(f => f.value
+                    ? <TextField
+                        key={uuidv4()}
+                        style={{
+                            width: '100%',
+                            padding: '1rem',
+                        }}
+                        label={f.label}
+                        value={f.value}
+                    />
+                    : '')}
+            </UiModal>
 
             <TableContainer component={Paper}>
                 <Table size="small">

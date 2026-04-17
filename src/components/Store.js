@@ -46,6 +46,8 @@ const Store = props => {
     const limit = useRef(25);
     const isRequest = useRef(false);
     const currentStock = props.app.stocks.find(s => s.id === props.app.current_stock_id);
+    const validStocks = useMemo(() => props.app.stocks.filter(s => s.is_valid), [props.app.stocks]);
+    const hasMultipleStocks = validStocks.length > 1;
 
     const goodsView = isGroup ? makeGroup(goods) : goods;
 
@@ -122,6 +124,10 @@ const Store = props => {
         if (isAllStocks) sendRequest()
 
     }, [isAllStocks])
+
+    useEffect(() => {
+        if (!hasMultipleStocks && isAllStocks) setIsAllStocks(false);
+    }, [hasMultipleStocks, isAllStocks]);
 
     useEffect(() => {
 
@@ -351,7 +357,7 @@ const Store = props => {
                     label="Сгруппировать"
                 />
 
-                {currentStock && <FormControlLabel control={
+                {currentStock && hasMultipleStocks && <FormControlLabel control={
 
                     <Checkbox checked={isAllStocks} onChange={() => setIsAllStocks(!isAllStocks)} />}
                     label="все точки"

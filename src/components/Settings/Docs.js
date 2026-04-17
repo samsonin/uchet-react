@@ -7,11 +7,19 @@ import {
     Card,
     CardContent,
     CardHeader,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     Divider,
+    FormControl,
     Grid,
+    InputLabel,
     List,
     ListItem,
     ListItemText,
+    MenuItem,
+    Select,
     TextField,
     Typography,
 } from "@material-ui/core";
@@ -86,6 +94,40 @@ const useStyles = makeStyles({
             margin: "0 2px",
         },
     },
+    previewPaper: {
+        background: "#eef2f5",
+    },
+    previewControls: {
+        display: "flex",
+        gap: 12,
+        flexWrap: "wrap",
+        marginBottom: 16,
+    },
+    previewControl: {
+        minWidth: 170,
+    },
+    previewViewport: {
+        overflow: "auto",
+        padding: "10px 0 22px",
+    },
+    previewPage: {
+        margin: "0 auto",
+        padding: "18mm",
+        background: "#fff",
+        color: "#111827",
+        boxShadow: "0 18px 42px rgba(28, 43, 54, 0.18)",
+        "& table": {
+            width: "100%",
+            borderCollapse: "collapse",
+        },
+        "& td, & th": {
+            border: "1px solid #999",
+            padding: 4,
+        },
+        "& p": {
+            marginTop: 0,
+        },
+    },
 });
 
 const TemplateVariable = Node.create({
@@ -132,6 +174,50 @@ const getDocId = doc => doc?.id;
 const getDocName = doc => doc?.name || doc?.doc_name || "";
 const getDocTitle = doc => doc?.title || doc?.doc_title || "";
 const getDocText = doc => doc?.text || doc?.doc_text || "";
+const internalDocNames = new Set(["remont", "buy", "checkout"]);
+
+const previewPaperSizes = {
+    a4: {
+        label: "A4",
+        portrait: { width: "210mm", minHeight: "297mm", printSize: "A4 portrait" },
+        landscape: { width: "297mm", minHeight: "210mm", printSize: "A4 landscape" },
+    },
+    a5: {
+        label: "A5",
+        portrait: { width: "148mm", minHeight: "210mm", printSize: "A5 portrait" },
+        landscape: { width: "210mm", minHeight: "148mm", printSize: "A5 landscape" },
+    },
+};
+
+const getDocDisplayTitle = (doc, index = 0) => {
+    const title = getDocTitle(doc).trim();
+    const name = getDocName(doc).trim().toLowerCase();
+
+    if (title && !internalDocNames.has(title.toLowerCase())) return title;
+    if (name && !internalDocNames.has(name)) return name;
+
+    return `Шаблон документа ${index + 1}`;
+};
+
+const getMockValue = name => {
+    const key = (name || "").toLowerCase();
+
+    if (key.includes("date") || key.includes("дата")) return "17.04.2026";
+    if (key.includes("time") || key.includes("время")) return "14:30";
+    if (key.includes("phone") || key.includes("тел")) return "+7 999 123-45-67";
+    if (key.includes("email") || key.includes("mail")) return "client@example.com";
+    if (key.includes("client") || key.includes("customer") || key.includes("клиент")) return "Иванов Иван Иванович";
+    if (key.includes("user") || key.includes("master") || key.includes("сотруд") || key.includes("мастер")) return "Петров Петр";
+    if (key.includes("org") || key.includes("organization") || key.includes("орган")) return "ООО \"Учет\"";
+    if (key.includes("address") || key.includes("адрес")) return "г. Владивосток, ул. Светланская, 10";
+    if (key.includes("sum") || key.includes("price") || key.includes("cost") || key.includes("сум") || key.includes("цен")) return "12 500 ₽";
+    if (key.includes("number") || key.includes("num") || key.includes("номер")) return "000123";
+    if (key.includes("barcode") || key.includes("штрих")) return "112116021526";
+    if (key.includes("imei")) return "356789012345678";
+    if (key.includes("model") || key.includes("goods") || key.includes("товар") || key.includes("модель")) return "iPhone 13";
+
+    return "Тестовое значение";
+};
 
 const updateDocShape = (doc, title, text) => ({
     ...doc,
@@ -152,6 +238,10 @@ const Docs = props => {
     const [savedHtml, setSavedHtml] = useState("");
     const [dirty, setDirty] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewHtml, setPreviewHtml] = useState("");
+    const [previewPaper, setPreviewPaper] = useState("a4");
+    const [previewOrientation, setPreviewOrientation] = useState("portrait");
 
     const currentDoc = docs[currentIndex] || docs[0];
 
@@ -294,6 +384,35 @@ const Docs = props => {
         setCurrentIndex(index);
     };
 
+    const buildPreviewHtml = html => {
+        const div = document.createElement("div");
+        div.innerHTML = html || "";
+
+        div.querySelectorAll("input[type='button']").forEach(input => {
+            const span = document.createElement("span");
+            const name = input.getAttribute("name") || "";
+            span.innerHTML = getMockValue(name);
+            input.parentNode.replaceChild(span, input);
+        });
+
+        return div.innerHTML;
+    };
+
+    const openPreview = () => {
+        if (!editor) return;
+
+        setPreviewHtml(buildPreviewHtml(editor.getHTML()));
+        setPreviewOpen(true);
+    };
+
+    const printPreview = () => window.print();
+
+    const currentPaperSize = previewPaperSizes[previewPaper][previewOrientation];
+    const previewPageStyle = {
+        width: currentPaperSize.width,
+        minHeight: currentPaperSize.minHeight,
+    };
+
     if (!docs.length) {
         return <div className={classes.root}>
             <Card className={classes.card}>
@@ -326,8 +445,7 @@ const Docs = props => {
                             key={"settings-doc-" + (getDocId(doc) || index)}
                         >
                             <ListItemText
-                                primary={getDocTitle(doc) || getDocName(doc)}
-                                secondary={getDocName(doc)}
+                                primary={getDocDisplayTitle(doc, index)}
                             />
                         </ListItem>)}
                     </List>
@@ -338,7 +456,7 @@ const Docs = props => {
                 <Card className={classes.card}>
                     <CardHeader
                         title="Редактирование документа"
-                        subheader={getDocName(currentDoc)}
+                        subheader={getDocDisplayTitle(currentDoc, currentIndex)}
                         className={classes.cardHeader}
                         titleTypographyProps={{ variant: "h5" }}
                     />
@@ -423,10 +541,80 @@ const Docs = props => {
                         >
                             Сохранить
                         </Button>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={openPreview}
+                            style={{ marginLeft: 8 }}
+                        >
+                            Предварительный просмотр
+                        </Button>
                     </CardContent>
                 </Card>
             </Grid>
         </Grid>
+        <Dialog
+            open={previewOpen}
+            onClose={() => setPreviewOpen(false)}
+            maxWidth="lg"
+            fullWidth
+            PaperProps={{ className: `${classes.previewPaper} docs-preview-paper` }}
+        >
+            <style>
+                {`@media print { @page { size: ${currentPaperSize.printSize}; margin: 0; } }`}
+            </style>
+            <DialogTitle className="non-printable">
+                Предварительный просмотр печати
+            </DialogTitle>
+            <DialogContent>
+                <div className={`${classes.previewControls} non-printable`}>
+                    <FormControl variant="outlined" size="small" className={classes.previewControl}>
+                        <InputLabel id="preview-paper-label">Размер бумаги</InputLabel>
+                        <Select
+                            labelId="preview-paper-label"
+                            value={previewPaper}
+                            onChange={event => setPreviewPaper(event.target.value)}
+                            label="Размер бумаги"
+                        >
+                            {Object.entries(previewPaperSizes).map(([value, config]) => <MenuItem
+                                key={"preview-paper-" + value}
+                                value={value}
+                            >
+                                {config.label}
+                            </MenuItem>)}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl variant="outlined" size="small" className={classes.previewControl}>
+                        <InputLabel id="preview-orientation-label">Расположение</InputLabel>
+                        <Select
+                            labelId="preview-orientation-label"
+                            value={previewOrientation}
+                            onChange={event => setPreviewOrientation(event.target.value)}
+                            label="Расположение"
+                        >
+                            <MenuItem value="portrait">Книжная</MenuItem>
+                            <MenuItem value="landscape">Альбомная</MenuItem>
+                        </Select>
+                    </FormControl>
+                </div>
+                <div className={classes.previewViewport}>
+                    <div
+                        className={`${classes.previewPage} docs-print-page`}
+                        style={previewPageStyle}
+                        dangerouslySetInnerHTML={{ __html: previewHtml }}
+                    />
+                </div>
+            </DialogContent>
+            <DialogActions className="non-printable">
+                <Button color="primary" variant="contained" onClick={printPreview}>
+                    Печать
+                </Button>
+                <Button onClick={() => setPreviewOpen(false)}>
+                    Закрыть
+                </Button>
+            </DialogActions>
+        </Dialog>
     </div>;
 };
 

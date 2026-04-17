@@ -116,7 +116,7 @@ export default class {
 
     renderUserNameDiv(ref, isReadonly) {
         return <div className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
-            <i className="fas fa-user prefix grey-text"/>
+            <span className="prefix grey-text" aria-hidden="true">👤</span>
             <input type="text"
                    ref={ref}
                    onBlur={this.blur}
@@ -143,7 +143,7 @@ export default class {
 
     renderPhoneNumberDiv(div_id, ref, onChange, isReadonly = false) {
         return <div id={div_id} className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
-            <i className="fas fa-phone prefix grey-text"/>
+            <span className="prefix grey-text" aria-hidden="true">☎</span>
             <input type="text"
                    ref={ref}
                    onBlur={this.blur}
@@ -156,7 +156,7 @@ export default class {
 
     renderPasswordDiv(div_id, input_id, onChange, label, isReadOnly = false) {
         return <div id={'div_' + div_id} className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
-            <i className="fas fa-lock prefix grey-text"/>
+            <span className="prefix grey-text" aria-hidden="true">●</span>
             <input type="password" id={input_id} onBlur={this.blur} onChange={e => onChange}
                    className="form-control validate" readOnly={isReadOnly}/>
             <label>
@@ -167,7 +167,7 @@ export default class {
 
     renderConfirmationCodeDiv(input_id, label) {
         return <div className="md-form mb-5" onInput={this.focus} onClick={this.focus}>
-            <i className="fas fa-check-circle prefix grey-text"/>
+            <span className="prefix grey-text" aria-hidden="true">✓</span>
             <input type="text" id={input_id} onBlur={this.blur} onChange={this.isValid}
                    className="form-control validate"/>
             <label className="">{label}</label>

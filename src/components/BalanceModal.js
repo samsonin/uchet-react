@@ -1,9 +1,4 @@
 import React, {useState} from "react";
-import {
-    MDBModal,
-    MDBModalBody,
-    MDBModalHeader,
-} from "mdbreact";
 import {connect} from "react-redux";
 
 import RadioGroup from "@material-ui/core/RadioGroup";
@@ -12,7 +7,7 @@ import Radio from "@material-ui/core/Radio";
 import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
 
-import {BottomButtons} from "./common/BottomButtons";
+import { UiButton, UiModal } from "./common/Ui";
 
 const BalanceModal = props => {
 
@@ -57,13 +52,19 @@ const BalanceModal = props => {
 
     }
 
-    return <MDBModal isOpen={props.isOpen} toggle={toggle}>
-        <MDBModalHeader toggle={toggle} className="font-weight-bold">
-            Пополнение счета
-        </MDBModalHeader>
-
-        <MDBModalBody>
-
+    return <UiModal
+        isOpen={props.isOpen}
+        onClose={toggle}
+        title="Пополнение счета"
+        footer={<>
+            <UiButton color="secondary" onClick={toggle}>
+                Отмена
+            </UiButton>
+            <UiButton color="primary" onClick={paymentFormSubmitter}>
+                Пополнить
+            </UiButton>
+        </>}
+    >
             <Grid container direction="row" justify="center" alignItems="center">
                 <TextField
                     label="Сумма платежа, руб."
@@ -91,12 +92,7 @@ const BalanceModal = props => {
                     />)}
                 </RadioGroup>
             </Grid>
-
-        </MDBModalBody>
-
-        {BottomButtons(paymentFormSubmitter, toggle)}
-
-    </MDBModal>
+    </UiModal>
 
 }
 

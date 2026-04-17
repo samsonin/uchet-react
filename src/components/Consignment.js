@@ -29,10 +29,9 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 
-import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
-
 import TreeModal from "./TreeModal";
 import rest from "../components/Rest";
+import { UiButton, UiModal } from "./common/Ui";
 
 
 const emptyTr = {
@@ -500,28 +499,25 @@ const Consignment = props => {
     return props.app.current_stock_id
         ? <>
 
-            <MDBContainer>
-                <MDBModal isOpen={isScanOpen} toggle={() => setIsScanOpen(false)}>
-                    <MDBModalHeader toggle={() => setIsScanOpen(false)}>
-                        Просканируйте или введите штрихкод
-                    </MDBModalHeader>
-                    <MDBModalBody>
-                        <TextField className={"w-100"}
-                                   value={scanValue}
-                                   onChange={e => setScanValue(e.target.value)}
-                                   inputRef={scanRef}
-                        />
-                    </MDBModalBody>
-                    <MDBModalFooter>
-                        <MDBBtn color="secondary" onClick={() => setIsScanOpen(false)}>
-                            Отмена
-                        </MDBBtn>
-                        <MDBBtn color="primary" onClick={() => scanDone(scanValue)}>
-                            Сохранить
-                        </MDBBtn>
-                    </MDBModalFooter>
-                </MDBModal>
-            </MDBContainer>
+            <UiModal
+                isOpen={isScanOpen}
+                onClose={() => setIsScanOpen(false)}
+                title="Просканируйте или введите штрихкод"
+                footer={<>
+                    <UiButton color="secondary" onClick={() => setIsScanOpen(false)}>
+                        Отмена
+                    </UiButton>
+                    <UiButton color="primary" onClick={() => scanDone(scanValue)}>
+                        Сохранить
+                    </UiButton>
+                </>}
+            >
+                <TextField className={"w-100"}
+                           value={scanValue}
+                           onChange={e => setScanValue(e.target.value)}
+                           inputRef={scanRef}
+                />
+            </UiModal>
 
             <TreeModal isOpen={state.currentTr !== false}
                        onClose={handleCategories}

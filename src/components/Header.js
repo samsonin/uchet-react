@@ -1,10 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { connect } from 'react-redux';
 import { bindActionCreators } from "redux";
-import {
-    MDBNavbar, MDBNavbarBrand, MDBNavbarNav, MDBNavItem, MDBNavLink, MDBNavbarToggler, MDBCollapse, MDBDropdown,
-    MDBDropdownToggle, MDBDropdownMenu, MDBDropdownItem, MDBIcon, MDBBtn, MDBCardHeader
-} from "mdbreact";
+import { Link } from "react-router-dom";
 import { init_user, upd_app, exit_app } from "../actions/actionCreator";
 import { Button, IconButton } from "@material-ui/core";
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
@@ -12,6 +9,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import BalanceModal from "./BalanceModal";
 import rest from './Rest'
 import { toLocalTimeStr } from "./common/Time";
+import { UiButton, UiDropdown, UiDropdownItem } from "./common/Ui";
 
 
 const NavbarPage = props => {
@@ -117,10 +115,10 @@ const NavbarPage = props => {
                         !props.app.daily.find(d => d.employees.includes(props.auth.user_id))
                         ? <Button
                             variant="outlined"
+                            className="header-shift-button"
                             style={{
-                                margin: '1rem',
-                                color: '#087f73',
-                                borderColor: 'rgba(15, 159, 143, 0.42)'
+                                color: '#e6fffb',
+                                borderColor: 'rgba(230, 255, 251, 0.42)'
                             }}
                             onClick={() => newDay()}
                         >
@@ -130,9 +128,9 @@ const NavbarPage = props => {
 
                     {props.app.current_stock_id && canSelectStock && <IconButton
                         variant="outlined"
-                        className="ml-2"
+                        className="header-exit-point"
                         style={{
-                            color: '#087f73'
+                            color: '#e6fffb'
                         }}
                         onClick={pointExit}
                     >
@@ -140,20 +138,20 @@ const NavbarPage = props => {
                     </IconButton>}
                 </>
                 : canSelectStock
-                    ? <MDBDropdown>
-                    <MDBDropdownToggle nav caret>
-                        <div className="d-none d-md-inline">Выбрать точку</div>
-                    </MDBDropdownToggle>
-                    <MDBDropdownMenu className="text-center">
-                        {validStocks.map(v => v.is_valid && <MDBDropdownItem
-                            onClick={pointChange}
+                    ? <UiDropdown
+                        label={<span className="header-select-stock">Выбрать точку</span>}
+                    >
+                        {close => validStocks.map(v => v.is_valid && <UiDropdownItem
+                            onClick={e => {
+                                pointChange(e)
+                                close()
+                            }}
                             value={v.id}
-                            key={"mdbdkey" + v.id}
+                            key={"stock-dropdown-key" + v.id}
                         >
                             {v.name}
-                        </MDBDropdownItem>)}
-                    </MDBDropdownMenu>
-                </MDBDropdown>
+                        </UiDropdownItem>)}
+                    </UiDropdown>
                     : ''
             : ''
     }
@@ -177,44 +175,44 @@ const NavbarPage = props => {
 
     }
 
-    const auth_menu = () => props.auth.user_id > 0
-        ? <MDBDropdownMenu className="text-center" right>
-
-            <MDBCardHeader className={"font-weight-bold"}>
+    const auth_menu = close => props.auth.user_id > 0
+        ? <>
+            <div className="header-user-name">
                 {getUserName()}
-            </MDBCardHeader>
+            </div>
 
-            <MDBDropdownItem>
-                <MDBNavLink to="/settings/personal" className="text-dark">
-                    Настройки
-                </MDBNavLink>
-            </MDBDropdownItem>
-            <MDBDropdownItem>
-                <MDBNavLink to="/subscribe" className="text-dark">
-                    Подписка до: {toLocalTimeStr(props.auth.expiration_time).slice(0, -9)}
-                </MDBNavLink>
-            </MDBDropdownItem>
+            <UiDropdownItem to="/settings/personal" onClick={close}>
+                Настройки
+            </UiDropdownItem>
+            <UiDropdownItem to="/subscribe" onClick={close}>
+                Подписка до: {toLocalTimeStr(props.auth.expiration_time).slice(0, -9)}
+            </UiDropdownItem>
             {props.app
-                ? <MDBDropdownItem onClick={() => setBalanceModalOpen(true)}>
+                ? <UiDropdownItem onClick={() => {
+                    setBalanceModalOpen(true)
+                    close()
+                }}>
                     Баланс: {props.app.balance}
-                </MDBDropdownItem>
+                </UiDropdownItem>
                 : ''}
-            <MDBBtn className="btn btn-sm mx-4" color="danger" onClick={exit}>
-                Выйти
-            </MDBBtn>
-        </MDBDropdownMenu>
-        : ''
+            <div style={{ padding: '0.75rem 1rem' }}>
+                <UiButton color="danger" size="sm" block onClick={exit}>
+                    Выйти
+                </UiButton>
+            </div>
+        </>
+        : null
 
-    return <MDBNavbar color="default-color" dark expand="md">
-        <MDBNavbarBrand>
-            <MDBNavLink to="/" className="header-brand-link">
+    return <nav className="navbar">
+        <div className="header-brand">
+            <Link to="/" className="header-brand-link">
                 <span className="header-brand-text">Uchet</span>
-            </MDBNavLink>
-        </MDBNavbarBrand>
+            </Link>
+        </div>
         <button
             id="menu-toggle"
             onClick={toggleClick}
-            className={`header-sidebar-toggle mx-2 ${sidebarOpen ? 'is-active' : ''}`}
+            className={`header-sidebar-toggle ${sidebarOpen ? 'is-active' : ''}`}
             type="button"
             aria-label={sidebarOpen ? "Скрыть боковую панель" : "Показать боковую панель"}
             title={sidebarOpen ? "Скрыть боковую панель" : "Показать боковую панель"}
@@ -225,40 +223,40 @@ const NavbarPage = props => {
                 <span />
             </span>
         </button>
-        <MDBNavbarNav left>
-            <MDBNavItem className={"mx-3"}>
-                {accessPoints()}
-            </MDBNavItem>
-        </MDBNavbarNav>
-        <MDBNavbarToggler onClick={toggleCollapse} />
-        <MDBCollapse id="navbarCollapse3" isOpen={isOpen} navbar className="text-right">
-            <MDBNavbarNav right>
-                {props.auth.organization_id === 1 && <MDBNavItem>
-                    <MDBNavLink className="waves-effect waves-light" to="/zp">
-                        <i className="fas fa-coins" />
-                        {props.app.zp || 0}
-                    </MDBNavLink>
-                </MDBNavItem>}
-                {/*<MDBNavItem>*/}
-                {/*    <MDBNavLink className="waves-effect waves-light" to="#!">*/}
-                {/*        <i className="far fa-envelope"/>*/}
-                {/*    </MDBNavLink>*/}
-                {/*</MDBNavItem>*/}
-                <MDBNavItem>
-                    <MDBDropdown>
-                        <MDBDropdownToggle nav caret>
-                            <MDBIcon icon="user" />
-                        </MDBDropdownToggle>
-                        {auth_menu()}
-                    </MDBDropdown>
-                </MDBNavItem>
-            </MDBNavbarNav>
-        </MDBCollapse>
+        <div className="header-access">
+            {accessPoints()}
+        </div>
+        <div className="header-spacer" />
+        <button
+            type="button"
+            className="header-collapse-toggle"
+            onClick={toggleCollapse}
+            aria-label={isOpen ? "Скрыть меню" : "Показать меню"}
+        >
+            <span className="header-menu-symbol" aria-hidden="true" />
+        </button>
+        <div className={`header-nav ${isOpen ? 'is-open' : ''}`}>
+            {props.auth.organization_id === 1 && <Link
+                className="header-nav-link"
+                to="/zp"
+                onClick={() => setIsOpen(false)}
+            >
+                <span aria-hidden="true">₽</span>
+                {props.app.zp || 0}
+            </Link>}
+            <UiDropdown
+                align="right"
+                buttonClassName="header-user-button"
+                label={<span aria-hidden="true">👤</span>}
+            >
+                {auth_menu}
+            </UiDropdown>
+        </div>
         <BalanceModal
             isOpen={balanceModalOpen}
             close={() => setBalanceModalOpen(false)}
         />
-    </MDBNavbar>
+    </nav>
 
 }
 

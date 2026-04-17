@@ -1,36 +1,34 @@
 import React, {useState} from "react";
 import {connect} from "react-redux";
-import {MDBBtn, MDBContainer, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
 
 import Tree from "./Tree";
+import { UiButton, UiModal } from "./common/Ui";
 
 
 const TreeModal = props => {
 
     const [currentId, setCurrentId] = useState(() => props.initialCategoryId)
 
-    return <MDBContainer>
-        <MDBModal isOpen={props.isOpen} toggle={() => props.onClose(0)}>
-            <MDBModalHeader toggle={() => props.onClose(0)}>
-                Выбор категории</MDBModalHeader>
-            <MDBModalBody>
-                <Tree
-                    initialId={props.initialCategoryId}
-                    categories={props.app.categories}
-                    onSelected={id => setCurrentId(id)}
-                    finished={id => props.onClose(id)}
-                />
-            </MDBModalBody>
-            <MDBModalFooter>
-                <MDBBtn color="secondary" onClick={() => props.onClose(0)}>
-                    Отмена
-                </MDBBtn>
-                <MDBBtn color="primary" onClick={() => props.onClose(currentId)}>
-                    Сохранить
-                </MDBBtn>
-            </MDBModalFooter>
-        </MDBModal>
-    </MDBContainer>
+    return <UiModal
+        isOpen={props.isOpen}
+        onClose={() => props.onClose(0)}
+        title="Выбор категории"
+        footer={<>
+            <UiButton color="secondary" onClick={() => props.onClose(0)}>
+                Отмена
+            </UiButton>
+            <UiButton color="primary" onClick={() => props.onClose(currentId)}>
+                Сохранить
+            </UiButton>
+        </>}
+    >
+        <Tree
+            initialId={props.initialCategoryId}
+            categories={props.app.categories}
+            onSelected={id => setCurrentId(id)}
+            finished={id => props.onClose(id)}
+        />
+    </UiModal>
 
 }
 

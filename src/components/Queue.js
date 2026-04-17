@@ -52,45 +52,49 @@ const Queue = (props) => {
 
     };
 
+    const getAllowedStocks = (allowedStocks = []) => allowedStocks
+        .map(id => props.app.stocks.find(s => s.id === id && s.is_valid))
+        .filter(Boolean)
+
+    const hasPointChoice = queue => queue.some(q => getAllowedStocks(q.allowed_stocks).length > 1)
+
     const renderTable = queue => <TableBody>
 
         {queue.map(q => {
 
             const user = props.app.users.find(u => +u.id === q.user_id)
+            const allowedStocks = getAllowedStocks(q.allowed_stocks)
+            const canChooseStock = allowedStocks.length > 1
 
             return user
                 ? <TableRow key={'rowinqueuetablekey' + q.user_id}>
                     <TableCell>
                         {user.name}
                     </TableCell>
-                    <TableCell>
-                        <MyFormControl variant="outlined">
-                            <Select onChange={e => pointChange(q.user_id, +e.target.value)}
-                                    value={q.stock_id}
-                                    disabled={request}
+                    {hasPointChoice(queue) && <TableCell>
+                        {canChooseStock && <MyFormControl variant="outlined">
+                            <Select
+                                onChange={e => pointChange(q.user_id, +e.target.value)}
+                                value={q.stock_id}
+                                disabled={request}
                             >
-                                <MenuItem key={'queueselectstockskey' + q.user_id + '0'}
-                                          value={0}
+                                <MenuItem
+                                    key={'queueselectstockskey' + q.user_id + '0'}
+                                    value={0}
                                 >
-                                    <br/>
+                                    <br />
                                 </MenuItem>
 
-                                {q.allowed_stocks.map(as => {
-
-                                    const stock = props.app.stocks.find(s => s.id === as)
-                                    return stock
-                                        ? <MenuItem
-                                            key={'queueselectstockskeytest' + q.user_id + as}
-                                            value={as}
-                                        >
-                                            {stock.name}
-                                        </MenuItem>
-                                        : null
-                                })}
+                                {allowedStocks.map(stock => <MenuItem
+                                    key={'queueselectstockskeytest' + q.user_id + stock.id}
+                                    value={stock.id}
+                                >
+                                    {stock.name}
+                                </MenuItem>)}
 
                             </Select>
-                        </MyFormControl>
-                    </TableCell>
+                        </MyFormControl>}
+                    </TableCell>}
                 </TableRow>
                 : null
 
@@ -111,7 +115,7 @@ const Queue = (props) => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Мастер</TableCell>
-                                <TableCell>Куда вышел на смену</TableCell>
+                                {hasPointChoice(props.app.queue) && <TableCell>Куда вышел на смену</TableCell>}
                             </TableRow>
                         </TableHead>
                         {renderTable(props.app.queue)}

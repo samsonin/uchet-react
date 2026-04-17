@@ -25,6 +25,8 @@ const RESEND_TIMEOUT = 60;
 
 const socialProviders = [
     { id: "google", label: "Google" },
+    { id: "apple", label: "Apple" },
+    { id: "telegram", label: "Telegram" },
     { id: "vk", label: "VK" },
     { id: "yandex", label: "Yandex" },
     { id: "sber", label: "Sber" },
@@ -37,6 +39,8 @@ const getSocialLinks = user => socialProviders.reduce((result, provider) => ({
 
 const socialErrors = {
     GOOGLE_ALREADY_LINKED: "Google уже привязан к другому пользователю",
+    APPLE_ALREADY_LINKED: "Apple уже привязан к другому пользователю",
+    TELEGRAM_ALREADY_LINKED: "Telegram уже привязан к другому пользователю",
     VK_ALREADY_LINKED: "VK уже привязан к другому пользователю",
     YANDEX_ALREADY_LINKED: "Yandex уже привязан к другому пользователю",
     SBER_ALREADY_LINKED: "Sber уже привязан к другому пользователю",

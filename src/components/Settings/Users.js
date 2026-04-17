@@ -19,7 +19,7 @@ import uuid from "uuid";
 import rest from "../Rest";
 
 import { Link } from 'react-router-dom';
-import { MDBBtn } from "mdbreact";
+import { UiButton } from "../common/Ui";
 
 
 const Users = props => {
@@ -70,11 +70,13 @@ const Users = props => {
             />
 
             <Link to={"/settings/invites/add"}>
-                < MDBBtn className="btn-l btn-block"
+                <UiButton
+                    className="btn-l"
+                    block
                     color="mdb-color"
                 >
                     Пригласить пользователя
-                </MDBBtn>
+                </UiButton>
             </Link>
 
 

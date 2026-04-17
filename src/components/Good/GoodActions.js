@@ -14,6 +14,7 @@ import HistoryIcon from '@material-ui/icons/History';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 
 import {useSnackbar} from "notistack";
 
@@ -87,7 +88,7 @@ const GoodActions = props => {
         open: renderIcon('открыть в отдельной вкладке', () => props.open(), <AspectRatioIcon/>),
         transit: renderIcon(good.wo ? 'Из транзита' : 'В транзит',
             () => transit(!good.wo),
-            <i className="fas fa-truck"/>),
+            <LocalShippingIcon/>),
         reject: renderIcon('В брак', () => reject(), <ThumbDownIcon/>),
         restore: renderIcon("Восстановить", () => restore(), <RestoreFromTrashIcon/>),
         refund: renderIcon('Вернуть в кассу', refund, <AttachMoneyIcon/>),

@@ -1,9 +1,7 @@
 import React from "react";
 import { Link } from 'react-router-dom';
-import { MDBBtn } from "mdbreact";
 
 import { siteMap } from "./SiteMap";
-import Grid from "@material-ui/core/Grid";
 import { connect } from "react-redux";
 
 // выделяем цветом популярные кнопки
@@ -13,41 +11,36 @@ const primaryIds = [1, 10, 31];
 
 const Main = ({ admin }) => {
 
-    return [
-        [1, 2, 3],
-        [10, 11, 14, 15, 16, 17, 19],
-        [31, 32, 33, 35],
-        [21, 22, 24],
-        [40, 41, 42, 43, 45, 46, 47, 48],
-        [51, 52, 53],
-    ].map(arr => <Grid container
-        key={arr.toString()}
-    >
-        {arr.map(id => {
+    return <div className="main-button-board">
+        {[
+            [1, 2, 3],
+            [10, 11, 14, 15, 16, 17, 19],
+            [31, 32, 33, 35],
+            [21, 22, 24],
+            [40, 41, 42, 43, 45, 46, 47, 48],
+            [51, 52, 53],
+        ].map(arr => <div
+            className="main-button-row"
+            key={arr.toString()}
+        >
+            {arr.map(id => {
 
-            const smItem = siteMap(admin)
-                .find(sm => sm.id === id)
+                const smItem = siteMap(admin)
+                    .find(sm => sm.id === id)
 
-            return smItem
-                ? <Grid item
-                    key={"mdbbtnmainkey" + smItem.id}
-                    style={{ margin: 5 }}
-                >
-                    <Link to={"/" + smItem.path}>
-                        <MDBBtn className="btn-l btn-block"
-                            color={primaryIds.includes(id)
-                                ? "primary"
-                                : "mdb-color"
-                            }
-                        >
-                            {smItem.text}
-                        </MDBBtn>
+                return smItem
+                    ? <Link
+                        key={"main-button-key" + smItem.id}
+                        to={"/" + smItem.path}
+                        className={`main-button ${primaryIds.includes(id) ? 'main-button-primary' : ''}`}
+                        role="button"
+                    >
+                        {smItem.text}
                     </Link>
-                </Grid>
-                : ''
-        })}
-    </Grid>
-    )
+                    : null
+            })}
+        </div>)}
+    </div>
 }
 
 export default connect(state => state.auth)(Main)

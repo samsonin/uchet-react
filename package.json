@@ -21,12 +21,11 @@
     "jsbarcode": "^3.11.5",
     "jss": "^9.8.7",
     "jss-camel-case": "^6.1.0",
-    "mdbreact": "4.19.1",
     "notistack": "^0.9.17",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-redux": "^7.2.1",
-    "react-router-dom": "latest",
+    "react-router-dom": "^5.3.4",
     "react-scripts": "^3.4.3",
     "redux": "^4.0.4",
     "uuid": "^3.4.0"

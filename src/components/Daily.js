@@ -91,6 +91,8 @@ const Daily = props => {
 
     const validStocks = props.app.stocks
         .filter(s => [2, 4].includes(props.auth.user_id) || validStockIds.includes(s.id))
+    const selectableStocks = validStocks.filter(s => s.is_valid)
+    const hasMultipleStocks = selectableStocks.length > 1
 
 
     useEffect(() => {
@@ -114,6 +116,10 @@ const Daily = props => {
             })
 
     }, [stock, date])
+
+    useEffect(() => {
+        if (!stock && selectableStocks[0]) setStock(selectableStocks[0].id)
+    }, [stock, selectableStocks])
 
     const daily = date === today
         ? props.app.daily.find(d => d.stock_id === stock)
@@ -331,18 +337,18 @@ const Daily = props => {
                 justify={'center'}
                 alignItems={'center'}
             >
-                <Grid item xs={6}>
+                {hasMultipleStocks && <Grid item xs={6}>
 
                     <StocksSelect
-                        stocks={validStocks}
+                        stocks={selectableStocks}
                         stock={stock}
                         setStock={setStock}
                         classes={classes.controls}
                     />
 
-                </Grid>
+                </Grid>}
 
-                <Grid item xs={6}>
+                <Grid item xs={hasMultipleStocks ? 6 : 12}>
                     <TextField
                         className={classes.controls}
                         variant="outlined"
