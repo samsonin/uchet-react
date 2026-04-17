@@ -159,7 +159,7 @@ const Real = props => {
 
         {isNew || <Dialog
             open={dialog !== ''}
-            TransitionComponent={Transition}
+            slots={{ transition: Transition }}
             keepMounted
             onClose={() => setDialog('')}
         >

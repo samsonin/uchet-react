@@ -191,7 +191,7 @@ const DailyModal = props => {
 
     return <Dialog
         open={props.isOpen}
-        TransitionComponent={Transition}
+        slots={{ transition: Transition }}
         keepMounted
         onClose={() => props.close()}
     >

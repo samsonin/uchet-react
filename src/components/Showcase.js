@@ -87,12 +87,14 @@ const Showcase = props => {
             <TextField style={{
                 margin: '1rem',
             }}
-                       InputProps={{
-                           startAdornment: (
-                               <InputAdornment position="start">
-                                   <SearchIcon/>
-                               </InputAdornment>
-                           ),
+                       slotProps={{
+                           input: {
+                               startAdornment: (
+                                   <InputAdornment position="start">
+                                       <SearchIcon/>
+                                   </InputAdornment>
+                               ),
+                           },
                        }}
                        value={search}
                        onChange={e => setSearch(e.target.value)}

@@ -43,17 +43,20 @@ const Users = props => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-around',
+            gap: '.75rem',
             margin: '.5rem',
         }}>
 
             <TextField
                 autoFocus
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <SearchIcon />
-                        </InputAdornment>
-                    ),
+                slotProps={{
+                    input: {
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    },
                 }}
                 value={search}
                 onChange={e => setSearch(e.target.value)}

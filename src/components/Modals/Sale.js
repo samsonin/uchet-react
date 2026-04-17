@@ -59,7 +59,7 @@ const SaleModal = props => {
     return props.row
         ? <Dialog
             open={props.isOpen}
-            TransitionComponent={Transition}
+            slots={{ transition: Transition }}
             keepMounted
             onClose={() => close()}
         >

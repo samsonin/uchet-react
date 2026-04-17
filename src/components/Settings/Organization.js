@@ -289,9 +289,7 @@ const Organization = props => {
         const rule = lengthValidation[v.fieldName]
 
         return <Grid
-            item
-            xs={12}
-            sm={v.sm || 6}
+            size={{ xs: 12, sm: v.sm || 6 }}
             key={'formcnrtolrenfderfildinorg' + v.fieldName}
         >
             <TextField
@@ -308,7 +306,7 @@ const Organization = props => {
                 }}
                 error={Boolean(errorText)}
                 helperText={errorText}
-                inputProps={rule?.maxLength ? { maxLength: rule.maxLength } : undefined}
+                slotProps={rule?.maxLength ? { htmlInput: { maxLength: rule.maxLength } } : undefined}
             />
         </Grid>
     }
@@ -325,7 +323,7 @@ const Organization = props => {
 
         {renderField({ label: 'Название', fieldName: 'name' })}
 
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ xs: 12, sm: 6 }}>
             <Autocomplete
                 className={classes.field}
             value={{ inn: state.inn }}
@@ -341,9 +339,9 @@ const Organization = props => {
                     updateFields(v)
                 }
             }}
-            getOptionSelected={(option, value) => {
-                return true;
-            }}
+            isOptionEqualToValue={(option, value) =>
+                Boolean(option && value && option.inn === value.inn)
+            }
             getOptionLabel={option => toStringValue(option?.inn)}
             renderOption={option => `${toStringValue(option?.inn)} ${toStringValue(option?.organization)}`}
             options={options}
@@ -359,24 +357,26 @@ const Organization = props => {
                 fullWidth
                 error={Boolean(validationErrors.inn)}
                 helperText={validationErrors.inn}
-                inputProps={{
-                    ...params.inputProps,
-                    maxLength: lengthValidation.inn.maxLength,
-                }}
-                InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                        <React.Fragment>
-                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                            {params.InputProps.endAdornment}
-                        </React.Fragment>
-                    )
+                slotProps={{
+                    htmlInput: {
+                        ...params.inputProps,
+                        maxLength: lengthValidation.inn.maxLength,
+                    },
+                    input: {
+                        ...params.InputProps,
+                        endAdornment: (
+                            <React.Fragment>
+                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                {params.InputProps.endAdornment}
+                            </React.Fragment>
+                        )
+                    }
                 }}
             />)}
             />
         </Grid>
 
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ xs: 12, sm: 6 }}>
             <Autocomplete
                 className={classes.field}
             value={{ ogrn: state.ogrn }}
@@ -392,9 +392,9 @@ const Organization = props => {
                     updateFields(v)
                 }
             }}
-            getOptionSelected={(option, value) => {
-                return true;
-            }}
+            isOptionEqualToValue={(option, value) =>
+                Boolean(option && value && option.ogrn === value.ogrn)
+            }
             getOptionLabel={option => toStringValue(option?.ogrn)}
             renderOption={option => `${toStringValue(option?.ogrn)} ${toStringValue(option?.organization)}`}
             options={options}
@@ -410,18 +410,20 @@ const Organization = props => {
                 fullWidth
                 error={Boolean(validationErrors.ogrn)}
                 helperText={validationErrors.ogrn}
-                inputProps={{
-                    ...params.inputProps,
-                    maxLength: lengthValidation.ogrn.maxLength,
-                }}
-                InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                        <React.Fragment>
-                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                            {params.InputProps.endAdornment}
-                        </React.Fragment>
-                    )
+                slotProps={{
+                    htmlInput: {
+                        ...params.inputProps,
+                        maxLength: lengthValidation.ogrn.maxLength,
+                    },
+                    input: {
+                        ...params.InputProps,
+                        endAdornment: (
+                            <React.Fragment>
+                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                {params.InputProps.endAdornment}
+                            </React.Fragment>
+                        )
+                    }
                 }}
             />)}
             />

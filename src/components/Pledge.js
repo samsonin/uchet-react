@@ -257,7 +257,7 @@ const Pledge = props => {
 
         <Dialog
             open={isOpen}
-            TransitionComponent={Transition}
+            slots={{ transition: Transition }}
             keepMounted
             onClose={() => setIsOpen(false)}
             className='non-printable'

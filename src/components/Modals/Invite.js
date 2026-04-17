@@ -155,7 +155,7 @@ const InviteModal = props => {
     return (
         <Dialog
             open={isOpen}
-            TransitionComponent={Transition}
+            slots={{ transition: Transition }}
             keepMounted
             onClose={close}
             onKeyPress={keyPress}

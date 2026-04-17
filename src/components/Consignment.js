@@ -464,7 +464,9 @@ const Consignment = props => {
                 onInputChange={(e, v, r) => productHandler(v, r, i)}
                 onChange={(e, v) => setProduct(v)}
                 getOptionLabel={option => option.name}
-                getOptionSelected={option => option.name}
+                isOptionEqualToValue={(option, selectedValue) =>
+                    Boolean(option && selectedValue && option.name === selectedValue.name)
+                }
                 renderInput={params => <TextField {...params} />}
                 disabled={product.isInBase}
             />
@@ -499,7 +501,7 @@ const Consignment = props => {
 
     const currentTr = state.consignment.products[state.currentTr]
 
-    const dailyReport = props.app.daily.find(d => d.stock_id === props.app.current_stock_id)
+    const dailyReport = (props.app.daily || []).find(d => d.stock_id === props.app.current_stock_id)
 
     return props.app.current_stock_id
         ? <>
@@ -542,11 +544,14 @@ const Consignment = props => {
                     Все за сегодня
                 </Button>}
 
-            <Grid container
-                  justify={'center'}
-                  alignItems={'center'}
-            >
-                <Grid item>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '0.75rem',
+                flexWrap: 'wrap',
+            }}>
+                <div>
                     <TableContainer component={Paper}>
                         <Table size="small">
                             <TableHead>
@@ -560,7 +565,9 @@ const Consignment = props => {
                                                 (_, v) => handleProvider(v)
                                             }
                                             getOptionLabel={option => option.name}
-                                            getOptionSelected={option => option.id}
+                                            isOptionEqualToValue={(option, selectedValue) =>
+                                                Boolean(option && selectedValue && option.id === selectedValue.id)
+                                            }
                                             renderInput={
                                                 params => <TextField {...params} label="Поставщик"/>
                                             }
@@ -684,9 +691,9 @@ const Consignment = props => {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                </Grid>
-                <Grid item>
-                    <Grid container justify='center'>
+                </div>
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <Button
                             style={{
                                 margin: '1rem',
@@ -699,9 +706,9 @@ const Consignment = props => {
                         >
                             {props.close ? 'Coxранить' : 'Внести'}
                         </Button>
-                    </Grid>
-                </Grid>
-            </Grid>
+                    </div>
+                </div>
+            </div>
 
         </>
         : <Typography variant="h5">Выберите точку</Typography>

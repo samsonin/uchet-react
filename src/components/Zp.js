@@ -25,7 +25,16 @@ const toUnix = date => {
 const useStyles = makeStyles(() => ({
     field: {
         margin: '.3rem .3rem',
-    }
+    },
+    controlsRow: {
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: '0.75rem',
+        flexWrap: 'wrap',
+        marginBottom: '0.5rem',
+    },
 }))
 
 const Zp = props => {
@@ -87,11 +96,7 @@ const Zp = props => {
         <>
 
             {props.auth.admin && props.app.users && props.app.users.length &&
-                <div style={{
-                    width: '100%',
-                    display: "flex",
-                    justifyContent: "space-between",
-                }}>
+                <div className={classes.controlsRow}>
                     <UsersSelect
                         classes={classes.field}
                         onlyValid={!isAll}
@@ -104,17 +109,13 @@ const Zp = props => {
                         control={<Checkbox
                             checked={isAll}
                             onChange={() => setIsAll(!isAll)}
-                            inputProps={{'aria-label': 'primary checkbox'}}
+                            slotProps={{ input: { 'aria-label': 'primary checkbox' } }}
                         />}
                         label="Включая уволенных"
                     />
                 </div>}
 
-            <div style={{
-                width: '100%',
-                display: "flex",
-                justifyContent: "space-between",
-            }}>
+            <div className={classes.controlsRow}>
 
                 <TextField
                     style={{margin: '.5rem'}}

@@ -165,12 +165,14 @@ const Sales = props => {
                 error={error}
                 autoFocus
                 style={style}
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <SearchIcon/>
-                        </InputAdornment>
-                    ),
+                slotProps={{
+                    input: {
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon/>
+                            </InputAdornment>
+                        ),
+                    },
                 }}
                 value={str}
                 onChange={e => setStr(e.target.value)}

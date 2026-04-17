@@ -256,7 +256,7 @@ const Prepaid = props => {
 
     return <Dialog
         open={props.isOpen}
-        TransitionComponent={Transition}
+        slots={{ transition: Transition }}
         keepMounted
         onClose={() => exit()}
         className='non-printable'

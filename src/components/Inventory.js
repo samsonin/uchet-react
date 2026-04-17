@@ -135,7 +135,7 @@ const Inventory = props => {
 
         <Dialog
             open={isOpen}
-            TransitionComponent={Transition}
+            slots={{ transition: Transition }}
             keepMounted
             onClose={() => setIsOpen(false)}
         >
@@ -170,7 +170,10 @@ const Inventory = props => {
 
         <div style={{
             display: 'flex',
-            justifyContent: 'space-around'
+            justifyContent: 'space-around',
+            alignItems: 'center',
+            gap: '0.75rem',
+            flexWrap: 'wrap'
         }}>
 
             <FormControlLabel
@@ -184,19 +187,21 @@ const Inventory = props => {
                 label="Скрыть учтенные"
             />
 
-            <TextField InputProps={{
-                startAdornment: (
-                    <InputAdornment position="start">
-                        <SearchIcon/>
-                    </InputAdornment>
-                ),
-                endAdornment: (
-                    <InputAdornment position="end">
-                        <IconButton onClick={() => setSearch('')}>
-                            <CloseIcon/>
-                        </IconButton>
-                    </InputAdornment>
-                ),
+            <TextField slotProps={{
+                input: {
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchIcon/>
+                        </InputAdornment>
+                    ),
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton onClick={() => setSearch('')}>
+                                <CloseIcon/>
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                },
             }}
                        value={search}
                        onChange={e => setSearch(e.target.value)}

@@ -37,8 +37,9 @@ const today = (new Date()).getFullYear() + '-' + full(1 + (new Date()).getMonth(
 export default connect(state => state)(props => {
 
     const classes = useStyles();
+    const appStocks = props.app.stocks || []
 
-    const [stocks, setStocks] = useState(() => props.app.stocks
+    const [stocks, setStocks] = useState(() => appStocks
         .map(s => s.is_valid ? s.id : null)
         .filter(s => s))
     const [dateFrom, setDateFrom] = useState(() => today)
@@ -167,12 +168,16 @@ export default connect(state => state)(props => {
                 disabled={requesting}
             />
 
-            <Grid container
-                  justify={'center'}
-                  alignItems={'center'}
-            >
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '0.75rem',
+                flexWrap: 'wrap',
+                marginBottom: '0.75rem',
+            }}>
 
-                <Grid item>
+                <div>
 
                     <TextField
                         className={classes.controls}
@@ -182,14 +187,12 @@ export default connect(state => state)(props => {
                         type="date"
                         value={dateFrom}
                         onChange={e => setDateFrom(e.target.value)}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
+                        slotProps={{ inputLabel: { shrink: true } }}
                     />
 
-                </Grid>
+                </div>
 
-                <Grid item>
+                <div>
 
                     <TextField
                         className={classes.controls}
@@ -199,14 +202,12 @@ export default connect(state => state)(props => {
                         type="date"
                         value={dateTo}
                         onChange={e => setDateTo(e.target.value)}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
+                        slotProps={{ inputLabel: { shrink: true } }}
                     />
 
-                </Grid>
+                </div>
 
-                <Grid item>
+                <div>
 
                     <Button
                         variant="contained"
@@ -218,9 +219,9 @@ export default connect(state => state)(props => {
                         Сформировать
                     </Button>
 
-                </Grid>
+                </div>
 
-            </Grid>
+            </div>
 
             <TableContainer component={Paper}>
                 <Table size="small">

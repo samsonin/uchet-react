@@ -64,7 +64,9 @@ const ArrivalToday = props => {
         <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-
+            alignItems: 'center',
+            gap: '0.75rem',
+            flexWrap: 'wrap',
             width: '100%',
             margin: '.5rem'
         }}>
@@ -73,24 +75,26 @@ const ArrivalToday = props => {
                 control={<Checkbox
                     checked={isGroup}
                     onChange={() => setIsGroup(!isGroup)}
-                    inputProps={{'aria-label': 'primary checkbox'}}
+                    slotProps={{ input: {'aria-label': 'primary checkbox'} }}
                 />}
                 label="Сгруппировать"
             />
 
-            <TextField InputProps={{
-                startAdornment: (
-                    <InputAdornment position="start">
-                        <SearchIcon/>
-                    </InputAdornment>
-                ),
-                endAdornment: (
-                    <InputAdornment position="end">
-                        <IconButton onClick={() => setSearch('')}>
-                            <CloseIcon/>
-                        </IconButton>
-                    </InputAdornment>
-                ),
+            <TextField slotProps={{
+                input: {
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchIcon/>
+                        </InputAdornment>
+                    ),
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton onClick={() => setSearch('')}>
+                                <CloseIcon/>
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                },
             }}
                        value={search}
                        onChange={e => setSearch(e.target.value)}

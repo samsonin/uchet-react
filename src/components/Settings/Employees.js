@@ -118,18 +118,20 @@ const Employees = props => {
             variant="outlined"
             label="Контакт сотрудника"
             onChange={validateWait}
-            InputProps={{
-                endAdornment: <InputAdornment position="end">
-                    <IconButton
-                        disabled={!isEndAdornment}
-                        onClick={() => requestSettings(
-                            "addEmployee",
-                            document.getElementById("add-employee").value
-                        )}
-                    >
-                        <AddIcon/>
-                    </IconButton>
-                </InputAdornment>
+            slotProps={{
+                input: {
+                    endAdornment: <InputAdornment position="end">
+                        <IconButton
+                            disabled={!isEndAdornment}
+                            onClick={() => requestSettings(
+                                "addEmployee",
+                                document.getElementById("add-employee").value
+                            )}
+                        >
+                            <AddIcon/>
+                        </IconButton>
+                    </InputAdornment>
+                }
             }}
         />
     </div>
@@ -151,12 +153,12 @@ const Employees = props => {
             key={"grusKey" + user.id + user.verified_contact}
         > {typeof user.verified_contact === "string"
             ? <>
-                <Grid item xs={9}>
+                <Grid size={{ xs: 12, md: 9 }}>
                     <Typography variant="subtitle1" style={{color: "gray"}}>
                         Ждет подтверждения:
                     </Typography>
                 </Grid>
-                <Grid item xs={3}>
+                <Grid size={{ xs: 12, md: 3 }}>
                     <IconButton
                         color="secondary"
                         onClick={() =>
@@ -166,20 +168,18 @@ const Employees = props => {
                         <DeleteIcon />
                     </IconButton>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={12}>
                     <TextField
                         defaultValue={user.verified_contact}
-                        InputProps={{
-                            readOnly: true,
-                        }}
+                        slotProps={{ input: { readOnly: true } }}
                     />
                 </Grid>
             </>
             : <>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <PersonIcon style={{fontSize: "4rem"}}/>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <FormControlLabel
                         label={user.is_valid ? "Работает" : "Уволен"}
                         control={
@@ -198,7 +198,7 @@ const Employees = props => {
                         }
                     />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={12}>
                     <Typography variant="subtitle1" style={{color: "gray"}}>
                         Имя:
                     </Typography>

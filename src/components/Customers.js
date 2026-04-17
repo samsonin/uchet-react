@@ -93,8 +93,8 @@ export default function (props) {
             </TableCell>
         </TableRow>
 
-    return <Grid container>
-        <Grid item>
+    return <Grid container sx={{ width: '100%' }}>
+        <Grid size={12}>
             <TableContainer component={Paper}>
                 <Table size="small">
                     <TableHead>
@@ -105,22 +105,28 @@ export default function (props) {
                                 </Typography>
                             </TableCell>
                             <TableCell colSpan={2}>
-                                <Input
-                                    id={'searchCustomerString'}
-                                    name={'searchCustomerString'}
-                                    onChange={e => handleSearch(e.target.value)}
-                                    endAdornment={
-                                        <InputAdornment position="end">
-                                            <SearchIcon/>
-                                        </InputAdornment>
-                                    }/>
-                                <Tooltip title="Добавить">
-                                    <Link to="/customers/0">
-                                        <IconButton>
-                                            <AddCircleIcon/>
-                                        </IconButton>
-                                    </Link>
-                                </Tooltip>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                }}>
+                                    <Input
+                                        id={'searchCustomerString'}
+                                        name={'searchCustomerString'}
+                                        onChange={e => handleSearch(e.target.value)}
+                                        endAdornment={
+                                            <InputAdornment position="end">
+                                                <SearchIcon/>
+                                            </InputAdornment>
+                                        }/>
+                                    <Tooltip title="Добавить">
+                                        <Link to="/customers/0">
+                                            <IconButton>
+                                                <AddCircleIcon/>
+                                            </IconButton>
+                                        </Link>
+                                    </Tooltip>
+                                </div>
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -136,7 +142,7 @@ export default function (props) {
                 </Table>
             </TableContainer>
 
-        </ Grid>
+        </Grid>
     </Grid>
 
 }

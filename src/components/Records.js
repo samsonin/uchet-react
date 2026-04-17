@@ -92,7 +92,7 @@ export const Records = props => {
   if (!request && data === undefined) handleSearch({date: searchDate});
 
   return <Grid container>
-    <Grid item>
+    <Grid size={12}>
       <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>
@@ -103,9 +103,7 @@ export const Records = props => {
                     type="date"
                     defaultValue={searchDate}
                     onChange={e => handleSearch({date: e.target.value})}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
+                    slotProps={{ inputLabel: { shrink: true } }}
                   />
                 </Typography>
               </TableCell>
@@ -148,7 +146,7 @@ export const Records = props => {
         </Table>
       </TableContainer>
 
-    </ Grid>
+        </Grid>
   </Grid>
 
 }

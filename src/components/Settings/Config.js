@@ -135,7 +135,7 @@ const ConfigField = ({ field, value, disabled, onChange, onSave }) => {
     const classes = useStyles();
 
     if (field.type === "checkbox") {
-        return <Grid item xs={12} sm={6}>
+        return <Grid size={{ xs: 12, sm: 6 }}>
             <FormControlLabel
                 control={
                     <Checkbox
@@ -150,7 +150,7 @@ const ConfigField = ({ field, value, disabled, onChange, onSave }) => {
         </Grid>;
     }
 
-    return <Grid item xs={12} sm={6}>
+    return <Grid size={{ xs: 12, sm: 6 }}>
         <TextField
             label={field.label}
             value={toStringValue(value)}
@@ -162,8 +162,10 @@ const ConfigField = ({ field, value, disabled, onChange, onSave }) => {
             disabled={disabled}
             onChange={event => onChange(field.name, event.target.value)}
             onBlur={() => onSave(field.name)}
-            InputProps={field.end ? {
-                endAdornment: <InputAdornment position="end">{field.end}</InputAdornment>,
+            slotProps={field.end ? {
+                input: {
+                    endAdornment: <InputAdornment position="end">{field.end}</InputAdornment>,
+                }
             } : undefined}
         />
     </Grid>;

@@ -341,11 +341,14 @@ const Daily = props => {
                 afterRes={afterRes}
             />}
 
-            <Grid container
-                justify={'center'}
-                alignItems={'center'}
-            >
-                {hasMultipleStocks && <Grid item xs={6}>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '0.75rem',
+                flexWrap: 'wrap',
+            }}>
+                {hasMultipleStocks && <div style={{ flex: '1 1 280px', maxWidth: 420 }}>
 
                     <StocksSelect
                         stocks={selectableStocks}
@@ -354,9 +357,9 @@ const Daily = props => {
                         classes={classes.controls}
                     />
 
-                </Grid>}
+                </div>}
 
-                <Grid item xs={hasMultipleStocks ? 6 : 12}>
+                <div style={{ flex: '1 1 280px', maxWidth: hasMultipleStocks ? 420 : 520 }}>
                     <TextField
                         className={classes.controls}
                         variant="outlined"
@@ -365,12 +368,10 @@ const Daily = props => {
                         type="date"
                         value={date}
                         onChange={e => setDate(e.target.value)}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
+                        slotProps={{ inputLabel: { shrink: true } }}
                     />
-                </Grid>
-            </Grid>
+                </div>
+            </div>
 
             {date !== today && (!localDaily || !localDaily.hasOwnProperty('id'))
                 ? <div style={{

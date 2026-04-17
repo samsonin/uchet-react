@@ -558,7 +558,7 @@ const Docs = props => {
             onClose={() => setPreviewOpen(false)}
             maxWidth="lg"
             fullWidth
-            PaperProps={{ className: `${classes.previewPaper} docs-preview-paper` }}
+            slotProps={{ paper: { className: `${classes.previewPaper} docs-preview-paper` } }}
         >
             <style>
                 {`@media print { @page { size: ${currentPaperSize.printSize}; margin: 0; } }`}

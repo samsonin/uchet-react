@@ -66,7 +66,7 @@ const Good = props => {
 
     return <Dialog
         open={!!good}
-        TransitionComponent={Transition}
+        slots={{ transition: Transition }}
         keepMounted
         onClose={() => close()}
         className='non-printable'

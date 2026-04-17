@@ -112,8 +112,8 @@ const Subscribe = ({ organization_id }) => {
             <Typography variant="h3" align="center" className="m-3">
                 Пожалуйста продлите подписку
             </Typography>
-            <Grid container item xs={12} justify="center" className={classes.root} spacing={4}>
-                {subscribes.map(v => <Grid key={v.monthText + v.cost} item>
+            <Grid container className={classes.root} spacing={4} sx={{ justifyContent: 'center' }}>
+                {subscribes.map(v => <Grid key={v.monthText + v.cost}>
                     <Paper className={classes.paper}>
                         <CardHeader
                             title={v.monthText}

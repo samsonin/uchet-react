@@ -125,7 +125,9 @@ const Fields = props => {
                         onChangeAutocomplete(v, r, field.name)
                     }}
                     getOptionLabel={option => option ? option[field.name] : ''}
-                    getOptionSelected={option => option.id === props.customer.id}
+                    isOptionEqualToValue={(option, selectedValue) =>
+                        Boolean(option && selectedValue && option.id === selectedValue.id)
+                    }
                     renderInput={params => <TextField
                         {...params}
                         label={field.value}

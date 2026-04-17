@@ -87,19 +87,21 @@ const Prepaids = props => {
                             </Typography>
                         </TableCell>
                         <TableCell align="right">
-                            <TextField InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon/>
-                                    </InputAdornment>
-                                ),
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton onClick={() => setSearch('')}>
-                                            <CloseIcon/>
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
+                            <TextField slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon/>
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setSearch('')}>
+                                                <CloseIcon/>
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
                                        value={search}
                                        onChange={e => setSearch(e.target.value)}

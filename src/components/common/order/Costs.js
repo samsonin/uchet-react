@@ -138,7 +138,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
         <Dialog
             open={serviceOpen}
-            TransitionComponent={Transition}
+            slots={{ transition: Transition }}
             keepMounted
             onClose={() => setServiceOpen(false)}
         >
