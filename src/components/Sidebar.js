@@ -2,9 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-import { makeStyles } from '@material-ui/core/styles';
-import Button from "@material-ui/core/Button";
-
+import { makeStyles } from 'muiLegacyStyles';
 import { siteMap } from "./SiteMap";
 
 
@@ -18,6 +16,7 @@ const useStyles = makeStyles({
         width: '100%',
         minHeight: 44,
         marginBottom: 8,
+        border: 0,
         borderRadius: 14,
         background: 'linear-gradient(135deg, #0f9f8f 0%, #18b8a5 100%)',
         color: '#ffffff !important',
@@ -63,12 +62,12 @@ const Sidebar = props => {
                 { name: 'Интеграции', arr: [51, 52, 53] },
             ].map(v => siteMap(props.admin).find(sm => v.arr.includes(sm.id))
                 ? <div key={'sidebararrkey' + v.name}>
-                    <Button
+                    <button
+                        type="button"
                         className={classes.button}
-                        size="large"
                         onClick={e => nextDivToggle(e.currentTarget.nextSibling)}>
                         {v.name}
-                    </Button>
+                    </button>
                     <div className="List-item hideBlock">
                         {v.arr.map(id => {
                             let obj = siteMap(props.admin).find(v => v.id === id)

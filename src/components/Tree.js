@@ -1,8 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
-import TreeView from '@material-ui/lab/TreeView';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import TreeItem from '@material-ui/lab/TreeItem';
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
 
 export default function ControlledTreeView({categories, initialId, onSelected, finished}) {
 
@@ -66,7 +66,7 @@ export default function ControlledTreeView({categories, initialId, onSelected, f
                 let childs = makeTree(cat.id)
 
                 return <TreeItem key={'treekeychild' + cat.id}
-                                 nodeId={cat.id.toString()}
+                                 itemId={cat.id.toString()}
                                  label={cat.name}
                 >
                     {childs.length
@@ -78,15 +78,17 @@ export default function ControlledTreeView({categories, initialId, onSelected, f
 
     }
 
-    return <TreeView
-        defaultCollapseIcon={<ExpandMoreIcon/>}
-        defaultExpandIcon={<ChevronRightIcon/>}
-        expanded={expanded}
-        selected={selected}
-        onNodeToggle={handleToggle}
-        onNodeSelect={handleSelect}
+    return <SimpleTreeView
+        slots={{
+            collapseIcon: ExpandMoreIcon,
+            expandIcon: ChevronRightIcon,
+        }}
+        expandedItems={expanded}
+        selectedItems={selected}
+        onExpandedItemsChange={handleToggle}
+        onSelectedItemsChange={handleSelect}
     >
         {tree}
-    </TreeView>
+    </SimpleTreeView>
 
 }

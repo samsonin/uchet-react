@@ -2,18 +2,18 @@ import React, {useState} from "react";
 import {connect} from "react-redux";
 import {Link} from "react-router-dom";
 
-import {Grid, Paper} from "@material-ui/core";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
+import {Grid, Paper} from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
 
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import DeleteIcon from "@material-ui/icons/Delete";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import ReferalSelect from "../ReferalSelect";
 import {BottomButtons} from "../common/BottomButtons";
-import TextField from "@material-ui/core/TextField/TextField";
+import TextField from "@mui/material/TextField";
 
 const types = {
     birthday: 'date',

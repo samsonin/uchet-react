@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 
-import { Card, CardContent, CardHeader, Grid, TextField } from "@material-ui/core";
-import Autocomplete from "@material-ui/lab/Autocomplete/Autocomplete";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import { makeStyles } from "@material-ui/core/styles";
+import { Card, CardContent, CardHeader, Grid, TextField } from "@mui/material";
+import Autocomplete from "@mui/material/Autocomplete";
+import CircularProgress from "@mui/material/CircularProgress";
+import { makeStyles } from "muiLegacyStyles";
 import rest from "../Rest";
 import { BottomButtons } from "../common/BottomButtons";
 

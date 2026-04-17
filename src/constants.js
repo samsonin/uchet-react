@@ -1,4 +1,4 @@
-const isLocalhost = Boolean(
+export const IS_LOCALHOST = Boolean(
     window.location.hostname === "localhost" ||
     // [::1] is the IPv6 localhost address.
     window.location.hostname === "[::1]" ||
@@ -20,10 +20,10 @@ export const
     DELETE_GOOD = 'DELETE_GOOD',
     EXIT_APP = 'EXIT_APP',
 
-    SERVER = isLocalhost ?
+    SERVER = IS_LOCALHOST ?
         'http://127.0.0.1:8000' :
         'https://api.uchet.store',
 
-    NEW_SERVER = isLocalhost ?
+    NEW_SERVER = IS_LOCALHOST ?
         'http://127.0.0.1:8000' :
         'https://api.appblog.ru';

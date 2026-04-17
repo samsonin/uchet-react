@@ -1,20 +1,20 @@
 import React, { forwardRef, useState, useEffect } from "react";
 
-import Dialog from "@material-ui/core/Dialog";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogActions from "@material-ui/core/DialogActions";
-import Button from "@material-ui/core/Button";
-import Slide from "@material-ui/core/Slide";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
+import Slide from "@mui/material/Slide";
 import { useSnackbar } from "notistack";
 import { connect } from "react-redux";
-import { TextField } from "@material-ui/core";
+import { TextField } from "@mui/material";
 import authRequest from "./authRequest";
 import { bindActionCreators } from "redux";
 import { init_user } from "../actions/actionCreator";
 import License from "./License";
 import Privacy from "./Privacy";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "muiLegacyStyles";
 import { SERVER } from '../constants';
 import logo from '../images/logo.png';
 import googleIcon from '../images/google.svg';
@@ -1008,12 +1008,12 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     return <Dialog
         open={props.isOpen}
-        TransitionComponent={Transition}
+        slots={{ transition: Transition }}
         keepMounted
         onClose={() => props.close()}
         fullWidth
         maxWidth="xs"
-        PaperProps={{ className: classes.dialogPaper }}
+        slotProps={{ paper: { className: classes.dialogPaper } }}
     >
         <form className={classes.formPane} onSubmit={submitCurrent}>
             <div className={classes.formTop}>

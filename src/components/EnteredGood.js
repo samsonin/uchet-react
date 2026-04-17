@@ -1,7 +1,7 @@
 import React from "react";
 import {connect} from "react-redux";
 
-import {TextField, Typography} from "@material-ui/core";
+import {TextField, Typography} from "@mui/material";
 
 import CategoryHandler from "./common/CategoryHandler";
 

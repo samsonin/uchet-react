@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
-import {Button} from "@material-ui/core";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
+import {Button} from "@mui/material";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 import {useSnackbar} from "notistack";
 

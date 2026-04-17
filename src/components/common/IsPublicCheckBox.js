@@ -1,8 +1,8 @@
 import React from "react";
 import * as PropTypes from "prop-types";
 
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 export default function IsPublicCheckBox(props) {
     return <FormControlLabel

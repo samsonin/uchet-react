@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from "redux";
 import { Link } from "react-router-dom";
 import { init_user, upd_app, exit_app } from "../actions/actionCreator";
-import { Button, IconButton } from "@material-ui/core";
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import { Button, IconButton } from "@mui/material";
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 import BalanceModal from "./BalanceModal";
 import rest from './Rest'
@@ -95,9 +95,11 @@ const NavbarPage = props => {
 
         if (!props.app) return '';
 
-        const position = props.app.positions
-            ? props.app.positions.find(p => p.id === props.auth.position_id)
-            : null
+        const appPositions = props.app.positions || []
+        const appDaily = props.app.daily || []
+        const appUsers = props.app.users || []
+
+        const position = appPositions.find(p => p.id === props.auth.position_id)
 
         const isSale = position && position.is_sale
 
@@ -111,8 +113,8 @@ const NavbarPage = props => {
                         {currentStock ? currentStock.name : ''}
                     </strong>
 
-                    {(props.auth.admin || isSale) && props.app.daily &&
-                        !props.app.daily.find(d => d.employees.includes(props.auth.user_id))
+                    {(props.auth.admin || isSale) &&
+                        !appDaily.find(d => d.employees.includes(props.auth.user_id))
                         ? <Button
                             variant="outlined"
                             className="header-shift-button"
@@ -168,7 +170,7 @@ const NavbarPage = props => {
 
         if (!props.app) return ''
 
-        const user = props.app.users.find(v => +v.id === +props.auth.user_id)
+        const user = appUsers.find(v => +v.id === +props.auth.user_id)
         return user
             ? user.name
             : ''

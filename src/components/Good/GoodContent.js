@@ -9,8 +9,8 @@ import {
     CardMedia,
     Fade,
     TextField,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import { makeStyles } from "muiLegacyStyles";
 import { useSnackbar } from "notistack";
 
 import { intInputHandler } from "../common/InputHandlers";

@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo} from "react";
 import {connect} from "react-redux";
 
-import {FormControlLabel, Checkbox} from "@material-ui/core";
+import {FormControlLabel, Checkbox} from "@mui/material";
 
 const StocksCheck = props => {
 

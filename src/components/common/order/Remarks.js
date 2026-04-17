@@ -1,10 +1,10 @@
 import React, {useState} from "react";
 
-import {Table, TableCell, TableRow} from "@material-ui/core";
-import TableHead from "@material-ui/core/TableHead";
-import TableBody from "@material-ui/core/TableBody";
-import TextField from "@material-ui/core/TextField/TextField";
-import Button from "@material-ui/core/Button";
+import {Table, TableCell, TableRow} from "@mui/material";
+import TableHead from "@mui/material/TableHead";
+import TableBody from "@mui/material/TableBody";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 import {useSnackbar} from "notistack";
 
 import rest from "../../Rest"

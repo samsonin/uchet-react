@@ -9,13 +9,13 @@ import {
     Switch,
     TextField,
     Typography,
-} from "@material-ui/core";
-import PersonIcon from "@material-ui/icons/Person";
-import PersonAddIcon from "@material-ui/icons/PersonAdd";
-import DeleteIcon from '@material-ui/icons/Delete';
-import AddIcon from "@material-ui/icons/Add";
-import {makeStyles} from "@material-ui/core/styles";
-import InputAdornment from "@material-ui/core/InputAdornment";
+} from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from "@mui/icons-material/Add";
+import {makeStyles} from "muiLegacyStyles";
+import InputAdornment from "@mui/material/InputAdornment";
 
 import {useSnackbar} from 'notistack';
 

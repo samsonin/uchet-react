@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
-import TextField from "@material-ui/core/TextField";
-import {Button, InputAdornment, Table, TableBody} from "@material-ui/core";
-import SearchIcon from "@material-ui/icons/Search";
+import TextField from "@mui/material/TextField";
+import {Button, InputAdornment, Table, TableBody} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import {useSnackbar} from "notistack";
 
 import rest from "../components/Rest"
@@ -12,9 +12,9 @@ import DateInterval from "./common/DateInterval";
 import ActionsSelect from "./common/ActionsSelect";
 import {intInputHandler} from "./common/InputHandlers";
 import UsersSelect from "./common/UsersSelect";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
 import TwoLineInCell from "./common/TwoLineInCell";
 import {toLocalTimeStr} from "./common/Time";
 
@@ -27,7 +27,10 @@ const style = {
 
 const Sales = props => {
 
-    const [stocks, setStocks] = useState(() => props.app.stocks
+    const appStocks = props.app.stocks || []
+    const appUsers = props.app.users || []
+
+    const [stocks, setStocks] = useState(() => appStocks
         .map(s => s.is_valid ? s.id : null)
         .filter(s => s))
     const [date1, setDate1] = useState()
@@ -100,8 +103,8 @@ const Sales = props => {
 
     const renderRow = sale => {
 
-        const stock = props.app.stocks.find(s => s.id === sale.stock_id)
-        const user = props.app.users.find(u => u.id === sale.user_id)
+        const stock = appStocks.find(s => s.id === sale.stock_id)
+        const user = appUsers.find(u => u.id === sale.user_id)
 
         total += sale.sum
 

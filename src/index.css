@@ -1202,4 +1202,23 @@
         font-family: Verdana, Arial, Helvetica, sans-serif;
     }
 
+    .printing-document * {
+        visibility: hidden !important;
+    }
+
+    .printing-document .printable,
+    .printing-document .printable * {
+        visibility: visible !important;
+    }
+
+    .printing-document .printable {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        background: #fff !important;
+        z-index: 9999 !important;
+    }
+
 }

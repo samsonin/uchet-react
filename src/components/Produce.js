@@ -2,7 +2,7 @@ import React from "react";
 import {connect} from "react-redux";
 
 import AddCosts from "./common/AddCosts";
-import {Typography} from "@material-ui/core";
+import {Typography} from "@mui/material";
 
 const Produce = props => {
 

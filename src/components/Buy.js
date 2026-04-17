@@ -13,17 +13,17 @@ import {
     TableBody,
     TableContainer,
     TextField
-} from "@material-ui/core";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import TableCell from "@material-ui/core/TableCell/TableCell";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import DeleteIcon from "@material-ui/icons/Delete";
+} from "@mui/material";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {intInputHandler} from "./common/InputHandlers";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import {createDate, Print} from "./common/Print";
 
 

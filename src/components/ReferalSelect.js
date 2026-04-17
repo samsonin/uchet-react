@@ -1,7 +1,7 @@
 import React from 'react';
-import {FormControl, Select, MenuItem} from "@material-ui/core";
+import {FormControl, Select, MenuItem} from "@mui/material";
 import {connect} from "react-redux";
-import InputLabel from "@material-ui/core/InputLabel/InputLabel";
+import InputLabel from "@mui/material/InputLabel";
 
 
 const ReferalSelect = props => {

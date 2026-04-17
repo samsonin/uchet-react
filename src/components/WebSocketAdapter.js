@@ -5,8 +5,9 @@ import {bindActionCreators} from 'redux';
 
 import {useSnackbar} from 'notistack';
 
-import Button from "@material-ui/core/Button";
+import Button from "@mui/material/Button";
 import rest from "./Rest";
+import { IS_LOCALHOST } from "../constants";
 
 const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
@@ -20,10 +21,14 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
 
         rest('initial')
 
+        const configuredUrl = process.env.REACT_APP_WS_URL;
+        const wsBaseUrl = configuredUrl || (IS_LOCALHOST ? '' : 'wss://appblog.ru:3333');
+
+        if (!wsBaseUrl) return
+
         try {
 
-            const ws = new WebSocket('wss://appblog.ru:3333/' + jwt);
-            // const ws = new WebSocket('ws://localhost:3333/'  + jwt);
+            const ws = new WebSocket(wsBaseUrl + '/' + jwt);
 
             ws.onmessage = response => {
 
@@ -107,6 +112,12 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
             window.onblur = () => sendIsFocus(false);
 
             sendIsFocus(true)
+
+            return () => {
+                window.onfocus = null
+                window.onblur = null
+                ws.close()
+            }
 
         } catch (e) {
             // console.error("ws " + e)

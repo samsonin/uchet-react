@@ -1,21 +1,21 @@
 import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
-import {makeStyles} from '@material-ui/core/styles';
-import TextField from "@material-ui/core/TextField";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import {makeStyles} from 'muiLegacyStyles';
+import TextField from "@mui/material/TextField";
 
-import CachedIcon from '@material-ui/icons/Cached';
-import Button from "@material-ui/core/Button";
+import CachedIcon from '@mui/icons-material/Cached';
+import Button from "@mui/material/Button";
 
 import rest from "./Rest";
-import TableContainer from "@material-ui/core/TableContainer";
-import {Paper} from "@material-ui/core";
-import Table from "@material-ui/core/Table";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import TableCell from "@material-ui/core/TableCell";
-import TableBody from "@material-ui/core/TableBody";
+import TableContainer from "@mui/material/TableContainer";
+import {Paper} from "@mui/material";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableBody from "@mui/material/TableBody";
 
 import StocksCheck from "./common/StocksCheck";
 

@@ -1,14 +1,14 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import CardContent from "@material-ui/core/CardContent";
-import CardActions from '@material-ui/core/CardActions';
-import CardHeader from "@material-ui/core/CardHeader";
-import Button from '@material-ui/core/Button';
+import { makeStyles } from 'muiLegacyStyles';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import CardContent from "@mui/material/CardContent";
+import CardActions from '@mui/material/CardActions';
+import CardHeader from "@mui/material/CardHeader";
+import Button from '@mui/material/Button';
 import { connect } from "react-redux";
-import Link from '@material-ui/core/Link';
-import Typography from '@material-ui/core/Typography';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
 
 
 const useStyles = makeStyles(theme => ({

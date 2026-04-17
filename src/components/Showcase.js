@@ -2,15 +2,15 @@ import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
 import rest from "../components/Rest";
-import TableHead from "@material-ui/core/TableHead";
-import {InputAdornment, Table, TableBody, TableCell, TableRow, TextField} from "@material-ui/core";
+import TableHead from "@mui/material/TableHead";
+import {InputAdornment, Table, TableBody, TableCell, TableRow, TextField} from "@mui/material";
 import TwoLineInCell from "./common/TwoLineInCell";
-import SearchIcon from "@material-ui/icons/Search";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
+import SearchIcon from "@mui/icons-material/Search";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 
 const statuses = {

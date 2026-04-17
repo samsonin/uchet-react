@@ -1,11 +1,11 @@
 import React, {useState} from "react";
 import {connect} from "react-redux";
 
-import RadioGroup from "@material-ui/core/RadioGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Radio from "@material-ui/core/Radio";
-import TextField from "@material-ui/core/TextField";
-import Grid from "@material-ui/core/Grid";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Radio from "@mui/material/Radio";
+import TextField from "@mui/material/TextField";
+import Grid from "@mui/material/Grid";
 
 import { UiButton, UiModal } from "./common/Ui";
 

@@ -15,14 +15,14 @@ import {
     ListItemText,
     Switch,
     Typography
-} from "@material-ui/core";
+} from "@mui/material";
 
 import rest from '../../components/Rest';
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
-import { makeStyles } from "@material-ui/core/styles";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import StoreIcon from "@material-ui/icons/Store";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import { makeStyles } from "muiLegacyStyles";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import StoreIcon from "@mui/icons-material/Store";
 
 const useStyles = makeStyles({
     root: {

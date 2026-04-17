@@ -14,8 +14,8 @@ import {
     Grid,
     Typography,
     TextField
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import { makeStyles } from "muiLegacyStyles";
 import { useSnackbar } from "notistack";
 
 import rest from "../Rest";
@@ -97,7 +97,7 @@ const Personal = props => {
     const { enqueueSnackbar } = useSnackbar();
 
     const auth = props.auth;
-    const user = props.app.users.find(u => u.id === auth.user_id);
+    const user = (props.app.users || []).find(u => u.id === auth.user_id);
     const history = props.history;
     const locationSearch = props.location?.search || "";
     const userName = user?.name || "";

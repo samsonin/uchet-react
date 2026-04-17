@@ -1,23 +1,23 @@
 import React, {forwardRef, useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
-import {Fade, InputAdornment, Table, TableBody, TableCell, TableHead, TableRow, TextField} from "@material-ui/core";
+import {Fade, InputAdornment, Table, TableBody, TableCell, TableHead, TableRow, TextField} from "@mui/material";
 import rest from "./Rest";
 import TwoLineInCell from "./common/TwoLineInCell";
-import IconButton from "@material-ui/core/IconButton";
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogActions from "@material-ui/core/DialogActions";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import Slide from "@material-ui/core/Slide";
+import IconButton from "@mui/material/IconButton";
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import Slide from "@mui/material/Slide";
 import {intInputHandler} from "./common/InputHandlers";
 import IsPublicCheckBox from "./common/IsPublicCheckBox";
 import {useSnackbar} from "notistack";
-import SearchIcon from "@material-ui/icons/Search";
-import CloseIcon from "@material-ui/icons/Close";
-import Checkbox from "@material-ui/core/Checkbox";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
+import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 import {v4 as uuidv4} from 'uuid';
 

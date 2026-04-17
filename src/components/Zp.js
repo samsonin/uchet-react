@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from "react";
 
-import TableHead from "@material-ui/core/TableHead";
-import {Button, FormControlLabel, Table, TableBody, TableCell, TableRow} from "@material-ui/core";
-import uuid from "uuid";
-import TextField from "@material-ui/core/TextField";
+import TableHead from "@mui/material/TableHead";
+import {Button, FormControlLabel, Table, TableBody, TableCell, TableRow} from "@mui/material";
+import { v4 as uuid } from "uuid";
+import TextField from "@mui/material/TextField";
 import {connect} from "react-redux";
-import {makeStyles} from "@material-ui/core/styles";
-import Checkbox from "@material-ui/core/Checkbox";
+import {makeStyles} from "muiLegacyStyles";
+import Checkbox from "@mui/material/Checkbox";
 
 import rest from "./Rest";
 import UsersSelect from "./common/UsersSelect";

@@ -1,20 +1,20 @@
 import React from "react";
 import {connect} from "react-redux";
 
-import Tooltip from "@material-ui/core/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
-import ThumbDownIcon from "@material-ui/icons/ThumbDown";
-import RestoreFromTrashIcon from "@material-ui/icons/RestoreFromTrash";
-import BuildIcon from "@material-ui/icons/Build";
-import LineWeightIcon from "@material-ui/icons/LineWeight";
-import DeleteIcon from "@material-ui/icons/Delete";
-import PrintIcon from "@material-ui/icons/Print";
-import AspectRatioIcon from '@material-ui/icons/AspectRatio';
-import HistoryIcon from '@material-ui/icons/History';
-import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
-import ReceiptIcon from '@material-ui/icons/Receipt';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
+import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
+import BuildIcon from "@mui/icons-material/Build";
+import LineWeightIcon from "@mui/icons-material/LineWeight";
+import DeleteIcon from "@mui/icons-material/Delete";
+import PrintIcon from "@mui/icons-material/Print";
+import AspectRatioIcon from '@mui/icons-material/AspectRatio';
+import HistoryIcon from '@mui/icons-material/History';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 import {useSnackbar} from "notistack";
 

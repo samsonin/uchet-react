@@ -1,16 +1,16 @@
 import React from 'react';
-import Grid from "@material-ui/core/Grid";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import Typography from "@material-ui/core/Typography";
-import Link from "@material-ui/core/Link";
-import makeStyles from "@material-ui/core/styles/makeStyles";
-import IconButton from "@material-ui/core/IconButton";
-import InputAdornment from "@material-ui/core/InputAdornment";
-import Input from "@material-ui/core/Input";
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import FormControl from "@material-ui/core/FormControl";
-import TextField from "@material-ui/core/TextField";
+import Grid from "@mui/material/Grid";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import Typography from "@mui/material/Typography";
+import Link from "@mui/material/Link";
+import makeStyles from "muiLegacyStyles";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import Input from "@mui/material/Input";
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import FormControl from "@mui/material/FormControl";
+import TextField from "@mui/material/TextField";
 
 const useStyles = makeStyles((theme) => ({
     root: {

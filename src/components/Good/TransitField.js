@@ -1,10 +1,10 @@
 import React from "react";
 import {connect} from "react-redux";
 
-import {Accordion, AccordionDetails, AccordionSummary, Typography} from "@material-ui/core";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ArrowRightAltIcon from "@material-ui/icons/ArrowRightAlt";
-import uuid from "uuid";
+import {Accordion, AccordionDetails, AccordionSummary, Typography} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
+import { v4 as uuid } from "uuid";
 
 import {toLocalTimeStr} from "../common/Time";
 

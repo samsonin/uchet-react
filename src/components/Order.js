@@ -1,11 +1,11 @@
 import React, {useEffect, useRef, useState} from "react";
 import {connect} from "react-redux";
 
-import {makeStyles} from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
-import PrintIcon from "@material-ui/icons/Print";
-import {Tab, Tabs, Typography} from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
+import {makeStyles} from "muiLegacyStyles";
+import IconButton from "@mui/material/IconButton";
+import PrintIcon from "@mui/icons-material/Print";
+import {Tab, Tabs, Typography} from "@mui/material";
+import Grid from "@mui/material/Grid";
 
 import {Print, createDate} from "./common/Print";
 import rest from "../components/Rest";
@@ -27,6 +27,11 @@ const useStyles = makeStyles(() => ({
 
 const Order = props => {
 
+    const appOrders = props.app.orders || []
+    const appPositions = props.app.positions || []
+    const appCategories = props.app.categories || []
+    const appStocks = props.app.stocks || []
+
     const [tabId, setTabId] = useState(0)
 
     const [id, setId] = useState(+props.match.params.order_id || null)
@@ -37,9 +42,7 @@ const Order = props => {
 
     const classes = useStyles()
 
-    const order = props.app.orders
-        ? props.app.orders.find(or => or.id === id && or.stock_id === stockId)
-        : null
+    const order = appOrders.find(or => or.id === id && or.stock_id === stockId) || null
 
     const canEdit = () => order
         ? order.status_id === 6
@@ -47,16 +50,22 @@ const Order = props => {
             : order.status_id < 6
         : false
 
-    const position = props.app.positions.find(p => p.id === props.auth.position_id)
+    const position = appPositions.find(p => p.id === props.auth.position_id)
     const isSale = position ? position.is_sale : false
 
-    const docName = order && order.status_id === 6 ? 'order_checkout' : 'order'
+    const docs = Array.isArray(props.app.docs)
+        ? props.app.docs
+        : props.app.docs?.docs || []
 
-    const doc = props.app.docs.find(d => d.name === docName)
+    const docNames = order && order.status_id === 6
+        ? ['order_checkout', 'checkout']
+        : ['order', 'remont']
 
-    const category = order ? props.app.categories.find(c => c.id === order.category_id) : null
+    const doc = docs.find(d => docNames.includes(d.name || d.doc_name))
 
-    const stock = order ? props.app.stocks.find(s => s.id === order.stock_id) : null
+    const category = order ? appCategories.find(c => c.id === order.category_id) : null
+
+    const stock = order ? appStocks.find(s => s.id === order.stock_id) : null
 
     const alias = order
         ? {

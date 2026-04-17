@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {connect} from "react-redux";
 
-import {Button, Grid} from "@material-ui/core";
+import {Button, Grid} from "@mui/material";
 
 import Tree from "../Tree";
 import {intInputHandler} from "./InputHandlers";
@@ -11,9 +11,11 @@ import {intInputHandler} from "./InputHandlers";
 
 const CategoryHandler = props => {
 
+    const categories = props.app.categories || []
+
     const [treeOpen, setTreeOpen] = useState(false)
 
-    const category = props.app.categories.find(c => c.id === props.id)
+    const category = categories.find(c => c.id === props.id)
 
     const handleTree = id => {
         intInputHandler(id, props.setId)
@@ -22,14 +24,14 @@ const CategoryHandler = props => {
 
     return treeOpen
         ? <Grid container className="m-1 p-1">
-            <Grid item xs={10} className="pt-1 pr-1">
+            <Grid size={10} className="pt-1 pr-1">
                 <Tree initialId={props.id}
-                      categories={props.app.categories}
+                      categories={categories}
                       onSelected={id => intInputHandler(id, props.setId)}
                       finished={id => handleTree(id)}
                 />
             </Grid>
-            <Grid item xs={2}>
+            <Grid size={2}>
                 <Button size="small" onClick={() => setTreeOpen(false)}
                         variant="outlined"
                 >
@@ -38,8 +40,8 @@ const CategoryHandler = props => {
             </Grid>
         </Grid>
         : <Grid container className="m-1 p-1">
-            <Grid item xs={3}>Категория:</Grid>
-            <Grid item xs={9}>
+            <Grid size={3}>Категория:</Grid>
+            <Grid size={9}>
                 <Button size="small"
                         className="w-100"
                         onClick={() => setTreeOpen(true)}

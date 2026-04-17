@@ -1,26 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 
-import TextField from "@material-ui/core/TextField";
-import Grid from "@material-ui/core/Grid";
+import TextField from "@mui/material/TextField";
+import Grid from "@mui/material/Grid";
 import StocksSelect from "./common/StocksSelect";
-import { makeStyles } from "@material-ui/core/styles";
-import { Paper, Typography } from "@material-ui/core";
-import TableContainer from "@material-ui/core/TableContainer";
-import Table from "@material-ui/core/Table";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import TableCell from "@material-ui/core/TableCell";
-import TableBody from "@material-ui/core/TableBody";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import SaveOutlinedIcon from '@material-ui/icons/SaveOutlined';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import List from "@material-ui/core/List";
+import { makeStyles } from "muiLegacyStyles";
+import { Paper, Typography } from "@mui/material";
+import TableContainer from "@mui/material/TableContainer";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableBody from "@mui/material/TableBody";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
+import List from "@mui/material/List";
 import { useSnackbar } from "notistack";
 
 import rest from "../components/Rest"
@@ -67,7 +67,15 @@ const costsArray = ['поступление', 'покупка', 'в залог',
 
 const Daily = props => {
 
-    const [stock, setStock] = useState(() => props.app.current_stock_id || props.app.stocks.find(s => s.is_valid).id)
+    const appStocks = props.app.stocks || []
+    const appStockUsers = props.app.stockusers || []
+    const appDaily = props.app.daily || []
+    const appUsers = props.app.users || []
+
+    const [stock, setStock] = useState(() => {
+        const firstValidStock = appStocks.find(s => s.is_valid)
+        return props.app.current_stock_id || firstValidStock?.id || 0
+    })
     const [date, setDate] = useState(() => today)
     const [localDaily, setLocalDaily] = useState({})
 
@@ -85,11 +93,11 @@ const Daily = props => {
     const classes = useStyles()
     const { enqueueSnackbar } = useSnackbar()
 
-    const validStockIds = props.app.stockusers
+    const validStockIds = appStockUsers
         .filter(su => su.user_id === props.auth.user_id)
         .map(su => su.stock_id)
 
-    const validStocks = props.app.stocks
+    const validStocks = appStocks
         .filter(s => [2, 4].includes(props.auth.user_id) || validStockIds.includes(s.id))
     const selectableStocks = validStocks.filter(s => s.is_valid)
     const hasMultipleStocks = selectableStocks.length > 1
@@ -122,7 +130,7 @@ const Daily = props => {
     }, [stock, selectableStocks])
 
     const daily = date === today
-        ? props.app.daily.find(d => d.stock_id === stock)
+        ? appDaily.find(d => d.stock_id === stock)
         : localDaily
 
     const canChange = date === today && props.app.current_stock_id === stock

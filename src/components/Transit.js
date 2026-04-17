@@ -1,19 +1,19 @@
 import React, {useEffect, useState} from "react";
 
 import rest from "../components/Rest"
-import TableContainer from "@material-ui/core/TableContainer";
-import {Paper} from "@material-ui/core";
-import Table from "@material-ui/core/Table";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import TableCell from "@material-ui/core/TableCell/TableCell";
-import TableBody from "@material-ui/core/TableBody";
+import TableContainer from "@mui/material/TableContainer";
+import {Paper} from "@mui/material";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableBody from "@mui/material/TableBody";
 import {connect} from "react-redux";
 
-import IconButton from "@material-ui/core/IconButton";
-import CheckIcon from '@material-ui/icons/Check';
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import TextField from "@material-ui/core/TextField/TextField";
+import IconButton from "@mui/material/IconButton";
+import CheckIcon from '@mui/icons-material/Check';
+import Tooltip from "@mui/material/Tooltip";
+import TextField from "@mui/material/TextField";
 import {useSnackbar} from "notistack";
 import {v4 as uuidv4} from 'uuid';
 import { UiButton, UiModal } from "./common/Ui";

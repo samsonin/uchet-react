@@ -1,7 +1,7 @@
 import React from "react";
 
-import {Grid} from "@material-ui/core";
-import Button from "@material-ui/core/Button";
+import {Grid} from "@mui/material";
+import Button from "@mui/material/Button";
 
 export const BottomButtons =
     (save, cancel, disabled = false, isNew = false) => <Grid

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Redirect, Route } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { connect } from "react-redux";
 
 import "./index.css";
@@ -50,9 +50,49 @@ import Zp from "./components/Zp";
 import Produce from "./components/Produce";
 import Reals from "./components/Reals";
 import { useSnackbar } from "notistack";
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 import Sales from "./components/Sales";
 import Users from "./components/Settings/Users";
+
+const LegacyRouteElement = ({ Component, componentProps = {} }) => {
+
+    const navigate = useNavigate()
+    const location = useLocation()
+    const params = useParams()
+
+    const history = useMemo(() => ({
+        push: (to, state) => navigate(to, { state }),
+        replace: (to, state) => navigate(to, { replace: true, state }),
+        goBack: () => navigate(-1),
+        go: delta => navigate(delta),
+        location,
+    }), [location, navigate])
+
+    return <Component
+        {...componentProps}
+        history={history}
+        location={location}
+        match={{ params }}
+    />
+}
+
+const routeElement = (Component, componentProps) => <LegacyRouteElement
+    Component={Component}
+    componentProps={componentProps}
+/>
+
+const ProfileRedirect = () => {
+
+    const location = useLocation()
+
+    return <Navigate
+        replace
+        to={{
+            pathname: "/settings/personal",
+            search: location.search,
+        }}
+    />
+}
 
 
 const parseJwt = token => {
@@ -247,127 +287,124 @@ const App = props => {
 
                         <form onSubmit={e => e.preventDefault()}>
 
-                            <Route exact path="/" component={Main} />
-                            <Route exact path="/profile"
-                                render={props => <Redirect to={{
-                                    pathname: "/settings/personal",
-                                    search: props.location.search
-                                }} />}
-                            />
-                            <Route exact path="/settings/personal" component={Personal} />
-                            <Route path="/subscribe" component={Subscribe} />
+                            <Routes>
+                                <Route path="/" element={routeElement(Main)} />
+                                <Route path="/profile" element={<ProfileRedirect />} />
+                                <Route path="/settings/personal" element={routeElement(Personal)} />
+                                <Route path="/subscribe" element={routeElement(Subscribe)} />
 
-                            {props.app.stocks[0] && <>
-                                <Route path="/daily"
-                                    render={props => <Daily
-                                        setOurBarcode={setOurBarcode}
-                                        {...props}
-                                    />}
-                                />
-                            </>}
-
-                            <Route exact path="/prepaids" component={Prepaids} />
-                            <Route path="/reals/:id?" component={Reals} />
-                            <Route exact path="/zp" component={Zp} />
-                            <Route exact path="/showcase" component={Showcase} />
-                            <Route exact path="/showcase/buy" component={Buy} />
-                            <Route exact path="/inventory" component={Inventory} />
-                            <Route exact path="/customers" component={Customers} />
-                            <Route exact path="/entities" component={Entities} />
-                            {props.app.fields.allElements && <>
-                                <Route exact path="/customers/:id" component={Customer} />
-                                <Route exact path="/pledges" component={Pledges} />
-                                <Route exact path="/pledges/:id" component={Pledges} />
-                                <Route exact path="/entities/:id" component={Entity} />
-                                <Route exact path="/sales" render={props => <Sales
-                                    enterPress={enterPress}
-                                    setEnterPress={setEnterPress}
-                                    {...props}
-                                />} />
-
-                                <Route exact path="/order" component={Order} />
-                                <Route exact path="/order/:stock_id/:order_id" component={Order} />
-                                <Route path="/orders" render={props => <Orders
-                                    enterPress={enterPress}
-                                    setEnterPress={setEnterPress}
-                                    {...props}
+                                {props.app.stocks[0] && <Route
+                                    path="/daily"
+                                    element={routeElement(Daily, {
+                                        setOurBarcode,
+                                    })}
                                 />}
-                                />                            </>}
 
-                            <Route path="/call_records"
-                                render={props => <Records
-                                    orgId={orgId}
-                                    {...props}
-                                />}
-                            />
-                            {props.app.users[0] && <Route path="/queue" component={Queue} />}
-
-                            <Route path="/store" render={props => <Store
-                                enterPress={enterPress}
-                                setEnterPress={setEnterPress}
-                                scrollDown={scrollDown}
-                                setScrollDown={setScrollDown}
-                                {...props}
-                            />} />
-
-                            {/*<Route exact path="/goods/:barcode" component={Good}/>*/}
-
-                            <Route exact path="/arrival/today"
-                                render={props => <ArrivalToday
-                                    newScan={ourBarcode}
-                                    setOurBarcode={setOurBarcode}
-                                    {...props}
-                                />} />
-
-                            {!props.app.current_stock_id || <>
-                                <Route exact path="/arrival" render={props => <Consignment
-                                    newScan={globalBarcode}
-                                    enterPress={enterPress}
-                                    setEnterPress={setEnterPress}
-                                    {...props}
-                                />} />
-                                <Route path="/consignments" component={Consignments} />
-                                <Route path="/produce"
-                                    render={props => <Produce
-                                        // setGood={setGood}
-                                        {...props}
-                                    />}
+                                <Route path="/prepaids" element={routeElement(Prepaids)} />
+                                <Route path="/reals/:id?" element={routeElement(Reals)} />
+                                <Route path="/zp" element={routeElement(Zp)} />
+                                <Route path="/showcase" element={routeElement(Showcase)} />
+                                <Route path="/showcase/buy" element={routeElement(Buy)} />
+                                <Route path="/inventory" element={routeElement(Inventory)} />
+                                <Route path="/customers" element={routeElement(Customers)} />
+                                <Route path="/entities" element={routeElement(Entities)} />
+                                <Route path="/order" element={routeElement(Order)} />
+                                <Route path="/order/:stock_id/:order_id" element={routeElement(Order)} />
+                                <Route
+                                    path="/orders"
+                                    element={routeElement(Orders, {
+                                        enterPress,
+                                        setEnterPress,
+                                    })}
                                 />
-                            </>}
 
-                            <Route path="/transit" render={props => <Transit
-                                newScan={ourBarcode}
-                                setOurBarcode={setOurBarcode}
-                                {...props}
-                            />} />
+                                {props.app.fields.allElements && <>
+                                    <Route path="/customers/:id" element={routeElement(Customer)} />
+                                    <Route path="/pledges" element={routeElement(Pledges)} />
+                                    <Route path="/pledges/:id" element={routeElement(Pledges)} />
+                                    <Route path="/entities/:id" element={routeElement(Entity)} />
+                                    <Route
+                                        path="/sales"
+                                        element={routeElement(Sales, {
+                                            enterPress,
+                                            setEnterPress,
+                                        })}
+                                    />
+                                </>}
 
-                            {props.auth.admin && <>
-                                <Route path="/funds" component={FundsFlow} />
-
-                                <Route path="/settings/invites" component={Invites} />
-                                <Route path="/settings/organization" component={Organization} />
-                                <Route path="/settings/employees" component={Users} />
-                                <Route exact path="/settings/stocks" component={Stocks} />
-                                {props.app.users && props.app.stocks && props.app.stockusers
-                                    ? <Route exact path="/settings/stocks/:id" component={Stock} />
-                                    : null
-                                }
-                                <Route path="/settings/config" component={Config} />
-                                <Route path="/settings/fields" component={Fields} />
-                                <Route path="/settings/docs" component={Docs} />
-                                <Route path="/integration/mango"
-                                    component={() => <IntegrationMango
-                                        org_id={props.auth.organization_id}
-                                        vpbx_api_key={'секретный ключ'}
-                                        vpbx_api_salt={'секретная соль'}
-                                    // keyHandle={keyHandle}
-                                    // saltHandle={saltHandle}
-                                    />}
+                                <Route
+                                    path="/call_records"
+                                    element={routeElement(Records, {
+                                        orgId,
+                                    })}
                                 />
-                                <Route path="/integration/sms_ru" component={IntegrationSmsRu} />
-                            </>}
+                                {props.app.users[0] && <Route path="/queue" element={routeElement(Queue)} />}
+                                <Route
+                                    path="/store"
+                                    element={routeElement(Store, {
+                                        enterPress,
+                                        setEnterPress,
+                                        scrollDown,
+                                        setScrollDown,
+                                    })}
+                                />
 
-                            <Route path="/integration/prices" component={Prices} />
+                                <Route
+                                    path="/arrival/today"
+                                    element={routeElement(ArrivalToday, {
+                                        newScan: ourBarcode,
+                                        setOurBarcode,
+                                    })}
+                                />
+
+                                {!props.app.current_stock_id && <>
+                                    <Route
+                                        path="/arrival"
+                                        element={routeElement(Consignment, {
+                                            newScan: globalBarcode,
+                                            enterPress,
+                                            setEnterPress,
+                                        })}
+                                    />
+                                    <Route path="/consignments" element={routeElement(Consignments)} />
+                                    <Route path="/produce" element={routeElement(Produce)} />
+                                </>}
+
+                                <Route
+                                    path="/transit"
+                                    element={routeElement(Transit, {
+                                        newScan: ourBarcode,
+                                        setOurBarcode,
+                                    })}
+                                />
+
+                                {props.auth.admin && <>
+                                    <Route path="/funds" element={routeElement(FundsFlow)} />
+                                    <Route path="/settings/invites" element={routeElement(Invites)} />
+                                    <Route path="/settings/organization" element={routeElement(Organization)} />
+                                    <Route path="/settings/employees" element={routeElement(Users)} />
+                                    <Route path="/settings/stocks" element={routeElement(Stocks)} />
+                                    {props.app.users && props.app.stocks && props.app.stockusers
+                                        ? <Route path="/settings/stocks/:id" element={routeElement(Stock)} />
+                                        : null
+                                    }
+                                    <Route path="/settings/config" element={routeElement(Config)} />
+                                    <Route path="/settings/fields" element={routeElement(Fields)} />
+                                    <Route path="/settings/docs" element={routeElement(Docs)} />
+                                    <Route
+                                        path="/integration/mango"
+                                        element={<IntegrationMango
+                                            org_id={props.auth.organization_id}
+                                            vpbx_api_key={'секретный ключ'}
+                                            vpbx_api_salt={'секретная соль'}
+                                        />}
+                                    />
+                                    <Route path="/integration/sms_ru" element={routeElement(IntegrationSmsRu)} />
+                                </>}
+
+                                <Route path="/integration/prices" element={routeElement(Prices)} />
+                                <Route path="*" element={null} />
+                            </Routes>
 
                         </form>
 

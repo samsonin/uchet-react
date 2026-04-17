@@ -1,7 +1,7 @@
 import React, {Fragment} from "react";
 import {connect} from "react-redux";
-import {Divider, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, Paper} from "@material-ui/core";
-import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
+import {Divider, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, Paper} from "@mui/material";
+import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import {useSnackbar} from "notistack";
 
 const Prices = props => {
@@ -10,9 +10,9 @@ const Prices = props => {
 
     const url = 'https://api.uchet.store/prices/' + props.auth.organization_id + '/'
 
-    const stocks = props.app.stocks.filter(s => s.is_valid)
+    const stocks = (props.app.stocks || []).filter(s => s.is_valid)
 
-    const stopId = stocks[stocks.length - 1].id
+    const stopId = stocks.length ? stocks[stocks.length - 1].id : null
 
     return <List component={Paper}>
 

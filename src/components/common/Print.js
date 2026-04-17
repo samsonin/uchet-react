@@ -33,14 +33,16 @@ export function Print(doc, alias, aliasFunction, afterPrint) {
     }
 
     document.body.append(div)
-
-    if (typeof (afterPrint) === "function") window.onafterprint = () => afterPrint()
+    document.body.classList.add('printing-document')
 
     window.print()
 
-    window.onafterprint = null
-
-    div.remove()
+    window.onafterprint = () => {
+        document.body.classList.remove('printing-document')
+        if (typeof (afterPrint) === "function") afterPrint()
+        window.onafterprint = null
+        div.remove()
+    }
 
 }
 

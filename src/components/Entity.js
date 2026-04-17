@@ -2,15 +2,15 @@ import React, {useState, useEffect} from 'react';
 import {connect} from "react-redux";
 import {Link} from "react-router-dom";
 
-import Grid from "@material-ui/core/Grid";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import DeleteIcon from '@material-ui/icons/Delete';
-import TextField from "@material-ui/core/TextField/TextField";
-import {Paper} from "@material-ui/core";
+import Grid from "@mui/material/Grid";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DeleteIcon from '@mui/icons-material/Delete';
+import TextField from "@mui/material/TextField";
+import {Paper} from "@mui/material";
 
 import {useSnackbar} from 'notistack';
 

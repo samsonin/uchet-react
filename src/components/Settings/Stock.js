@@ -1,20 +1,20 @@
-import {Grid, Paper, Typography} from "@material-ui/core";
+import {Grid, Paper, Typography} from "@mui/material";
 import React, {useEffect, useState} from "react";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
+import Tooltip from "@mui/material/Tooltip";
 import {Link} from "react-router-dom";
-import IconButton from "@material-ui/core/IconButton";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import DeleteIcon from "@material-ui/icons/Delete";
+import IconButton from "@mui/material/IconButton";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {connect} from "react-redux";
 import {BottomButtons} from "../common/BottomButtons";
-import {List} from "@material-ui/core";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import Checkbox from "@material-ui/core/Checkbox";
+import {List} from "@mui/material";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
+import Checkbox from "@mui/material/Checkbox";
 
 import rest from "../Rest";
-import TextField from "@material-ui/core/TextField/TextField";
+import TextField from "@mui/material/TextField";
 import {useSnackbar} from "notistack";
 
 

@@ -1,19 +1,19 @@
 import React, {forwardRef, useEffect, useRef, useState} from 'react';
 import {connect} from "react-redux";
-import {Button, TextField} from "@material-ui/core";
+import {Button, TextField} from "@mui/material";
 import {intInputHandler} from "./common/InputHandlers";
-import IconButton from "@material-ui/core/IconButton";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import PrintIcon from '@material-ui/icons/Print';
+import IconButton from "@mui/material/IconButton";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import PrintIcon from '@mui/icons-material/Print';
 import {useSnackbar} from "notistack";
 import Fields from "./customer/Fields";
 import rest from "./Rest";
 import {createDate, Print} from "./common/Print";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogActions from "@material-ui/core/DialogActions";
-import Dialog from "@material-ui/core/Dialog";
-import {makeStyles} from "@material-ui/core/styles";
-import Slide from "@material-ui/core/Slide";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Dialog from "@mui/material/Dialog";
+import {makeStyles} from "muiLegacyStyles";
+import Slide from "@mui/material/Slide";
 
 
 const Transition = forwardRef(function Transition(props, ref) {

@@ -1,14 +1,14 @@
 import React, {forwardRef, useState} from "react";
 import Fields from "./customer/Fields";
 import {connect} from "react-redux";
-import {Button, Dialog, DialogContent, DialogTitle, TextField} from "@material-ui/core";
-import IconButton from "@material-ui/core/IconButton";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import {Button, Dialog, DialogContent, DialogTitle, TextField} from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {createDate, Print} from "./common/Print";
-import PrintIcon from "@material-ui/icons/Print";
+import PrintIcon from "@mui/icons-material/Print";
 import {toLocalTimeStr} from "./common/Time";
-import Slide from "@material-ui/core/Slide";
-import DialogActions from "@material-ui/core/DialogActions";
+import Slide from "@mui/material/Slide";
+import DialogActions from "@mui/material/DialogActions";
 
 import rest from "./Rest"
 import {intInputHandler, line} from "./common/InputHandlers";

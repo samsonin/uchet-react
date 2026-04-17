@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
 
-import TableHead from "@material-ui/core/TableHead";
+import TableHead from "@mui/material/TableHead";
 import {
     Table,
     TableBody,
     TableCell,
     TableRow
-} from "@material-ui/core";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import DeleteCircleIcon from "@material-ui/icons/Delete";
+} from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import DeleteCircleIcon from "@mui/icons-material/Delete";
 import { useSnackbar } from "notistack";
 
 import rest from "../../components/Rest";

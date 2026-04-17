@@ -1,12 +1,12 @@
 import React, {useRef, useState} from "react";
-import {InputAdornment, List, ListItem, ListItemText} from "@material-ui/core";
-import Button from "@material-ui/core/Button";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import TextField from "@material-ui/core/TextField/TextField";
+import {InputAdornment, List, ListItem, ListItemText} from "@mui/material";
+import Button from "@mui/material/Button";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import TextField from "@mui/material/TextField";
 import {useSnackbar} from "notistack";
 
 import rest from "../Rest";
-import SearchIcon from "@material-ui/icons/Search";
+import SearchIcon from "@mui/icons-material/Search";
 
 
 export const GoodSearch = ({onSelected}) => {

@@ -1,10 +1,10 @@
 import React from 'react';
 
-import {Tooltip} from "@material-ui/core";
-import IconButton from "@material-ui/core/IconButton";
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import {Tooltip} from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
-import uuid from "uuid";
+import { v4 as uuid } from "uuid";
 
 const mainUrl = document.location.protocol + '//' + document.location.host
 

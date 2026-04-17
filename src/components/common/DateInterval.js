@@ -1,4 +1,4 @@
-import TextField from "@material-ui/core/TextField";
+import TextField from "@mui/material/TextField";
 import React from "react";
 import {minDate, today, setInRange} from "./Time";
 
@@ -8,7 +8,9 @@ const DateInterval = props => {
 
     const textF = (v, f) => <TextField
         type="date"
-        inputProps={{min: minDate, max: today}}
+        slotProps={{
+            htmlInput: { min: minDate, max: today }
+        }}
         value={v}
         onChange={e => setInRange(f(e.target.value))}
     />

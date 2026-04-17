@@ -1,16 +1,16 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {connect} from "react-redux";
 
-import Checkbox from "@material-ui/core/Checkbox";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Grid from "@material-ui/core/Grid";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
-import Table from "@material-ui/core/Table";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import TableCell from "@material-ui/core/TableCell";
-import TableBody from "@material-ui/core/TableBody";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Grid from "@mui/material/Grid";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableBody from "@mui/material/TableBody";
 import {useSnackbar} from "notistack";
 
 import rest from "../components/Rest"
@@ -34,9 +34,13 @@ const initCustomer = {
 
 const Orders = props => {
 
+    const appStocks = props.app.stocks || []
+    const appPositions = props.app.positions || []
+    const appStatuses = props.app.statuses || []
+
     const [parameters, setParameters] = useState(false)
 
-    const [stocks, setStocks] = useState(() => props.app.stocks
+    const [stocks, setStocks] = useState(() => appStocks
         .map(s => s.is_valid ? s.id : null)
         .filter(s => s))
 
@@ -59,7 +63,7 @@ const Orders = props => {
 
     const inputRef = useRef();
 
-    const position = props.app.positions.find(p => p.id === props.auth.position_id)
+    const position = appPositions.find(p => p.id === props.auth.position_id)
 
     const afterRest = res => {
 
@@ -78,7 +82,7 @@ const Orders = props => {
 
     useEffect(() => {
 
-        inputRef.current.focus();
+        if (inputRef.current) inputRef.current.focus();
 
         let url = 'orders/all'
 
@@ -145,7 +149,7 @@ const Orders = props => {
 
     const renderStatus = (stock_id, order_id, status_id) => {
 
-        const status = props.app.statuses.find(s => s.id === status_id)
+        const status = appStatuses.find(s => s.id === status_id)
 
         return status
             ? <div style={{
@@ -227,11 +231,11 @@ const Orders = props => {
             />}
 
             {!id && !(customer.id || customer.fio || customer.phone_number) && <>
-                <Grid item className="w-100 m-2 p-2">
+                <div className="w-100 m-2 p-2">
 
                     <StocksCheck stocks={stocks} setStocks={setStocks}/>
 
-                </Grid>
+                </div>
 
                 <DateInterval
                     label="Заказ создан"

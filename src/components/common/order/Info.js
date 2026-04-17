@@ -1,7 +1,7 @@
 import React, {forwardRef, useEffect, useState} from "react";
 import StatusesSelect from "../StatusesSelect";
-import Button from "@material-ui/core/Button";
-import {DialogTitle, FormControl, TextField} from "@material-ui/core";
+import Button from "@mui/material/Button";
+import {DialogTitle, FormControl, TextField} from "@mui/material";
 import {useSnackbar} from "notistack";
 
 import rest from "../../Rest"
@@ -10,12 +10,12 @@ import CustomersSelect from "../CustomersSelect";
 import UsersSelect from "../UsersSelect";
 import {numberInputHandler, sumField} from "../InputHandlers";
 import {totalSum} from "./functions";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import Dialog from "@material-ui/core/Dialog";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogActions from "@material-ui/core/DialogActions";
-import Slide from "@material-ui/core/Slide";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Slide from "@mui/material/Slide";
 import {connect} from "react-redux";
 
 const fieldsStyle = {

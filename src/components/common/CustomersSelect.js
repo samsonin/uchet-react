@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react'
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import TextField from "@material-ui/core/TextField/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 import rest from "../Rest";
 import {fioHandler, phoneNumberHandler} from "./InputHandlers";
 
@@ -107,7 +107,9 @@ export default function (props) {
             onInputChange={(e, v, r) => handlerInput(v, r, f.name)}
             onChange={(e, v) => handler(v)}
             getOptionLabel={option => option ? option[f.name] || '' : ''}
-            getOptionSelected={option => option.id === props.customer.id}
+            isOptionEqualToValue={(option, selectedValue) =>
+                Boolean(option && selectedValue && option.id === selectedValue.id)
+            }
             renderInput={params => <TextField
                 {...params}
                 autoComplete='off'

@@ -1,19 +1,19 @@
 import React, {forwardRef, useState} from "react";
-import {Checkbox, FormControlLabel, Table, TableCell, TableRow} from "@material-ui/core";
-import TableHead from "@material-ui/core/TableHead";
-import TableBody from "@material-ui/core/TableBody";
+import {Checkbox, FormControlLabel, Table, TableCell, TableRow} from "@mui/material";
+import TableHead from "@mui/material/TableHead";
+import TableBody from "@mui/material/TableBody";
 
-import TextField from "@material-ui/core/TextField/TextField";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogActions from "@material-ui/core/DialogActions";
-import Slide from "@material-ui/core/Slide";
-import {makeStyles} from "@material-ui/core/styles";
-import CancelIcon from '@material-ui/icons/Cancel';
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Slide from "@mui/material/Slide";
+import {makeStyles} from "muiLegacyStyles";
+import CancelIcon from '@mui/icons-material/Cancel';
 import {useSnackbar} from "notistack";
 
 import rest from "../../Rest"

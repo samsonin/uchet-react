@@ -2,18 +2,18 @@ import React, {useState} from 'react'
 import {connect} from "react-redux";
 import rest from "./Rest";
 
-import {styled} from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import {Select} from "@material-ui/core";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
+import {styled} from 'muiLegacyStyles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import {Select} from "@mui/material";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
 import {useSnackbar} from "notistack";
 
 const MyPaper = styled(Paper)({
@@ -30,6 +30,10 @@ const MyFormControl = styled(FormControl)({
 
 
 const Queue = (props) => {
+
+    const appStocks = props.app.stocks || []
+    const appUsers = props.app.users || []
+    const appQueue = props.app.queue || []
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -53,7 +57,7 @@ const Queue = (props) => {
     };
 
     const getAllowedStocks = (allowedStocks = []) => allowedStocks
-        .map(id => props.app.stocks.find(s => s.id === id && s.is_valid))
+        .map(id => appStocks.find(s => s.id === id && s.is_valid))
         .filter(Boolean)
 
     const hasPointChoice = queue => queue.some(q => getAllowedStocks(q.allowed_stocks).length > 1)
@@ -62,7 +66,7 @@ const Queue = (props) => {
 
         {queue.map(q => {
 
-            const user = props.app.users.find(u => +u.id === q.user_id)
+            const user = appUsers.find(u => +u.id === q.user_id)
             const allowedStocks = getAllowedStocks(q.allowed_stocks)
             const canChooseStock = allowedStocks.length > 1
 
@@ -115,10 +119,10 @@ const Queue = (props) => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Мастер</TableCell>
-                                {hasPointChoice(props.app.queue) && <TableCell>Куда вышел на смену</TableCell>}
+                                {hasPointChoice(appQueue) && <TableCell>Куда вышел на смену</TableCell>}
                             </TableRow>
                         </TableHead>
-                        {renderTable(props.app.queue)}
+                        {renderTable(appQueue)}
                     </Table>
                 </MyPaper>
             </Grid>

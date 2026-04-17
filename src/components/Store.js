@@ -10,18 +10,18 @@ import {
     TableCell,
     TableRow,
     TextField
-} from "@material-ui/core";
-import TableHead from "@material-ui/core/TableHead";
-import SearchIcon from "@material-ui/icons/Search";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+} from "@mui/material";
+import TableHead from "@mui/material/TableHead";
+import SearchIcon from "@mui/icons-material/Search";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 import rest from "./Rest";
 import TwoLineInCell from "./common/TwoLineInCell";
 import { toLocalTimeStr } from "./common/Time";
 import { groupAlias } from "./common/GroupAliases";
 import CategoryHandler from "./common/CategoryHandler";
-import CloseIcon from "@material-ui/icons/Close";
+import CloseIcon from "@mui/icons-material/Close";
 import store from "../store";
 import { makeGroup } from "../Models/Good";
 
@@ -33,6 +33,7 @@ const oftenUsedButtons = [
 ]
 
 const Store = props => {
+    const appStocks = props.app.stocks || [];
     const [goods, setGoods] = useState([]);
     const [catId, setCatId] = useState(0);
     const [error, setError] = useState(false);
@@ -45,8 +46,8 @@ const Store = props => {
 
     const limit = useRef(25);
     const isRequest = useRef(false);
-    const currentStock = props.app.stocks.find(s => s.id === props.app.current_stock_id);
-    const validStocks = useMemo(() => props.app.stocks.filter(s => s.is_valid), [props.app.stocks]);
+    const currentStock = appStocks.find(s => s.id === props.app.current_stock_id);
+    const validStocks = useMemo(() => appStocks.filter(s => s.is_valid), [appStocks]);
     const hasMultipleStocks = validStocks.length > 1;
 
     const goodsView = isGroup ? makeGroup(goods) : goods;
@@ -323,12 +324,14 @@ const Store = props => {
                     fullWidth
                     error={error}
                     autoFocus
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon />
-                            </InputAdornment>
-                        ),
+                    slotProps={{
+                        input: {
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                        },
                     }}
                     value={search}
                     onChange={e => searchHandle(e.target.value)}

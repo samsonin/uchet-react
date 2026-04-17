@@ -3,31 +3,31 @@ import {connect} from "react-redux";
 
 import {useSnackbar} from 'notistack';
 
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import TextField from "@material-ui/core/TextField/TextField";
-import IconButton from "@material-ui/core/IconButton";
-import DoneIcon from '@material-ui/icons/Done';
-import DoneAllIcon from '@material-ui/icons/DoneAll';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import CropFreeIcon from '@material-ui/icons/CropFree';
-import DeleteIcon from '@material-ui/icons/Delete';
-import ClearIcon from '@material-ui/icons/Clear';
-import Button from "@material-ui/core/Button";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import TextField from "@mui/material/TextField";
+import IconButton from "@mui/material/IconButton";
+import DoneIcon from '@mui/icons-material/Done';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import CropFreeIcon from '@mui/icons-material/CropFree';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ClearIcon from '@mui/icons-material/Clear';
+import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
+import Autocomplete from "@mui/material/Autocomplete";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import TreeModal from "./TreeModal";
 import rest from "../components/Rest";
@@ -59,6 +59,11 @@ const initialState = () => ({
 
 const Consignment = props => {
 
+    const appProviders = props.app.providers || []
+    const appCategories = props.app.categories || []
+    const appDaily = props.app.daily || []
+    const appUsers = props.app.users || []
+
     const [state, setState] = useState(initialState)
     const [product, setProduct] = useState()
 
@@ -77,7 +82,7 @@ const Consignment = props => {
 
     const {enqueueSnackbar} = useSnackbar();
 
-    const providerOptions = props.app.providers.map(p => ({id: p.id, name: p.name}))
+    const providerOptions = appProviders.map(p => ({id: p.id, name: p.name}))
     providerOptions.unshift({id: 0, name: ''})
 
     useEffect(() => {

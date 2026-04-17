@@ -1,7 +1,7 @@
 import React from "react";
 
-import {Table, TableBody, TableHead, TableRow, TableCell, IconButton, Typography} from "@material-ui/core";
-import CancelIcon from "@material-ui/icons/Cancel";
+import {Table, TableBody, TableHead, TableRow, TableCell, IconButton, Typography} from "@mui/material";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 import TwoLineInCell from "./TwoLineInCell";
 import {toLocalTimeStr} from "./Time";

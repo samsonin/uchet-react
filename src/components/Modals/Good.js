@@ -1,12 +1,12 @@
 import React, {forwardRef, useState} from "react";
 import {connect} from "react-redux";
 
-import IconButton from "@material-ui/core/IconButton";
-import Dialog from "@material-ui/core/Dialog";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CloseIcon from "@material-ui/icons/Close";
-import Slide from "@material-ui/core/Slide";
-import {makeStyles} from "@material-ui/core/styles";
+import IconButton from "@mui/material/IconButton";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import CloseIcon from "@mui/icons-material/Close";
+import Slide from "@mui/material/Slide";
+import {makeStyles} from "muiLegacyStyles";
 
 import GoodActions from "../Good/GoodActions";
 import GoodContent from "../Good/GoodContent";

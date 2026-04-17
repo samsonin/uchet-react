@@ -2,17 +2,17 @@ import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
 import rest from "../components/Rest"
-import {Typography} from "@material-ui/core";
+import {Typography} from "@mui/material";
 
 import {useSnackbar} from "notistack";
-import DeleteIcon from '@material-ui/icons/Delete';
-import IconButton from "@material-ui/core/IconButton";
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from "@mui/material/IconButton";
 
-import {makeStyles} from '@material-ui/core/styles';
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
+import {makeStyles} from 'muiLegacyStyles';
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import Consignment from "./Consignment";
 
 const useStyles = makeStyles((theme) => ({
@@ -28,6 +28,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Consignments = props => {
+
+    const appProviders = props.app.providers || []
 
     const [cons, setCons] = useState()
     const [consignment, setConsignment] = useState()
@@ -95,6 +97,7 @@ const Consignments = props => {
             >
                     <ListItemText
                         primary={props.app.providers.find(p => p.id === +c.provider_id).name + ', №' + c.consignment_number}
+                        primary={(appProviders.find(p => p.id === +c.provider_id)?.name || '') + ', №' + c.consignment_number}
                     />
                     <ListItemIcon>
 

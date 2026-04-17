@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from "react";
 
-import {Table, TableBody, TableCell, TableRow, Typography} from "@material-ui/core";
-import TableHead from "@material-ui/core/TableHead";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
+import {Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
+import TableHead from "@mui/material/TableHead";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import {useSnackbar} from "notistack";
-import uuid from "uuid";
+import { v4 as uuid } from "uuid";
 
 import Real from "./Real";
 import rest from "../components/Rest";

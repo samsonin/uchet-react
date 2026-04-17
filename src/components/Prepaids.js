@@ -10,12 +10,12 @@ import {
     Typography,
     TextField,
     InputAdornment
-} from "@material-ui/core";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import SearchIcon from '@material-ui/icons/Search';
-import CloseIcon from "@material-ui/icons/Close";
+} from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from "@mui/icons-material/Close";
 
 import rest from './Rest'
 import PrepaidModal from "./Modals/Prepaid";

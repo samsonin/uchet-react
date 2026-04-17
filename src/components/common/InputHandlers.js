@@ -1,7 +1,7 @@
 import React from "react";
 
-import {TextareaAutosize, TextField} from "@material-ui/core";
-import uuid from "uuid";
+import {TextareaAutosize, TextField} from "@mui/material";
+import { v4 as uuid } from "uuid";
 
 export const intInputHandler = (value, setInt) => {
 
