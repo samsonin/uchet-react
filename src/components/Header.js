@@ -21,6 +21,7 @@ const NavbarPage = props => {
     const app = props.app || {}
     const appStocks = app.stocks || []
     const appStockusers = app.stockusers || []
+    const appUsers = app.users || []
     const currentStockId = app.current_stock_id
     const updApp = props.upd_app
 
@@ -97,8 +98,6 @@ const NavbarPage = props => {
 
         const appPositions = props.app.positions || []
         const appDaily = props.app.daily || []
-        const appUsers = props.app.users || []
-
         const position = appPositions.find(p => p.id === props.auth.position_id)
 
         const isSale = position && position.is_sale
