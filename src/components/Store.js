@@ -34,6 +34,7 @@ const oftenUsedButtons = [
 
 const Store = props => {
     const appStocks = props.app.stocks || [];
+    const appCategories = props.app.categories || [];
     const [goods, setGoods] = useState([]);
     const [catId, setCatId] = useState(0);
     const [error, setError] = useState(false);
@@ -171,7 +172,7 @@ const Store = props => {
 
         if (oftenUsedButtons.length < 8) {
 
-            const cat = props.app.categories.find(c => c.id === id)
+            const cat = appCategories.find(c => c.id === id)
 
             if (cat && cat.id > 6 && cat.id < 999) {
 
@@ -211,7 +212,7 @@ const Store = props => {
             ? 'green'
             : g.wo === 'reject' ? 'red' : 'black';
 
-        const stock = props.app.stocks.find(s => s.id === g.stock_id);
+        const stock = appStocks.find(s => s.id === g.stock_id);
         const checkTime = Math.max(g.out_unix || 0, g.storage_unix || 0, g.unix || 0);
         const checkTimeStr = toLocalTimeStr(checkTime);
 
@@ -222,7 +223,7 @@ const Store = props => {
         }
 
         const category = g.category_id
-            ? props.app.categories.find(c => c.id === g.category_id)
+            ? appCategories.find(c => c.id === g.category_id)
             : null;
 
         const storage = g.wo === 't'

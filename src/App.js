@@ -357,15 +357,16 @@ const App = props => {
                                     })}
                                 />
 
+                                <Route
+                                    path="/arrival"
+                                    element={routeElement(Consignment, {
+                                        newScan: globalBarcode,
+                                        enterPress,
+                                        setEnterPress,
+                                    })}
+                                />
+
                                 {!props.app.current_stock_id && <>
-                                    <Route
-                                        path="/arrival"
-                                        element={routeElement(Consignment, {
-                                            newScan: globalBarcode,
-                                            enterPress,
-                                            setEnterPress,
-                                        })}
-                                    />
                                     <Route path="/consignments" element={routeElement(Consignments)} />
                                     <Route path="/produce" element={routeElement(Produce)} />
                                 </>}

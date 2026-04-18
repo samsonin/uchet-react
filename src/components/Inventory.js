@@ -287,7 +287,7 @@ const Inventory = props => {
                                 </TableRow>
                             </Fade>)
                         })
-                    : ''}
+                    : null}
             </TableBody>
         </Table>
     </>

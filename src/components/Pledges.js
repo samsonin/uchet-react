@@ -18,6 +18,8 @@ import Pledge from "./Pledge";
 
 
 const Pledges = props => {
+    const appStocks = props.app.stocks || []
+    const appConfig = props.app.config || {}
 
     const [search, setSearch] = useState('')
     const [pledges, setPledges] = useState([])
@@ -30,8 +32,8 @@ const Pledges = props => {
 
         const days = Math.ceil((date2 - date1) / 86400000)
 
-        const min = +props.app.config.zalog_min_sum ?? 500
-        const percent = +props.app.config.zalog_day_percent ?? 3
+        const min = +(appConfig.zalog_min_sum ?? 500)
+        const percent = +(appConfig.zalog_day_percent ?? 3)
 
         const daily = sum * percent / 100
         const prof = daily * days
@@ -49,10 +51,10 @@ const Pledges = props => {
 
                     const pledges = res.body.map(p => {
 
-                        const stock = props.app.stocks.find(s => s.id === p.stock)
-                        const timeZone = stock.timezone_offset ?? 0
+                        const stock = appStocks.find(s => s.id === p.stock)
+                        const timeZone = stock?.timezone_offset ?? 0
 
-                        p.stockName = stock.name
+                        p.stockName = stock?.name || ''
                         p.isDelay = (dateNow - Date.parse(p.ransomdate)) / 3600000 + timeZone > 24
 
                         if (p.isDelay) {

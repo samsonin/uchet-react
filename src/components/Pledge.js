@@ -29,11 +29,13 @@ const useStyles = makeStyles((theme) => ({
 
 
 const Pledge = props => {
+    const appStocks = props.app.stocks || []
+    const appDocs = props.app.docs || []
 
     const pledge = props.current
     const classes = useStyles()
 
-    const stock = props.app.stocks.find(s => s.id === pledge.stock)
+    const stock = appStocks.find(s => s.id === pledge.stock)
     const timeZone = stock ? stock.timezone_offset : 0
     const isDelay = pledge.ransomdate
         ? (Date.now() - Date.parse(pledge.ransomdate)) / 3600000 + timeZone > 24
@@ -67,7 +69,7 @@ const Pledge = props => {
         width: '100%',
     }
 
-    const doc = props.app.docs.find(d => d.name === 'zalog')
+    const doc = appDocs.find(d => d.name === 'zalog')
 
     const alias = pledge.id
         ? {

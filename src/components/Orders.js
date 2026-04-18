@@ -336,7 +336,7 @@ const Orders = props => {
                 {orders && orders.filter(o => !hideFinished || o.status_id < 6)
                     .map(o => {
 
-                        const master = props.app.users.find(u => u.id === o.master_id)
+                        const master = (props.app.users || []).find(u => u.id === o.master_id)
 
                         const color = o.defect && o.defect.indexOf('Технический осмотр') === 0
                             ? 'blue'

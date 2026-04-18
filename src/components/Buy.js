@@ -36,6 +36,8 @@ const pic = {
 }
 
 const Buy = props => {
+    const appDocs = props.app.docs || []
+    const appStocks = props.app.stocks || []
 
     const {enqueueSnackbar} = useSnackbar()
 
@@ -80,9 +82,9 @@ const Buy = props => {
 
                     if (isNeedDoc) {
 
-                        const doc = props.app.docs.find(d => d.name === 'buy')
+                        const doc = appDocs.find(d => d.name === 'buy')
 
-                        const stock = props.app.stocks.find(s => s.id === props.app.current_stock_id)
+                        const stock = appStocks.find(s => s.id === props.app.current_stock_id)
 
                         let table = '<table border="1"><thead><tr>' +
                             '<th>Группа</th><th>Модель</th><th>Идентификатор</th><th>Сумма</th></tr></thead><tbody>'
@@ -183,7 +185,7 @@ const Buy = props => {
             control={<Checkbox
                 checked={isNeedDoc}
                 onChange={() => setIsNeedDocs(!isNeedDoc)}
-                inputProps={{'aria-label': 'primary checkbox'}}
+                slotProps={{ input: {'aria-label': 'primary checkbox'} }}
             />}
             label="оформить договор"
         />

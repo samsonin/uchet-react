@@ -381,11 +381,11 @@ const Daily = props => {
                     Нет Данных
                 </div>
                 : <>
-                    <Grid item className="p-2">
+                    <div className="p-2">
                         <List dense>
                             {daily && daily.employees && daily.employees.map(e => {
 
-                                const user = props.app.users.find(u => u.id === e)
+                                const user = appUsers.find(u => u.id === e)
 
                                 return user && <ListItem
                                     key={'ListItem-users' + user.id}
@@ -405,7 +405,7 @@ const Daily = props => {
                                 </ListItem>
                             })}
                         </List>
-                    </Grid>
+                    </div>
 
                     {[
                         {
@@ -496,7 +496,7 @@ const Daily = props => {
 
                                                         let value = row[v]
 
-                                                        const user = props.app.users.find(u => u.id === row.ui_user_id)
+                                                        const user = appUsers.find(u => u.id === row.ui_user_id)
 
                                                         const userName = user ? user.name : row.ui_user_id
 

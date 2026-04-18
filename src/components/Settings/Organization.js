@@ -349,30 +349,35 @@ const Organization = props => {
             onInputChange={(_, v) => {
                 updateFields({ inn: v })
             }}
-            renderInput={params => (<TextField
-                {...params}
-                label="ИНН"
-                variant="outlined"
-                size="small"
-                fullWidth
-                error={Boolean(validationErrors.inn)}
-                helperText={validationErrors.inn}
-                slotProps={{
-                    htmlInput: {
-                        ...params.inputProps,
-                        maxLength: lengthValidation.inn.maxLength,
-                    },
-                    input: {
-                        ...params.InputProps,
-                        endAdornment: (
-                            <React.Fragment>
-                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                {params.InputProps.endAdornment}
-                            </React.Fragment>
-                        )
-                    }
-                }}
-            />)}
+            renderInput={params => {
+                const htmlInputProps = params.inputProps || {}
+                const inputProps = params.InputProps || {}
+
+                return <TextField
+                    {...params}
+                    label="ИНН"
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    error={Boolean(validationErrors.inn)}
+                    helperText={validationErrors.inn}
+                    slotProps={{
+                        htmlInput: {
+                            ...htmlInputProps,
+                            maxLength: lengthValidation.inn.maxLength,
+                        },
+                        input: {
+                            ...inputProps,
+                            endAdornment: (
+                                <React.Fragment>
+                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                    {inputProps.endAdornment || null}
+                                </React.Fragment>
+                            )
+                        }
+                    }}
+                />
+            }}
             />
         </Grid>
 
@@ -402,30 +407,35 @@ const Organization = props => {
             onInputChange={(_, v) => {
                 updateFields({ ogrn: v })
             }}
-            renderInput={params => (<TextField
-                {...params}
-                label="ОГРН"
-                variant="outlined"
-                size="small"
-                fullWidth
-                error={Boolean(validationErrors.ogrn)}
-                helperText={validationErrors.ogrn}
-                slotProps={{
-                    htmlInput: {
-                        ...params.inputProps,
-                        maxLength: lengthValidation.ogrn.maxLength,
-                    },
-                    input: {
-                        ...params.InputProps,
-                        endAdornment: (
-                            <React.Fragment>
-                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                {params.InputProps.endAdornment}
-                            </React.Fragment>
-                        )
-                    }
-                }}
-            />)}
+            renderInput={params => {
+                const htmlInputProps = params.inputProps || {}
+                const inputProps = params.InputProps || {}
+
+                return <TextField
+                    {...params}
+                    label="ОГРН"
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    error={Boolean(validationErrors.ogrn)}
+                    helperText={validationErrors.ogrn}
+                    slotProps={{
+                        htmlInput: {
+                            ...htmlInputProps,
+                            maxLength: lengthValidation.ogrn.maxLength,
+                        },
+                        input: {
+                            ...inputProps,
+                            endAdornment: (
+                                <React.Fragment>
+                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                    {inputProps.endAdornment || null}
+                                </React.Fragment>
+                            )
+                        }
+                    }}
+                />
+            }}
             />
         </Grid>
 

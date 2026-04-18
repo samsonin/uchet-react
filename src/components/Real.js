@@ -23,6 +23,7 @@ const checkoutText = 'Деньги будут списаны из кассы, и
 const cancelText = 'Договор реализации будет анулирован, необходимо вернуть товар собственнику и взять у него расписку о получении товара'
 
 const Real = props => {
+    const appDocs = props.app.docs || []
 
     const isNew = !props.current.good
 
@@ -38,7 +39,7 @@ const Real = props => {
 
     const {enqueueSnackbar} = useSnackbar()
 
-    const doc = props.app.docs.find(d => d.name === 'real')
+    const doc = appDocs.find(d => d.name === 'real')
 
     const isSame = !isNew
         && catId === props.current.good.category_id

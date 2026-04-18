@@ -96,7 +96,6 @@ const Consignments = props => {
                                          onClick={() => openCons(c)}
             >
                     <ListItemText
-                        primary={props.app.providers.find(p => p.id === +c.provider_id).name + ', №' + c.consignment_number}
                         primary={(appProviders.find(p => p.id === +c.provider_id)?.name || '') + ', №' + c.consignment_number}
                     />
                     <ListItemIcon>

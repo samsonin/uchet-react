@@ -85,6 +85,16 @@ const Consignment = props => {
     const providerOptions = appProviders.map(p => ({id: p.id, name: p.name}))
     providerOptions.unshift({id: 0, name: ''})
 
+    const getOptionKey = (option, fallback = '') => {
+        if (!option) return fallback
+        if (option.id !== undefined && option.id !== null) return String(option.id)
+        if (option.barcode) return String(option.barcode)
+        if (option.value !== undefined && option.value !== null) return String(option.value)
+        if (option.category_id && option.name) return `${option.category_id}-${option.name}`
+        if (option.name) return `${option.name}-${fallback}`
+        return fallback
+    }
+
     useEffect(() => {
 
         if (isScanOpen) setTimeout(() => {
@@ -451,7 +461,7 @@ const Consignment = props => {
                     onClick={() => setState(prev => ({...prev, currentTr: i}))}
             >
                 {product.category_id > 0
-                    ? props.app.categories.find(v => v.id === product.category_id).name
+                    ? appCategories.find(v => v.id === product.category_id)?.name || "выбрать..."
                     : "выбрать..."}
             </Button>
         </TableCell>
@@ -464,8 +474,21 @@ const Consignment = props => {
                 onInputChange={(e, v, r) => productHandler(v, r, i)}
                 onChange={(e, v) => setProduct(v)}
                 getOptionLabel={option => option.name}
+                renderOption={(renderProps, option, state) => (
+                    <li {...renderProps} key={getOptionKey(option, state.index)}>
+                        {option.name}
+                    </li>
+                )}
                 isOptionEqualToValue={(option, selectedValue) =>
-                    Boolean(option && selectedValue && option.name === selectedValue.name)
+                    Boolean(
+                        option
+                        && selectedValue
+                        && (
+                            (option.id !== undefined && selectedValue.id !== undefined && option.id === selectedValue.id)
+                            || (option.barcode && selectedValue.barcode && option.barcode === selectedValue.barcode)
+                            || option.name === selectedValue.name
+                        )
+                    )
                 }
                 renderInput={params => <TextField {...params} />}
                 disabled={product.isInBase}
@@ -565,6 +588,11 @@ const Consignment = props => {
                                                 (_, v) => handleProvider(v)
                                             }
                                             getOptionLabel={option => option.name}
+                                            renderOption={(renderProps, option, state) => (
+                                                <li {...renderProps} key={getOptionKey(option, state.index)}>
+                                                    {option.name}
+                                                </li>
+                                            )}
                                             isOptionEqualToValue={(option, selectedValue) =>
                                                 Boolean(option && selectedValue && option.id === selectedValue.id)
                                             }
@@ -665,7 +693,7 @@ const Consignment = props => {
                                                 </MenuItem>
                                                 {dailyReport.imprests.map(i => {
 
-                                                    const user = props.app.users.find(u => u.id === i.ui_user_id)
+                                                    const user = appUsers.find(u => u.id === i.ui_user_id)
 
                                                     return user
                                                         ? <MenuItem
