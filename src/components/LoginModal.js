@@ -485,7 +485,11 @@ export default connect(state => state, mapDispatchToProps)(props => {
         },
     }
 
-    const currentMeta = statusMeta[status] || statusMeta.signIn
+    const standaloneAllowed = availableRegistrationModes.includes('standalone') || invites.length === 0;
+    const shouldShowStandaloneOnly = status === 'invites' && invites.length === 0 && standaloneAllowed;
+    const currentMeta = shouldShowStandaloneOnly
+        ? { title: 'Завершение регистрации' }
+        : (statusMeta[status] || statusMeta.signIn)
     const isLegalScreen = ['privacy', 'license'].includes(status)
     const isOAuthRegistration = Boolean(oauthState)
 
@@ -512,7 +516,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
         if (tgAuthResult || telegramHashAuth) {
             setRequesting(true);
-            completeTelegramAuth(tgAuthResult || telegramHashAuth)
+            completeTelegramAuth(tgAuthResult || telegramHashAuth, state)
                 .finally(() => setRequesting(false));
             return;
         }
@@ -546,7 +550,11 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     if (data?.email) setLogin(data.email);
                     if (data?.name) setName(data.name);
 
-                    if (data?.mode === 'invites' || data?.mode === 'choose_registration_mode') {
+                    if (
+                        data?.mode === 'invites' ||
+                        data?.mode === 'choose_registration_mode' ||
+                        data?.mode === 'standalone'
+                    ) {
                         setAvailableRegistrationModes(data.available_modes || []);
                         setInvites(data.invites || []);
                         setStatus('invites');
@@ -770,7 +778,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
         return true;
     }
 
-    const completeTelegramAuth = async tgAuthResult => {
+    const completeTelegramAuth = async (tgAuthResult, oauthStateFromCallback = '') => {
         const authData = parseTelegramAuthResult(tgAuthResult);
 
         if (!authData) {
@@ -780,21 +788,13 @@ export default connect(state => state, mapDispatchToProps)(props => {
             return false;
         }
 
-        const attempts = [
-            { url: 'auth/social/telegram/callback', data: authData },
-            { url: 'auth/social/telegram/callback', data: { auth_data: authData } },
-            { url: 'auth/social/telegram/callback', data: { tgAuthResult } },
-            { url: 'auth/social/telegram/callback', data: { tg_auth_result: tgAuthResult } },
-            { url: 'auth/social/telegram/login', data: authData },
-            { url: 'auth/social/telegram/login', data: { auth_data: authData } },
-            { url: 'auth/social/login', data: { provider: 'telegram', ...authData } },
-            { url: 'auth/social/login', data: { provider: 'telegram', auth_data: authData } },
-        ];
+        const requestData = oauthStateFromCallback
+            ? { ...authData, state: oauthStateFromCallback }
+            : authData;
 
-        for (const attempt of attempts) {
-            const res = await authRequest(attempt.data, attempt.url);
-            if (!res?.ok) continue;
+        const res = await authRequest(requestData, 'auth/social/telegram/callback');
 
+        if (res?.ok) {
             const { data, text } = await readAuthResponse(res);
             const authToken = data?.token || text;
 
@@ -802,6 +802,24 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 const cleanUrl = window.location.pathname + window.location.search;
                 window.history.replaceState({}, document.title, cleanUrl);
                 window.location.href = '/';
+                return true;
+            }
+
+            if (
+                data?.mode === 'invites' ||
+                data?.mode === 'choose_registration_mode' ||
+                data?.mode === 'standalone'
+            ) {
+                if (data?.email) setLogin(data.email);
+                if (data?.name) setName(data.name);
+                if (data?.state) setOauthState(data.state);
+                else if (oauthStateFromCallback) setOauthState(oauthStateFromCallback);
+                setAvailableRegistrationModes(data.available_modes || []);
+                setInvites(data.invites || []);
+                setStatus('invites');
+
+                const cleanUrl = window.location.pathname + window.location.search;
+                window.history.replaceState({}, document.title, cleanUrl);
                 return true;
             }
         }
@@ -866,7 +884,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
     const registerStandalone = () => {
         const trimmedOrganizationName = organizationName.trim();
 
-        if (!isOAuthRegistration && !trimmedOrganizationName) {
+        if (!trimmedOrganizationName) {
             enqueueSnackbar("Введите название организации", { variant: "error" });
             return;
         }
@@ -878,6 +896,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
             ? {
                 state: oauthState,
                 register_mode: 'standalone',
+                organization_name: trimmedOrganizationName,
             }
             : {
                 register_mode: 'standalone',
@@ -946,7 +965,12 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 }
 
                 if (res.status === 200 || res.status === 201) {
-                    if (data?.mode === 'invites' || data?.mode === 'choose_registration_mode') {
+                    if (
+                        data?.mode === 'invites' ||
+                        data?.mode === 'choose_registration_mode' ||
+                        data?.mode === 'standalone'
+                    ) {
+                        setAvailableRegistrationModes(data.available_modes || []);
                         setInvites(data.invites || []);
                         setStatus('invites');
                         return;
@@ -1102,12 +1126,25 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const Invites = () => (
         <div>
-            {invites.length > 0 ? invites.map(i => <Invite invite={i} />) : <div>Приглашений нет</div>}
+            {invites.length > 0 ? (
+                <>
+                    <DialogContentText className={classes.legalText}>
+                        Мы нашли доступные приглашения. Вы можете присоединиться к существующей организации или зарегистрироваться отдельно.
+                    </DialogContentText>
+                    {invites.map(i => <Invite key={i.id || i.invite_id} invite={i} />)}
+                </>
+            ) : (
+                <DialogContentText className={classes.legalText}>
+                    Мы не нашли существующий аккаунт или приглашение. Чтобы продолжить, укажите название организации и подтвердите создание новой организации.
+                </DialogContentText>
+            )}
 
-            {(!isOAuthRegistration || availableRegistrationModes.includes('standalone')) && <div className={classes.standaloneCard}>
-                <div className={classes.standaloneTitle}>Зарегистрироваться отдельно</div>
+            {standaloneAllowed && <div className={classes.standaloneCard}>
+                <div className={classes.standaloneTitle}>
+                    {invites.length > 0 ? 'Зарегистрироваться отдельно' : 'Создание новой организации'}
+                </div>
 
-                {!isOAuthRegistration && <TextField
+                <TextField
                     label="Название организации"
                     fullWidth
                     margin="dense"
@@ -1116,16 +1153,24 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     disabled={requesting}
                     value={organizationName}
                     onChange={e => setOrganizationName(e.target.value)}
-                />}
+                />
 
-                {false && <Button
+                <DialogContentText className={classes.legalText}>
+                    {invites.length > 0
+                        ? 'Этот вариант создаст для вас новую отдельную организацию.'
+                        : 'Новая организация будет создана только после вашего явного подтверждения.'}
+                </DialogContentText>
+
+                <Button
                     variant="contained"
                     className={`${classes.primaryAction} ${classes.standaloneButton}`}
-                    disabled={requesting}
+                    disabled={requesting || !organizationName.trim()}
                     onClick={registerStandalone}
                 >
-                    Зарегистрироваться отдельно
-                </Button>}
+                    {invites.length > 0
+                        ? 'Создать новую организацию'
+                        : 'Создать организацию и продолжить'}
+                </Button>
             </div>}
         </div>
     )

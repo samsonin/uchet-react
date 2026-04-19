@@ -4,3 +4,5 @@ build.zip
 node_modules/
 test.js
 .env
+.DS_Store
+**/.DS_Store
