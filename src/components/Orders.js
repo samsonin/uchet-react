@@ -36,11 +36,22 @@ const getContrastText = color => {
     const hex = String(color || '').replace('#', '');
     if (!/^[0-9a-fA-F]{6}$/.test(hex)) return '#ffffff';
 
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
+    const [r, g, b] = [
+        parseInt(hex.substring(0, 2), 16),
+        parseInt(hex.substring(2, 4), 16),
+        parseInt(hex.substring(4, 6), 16),
+    ].map(channel => {
+        const normalized = channel / 255;
+        return normalized <= 0.03928
+            ? normalized / 12.92
+            : Math.pow((normalized + 0.055) / 1.055, 2.4);
+    });
 
-    return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#16303a' : '#ffffff';
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const whiteContrast = 1.05 / (luminance + 0.05);
+    const darkContrast = (luminance + 0.05) / 0.05;
+
+    return darkContrast > whiteContrast ? '#102331' : '#ffffff';
 }
 
 const Orders = props => {

@@ -290,6 +290,30 @@
         background: linear-gradient(180deg, rgba(28, 40, 50, 0.98), rgba(22, 33, 43, 0.98));
     }
 
+    :root[data-theme="dark"] .header-shift-button {
+        color: #ecfffb !important;
+        border-color: rgba(230, 255, 251, 0.42) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    :root[data-theme="dark"] .header-shift-button:hover {
+        color: #ffffff !important;
+        border-color: rgba(230, 255, 251, 0.58) !important;
+        background: rgba(255, 255, 255, 0.14) !important;
+    }
+
+    :root[data-theme="dark"] .header-exit-point {
+        color: #ecfffb !important;
+        border-color: rgba(230, 255, 251, 0.26) !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+    }
+
+    :root[data-theme="dark"] .header-exit-point:hover {
+        color: #ffffff !important;
+        border-color: rgba(230, 255, 251, 0.42) !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+    }
+
     .header-theme-switcher {
         padding: 0.8rem 1rem 0.35rem;
         border-top: 1px solid var(--line-soft);
@@ -391,6 +415,16 @@
         border-radius: 11px !important;
         font-size: 0.82rem !important;
         line-height: 1.1 !important;
+        color: #17304d !important;
+        border-color: rgba(23, 48, 77, 0.18) !important;
+        background: rgba(255, 255, 255, 0.72) !important;
+        font-weight: 700 !important;
+    }
+
+    .header-shift-button:hover {
+        color: #10263d !important;
+        border-color: rgba(23, 48, 77, 0.28) !important;
+        background: rgba(255, 255, 255, 0.88) !important;
     }
 
     .header-exit-point {
@@ -398,6 +432,15 @@
         height: 36px !important;
         padding: 0 !important;
         margin-left: 0.25rem !important;
+        color: #17304d !important;
+        border: 1px solid rgba(23, 48, 77, 0.18) !important;
+        background: rgba(255, 255, 255, 0.66) !important;
+    }
+
+    .header-exit-point:hover {
+        color: #10263d !important;
+        border-color: rgba(23, 48, 77, 0.28) !important;
+        background: rgba(255, 255, 255, 0.84) !important;
     }
 
     .menu-toggle-lines {
@@ -1195,6 +1238,20 @@
         margin: 0.5rem 0.3rem !important;
     }
 
+    .customers-select-paper,
+    .customers-select-popper .MuiPaper-root {
+        border-radius: 14px !important;
+        overflow: hidden;
+    }
+
+    .customers-select-option {
+        color: var(--text);
+    }
+
+    .customers-select-indicator {
+        color: inherit !important;
+    }
+
     .MuiTabs-indicator {
         background-color: var(--brand) !important;
     }
@@ -1425,6 +1482,38 @@
         background: rgba(23, 163, 155, 0.22);
     }
 
+    :root[data-theme="dark"] .order-header,
+    :root[data-theme="dark"] .order-header .MuiTypography-root,
+    :root[data-theme="dark"] .order-header .MuiIconButton-root,
+    :root[data-theme="dark"] .order-header .MuiSvgIcon-root {
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .order-page .MuiInputBase-root.Mui-disabled,
+    :root[data-theme="dark"] .order-page .MuiOutlinedInput-root.Mui-disabled,
+    :root[data-theme="dark"] .order-page .MuiInputBase-input.Mui-disabled,
+    :root[data-theme="dark"] .order-page input:disabled,
+    :root[data-theme="dark"] .order-page textarea:disabled {
+        color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
+        opacity: 1 !important;
+    }
+
+    :root[data-theme="dark"] .order-page .MuiInputLabel-root.Mui-disabled,
+    :root[data-theme="dark"] .order-page .MuiFormLabel-root.Mui-disabled,
+    :root[data-theme="dark"] .order-page .MuiFormHelperText-root.Mui-disabled {
+        color: var(--text-muted) !important;
+        -webkit-text-fill-color: var(--text-muted) !important;
+        opacity: 1 !important;
+    }
+
+    :root[data-theme="dark"] .order-page .customers-select,
+    :root[data-theme="dark"] .order-page .customers-select .MuiInputBase-root,
+    :root[data-theme="dark"] .order-page .customers-select .MuiInputBase-input,
+    :root[data-theme="dark"] .order-page .customers-select .MuiInputLabel-root {
+        color: var(--text) !important;
+    }
+
     :root[data-theme="dark"] .bg-light,
     :root[data-theme="dark"] .table,
     :root[data-theme="dark"] .list-group-item {
@@ -1467,6 +1556,25 @@
         color: var(--brand-strong);
     }
 
+    :root[data-theme="dark"] .customers-select-field .MuiInputBase-root,
+    :root[data-theme="dark"] .customers-select-field .MuiInputBase-input,
+    :root[data-theme="dark"] .customers-select-field .MuiInputLabel-root,
+    :root[data-theme="dark"] .customers-select-field .MuiSvgIcon-root,
+    :root[data-theme="dark"] .customers-select-indicator {
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .customers-select-field .MuiOutlinedInput-notchedOutline {
+        border-color: var(--line) !important;
+    }
+
+    :root[data-theme="dark"] .customers-select-paper,
+    :root[data-theme="dark"] .customers-select-popper .MuiPaper-root {
+        background: var(--surface) !important;
+        border: 1px solid var(--line) !important;
+        box-shadow: 0 18px 36px rgba(6, 12, 18, 0.34) !important;
+    }
+
     :root[data-theme="dark"] .MuiAutocomplete-popper .MuiPaper-root,
     :root[data-theme="dark"] .MuiMenu-list,
     :root[data-theme="dark"] .MuiListItem-root,
@@ -1475,9 +1583,22 @@
         color: var(--text) !important;
     }
 
+    :root[data-theme="dark"] .customers-select-popper .MuiAutocomplete-option,
+    :root[data-theme="dark"] .customers-select-option,
+    :root[data-theme="dark"] .customers-select-popper .MuiAutocomplete-loading,
+    :root[data-theme="dark"] .customers-select-popper .MuiAutocomplete-noOptions {
+        background: transparent !important;
+        color: var(--text) !important;
+    }
+
     :root[data-theme="dark"] .MuiMenuItem-root.Mui-selected,
     :root[data-theme="dark"] .MuiAutocomplete-option[aria-selected="true"] {
         background: rgba(127, 176, 255, 0.14) !important;
+    }
+
+    :root[data-theme="dark"] .customers-select-popper .MuiAutocomplete-option[aria-selected="true"] {
+        color: #eef6ff !important;
+        background: rgba(127, 176, 255, 0.18) !important;
     }
 
     :root[data-theme="dark"] .MuiMenuItem-root:hover,
@@ -1485,6 +1606,12 @@
     :root[data-theme="dark"] .MuiListItem-button:hover,
     :root[data-theme="dark"] .MuiListItem-root:hover {
         background: var(--surface-tint) !important;
+    }
+
+    :root[data-theme="dark"] .customers-select-popper .MuiAutocomplete-option:hover,
+    :root[data-theme="dark"] .customers-select-popper .Mui-focused {
+        background: rgba(23, 163, 155, 0.16) !important;
+        color: #f3fcfb !important;
     }
 
     :root[data-theme="dark"] .MuiSvgIcon-root {

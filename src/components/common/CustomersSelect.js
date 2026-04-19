@@ -108,10 +108,18 @@ export default function CustomersSelect(props) {
             key={"customerselectkeyincustselect" + f.name + f.label}
             disabled={props.disabled}
             className="customers-select-field"
+            slotProps={{
+                popper: { className: "customers-select-popper" },
+                paper: { className: "customers-select-paper" },
+                clearIndicator: { className: "customers-select-indicator" },
+                popupIndicator: { className: "customers-select-indicator" },
+            }}
             fullWidth
             value={value}
             options={customers}
             loading={request.current}
+            loadingText="Поиск заказчиков..."
+            noOptionsText="Ничего не найдено"
             filterSelectedOptions={true}
             filterOptions={options => Array.isArray(options) ? options : []}
             onInputChange={(e, v, r) => handlerInput(v, r, f.name)}
@@ -120,6 +128,15 @@ export default function CustomersSelect(props) {
             isOptionEqualToValue={(option, selectedValue) =>
                 Boolean(option && selectedValue && option.id === selectedValue.id)
             }
+            renderOption={(renderProps, option, state) => (
+                <li
+                    {...renderProps}
+                    key={`${option?.id || "customer"}-${f.name}-${state.index}`}
+                    className={`customers-select-option ${renderProps.className || ""}`}
+                >
+                    {option ? option[f.name] || "" : ""}
+                </li>
+            )}
             renderInput={params => <TextField
                 {...params}
                 autoComplete="off"

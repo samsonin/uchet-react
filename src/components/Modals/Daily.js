@@ -23,6 +23,11 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const useStyles = makeStyles((theme) => ({
+    title: {
+        position: 'relative',
+        padding: '1rem 3.5rem 0.85rem 1.2rem !important',
+        minHeight: '56px',
+    },
     field: {
         margin: '0 !important',
         width: '100%'
@@ -205,7 +210,7 @@ const DailyModal = props => {
         keepMounted
         onClose={() => props.close()}
     >
-        <DialogTitle>
+        <DialogTitle className={classes.title}>
 
             {props.type === 'Расходы, зарплата'
                 ? <Select

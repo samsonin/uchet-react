@@ -131,19 +131,15 @@ const NavbarPage = props => {
         return validStocks
             ? props.app.current_stock_id
                 ? <>
-                    <strong className="white-text">
+                    {canSelectStock && <strong className="white-text">
                         {currentStock ? currentStock.name : ""}
-                    </strong>
+                    </strong>}
 
                     {(props.auth.admin || isSale) &&
                         !appDaily.find(d => d.employees.includes(props.auth.user_id))
                         ? <Button
                             variant="outlined"
                             className="header-shift-button"
-                            style={{
-                                color: "#e6fffb",
-                                borderColor: "rgba(230, 255, 251, 0.42)",
-                            }}
                             onClick={() => newDay()}
                         >
                             Начать смену
@@ -153,9 +149,6 @@ const NavbarPage = props => {
                     {props.app.current_stock_id && canSelectStock && <IconButton
                         variant="outlined"
                         className="header-exit-point"
-                        style={{
-                            color: "#e6fffb",
-                        }}
                         onClick={pointExit}
                     >
                         <ExitToAppIcon />
