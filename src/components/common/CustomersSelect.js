@@ -7,6 +7,9 @@ import { fioHandler, phoneNumberHandler } from "./InputHandlers";
 
 const fields = ["id", "fio", "phone_number"];
 const SEARCH_DEBOUNCE_MS = 400;
+const hasCustomerValue = value => Boolean(
+    value && typeof value === "object" && Object.values(value).some(Boolean)
+);
 
 export default function CustomersSelect(props) {
 
@@ -14,7 +17,7 @@ export default function CustomersSelect(props) {
     const debounceRef = useRef(null);
     const requestIdRef = useRef(0);
     const [customers, setCustomers] = useState([]);
-    const [value, setValue] = useState({});
+    const [value, setValue] = useState(null);
 
     const upd = (name, val) => {
         props.setCustomer(prev => {
@@ -25,7 +28,7 @@ export default function CustomersSelect(props) {
     };
 
     useEffect(() => {
-        setValue(props.customer);
+        setValue(hasCustomerValue(props.customer) ? props.customer : null);
         setCustomers([]);
     }, [props.customer]);
 
@@ -60,6 +63,7 @@ export default function CustomersSelect(props) {
             upd("phone_number", "");
             upd("fio", "");
             upd("id", 0);
+            setValue(null);
             return;
         }
 
@@ -85,7 +89,7 @@ export default function CustomersSelect(props) {
     };
 
     const handler = val => {
-        setValue(val);
+        setValue(val || null);
         if (val) fields.map(f => upd(f, val[f]));
         setCustomers([]);
     };
@@ -109,7 +113,7 @@ export default function CustomersSelect(props) {
             options={customers}
             loading={request.current}
             filterSelectedOptions={true}
-            filterOptions={options => Object.keys(options).length ? options : true}
+            filterOptions={options => Array.isArray(options) ? options : []}
             onInputChange={(e, v, r) => handlerInput(v, r, f.name)}
             onChange={(e, v) => handler(v)}
             getOptionLabel={option => option ? option[f.name] || "" : ""}

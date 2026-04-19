@@ -32,6 +32,17 @@ const initCustomer = {
     phone_number: ''
 }
 
+const getContrastText = color => {
+    const hex = String(color || '').replace('#', '');
+    if (!/^[0-9a-fA-F]{6}$/.test(hex)) return '#ffffff';
+
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#16303a' : '#ffffff';
+}
+
 const Orders = props => {
 
     const appStocks = props.app.stocks || []
@@ -150,14 +161,16 @@ const Orders = props => {
     const renderStatus = (stock_id, order_id, status_id) => {
 
         const status = appStatuses.find(s => s.id === status_id)
+        const statusColor = status ? '#' + status.color : 'var(--surface-soft)'
+        const statusTextColor = status ? getContrastText(status.color) : 'var(--text)'
 
         return status
-            ? <div style={{
-                backgroundColor: status ? '#' + status.color : '#fff',
-                borderRadius: 5,
-                padding: '.5rem',
-                textAlign: 'center'
-            }}
+            ? <div
+                className="order-status-pill"
+                style={{
+                    backgroundColor: statusColor,
+                    color: statusTextColor,
+                }}
             >
                 {status.name}
             </div>
@@ -166,9 +179,7 @@ const Orders = props => {
     }
 
     const findButton = () => <Button
-        style={{
-            margin: '1rem'
-        }}
+        className="orders-action-button"
         onClick={() => find()}
         color={'primary'}
         variant='outlined'
@@ -176,20 +187,12 @@ const Orders = props => {
         Найти
     </Button>
 
-    return <div
-        style={{
-            backgroundColor: '#fff',
-            borderRadius: 5,
-            padding: '1rem'
-        }}
-    >
+    return <div className="orders-page">
 
-        <div>
+        <div className="orders-toolbar">
 
             <TextField
-                style={{
-                    margin: '1rem'
-                }}
+                className="orders-id-field"
                 label={"Заказ №"}
                 value={id ? id.toString() : ''}
                 onChange={e => intInputHandler(e.target.value, setId)}
@@ -200,10 +203,8 @@ const Orders = props => {
 
         </div>
 
-        <Button style={{
-            padding: '1rem',
-            margin: '1rem'
-        }}
+        <Button
+                className="orders-secondary-button"
                 variant="outlined"
                 size="small"
                 onClick={() => setParameters(!parameters)}
@@ -211,10 +212,8 @@ const Orders = props => {
             Параметры поиска
         </Button>
 
-        <Button style={{
-            padding: '1rem',
-            margin: '1rem'
-        }}
+        <Button
+                className="orders-secondary-button"
                 variant="outlined"
                 size="small"
                 onClick={() => getMy()}
@@ -288,10 +287,7 @@ const Orders = props => {
 
         </>}
 
-        <div style={{
-            display: 'flex',
-            justifyContent: 'space-between'
-        }}>
+        <div className="orders-inline-actions">
 
             <FormControlLabel
                 control={
@@ -321,7 +317,7 @@ const Orders = props => {
 
         </div>
 
-        <Table size="small">
+        <Table size="small" className="orders-table">
             <TableHead>
                 <TableRow>
                     <TableCell>#</TableCell>

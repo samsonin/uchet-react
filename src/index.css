@@ -941,6 +941,97 @@
         background: rgba(255, 255, 255, 0.18);
     }
 
+    .orders-page,
+    .order-page {
+        padding: 1rem;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 249, 250, 0.96));
+        box-shadow: var(--shadow-subtle);
+    }
+
+    .orders-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.25rem;
+    }
+
+    .orders-id-field {
+        min-width: min(100%, 240px);
+    }
+
+    .orders-id-field .MuiOutlinedInput-root,
+    .orders-id-field .MuiInputBase-root {
+        background: var(--surface);
+    }
+
+    .orders-action-button,
+    .orders-secondary-button {
+        margin: 0.35rem 0.35rem 0.35rem 0 !important;
+    }
+
+    .orders-inline-actions,
+    .order-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin: 0.5rem 0 0.85rem;
+    }
+
+    .orders-table {
+        margin-top: 0.5rem;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .order-tabs {
+        margin: 0.5rem 0 1rem;
+        padding: 0.35rem;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface-soft);
+    }
+
+    .order-tabs .MuiTab-root {
+        min-height: 42px;
+        border-radius: 12px;
+        color: var(--text-muted);
+        font-weight: 700;
+    }
+
+    .order-tabs .Mui-selected {
+        color: var(--brand-strong) !important;
+    }
+
+    .order-tabs .MuiTabs-indicator {
+        height: calc(100% - 10px);
+        margin: 5px;
+        border-radius: 12px;
+        background: var(--brand-soft);
+        z-index: 0;
+    }
+
+    .order-tabs .MuiTabs-flexContainer {
+        position: relative;
+        z-index: 1;
+        gap: 0.25rem;
+    }
+
+    .order-status-pill {
+        min-width: 116px;
+        padding: 0.45rem 0.7rem;
+        border-radius: 999px;
+        text-align: center;
+        font-weight: 800;
+        line-height: 1.2;
+        box-shadow: 0 10px 24px rgba(28, 43, 54, 0.12);
+    }
+
     .main-button-board {
         display: grid;
         gap: 0.9rem;
@@ -1316,6 +1407,22 @@
     :root[data-theme="dark"] .main-button:hover,
     :root[data-theme="dark"] .main-button-primary:hover {
         color: #ffffff !important;
+    }
+
+    :root[data-theme="dark"] .orders-page,
+    :root[data-theme="dark"] .order-page {
+        background:
+            linear-gradient(180deg, rgba(22, 33, 43, 0.98), rgba(27, 40, 51, 0.98));
+        border-color: var(--line);
+    }
+
+    :root[data-theme="dark"] .order-tabs {
+        background: var(--surface-tint);
+        border-color: var(--line);
+    }
+
+    :root[data-theme="dark"] .order-tabs .MuiTabs-indicator {
+        background: rgba(23, 163, 155, 0.22);
     }
 
     :root[data-theme="dark"] .bg-light,

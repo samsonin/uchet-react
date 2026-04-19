@@ -7,6 +7,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 
 const StatusesSelect = ({status, setStatus, disabled, empty, statuses}) => {
+    const items = Array.isArray(statuses) ? statuses : [];
 
     return <FormControl variant="outlined" className={'w-100 p-1 m-1'}>
         <InputLabel id="funds-statuses-control-select-outlined-label">Статус</InputLabel>
@@ -23,8 +24,8 @@ const StatusesSelect = ({status, setStatus, disabled, empty, statuses}) => {
                     <br/>
                 </MenuItem>
                 : null}
-            {statuses.map(s => <MenuItem key={'menustatusescontrolinfundskey' + s.id}
-                                         value={s.id}>
+            {items.map(s => <MenuItem key={'menustatusescontrolinfundskey' + s.id}
+                                      value={s.id}>
                 {s.name}
             </MenuItem>)}
         </Select>

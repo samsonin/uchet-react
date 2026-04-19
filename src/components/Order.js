@@ -152,15 +152,10 @@ const Order = props => {
 
     const disabled = !!id
 
-    return <div
-        style={{
-            backgroundColor: '#fff',
-            borderRadius: 5,
-            padding: '1rem'
-        }}
-    >
+    return <div className="order-page">
 
         <Grid container
+              className="order-header"
               justify="space-between"
         >
 
@@ -185,13 +180,11 @@ const Order = props => {
 
         {order
             ? <Tabs
+                className="order-tabs"
                 value={tabId}
                 indicatorColor="primary"
                 textColor="primary"
                 onChange={(e, v) => setTabId(v)}
-                style={{
-                    margin: '1rem'
-                }}
             >
                 <Tab label="Информация"/>
                 <Tab label="Затраты"/>

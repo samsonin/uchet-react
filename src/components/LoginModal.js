@@ -491,12 +491,21 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
         const token = params.get("token");
         const state = params.get("state");
+        const tgAuthResult = hashParams.get("tgAuthResult");
 
         if (token) {
             init(token);
             window.location.href = "/";
+            return;
+        }
+
+        if (tgAuthResult) {
+            setRequesting(true);
+            completeTelegramAuth(tgAuthResult)
+                .finally(() => setRequesting(false));
             return;
         }
 
@@ -689,6 +698,47 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
         setStatus('signIn');
         return true;
+    }
+
+    const completeTelegramAuth = async tgAuthResult => {
+        let authData;
+
+        try {
+            authData = JSON.parse(tgAuthResult);
+        } catch (e) {
+            enqueueSnackbar('Не удалось обработать ответ Telegram', {
+                variant: 'error'
+            });
+            return false;
+        }
+
+        const attempts = [
+            { url: 'auth/social/telegram/login', data: authData },
+            { url: 'auth/social/telegram/login', data: { auth_data: authData } },
+            { url: 'auth/social/login', data: { provider: 'telegram', ...authData } },
+            { url: 'auth/social/login', data: { provider: 'telegram', auth_data: authData } },
+        ];
+
+        for (const attempt of attempts) {
+            const res = await authRequest(attempt.data, attempt.url);
+            if (!res?.ok) continue;
+
+            const { data, text } = await readAuthResponse(res);
+            const authToken = data?.token || text;
+
+            if (authToken && init(authToken)) {
+                const cleanUrl = window.location.pathname + window.location.search;
+                window.history.replaceState({}, document.title, cleanUrl);
+                window.location.href = '/';
+                return true;
+            }
+        }
+
+        enqueueSnackbar('Не удалось завершить вход через Telegram', {
+            variant: 'error'
+        });
+
+        return false;
     }
 
     const acceptInvite = inviteId => {
@@ -894,6 +944,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 fullWidth
                 variant="outlined"
                 className={classes.field}
+                autoComplete="username"
                 value={login}
                 onChange={e => setLogin(e.target.value)}
                 error={!isLoginValid(login)}
@@ -908,6 +959,15 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 fullWidth
                 variant="outlined"
                 className={classes.field}
+                autoComplete={
+                    n === 'password'
+                        ? 'current-password'
+                        : n === 'password2'
+                            ? 'new-password'
+                            : n === 'code'
+                                ? 'one-time-code'
+                                : 'off'
+                }
                 value={fields[n].v}
                 onChange={fields[n].a}
             />
