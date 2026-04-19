@@ -495,6 +495,14 @@ export default connect(state => state, mapDispatchToProps)(props => {
         const token = params.get("token");
         const state = params.get("state");
         const tgAuthResult = hashParams.get("tgAuthResult");
+        const telegramHashAuth = (() => {
+            const authKeys = ['id', 'hash', 'auth_date'];
+            const hasTelegramPayload = authKeys.every(key => hashParams.get(key));
+
+            if (!hasTelegramPayload) return '';
+
+            return window.location.hash.replace(/^#/, '');
+        })();
 
         if (token) {
             init(token);
@@ -502,9 +510,9 @@ export default connect(state => state, mapDispatchToProps)(props => {
             return;
         }
 
-        if (tgAuthResult) {
+        if (tgAuthResult || telegramHashAuth) {
             setRequesting(true);
-            completeTelegramAuth(tgAuthResult)
+            completeTelegramAuth(tgAuthResult || telegramHashAuth)
                 .finally(() => setRequesting(false));
             return;
         }
@@ -688,6 +696,68 @@ export default connect(state => state, mapDispatchToProps)(props => {
         }
     }
 
+    const parseTelegramAuthResult = tgAuthResult => {
+        const normalizeObject = value => {
+            if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+            return value.id && value.hash ? value : null;
+        };
+
+        const tryJson = value => {
+            try {
+                return normalizeObject(JSON.parse(value));
+            } catch (e) {
+                return null;
+            }
+        };
+
+        const tryParams = value => {
+            const params = new URLSearchParams(value.replace(/^#/, '').replace(/^\?/, ''));
+            const result = {};
+
+            params.forEach((paramValue, key) => {
+                result[key] = paramValue;
+            });
+
+            return normalizeObject(result);
+        };
+
+        const tryDecode = value => {
+            try {
+                return decodeURIComponent(value);
+            } catch (e) {
+                return value;
+            }
+        };
+
+        const tryBase64Json = value => {
+            try {
+                const normalizedBase64 = value
+                    .replace(/-/g, '+')
+                    .replace(/_/g, '/');
+                const paddedBase64 = normalizedBase64 + '='.repeat((4 - normalizedBase64.length % 4) % 4);
+                const binary = window.atob(paddedBase64);
+                const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+                const decoded = new TextDecoder('utf-8').decode(bytes);
+
+                return normalizeObject(JSON.parse(decoded));
+            } catch (e) {
+                return null;
+            }
+        };
+
+        const normalized = tgAuthResult || '';
+        const decoded = tryDecode(normalized);
+
+        return (
+            tryJson(normalized) ||
+            tryJson(decoded) ||
+            tryBase64Json(normalized) ||
+            tryBase64Json(decoded) ||
+            tryParams(normalized) ||
+            tryParams(decoded)
+        );
+    }
+
     const finishAuth = token => {
         if (!init(token)) return false;
 
@@ -701,11 +771,9 @@ export default connect(state => state, mapDispatchToProps)(props => {
     }
 
     const completeTelegramAuth = async tgAuthResult => {
-        let authData;
+        const authData = parseTelegramAuthResult(tgAuthResult);
 
-        try {
-            authData = JSON.parse(tgAuthResult);
-        } catch (e) {
+        if (!authData) {
             enqueueSnackbar('Не удалось обработать ответ Telegram', {
                 variant: 'error'
             });

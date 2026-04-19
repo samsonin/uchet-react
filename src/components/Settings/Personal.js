@@ -22,6 +22,7 @@ import rest from "../Rest";
 import { SERVER } from "../../constants";
 
 const RESEND_TIMEOUT = 60;
+const DELETE_CONFIRM_WORD = "удалить";
 
 const socialProviders = [
     { id: "google", label: "Google" },
@@ -101,6 +102,15 @@ const Personal = props => {
     const userEmail = user?.email || "";
     const userPhone = user?.phone_number || "";
     const [linkedProviders, setLinkedProviders] = useState(getSocialLinks(user));
+    const hasLinkedProvider = socialProviders.some(provider => !!linkedProviders[provider.id]);
+    const hasPassword = user?.has_password;
+    const requiresDeletePassword = hasPassword !== undefined
+        ? !!hasPassword
+        : !hasLinkedProvider;
+    const deleteConfirmNormalized = (deleteConfirm || "").trim().toLowerCase();
+    const isDeleteConfirmationValid = requiresDeletePassword
+        ? !!deleteConfirm
+        : deleteConfirmNormalized === DELETE_CONFIRM_WORD;
 
     const [name, setName] = useState(userName);
     const [savingName, setSavingName] = useState(false);
@@ -555,13 +565,15 @@ const Personal = props => {
 
 
     const deleteAccount = () => {
-        if (!deleteConfirm) return;
+        if (!isDeleteConfirmationValid) return;
 
         setDeleting(true);
 
-        rest("users/me", "DELETE", {
-            current_password: deleteConfirm
-        })
+        const payload = requiresDeletePassword && deleteConfirm
+            ? { current_password: deleteConfirm }
+            : {};
+
+        rest("users/me", "DELETE", payload)
             .then(res => {
                 if (res.body?.ok) {
                     enqueueSnackbar(
@@ -969,17 +981,20 @@ const Personal = props => {
 
                 <DialogContent>
                     <DialogContentText>
-                        Это действие нельзя отменить. Для подтверждения введите текущий пароль и нажмите "Удалить аккаунт".
+                        {requiresDeletePassword
+                            ? 'Это действие нельзя отменить. Для подтверждения введите текущий пароль и нажмите "Удалить аккаунт".'
+                            : `Это действие нельзя отменить. Пароль для этого аккаунта не требуется. Для подтверждения введите слово "${DELETE_CONFIRM_WORD}" и нажмите "Удалить аккаунт".`}
                     </DialogContentText>
 
                     <TextField
-                        label="Текущий пароль"
+                        label={requiresDeletePassword ? "Текущий пароль" : `Введите слово "${DELETE_CONFIRM_WORD}"`}
                         fullWidth
-                        type="password"
-                        autoComplete="current-password"
+                        type={requiresDeletePassword ? "password" : "text"}
+                        autoComplete="off"
                         margin="dense"
                         value={deleteConfirm}
                         onChange={e => setDeleteConfirm(e.target.value)}
+                        helperText={requiresDeletePassword ? "" : `Подтверждение: ${DELETE_CONFIRM_WORD}`}
                     />
                 </DialogContent>
 
@@ -997,7 +1012,7 @@ const Personal = props => {
                     <Button
                         color="secondary"
                         onClick={deleteAccount}
-                        disabled={deleting || !deleteConfirm}
+                        disabled={deleting || !isDeleteConfirmationValid}
                     >
                         Удалить аккаунт
                     </Button>
