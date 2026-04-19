@@ -781,6 +781,10 @@ export default connect(state => state, mapDispatchToProps)(props => {
         }
 
         const attempts = [
+            { url: 'auth/social/telegram/callback', data: authData },
+            { url: 'auth/social/telegram/callback', data: { auth_data: authData } },
+            { url: 'auth/social/telegram/callback', data: { tgAuthResult } },
+            { url: 'auth/social/telegram/callback', data: { tg_auth_result: tgAuthResult } },
             { url: 'auth/social/telegram/login', data: authData },
             { url: 'auth/social/telegram/login', data: { auth_data: authData } },
             { url: 'auth/social/login', data: { provider: 'telegram', ...authData } },
