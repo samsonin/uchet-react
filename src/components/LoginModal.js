@@ -997,7 +997,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
 
     const renderField = n => {
 
-        if (n === 'privacy') return <DialogContentText
+        if (n === 'privacyNotice') return <DialogContentText
             key={'fieldkeyinloginmodal' + n}
             className={classes.legalText}
         >
@@ -1017,11 +1017,9 @@ export default connect(state => state, mapDispatchToProps)(props => {
             </span>
         </DialogContentText>
 
-        else if (n === 'invites') {
-
-            console.log(n)
-            return null
-        }
+        else if (n === 'invites') return <Invites key="login-modal-invites" />
+        else if (n === 'privacy') return <Privacy key="login-modal-privacy" />
+        else if (n === 'license') return <License key="login-modal-license" />
 
         const fields = {
             name: { l: 'Ваше имя', a: e => setName(e.target.value), v: name },
@@ -1189,7 +1187,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
             buttons: ['back', 'restoreConfirm']
         },
         preRegister: {
-            fields: ['name', 'login', 'privacy'],
+            fields: ['name', 'login', 'privacyNotice'],
             buttons: ['back', 'register',]
         },
         register: {
@@ -1197,15 +1195,15 @@ export default connect(state => state, mapDispatchToProps)(props => {
             buttons: ['back', 'registerConfirm']
         },
         privacy: {
-            fields: [<Privacy />],
+            fields: ['privacy'],
             buttons: ['back', 'preRegister']
         },
         license: {
-            fields: [<License />],
+            fields: ['license'],
             buttons: ['back', 'preRegister']
         },
         'invites': {
-            fields: [<Invites />],
+            fields: ['invites'],
             buttons: ['back']
         }
     }
@@ -1239,7 +1237,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
             </div>
 
             <DialogContent className={`${classes.content} ${isLegalScreen ? classes.scrollContent : ''}`}>
-                {statuses[status].fields.map(f => typeof f === 'string' ? renderField(f) : f)}
+                {statuses[status].fields.map(f => renderField(f))}
             </DialogContent>
 
             <div className={classes.actions}>

@@ -38,15 +38,28 @@ const totalSum = costs => {
 }
 
 const useStyles = makeStyles((theme) => ({
+    title: {
+        position: 'relative',
+        padding: '1rem 3.5rem 0.85rem 1.2rem !important',
+        minHeight: '56px',
+    },
     field: {
         margin: '1rem .3rem',
         width: '100%'
+    },
+    content: {
+        padding: '0.75rem 1.2rem !important',
+    },
+    actions: {
+        padding: '0.75rem 1.2rem 1rem !important',
+        gap: '0.65rem'
     },
     closeButton: {
         position: 'absolute',
         right: theme.spacing(1),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
+        zIndex: 1,
     }
 }))
 
@@ -142,7 +155,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
             keepMounted
             onClose={() => setServiceOpen(false)}
         >
-            <DialogTitle>
+            <DialogTitle className={classes.title}>
 
                 Добавление работы в заказ
 
@@ -153,7 +166,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
             </DialogTitle>
 
-            <DialogContent>
+            <DialogContent className={classes.content}>
 
                 <TextField label="Выполненная работа"
                            className={classes.field}
@@ -184,7 +197,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
             </DialogContent>
 
-            <DialogActions>
+            <DialogActions className={classes.actions}>
                 <Button onClick={() => setServiceOpen(false)}
                         color="secondary">
                     Отмена

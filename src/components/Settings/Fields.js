@@ -152,12 +152,13 @@ const Fields = props => {
         .filter(f => f.index === index))
 
     return typeof fields === "object"
-        ? <Paper style={{padding: '1rem'}}>
+        ? <Paper className="settings-fields-page" style={{padding: '1rem'}}>
             <Grid container justify="space-evenly"
                   style={{marginBottom: '1rem'}}
             >
 
                 <Select
+                    className="settings-fields-select"
                     style={{width: '75%'}}
                     value={index}
                     onChange={e => indexHandle(e.target.value)}
@@ -177,6 +178,7 @@ const Fields = props => {
             >
                 <FormControl style={{width: '75%'}}>
                     <Select
+                        className="settings-fields-select"
                         variant="outlined"
                         value={systemFieldsHandle}
                         onChange={e => setSystemFieldsHandle(e.target.value)}
@@ -209,6 +211,7 @@ const Fields = props => {
                                    padding: '1rem'
                                }}>
                     <Input
+                        className="settings-fields-input"
                         value={field.value}
                         disabled={field.is_system}
                         onChange={e => fieldHandle(field.name, e.target.value)}

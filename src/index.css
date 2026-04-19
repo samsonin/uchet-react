@@ -1478,8 +1478,18 @@
         border-color: var(--line);
     }
 
+    :root[data-theme="dark"] .order-tabs .MuiTab-root {
+        color: rgba(232, 243, 255, 0.74) !important;
+    }
+
+    :root[data-theme="dark"] .order-tabs .MuiTab-root.Mui-selected,
+    :root[data-theme="dark"] .order-tabs .Mui-selected {
+        color: #f7fffe !important;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+    }
+
     :root[data-theme="dark"] .order-tabs .MuiTabs-indicator {
-        background: rgba(23, 163, 155, 0.22);
+        background: linear-gradient(135deg, rgba(23, 163, 155, 0.42), rgba(46, 196, 182, 0.28));
     }
 
     :root[data-theme="dark"] .order-header,
@@ -1625,6 +1635,41 @@
 
     :root[data-theme="dark"] .MuiFormHelperText-root {
         color: var(--text-muted) !important;
+    }
+
+    :root[data-theme="dark"] .settings-fields-page {
+        background: var(--surface) !important;
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-select,
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-select .MuiInputBase-root,
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-input,
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-input.MuiInputBase-root {
+        background: var(--surface-soft) !important;
+        color: var(--text) !important;
+        border-radius: 12px !important;
+    }
+
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-input .MuiInputBase-input,
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-select .MuiSelect-select,
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-select .MuiSvgIcon-root,
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-input .MuiSvgIcon-root {
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-input:before,
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-input:after,
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-input:hover:not(.Mui-disabled, .Mui-error):before,
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-select .MuiOutlinedInput-notchedOutline {
+        border-bottom-color: var(--line) !important;
+        border-color: var(--line) !important;
+    }
+
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-input.Mui-disabled,
+    :root[data-theme="dark"] .settings-fields-page .settings-fields-input.Mui-disabled .MuiInputBase-input {
+        color: var(--text-muted) !important;
+        -webkit-text-fill-color: var(--text-muted) !important;
     }
 
     :root[data-theme="dark"] .MuiCheckbox-root,
