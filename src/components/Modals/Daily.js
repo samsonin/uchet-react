@@ -24,8 +24,18 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const useStyles = makeStyles((theme) => ({
     field: {
-        margin: '1rem .3rem',
-        width: '90%'
+        margin: '0 !important',
+        width: '100%'
+    },
+    content: {
+        display: 'grid',
+        gap: '0.9rem',
+        padding: '1rem 1.2rem 0.75rem !important',
+        minWidth: 'min(92vw, 420px)'
+    },
+    actions: {
+        padding: '0.75rem 1.2rem 1rem !important',
+        gap: '0.65rem'
     },
     closeButton: {
         position: 'absolute',
@@ -220,7 +230,7 @@ const DailyModal = props => {
             </IconButton>
 
         </DialogTitle>
-        <DialogContent>
+        <DialogContent className={classes.content}>
 
             {props.type === 'Расходы, зарплата' && isZp
                 ? <>
@@ -273,7 +283,7 @@ const DailyModal = props => {
 
         {props.disabled
             ? ''
-            : <DialogActions>
+            : <DialogActions className={classes.actions}>
                 <Button onClick={() => props.row
                     ? del()
                     : props.close()}

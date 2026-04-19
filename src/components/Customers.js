@@ -19,6 +19,8 @@ import TableContainer from "@mui/material/TableContainer";
 
 import rest from "./Rest";
 
+const toLowerSafe = value => String(value || '').toLowerCase();
+
 export default function (props) {
 
     const [search, setSearch] = useState('')
@@ -58,8 +60,8 @@ export default function (props) {
 
                 if (!search) return true
 
-                const fio = c.fio.toLowerCase()
-                const pn = c.phone_number.toLowerCase()
+                const fio = toLowerSafe(c.fio)
+                const pn = toLowerSafe(c.phone_number)
 
                 let r = true
 

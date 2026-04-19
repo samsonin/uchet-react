@@ -31,6 +31,7 @@ const useStyles = makeStyles((theme) => ({
 const Pledge = props => {
     const appStocks = props.app.stocks || []
     const appDocs = props.app.docs || []
+    const organization = props.app.organization || {}
 
     const pledge = props.current
     const classes = useStyles()
@@ -73,19 +74,19 @@ const Pledge = props => {
 
     const alias = pledge.id
         ? {
-            organization_organization: props.app.organization.organization,
-            organization_legal_address: props.app.organization.legal_address,
-            organization_inn: props.app.organization.inn,
-            access_point_address: stock.address || '',
-            access_point_phone_number: stock.phone_number || '',
+            organization_organization: organization.organization || '',
+            organization_legal_address: organization.legal_address || '',
+            organization_inn: organization.inn || '',
+            access_point_address: stock?.address || '',
+            access_point_phone_number: stock?.phone_number || '',
             today: createDate(pledge.time),
-            fio: pledge.customer.fio,
-            phone_number: pledge.customer.phone_number,
-            birthday: pledge.customer.birthday ? createDate(pledge.customer.birthday) : '',
-            doc_sn: pledge.customer.doc_sn,
-            doc_date: pledge.customer.doc_date ? createDate(pledge.customer.doc_date) : '',
-            doc_division_name: pledge.customer.doc_division_name,
-            address: pledge.customer.address,
+            fio: pledge.customer?.fio || '',
+            phone_number: pledge.customer?.phone_number || '',
+            birthday: pledge.customer?.birthday ? createDate(pledge.customer.birthday) : '',
+            doc_sn: pledge.customer?.doc_sn || '',
+            doc_date: pledge.customer?.doc_date ? createDate(pledge.customer.doc_date) : '',
+            doc_division_name: pledge.customer?.doc_division_name || '',
+            address: pledge.customer?.address || '',
             model: pledge.model,
             imei: pledge.imei,
             password: pledge.password,

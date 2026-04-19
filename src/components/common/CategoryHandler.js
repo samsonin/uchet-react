@@ -1,20 +1,14 @@
-import React, {useState} from "react";
-import {connect} from "react-redux";
-
-import {Button, Grid} from "@mui/material";
+import React, { useState } from "react";
+import { connect } from "react-redux";
+import { Button } from "@mui/material";
 
 import Tree from "../Tree";
-import {intInputHandler} from "./InputHandlers";
-
-
-//TODO добавить закрытие дерева по команде родителя
+import { intInputHandler } from "./InputHandlers";
 
 const CategoryHandler = props => {
 
     const categories = props.app.categories || []
-
     const [treeOpen, setTreeOpen] = useState(false)
-
     const category = categories.find(c => c.id === props.id)
 
     const handleTree = id => {
@@ -22,35 +16,40 @@ const CategoryHandler = props => {
         setTreeOpen(false)
     }
 
-    return treeOpen
-        ? <Grid container className="m-1 p-1">
-            <Grid size={10} className="pt-1 pr-1">
-                <Tree initialId={props.id}
-                      categories={categories}
-                      onSelected={id => intInputHandler(id, props.setId)}
-                      finished={id => handleTree(id)}
+    if (treeOpen) {
+        return <div className="category-handler category-handler-tree">
+            <div className="category-handler-tree-content">
+                <Tree
+                    initialId={props.id}
+                    categories={categories}
+                    onSelected={id => intInputHandler(id, props.setId)}
+                    finished={id => handleTree(id)}
                 />
-            </Grid>
-            <Grid size={2}>
-                <Button size="small" onClick={() => setTreeOpen(false)}
-                        variant="outlined"
+            </div>
+            <div className="category-handler-tree-actions">
+                <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => setTreeOpen(false)}
                 >
                     Ок
                 </Button>
-            </Grid>
-        </Grid>
-        : <Grid container className="m-1 p-1">
-            <Grid size={3}>Категория:</Grid>
-            <Grid size={9}>
-                <Button size="small"
-                        className="w-100"
-                        onClick={() => setTreeOpen(true)}
-                >
-                    {category ? category.name : 'Выбрать...'}
-                </Button>
-            </Grid>
-        </Grid>
+            </div>
+        </div>
+    }
 
+    return <div className="category-handler">
+        <div className="category-handler-label">Категория:</div>
+        <div className="category-handler-control">
+            <Button
+                size="small"
+                className="w-100 category-handler-button"
+                onClick={() => setTreeOpen(true)}
+            >
+                {category ? category.name : "Выбрать..."}
+            </Button>
+        </div>
+    </div>
 }
 
 export default connect(state => state)(CategoryHandler)

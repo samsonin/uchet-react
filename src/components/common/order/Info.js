@@ -245,12 +245,16 @@ const Info = props => {
 
             setStatus_id(order.status_id)
             setMaster_id(order.master_id)
-            setCustomer(order.customer)
+            setCustomer(order.customer || {
+                id: 0,
+                phone_number: '',
+                fio: '',
+            })
             setCategory_id(order.category_id)
-            setModel(order.model)
+            setModel(order.model || '')
             setSum(order.sum)
             setSum2(order.sum2)
-            setFor_client(order.for_client)
+            setFor_client(order.for_client || '')
 
             fields.map(f => {
                 setField(f.name, order[f.name])
@@ -407,7 +411,7 @@ const Info = props => {
 
         <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
                    style={fieldsStyle}
-                   value={model}
+                   value={model || ''}
                    onChange={e => setModel(e.target.value)}
                    disabled={!isEditable}
         />
@@ -428,7 +432,7 @@ const Info = props => {
                              ...fieldsStyle,
                              marginTop: '2rem'
                          }}
-                         value={for_client}
+                         value={for_client || ''}
                          onChange={e => setFor_client(e.target.value)}
             />
             : null}

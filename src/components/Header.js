@@ -1,115 +1,138 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { connect } from 'react-redux';
+import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { Link } from "react-router-dom";
-import { init_user, upd_app, exit_app } from "../actions/actionCreator";
 import { Button, IconButton } from "@mui/material";
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 
-import BalanceModal from "./BalanceModal";
-import rest from './Rest'
+import { init_user, upd_app, exit_app } from "../actions/actionCreator";
+import rest from "./Rest";
 import { toLocalTimeStr } from "./common/Time";
 import { UiButton, UiDropdown, UiDropdownItem } from "./common/Ui";
 
+const THEME_STORAGE_KEY = "themePreference";
+const THEME_OPTIONS = [
+    { value: "light", label: "Светлая" },
+    { value: "dark", label: "Темная" },
+    { value: "system", label: "Как в системе" },
+];
+
+const applyTheme = preference => {
+    const resolvedTheme = preference === "system"
+        ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        : preference;
+
+    document.documentElement.dataset.theme = resolvedTheme;
+};
 
 const NavbarPage = props => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [themePreference, setThemePreference] = useState(() => window.localStorage.getItem(THEME_STORAGE_KEY) || "system");
 
-    const [balanceModalOpen, setBalanceModalOpen] = useState(false)
-    const [isOpen, setIsOpen] = useState(false)
-    const [sidebarOpen, setSidebarOpen] = useState(false)
-
-    const app = props.app || {}
-    const appStocks = app.stocks || []
-    const appStockusers = app.stockusers || []
-    const appUsers = app.users || []
-    const currentStockId = app.current_stock_id
-    const updApp = props.upd_app
+    const app = props.app || {};
+    const appStocks = app.stocks || [];
+    const appStockusers = app.stockusers || [];
+    const appUsers = app.users || [];
+    const currentStockId = app.current_stock_id;
+    const updApp = props.upd_app;
 
     const allowedStockIds = useMemo(() => appStockusers
         .filter(su => su.user_id === props.auth.user_id)
-        .map(su => su.stock_id), [appStockusers, props.auth.user_id])
+        .map(su => su.stock_id), [appStockusers, props.auth.user_id]);
 
     const validStocks = useMemo(() => appStocks
         .filter(stock => stock.is_valid && allowedStockIds.includes(stock.id)),
-        [appStocks, allowedStockIds])
+        [appStocks, allowedStockIds]);
 
     useEffect(() => {
+        if ((Date.now() - props.auth.time) > 43200000) exit();
 
-        // если больше 12 часов выходим
-        if ((Date.now() - props.auth.time) > 43200000) exit()
+        syncSidebarState();
+        window.addEventListener("resize", syncSidebarState);
 
-        syncSidebarState()
-        window.addEventListener('resize', syncSidebarState)
-
-        return () => window.removeEventListener('resize', syncSidebarState)
-
+        return () => window.removeEventListener("resize", syncSidebarState);
         // eslint-disable-next-line
-    }, [])
+    }, []);
 
     useEffect(() => {
-        if (validStocks.length !== 1) return
+        if (validStocks.length !== 1) return;
 
-        const stockId = +validStocks[0].id
-
+        const stockId = +validStocks[0].id;
         if (+currentStockId !== stockId) {
-            updApp({ current_stock_id: stockId })
+            updApp({ current_stock_id: stockId });
         }
-    }, [currentStockId, updApp, validStocks])
+    }, [currentStockId, updApp, validStocks]);
 
-    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches
+    useEffect(() => {
+        applyTheme(themePreference);
 
-    const isSidebarVisible = wrapper => wrapper.classList.contains('sidebar-open')
-        || (!wrapper.classList.contains('sidebar-hidden') && isDesktop())
+        const media = window.matchMedia("(prefers-color-scheme: dark)");
+        const syncSystemTheme = () => {
+            if (themePreference === "system") {
+                applyTheme("system");
+            }
+        };
+
+        if (typeof media.addEventListener === "function") {
+            media.addEventListener("change", syncSystemTheme);
+            return () => media.removeEventListener("change", syncSystemTheme);
+        }
+
+        media.addListener(syncSystemTheme);
+        return () => media.removeListener(syncSystemTheme);
+    }, [themePreference]);
+
+    const isDesktop = () => window.matchMedia("(min-width: 768px)").matches;
+
+    const isSidebarVisible = wrapper => wrapper.classList.contains("sidebar-open")
+        || (!wrapper.classList.contains("sidebar-hidden") && isDesktop());
 
     const syncSidebarState = () => {
+        const wrapper = document.querySelector("#wrapper");
+        if (!wrapper) return;
 
-        const wrapper = document.querySelector('#wrapper');
-        if (!wrapper) return
-
-        setSidebarOpen(isSidebarVisible(wrapper))
-
-    }
+        setSidebarOpen(isSidebarVisible(wrapper));
+    };
 
     const toggleClick = () => {
+        const wrapper = document.querySelector("#wrapper");
+        if (!wrapper) return;
 
-        const wrapper = document.querySelector('#wrapper');
-        if (!wrapper) return
+        const shouldHide = isSidebarVisible(wrapper);
 
-        const shouldHide = isSidebarVisible(wrapper)
+        wrapper.classList.remove("sidebar-open", "sidebar-hidden");
+        wrapper.classList.add(shouldHide ? "sidebar-hidden" : "sidebar-open");
 
-        wrapper.classList.remove('sidebar-open', 'sidebar-hidden')
-        wrapper.classList.add(shouldHide ? 'sidebar-hidden' : 'sidebar-open')
+        setSidebarOpen(!shouldHide);
+    };
 
-        setSidebarOpen(!shouldHide)
+    const toggleCollapse = () => setIsOpen(!isOpen);
 
-    }
+    const pointChange = e => props.upd_app({ current_stock_id: +e.target.value });
+    const pointExit = () => props.upd_app({ current_stock_id: 0 });
+    const newDay = () => rest("daily/" + props.app.current_stock_id, "POST");
 
-    const toggleCollapse = () => setIsOpen(!isOpen)
-
-    const pointChange = e => props.upd_app({ current_stock_id: +e.target.value })
-
-    const pointExit = () => props.upd_app({ current_stock_id: 0 })
-
-    const newDay = () => rest('daily/' + props.app.current_stock_id, 'POST')
+    const setTheme = value => {
+        setThemePreference(value);
+        window.localStorage.setItem(THEME_STORAGE_KEY, value);
+    };
 
     const accessPoints = () => {
+        if (!props.app) return "";
 
-        if (!props.app) return '';
-
-        const appPositions = props.app.positions || []
-        const appDaily = props.app.daily || []
-        const position = appPositions.find(p => p.id === props.auth.position_id)
-
-        const isSale = position && position.is_sale
-
-        const currentStock = validStocks.find(stock => +stock.id === props.app.current_stock_id)
-        const canSelectStock = validStocks.length > 1
+        const appPositions = props.app.positions || [];
+        const appDaily = props.app.daily || [];
+        const position = appPositions.find(p => p.id === props.auth.position_id);
+        const isSale = position && position.is_sale;
+        const currentStock = validStocks.find(stock => +stock.id === props.app.current_stock_id);
+        const canSelectStock = validStocks.length > 1;
 
         return validStocks
             ? props.app.current_stock_id
                 ? <>
                     <strong className="white-text">
-                        {currentStock ? currentStock.name : ''}
+                        {currentStock ? currentStock.name : ""}
                     </strong>
 
                     {(props.auth.admin || isSale) &&
@@ -118,20 +141,20 @@ const NavbarPage = props => {
                             variant="outlined"
                             className="header-shift-button"
                             style={{
-                                color: '#e6fffb',
-                                borderColor: 'rgba(230, 255, 251, 0.42)'
+                                color: "#e6fffb",
+                                borderColor: "rgba(230, 255, 251, 0.42)",
                             }}
                             onClick={() => newDay()}
                         >
                             Начать смену
                         </Button>
-                        : ''}
+                        : ""}
 
                     {props.app.current_stock_id && canSelectStock && <IconButton
                         variant="outlined"
                         className="header-exit-point"
                         style={{
-                            color: '#e6fffb'
+                            color: "#e6fffb",
                         }}
                         onClick={pointExit}
                     >
@@ -144,8 +167,8 @@ const NavbarPage = props => {
                     >
                         {close => validStocks.map(v => v.is_valid && <UiDropdownItem
                             onClick={e => {
-                                pointChange(e)
-                                close()
+                                pointChange(e);
+                                close();
                             }}
                             value={v.id}
                             key={"stock-dropdown-key" + v.id}
@@ -153,31 +176,30 @@ const NavbarPage = props => {
                             {v.name}
                         </UiDropdownItem>)}
                     </UiDropdown>
-                    : ''
-            : ''
-    }
+                    : ""
+            : "";
+    };
 
     const exit = () => {
-
-        props.init_user('', 0, '', '', '', 0)
-        props.exit_app()
-        setIsOpen(false)
-
-    }
+        props.init_user("", 0, "", "", "", 0);
+        props.exit_app();
+        setIsOpen(false);
+    };
 
     const getUserName = () => {
+        if (!props.app) return "";
 
-        if (!props.app) return ''
+        const user = appUsers.find(v => +v.id === +props.auth.user_id);
+        return user ? user.name : "";
+    };
 
-        const user = appUsers.find(v => +v.id === +props.auth.user_id)
-        return user
-            ? user.name
-            : ''
-
-    }
+    const getUserAvatarLabel = () => {
+        const userName = getUserName().trim();
+        return userName ? userName.charAt(0).toUpperCase() : "U";
+    };
 
     const auth_menu = close => props.auth.user_id > 0
-        ? <>
+        ? <div onClick={close}>
             <div className="header-user-name">
                 {getUserName()}
             </div>
@@ -188,21 +210,28 @@ const NavbarPage = props => {
             <UiDropdownItem to="/subscribe" onClick={close}>
                 Подписка до: {toLocalTimeStr(props.auth.expiration_time).slice(0, -9)}
             </UiDropdownItem>
-            {props.app
-                ? <UiDropdownItem onClick={() => {
-                    setBalanceModalOpen(true)
-                    close()
-                }}>
-                    Баланс: {props.app.balance}
-                </UiDropdownItem>
-                : ''}
-            <div style={{ padding: '0.75rem 1rem' }}>
+
+            <div className="header-theme-switcher" onClick={e => e.stopPropagation()}>
+                <div className="header-theme-title">Тема</div>
+                <div className="header-theme-options">
+                    {THEME_OPTIONS.map(option => <button
+                        key={"theme-option-" + option.value}
+                        type="button"
+                        className={`header-theme-option ${themePreference === option.value ? "is-active" : ""}`}
+                        onClick={() => setTheme(option.value)}
+                    >
+                        {option.label}
+                    </button>)}
+                </div>
+            </div>
+
+            <div style={{ padding: "0.75rem 1rem" }}>
                 <UiButton color="danger" size="sm" block onClick={exit}>
                     Выйти
                 </UiButton>
             </div>
-        </>
-        : null
+        </div>
+        : null;
 
     return <nav className="navbar">
         <div className="header-brand">
@@ -213,7 +242,7 @@ const NavbarPage = props => {
         <button
             id="menu-toggle"
             onClick={toggleClick}
-            className={`header-sidebar-toggle ${sidebarOpen ? 'is-active' : ''}`}
+            className={`header-sidebar-toggle ${sidebarOpen ? "is-active" : ""}`}
             type="button"
             aria-label={sidebarOpen ? "Скрыть боковую панель" : "Показать боковую панель"}
             title={sidebarOpen ? "Скрыть боковую панель" : "Показать боковую панель"}
@@ -236,7 +265,7 @@ const NavbarPage = props => {
         >
             <span className="header-menu-symbol" aria-hidden="true" />
         </button>
-        <div className={`header-nav ${isOpen ? 'is-open' : ''}`}>
+        <div className={`header-nav ${isOpen ? "is-open" : ""}`}>
             {props.auth.organization_id === 1 && <Link
                 className="header-nav-link"
                 to="/zp"
@@ -248,23 +277,18 @@ const NavbarPage = props => {
             <UiDropdown
                 align="right"
                 buttonClassName="header-user-button"
-                label={<span aria-hidden="true">👤</span>}
+                label={<span className="header-user-avatar" aria-hidden="true">{getUserAvatarLabel()}</span>}
             >
                 {auth_menu}
             </UiDropdown>
         </div>
-        <BalanceModal
-            isOpen={balanceModalOpen}
-            close={() => setBalanceModalOpen(false)}
-        />
-    </nav>
-
-}
+    </nav>;
+};
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     init_user,
     upd_app,
-    exit_app
+    exit_app,
 }, dispatch);
 
 export default connect(state => state, mapDispatchToProps)(NavbarPage);

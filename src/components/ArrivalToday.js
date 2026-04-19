@@ -19,6 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import {makeGroup} from "../Models/Good";
 
+const toLowerSafe = value => String(value || '').toLowerCase();
 
 const ArrivalToday = props => {
 
@@ -136,9 +137,9 @@ const ArrivalToday = props => {
 
                             const category = props.categories.find(c => c.id === g.category_id)
 
-                            const model = g.model.toLowerCase()
-                            const categoryName = category.name.toLowerCase()
-                            const wf = g.ui_wf.toLowerCase()
+                            const model = toLowerSafe(g.model)
+                            const categoryName = toLowerSafe(category?.name)
+                            const wf = toLowerSafe(g.ui_wf)
 
                             let r = true
 

@@ -31,8 +31,9 @@ const useStyles = makeStyles((theme) => ({
     dialogPaper: {
         borderRadius: 20,
         overflow: 'hidden',
-        background: '#ffffff',
-        boxShadow: '0 24px 70px rgba(15, 23, 42, 0.2)',
+        background: 'var(--surface)',
+        color: 'var(--text)',
+        boxShadow: 'var(--shadow-soft)',
     },
     hero: {
         position: 'relative',
@@ -186,7 +187,7 @@ const useStyles = makeStyles((theme) => ({
     screenTitle: {
         fontSize: 22,
         fontWeight: 700,
-        color: '#0f172a',
+        color: 'var(--text)',
     },
     statusChip: {
         display: 'none',
@@ -195,17 +196,10 @@ const useStyles = makeStyles((theme) => ({
         margin: 0,
         fontSize: 22,
         fontWeight: 700,
-        color: '#0f172a',
+        color: 'var(--text)',
     },
     subtitle: {
         display: 'none',
-    },
-    closeButton: {
-        minWidth: 'auto',
-        padding: 0,
-        color: '#94a3b8',
-        fontSize: 28,
-        lineHeight: 1,
     },
     content: {
         padding: '0 !important',
@@ -217,11 +211,11 @@ const useStyles = makeStyles((theme) => ({
         maxHeight: 'min(58vh, 520px)',
         overflowY: 'auto',
         paddingRight: '10px !important',
-        borderTop: '1px solid #eef2f7',
-        borderBottom: '1px solid #eef2f7',
+        borderTop: '1px solid var(--line-soft)',
+        borderBottom: '1px solid var(--line-soft)',
         paddingTop: '14px !important',
         paddingBottom: '14px !important',
-        color: '#334155',
+        color: 'var(--text)',
         lineHeight: 1.7,
         fontSize: 14,
         whiteSpace: 'pre-wrap',
@@ -229,13 +223,46 @@ const useStyles = makeStyles((theme) => ({
     field: {
         '& .MuiInputBase-root': {
             borderRadius: 12,
-            background: '#fff',
+            background: 'var(--surface-soft)',
+            color: 'var(--text)',
+            transition: 'background 160ms ease, box-shadow 160ms ease',
+        },
+        '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'var(--brand)',
         },
         '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#d7deea',
+            borderColor: 'var(--line)',
+            transition: 'border-color 160ms ease, box-shadow 160ms ease',
+        },
+        '& .MuiOutlinedInput-root.Mui-focused': {
+            background: 'var(--surface)',
+            boxShadow: '0 0 0 3px var(--brand-soft)',
+        },
+        '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'var(--brand)',
+            borderWidth: 1,
         },
         '& .MuiInputLabel-root': {
-            color: '#64748b',
+            color: 'var(--text-muted)',
+        },
+        '& .MuiInputLabel-root.Mui-focused': {
+            color: 'var(--brand)',
+        },
+        '& .MuiInputBase-input': {
+            color: 'var(--text)',
+            caretColor: 'var(--text)',
+        },
+        '& .MuiFormHelperText-root': {
+            color: 'var(--text-muted)',
+        },
+        '& input:-webkit-autofill': {
+            WebkitBoxShadow: '0 0 0 100px var(--surface-soft) inset',
+            WebkitTextFillColor: 'var(--text)',
+            caretColor: 'var(--text)',
+            borderRadius: 12,
+        },
+        '& .MuiOutlinedInput-root.Mui-focused input:-webkit-autofill': {
+            WebkitBoxShadow: '0 0 0 100px var(--surface) inset',
         },
     },
     span: {
@@ -249,29 +276,29 @@ const useStyles = makeStyles((theme) => ({
     legalText: {
         margin: 0,
         padding: '4px 2px 0',
-        color: '#64748b',
+        color: 'var(--text-muted)',
         lineHeight: 1.7,
         fontSize: 14,
     },
     inviteCard: {
-        border: '1px solid #dbe4f0',
+        border: '1px solid var(--line)',
         borderRadius: 14,
         padding: 14,
         marginTop: 10,
-        background: '#f8fbff',
+        background: 'var(--surface-soft)',
     },
     inviteOrg: {
         fontSize: 15,
         fontWeight: 700,
-        color: '#0f172a',
+        color: 'var(--text)',
     },
     inviteRole: {
         marginTop: 6,
-        color: '#64748b',
+        color: 'var(--text-muted)',
     },
     inviteDate: {
         marginTop: 6,
-        color: '#94a3b8',
+        color: 'var(--text-muted)',
         fontSize: 13,
     },
     inviteActions: {
@@ -283,13 +310,13 @@ const useStyles = makeStyles((theme) => ({
         marginTop: 14,
         padding: 14,
         borderRadius: 14,
-        background: '#ffffff',
-        border: '1px solid #dbe4f0',
+        background: 'var(--surface)',
+        border: '1px solid var(--line)',
     },
     standaloneTitle: {
         fontSize: 15,
         fontWeight: 700,
-        color: '#0f172a',
+        color: 'var(--text)',
         marginBottom: 10,
     },
     standaloneButton: {
@@ -323,31 +350,31 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: 12,
         minHeight: 42,
         padding: '9px 16px',
-        background: '#eef4ff',
-        color: '#1d4ed8',
+        background: 'var(--ink-blue-soft)',
+        color: 'var(--ink-blue)',
         '&:hover': {
-            background: '#dceaff',
+            background: 'var(--surface-tint)',
         },
     },
     ghostAction: {
         borderRadius: 12,
         minHeight: 42,
         padding: '9px 16px',
-        background: '#fff',
-        border: '1px solid #d7deea',
-        color: '#334155',
+        background: 'var(--surface)',
+        border: '1px solid var(--line)',
+        color: 'var(--text)',
         '&:hover': {
-            background: '#f8fafc',
+            background: 'var(--surface-soft)',
         },
     },
     socialSection: {
         marginTop: 2,
         paddingTop: 12,
-        borderTop: '1px solid #eef2f7',
+        borderTop: '1px solid var(--line-soft)',
     },
     socialTitle: {
         margin: '0 0 10px',
-        color: '#64748b',
+        color: 'var(--text-muted)',
         fontSize: 13,
         fontWeight: 700,
         letterSpacing: '0.04em',
@@ -370,18 +397,18 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        border: '1px solid #d7deea',
-        background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-        color: '#0f172a',
+        border: '1px solid var(--line)',
+        background: 'linear-gradient(180deg, var(--surface) 0%, var(--surface-soft) 100%)',
+        color: 'var(--text)',
         textTransform: 'none',
         fontWeight: 600,
         fontSize: 13,
-        boxShadow: '0 8px 18px rgba(15, 23, 42, 0.08)',
+        boxShadow: 'var(--shadow-subtle)',
         transition: 'box-shadow 140ms ease, border-color 140ms ease, background 140ms ease',
         '&:hover': {
-            background: '#ffffff',
-            borderColor: '#b8c4d6',
-            boxShadow: '0 12px 24px rgba(15, 23, 42, 0.12)',
+            background: 'var(--surface)',
+            borderColor: 'var(--brand)',
+            boxShadow: 'var(--shadow-soft)',
         },
     },
     socialIcon: {
@@ -828,7 +855,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
             key={'fieldkeyinloginmodal' + n}
             className={classes.legalText}
         >
-            Нажимая "Запросить код", вы принимаете
+            Нажимая "Запросить код регистрации", вы принимаете
             <span
                 className={classes.span}
                 onClick={() => setStatus('license')}
@@ -930,13 +957,13 @@ export default connect(state => state, mapDispatchToProps)(props => {
             <div className={classes.inviteDate}>Создано: {invite.created_at || "дата не указана"}</div>
 
             <div className={classes.inviteActions}>
-                <Button
+                {false && <Button
                     variant="contained"
                     className={classes.primaryAction}
                     onClick={() => acceptInvite(invite.id || invite.invite_id)}
                 >
                     Принять приглашение
-                </Button>
+                </Button>}
             </div>
         </div>
     )
@@ -959,14 +986,14 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     onChange={e => setOrganizationName(e.target.value)}
                 />}
 
-                <Button
+                {false && <Button
                     variant="contained"
                     className={`${classes.primaryAction} ${classes.standaloneButton}`}
                     disabled={requesting}
                     onClick={registerStandalone}
                 >
                     Зарегистрироваться отдельно
-                </Button>
+                </Button>}
             </div>}
         </div>
     )
@@ -1026,12 +1053,12 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     <div className={classes.screenTitle}>{currentMeta.title}</div>
                 </div>
 
-                <Button
+                {false && <Button
                     onClick={() => props.close()}
-                    className={classes.closeButton}
+                    className={classes.closeButtonHidden}
                 >
                     ×
-                </Button>
+                </Button>}
             </div>
 
             <DialogContent className={`${classes.content} ${isLegalScreen ? classes.scrollContent : ''}`}>

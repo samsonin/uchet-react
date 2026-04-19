@@ -16,6 +16,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import rest from "../components/Rest"
 import Pledge from "./Pledge";
 
+const toLowerSafe = value => String(value || '').toLowerCase();
 
 const Pledges = props => {
     const appStocks = props.app.stocks || []
@@ -192,8 +193,8 @@ const Pledges = props => {
 
                             if (!search) return true
 
-                            const model = p.model.toLowerCase()
-                            const imei = p.imei.toLowerCase()
+                            const model = toLowerSafe(p.model)
+                            const imei = toLowerSafe(p.imei)
 
                             let r = true
 

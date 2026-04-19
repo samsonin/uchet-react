@@ -91,6 +91,7 @@ export default function (props) {
                         <TextField className="w-100"
                                    value={props.vpbx_api_key}
                                    type="password"
+                                   autoComplete="new-password"
                                    // onChange={e => props.keyHandle(e.target.value)}
                         />
                     </ListItem>
@@ -103,6 +104,7 @@ export default function (props) {
                         <TextField className="w-100"
                                    value={props.vpbx_api_salt}
                                    type="password"
+                                   autoComplete="new-password"
                                    // onChange={e => props.saltHandle(e.target.value)}
                         />
                     </ListItem>

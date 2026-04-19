@@ -22,6 +22,8 @@ import PrepaidModal from "./Modals/Prepaid";
 import TwoLineInCell from "./common/TwoLineInCell";
 import {toLocalTimeStr} from "./common/Time";
 
+const toLowerSafe = value => String(value || '').toLowerCase();
+
 const Prepaids = props => {
 
     const [isPrepaidOpen, setIsPrepaidOpen] = useState(false)
@@ -137,10 +139,10 @@ const Prepaids = props => {
 
                                 if (!search) return true
 
-                                const fio = p.customer.fio.toLowerCase()
-                                const pn = p.customer.phone_number.toLowerCase()
-                                const time = p.time.toLowerCase()
-                                const item = p.item.toLowerCase()
+                                const fio = toLowerSafe(p.customer?.fio)
+                                const pn = toLowerSafe(p.customer?.phone_number)
+                                const time = toLowerSafe(p.time)
+                                const item = toLowerSafe(p.item)
 
                                 let r = true
 

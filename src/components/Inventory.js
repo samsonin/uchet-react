@@ -21,6 +21,8 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 
 import {v4 as uuidv4} from 'uuid';
 
+const toLowerSafe = value => String(value || '').toLowerCase();
+
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -230,9 +232,9 @@ const Inventory = props => {
 // eslint-disable-next-line
                             if (!search || g.sum == search || g.id == search) return true
 
-                            const model = g.model.toLowerCase()
-                            const imei = g.imei.toLowerCase()
-                            const sum = g.imei.toLowerCase()
+                            const model = toLowerSafe(g.model)
+                            const imei = toLowerSafe(g.imei)
+                            const sum = toLowerSafe(g.sum)
 
                             let r = true
 

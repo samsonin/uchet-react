@@ -31,6 +31,7 @@ const Order = props => {
     const appPositions = props.app.positions || []
     const appCategories = props.app.categories || []
     const appStocks = props.app.stocks || []
+    const organization = props.app.organization || {}
 
     const [tabId, setTabId] = useState(0)
 
@@ -69,12 +70,12 @@ const Order = props => {
 
     const alias = order
         ? {
-            organization_organization: props.app.organization.organization,
-            organization_legal_address: props.app.organization.legal_address,
-            organization_inn: props.app.organization.inn,
-            organization_ogrn: props.app.organization.ogrn,
-            access_point_address: stock.address,
-            access_point_phone_number: stock.phone_number,
+            organization_organization: organization.organization || '',
+            organization_legal_address: organization.legal_address || '',
+            organization_inn: organization.inn || '',
+            organization_ogrn: organization.ogrn || '',
+            access_point_address: stock?.address || '',
+            access_point_phone_number: stock?.phone_number || '',
             id: id,
             group: category ? category.name : '',
             fio: order.customer
@@ -102,12 +103,12 @@ const Order = props => {
     const aliasFunction = name => {
 
         let value
-        if (props.app.config[name]) {
+        if (props.app.config?.[name]) {
             value = props.app.config[name]
-        } else if (props.app.fields.allElements
+        } else if ((props.app.fields?.allElements || [])
             .filter(f => f.index === 'order' && f.is_valid && !f.is_system)
             .find(f => f.name === name)) {
-            value = order[name]
+            value = order?.[name]
         }
 
         return value

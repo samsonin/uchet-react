@@ -21,6 +21,7 @@ import rest from "../Rest";
 import { Link } from 'react-router-dom';
 import { UiButton } from "../common/Ui";
 
+const toLowerSafe = value => String(value || '').toLowerCase();
 
 const Users = props => {
 
@@ -72,7 +73,7 @@ const Users = props => {
                 label="включая уволенных"
             />
 
-            <Link to={"/settings/invites/add"}>
+            <Link to={"/settings/invites"}>
                 <UiButton
                     className="btn-l"
                     block
@@ -86,7 +87,7 @@ const Users = props => {
         </div >
 
         <Table size="small"
-            style={{ background: 'white' }}
+            style={{ background: 'var(--surface)' }}
         >
             <TableHead>
                 <TableRow>
@@ -102,9 +103,9 @@ const Users = props => {
 
                         if (!search) return true
 
-                        const name = u.name.toLowerCase()
-                        const email = u.email ? u.email.toLowerCase() : ''
-                        const pn = u.phone_number.toLowerCase()
+                        const name = toLowerSafe(u.name)
+                        const email = toLowerSafe(u.email)
+                        const pn = toLowerSafe(u.phone_number)
 
                         let r = true
 

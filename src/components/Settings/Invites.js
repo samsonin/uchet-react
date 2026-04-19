@@ -62,7 +62,7 @@ const Invites = props => {
             />
         )}
 
-        <Table size="small" style={{ background: 'white' }}>
+        <Table size="small" style={{ background: 'var(--surface)' }}>
             <TableHead>
                 <TableRow>
                     <TableCell>Имя</TableCell>

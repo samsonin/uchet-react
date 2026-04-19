@@ -25,11 +25,8 @@ const RESEND_TIMEOUT = 60;
 
 const socialProviders = [
     { id: "google", label: "Google" },
-    { id: "apple", label: "Apple" },
     { id: "telegram", label: "Telegram" },
-    { id: "vk", label: "VK" },
     { id: "yandex", label: "Yandex" },
-    { id: "sber", label: "Sber" },
 ];
 
 const getSocialLinks = user => socialProviders.reduce((result, provider) => ({
@@ -594,13 +591,13 @@ const Personal = props => {
                     title="Личные настройки"
                     subheader={userEmail}
                     className={classes.cardHeader}
-                    titleTypographyProps={{ variant: "h5" }}
                 />
                 <CardContent>
                     <Grid container spacing={2}>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                             <TextField
                                 label="Имя"
+                                autoComplete="name"
                                 fullWidth
                                 margin="dense"
                                 value={name}
@@ -633,14 +630,14 @@ const Personal = props => {
                 <CardHeader
                     title="Изменение email"
                     className={classes.cardHeader}
-                    titleTypographyProps={{ variant: "subtitle1" }}
                 />
                 <CardContent>
                     <Grid container spacing={2}>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
 
                 <TextField
                     label="Новый email"
+                    autoComplete="username"
                     fullWidth
                     margin="dense"
                     value={email}
@@ -657,6 +654,7 @@ const Personal = props => {
                 {emailStep === 2 && (
                     <TextField
                         label="Код подтверждения"
+                        autoComplete="one-time-code"
                         fullWidth
                         margin="dense"
                         value={emailCode}
@@ -725,14 +723,14 @@ const Personal = props => {
                 <CardHeader
                     title="Изменение телефона"
                     className={classes.cardHeader}
-                    titleTypographyProps={{ variant: "subtitle1" }}
                 />
                 <CardContent>
                     <Grid container spacing={2}>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
 
                 <TextField
                     label="Новый телефон"
+                    autoComplete="tel"
                     fullWidth
                     margin="dense"
                     value={phone}
@@ -749,6 +747,7 @@ const Personal = props => {
                 {phoneStep === 2 && (
                     <TextField
                         label="Код подтверждения"
+                        autoComplete="one-time-code"
                         fullWidth
                         margin="dense"
                         value={phoneCode}
@@ -817,15 +816,15 @@ const Personal = props => {
                 <CardHeader
                     title="Смена пароля"
                     className={classes.cardHeader}
-                    titleTypographyProps={{ variant: "subtitle1" }}
                 />
                 <CardContent>
                     <Grid container spacing={2}>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
 
                 <TextField
                     label="Текущий пароль"
                     type="password"
+                    autoComplete="current-password"
                     fullWidth
                     margin="dense"
                     value={currentPassword}
@@ -844,6 +843,7 @@ const Personal = props => {
                 <TextField
                     label="Новый пароль"
                     type="password"
+                    autoComplete="new-password"
                     fullWidth
                     margin="dense"
                     value={newPassword}
@@ -866,6 +866,7 @@ const Personal = props => {
                 <TextField
                     label="Повторите новый пароль"
                     type="password"
+                    autoComplete="new-password"
                     fullWidth
                     margin="dense"
                     value={repeatPassword}
@@ -904,7 +905,6 @@ const Personal = props => {
                 <CardHeader
                     title="Внешние сервисы"
                     className={classes.cardHeader}
-                    titleTypographyProps={{ variant: "subtitle1" }}
                 />
                 <CardContent>
 
@@ -946,7 +946,6 @@ const Personal = props => {
                 <CardHeader
                     title="Опасная зона"
                     className={classes.dangerHeader}
-                    titleTypographyProps={{ variant: "subtitle1" }}
                 />
                 <CardContent>
 
@@ -977,6 +976,7 @@ const Personal = props => {
                         label="Текущий пароль"
                         fullWidth
                         type="password"
+                        autoComplete="current-password"
                         margin="dense"
                         value={deleteConfirm}
                         onChange={e => setDeleteConfirm(e.target.value)}

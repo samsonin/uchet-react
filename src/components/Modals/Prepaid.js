@@ -59,16 +59,27 @@ const useStyles = makeStyles((theme) => ({
         margin: '1rem .3rem',
         width: '100%'
     },
+    titleBar: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '1rem',
+        paddingRight: theme.spacing(1),
+    },
+    titleText: {
+        fontWeight: 700,
+    },
+    titleActions: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: theme.spacing(0.5),
+        flexShrink: 0,
+    },
     closeButton: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1),
         color: theme.palette.grey[500],
     },
     printButton: {
-        position: 'absolute',
-        right: '4rem',
-        top: theme.spacing(1),
+        color: 'inherit',
     }
 }));
 
@@ -262,21 +273,23 @@ const Prepaid = props => {
         className='non-printable'
     >
         <DialogTitle>
-
-            Предоплата
-
-            <IconButton className={classes.printButton}
+            <div className={classes.titleBar}>
+                <span className={classes.titleText}>Предоплата</span>
+                <div className={classes.titleActions}>
+                    <IconButton
+                        className={classes.printButton}
                         disabled={!id}
                         onClick={() => Print(doc, alias)}
-            >
-                <PrintIcon/>
-            </IconButton>
+                    >
+                        <PrintIcon/>
+                    </IconButton>
 
-            <IconButton aria-label="close" className={classes.closeButton}
-                        onClick={() => props.close()}>
-                <CloseIcon/>
-            </IconButton>
-
+                    <IconButton aria-label="close" className={classes.closeButton}
+                                onClick={() => props.close()}>
+                        <CloseIcon/>
+                    </IconButton>
+                </div>
+            </div>
         </DialogTitle>
 
         <DialogContent>

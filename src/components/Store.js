@@ -200,7 +200,9 @@ const Store = props => {
 
     const style = {
         display: 'flex',
-        justifyContent: 'space-around',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: '.5rem',
         margin: '.5rem',
         opacity: showButtons ? '25%' : '100%'
     }

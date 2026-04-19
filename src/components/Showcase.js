@@ -12,6 +12,7 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 
+const toLowerSafe = value => String(value || '').toLowerCase();
 
 const statuses = {
     all: 'Вся',
@@ -132,8 +133,8 @@ const Showcase = props => {
 
                             if (!search || s.sum == search || s.id == search) return true
 
-                            const model = s.model.toLowerCase()
-                            const imei = s.imei.toLowerCase()
+                            const model = toLowerSafe(s.model)
+                            const imei = toLowerSafe(s.imei)
 
                             let r = true
 

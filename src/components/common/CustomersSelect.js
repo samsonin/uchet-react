@@ -1,103 +1,109 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, { useEffect, useRef, useState } from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
+
 import rest from "../Rest";
-import {fioHandler, phoneNumberHandler} from "./InputHandlers";
+import { fioHandler, phoneNumberHandler } from "./InputHandlers";
 
-const fields = ['id', 'fio', 'phone_number']
+const fields = ["id", "fio", "phone_number"];
+const SEARCH_DEBOUNCE_MS = 400;
 
-let outCount = 0
-let inCount = 0
+export default function CustomersSelect(props) {
 
-export default function (props) {
-
-    const request = useRef(false)
-
-    const [customers, setCustomers] = useState([])
-    const [value, setValue] = useState({})
+    const request = useRef(false);
+    const debounceRef = useRef(null);
+    const requestIdRef = useRef(0);
+    const [customers, setCustomers] = useState([]);
+    const [value, setValue] = useState({});
 
     const upd = (name, val) => {
-
         props.setCustomer(prev => {
-
-            const newState = {...prev}
-            newState[name] = val
-            return newState
-
-        })
-
-    }
+            const newState = { ...prev };
+            newState[name] = val;
+            return newState;
+        });
+    };
 
     useEffect(() => {
+        setValue(props.customer);
+        setCustomers([]);
+    }, [props.customer]);
 
-        setValue(props.customer)
-        setCustomers([])
+    useEffect(() => () => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+    }, []);
 
-    }, [props.customer])
+    const searchCustomers = val => {
+        const requestId = ++requestIdRef.current;
+        request.current = true;
+
+        rest("customers?all=" + val)
+            .then(res => {
+                if (requestId !== requestIdRef.current) return;
+
+                request.current = false;
+                if (res.ok) setCustomers(res.body || []);
+            })
+            .catch(() => {
+                if (requestId !== requestIdRef.current) return;
+                request.current = false;
+                setCustomers([]);
+            });
+    };
 
     const handlerInput = (val, reason, name) => {
-
-        if (reason === 'clear') {
-            upd('phone_number', '')
-            upd('fio', '')
-            upd('id', 0)
-            return
+        if (reason === "clear") {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            requestIdRef.current++;
+            request.current = false;
+            setCustomers([]);
+            upd("phone_number", "");
+            upd("fio", "");
+            upd("id", 0);
+            return;
         }
 
-        if (reason !== 'input') return
+        if (reason !== "input") return;
 
-        if (name === 'phone_number') val = phoneNumberHandler(val)
-        if (name === 'fio') val = fioHandler(val)
+        if (name === "phone_number") val = phoneNumberHandler(val);
+        if (name === "fio") val = fioHandler(val);
 
-        upd(name, val)
+        upd(name, val);
 
-        if (val.length < 6) return
+        if (debounceRef.current) clearTimeout(debounceRef.current);
 
-        request.current = true;
-        outCount++
+        if (val.length < 6) {
+            requestIdRef.current++;
+            request.current = false;
+            setCustomers([]);
+            return;
+        }
 
-        rest('customers?all=' + val)
-            .then(res => {
-                request.current = false;
-                inCount++
-                if (res.ok && outCount === inCount) {
-                    setCustomers(res.body || [])
-                }
-            })
-
-    }
+        debounceRef.current = setTimeout(() => {
+            searchCustomers(val);
+        }, SEARCH_DEBOUNCE_MS);
+    };
 
     const handler = val => {
+        setValue(val);
+        if (val) fields.map(f => upd(f, val[f]));
+        setCustomers([]);
+    };
 
-        setValue(val)
-        if (val) fields.map(f => upd(f, val[f]))
-        setCustomers([])
-
-    }
-
-    return <div
-        style={{
-            backgroundColor: '#e2f6e2',
-            padding: '.5rem',
-            margin: '.3rem 0',
-            width: '100%'
-        }}
-    >
-        {props.onlySearch || <div style={{
-            textDecoration: 'bold',
-        }}>
+    return <div className="customers-select">
+        {!props.onlySearch && <div className="customers-select-status">
             {props.customer.id
-                ? 'Заказчик из базы'
-                : 'Новый заказчик'
-            }
+                ? "Заказчик из базы"
+                : "Новый заказчик"}
         </div>}
+
         {[
-            {name: 'phone_number', label: 'Телефон'},
-            {name: 'fio', label: 'ФИО'},
+            { name: "phone_number", label: "Телефон" },
+            { name: "fio", label: "ФИО" },
         ].map(f => <Autocomplete
-            key={'customerselectkeyincustselect' + f.name + f.label}
+            key={"customerselectkeyincustselect" + f.name + f.label}
             disabled={props.disabled}
-            style={{margin: '.5rem .3rem'}}
+            className="customers-select-field"
             fullWidth
             value={value}
             options={customers}
@@ -106,17 +112,17 @@ export default function (props) {
             filterOptions={options => Object.keys(options).length ? options : true}
             onInputChange={(e, v, r) => handlerInput(v, r, f.name)}
             onChange={(e, v) => handler(v)}
-            getOptionLabel={option => option ? option[f.name] || '' : ''}
+            getOptionLabel={option => option ? option[f.name] || "" : ""}
             isOptionEqualToValue={(option, selectedValue) =>
                 Boolean(option && selectedValue && option.id === selectedValue.id)
             }
             renderInput={params => <TextField
                 {...params}
-                autoComplete='off'
+                autoComplete="off"
                 label={f.label}
-                id={'customer-select-key-in-custselect' + f.name + f.label}
-                name={'customer-select-key-in-custselect' + f.name + f.label}
+                id={"customer-select-key-in-custselect" + f.name + f.label}
+                name={"customer-select-key-in-custselect" + f.name + f.label}
             />}
         />)}
-    </div>
+    </div>;
 }

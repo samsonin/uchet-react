@@ -20,6 +20,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 
+const toLowerSafe = value => String(value || '').toLowerCase();
+
 const Entities = ({providers}) => {
 
     const [search, setSearch] = useState('');
@@ -66,7 +68,7 @@ const Entities = ({providers}) => {
 
                         if (!search) return true
 
-                        const name = p.name.toLowerCase()
+                        const name = toLowerSafe(p.name)
 
                         let r = true
 

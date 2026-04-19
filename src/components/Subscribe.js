@@ -253,7 +253,7 @@ const formatMoney = (amount, currencyCode = defaultCurrency) => {
     return new Intl.NumberFormat(currency?.locale || "ru-RU").format(amount);
 };
 
-const getBaseMonthlyPrice = currencyCode => getMonthlyPrice(subscribes[0], currencyCode);
+const getBaseMonthlyPrice = currencyCode => getMonthlyPrice(subscribes.find(v => v.month === 1), currencyCode);
 
 const getMonthlySavings = (subscribe, currencyCode = defaultCurrency) => {
     const basePrice = getBaseMonthlyPrice(currencyCode);
@@ -329,7 +329,7 @@ const Subscribe = ({ organization_id }) => {
                 Чем длиннее период оплаты, тем ниже цена за месяц и выше общая экономия.
             </Typography>
             <Grid container className={classes.root} spacing={4} sx={{ justifyContent: 'center' }}>
-                {subscribes.map(v => {
+                {[...subscribes].sort((a, b) => b.month - a.month).map(v => {
                     const monthlyPrice = getMonthlyPrice(v, activeCurrency);
                     const totalPrice = getTotalPrice(v, activeCurrency);
                     const monthlySavings = getMonthlySavings(v, activeCurrency);
