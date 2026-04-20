@@ -20,6 +20,11 @@ import { useSnackbar } from "notistack";
 
 import rest from "../Rest";
 import { SERVER } from "../../constants";
+import {
+    clearSocialState,
+    readSocialState,
+    storeSocialState,
+} from "../socialAuthState";
 
 const RESEND_TIMEOUT = 60;
 const DELETE_CONFIRM_WORD = "удалить";
@@ -242,6 +247,7 @@ const Personal = props => {
     useEffect(() => {
         const search = new URLSearchParams(locationSearch);
         const hashParams = new URLSearchParams(locationHash.replace(/^#/, ""));
+        const stateFromQuery = search.get("state") || "";
         const tgAuthResult = hashParams.get("tgAuthResult");
         const telegramHashAuth = (() => {
             const authKeys = ["id", "hash", "auth_date"];
@@ -251,6 +257,10 @@ const Personal = props => {
 
             return locationHash.replace(/^#/, "");
         })();
+
+        if (stateFromQuery) {
+            storeSocialState("telegram", stateFromQuery, "connect");
+        }
 
         let handled = false;
 
@@ -274,11 +284,12 @@ const Personal = props => {
         });
 
         if (handled) {
+            clearSocialState("telegram", "connect");
             history.replace("/settings/personal");
             return;
         }
 
-        const state = search.get("state");
+        const state = stateFromQuery || readSocialState("telegram", "connect");
 
         if (!state || !(tgAuthResult || telegramHashAuth)) return;
 
@@ -318,6 +329,7 @@ const Personal = props => {
                 enqueueSnackbar("Ошибка привязки Telegram", { variant: "error" });
             })
             .finally(() => {
+                clearSocialState("telegram", "connect");
                 history.replace("/settings/personal");
             });
     }, [enqueueSnackbar, history, locationHash, locationSearch]);
@@ -653,6 +665,10 @@ const Personal = props => {
         if (!token) {
             enqueueSnackbar("Ошибка авторизации", { variant: "error" });
             return;
+        }
+
+        if (provider.id === "telegram") {
+            clearSocialState("telegram", "connect");
         }
 
         window.location.href = `${SERVER}/auth/social/${provider.id}/connect?token=${encodeURIComponent(token)}`;
