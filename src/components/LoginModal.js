@@ -9,6 +9,7 @@ import Slide from "@mui/material/Slide";
 import { useSnackbar } from "notistack";
 import { connect } from "react-redux";
 import { TextField } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import authRequest from "./authRequest";
 import { bindActionCreators } from "redux";
 import { init_user } from "../actions/actionCreator";
@@ -456,6 +457,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
     const [requesting, setRequesting] = useState(false)
 
     const { enqueueSnackbar } = useSnackbar()
+    const navigate = useNavigate()
 
     const classes = useStyles()
 
@@ -529,28 +531,47 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     return;
                 }
 
-                const form = document.createElement("form");
-                form.method = "POST";
-                form.action = `${SERVER}/auth/social/telegram/connect/callback`;
-                form.style.display = "none";
+                setRequesting(true);
+                fetch(`${SERVER}/auth/social/telegram/connect/callback`, {
+                    method: "POST",
+                    mode: "cors",
+                    credentials: "include",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        ...authData,
+                        state: connectState,
+                    }),
+                })
+                    .then(async res => {
+                        const bodyText = await res.text();
+                        let body = {};
 
-                const payload = {
-                    ...authData,
-                    state: connectState,
-                };
+                        try {
+                            body = bodyText ? JSON.parse(bodyText) : {};
+                        } catch (e) {
+                            body = {};
+                        }
 
-                Object.entries(payload).forEach(([key, value]) => {
-                    if (value === undefined || value === null || value === "") return;
-                    const input = document.createElement("input");
-                    input.type = "hidden";
-                    input.name = key;
-                    input.value = String(value);
-                    form.appendChild(input);
-                });
+                        clearSocialState("telegram", "connect");
 
-                document.body.appendChild(form);
-                clearSocialState("telegram", "connect");
-                form.submit();
+                        if (res.ok && body?.ok) {
+                            navigate("/settings/personal?telegram_connected=1", { replace: true });
+                            return;
+                        }
+
+                        const error = body?.error ? `?telegram_connected=0&error=${encodeURIComponent(body.error)}` : "?telegram_connected=0";
+                        navigate(`/settings/personal${error}`, { replace: true });
+                    })
+                    .catch(() => {
+                        clearSocialState("telegram", "connect");
+                        enqueueSnackbar('Ошибка сети при привязке Telegram', {
+                            variant: 'error'
+                        });
+                    })
+                    .finally(() => setRequesting(false));
                 return;
             }
 
