@@ -510,7 +510,7 @@ const Docs = props => {
                                     </ButtonGroup>
                                 </div>
 
-                                <EditorContent editor={editor} className={classes.editor} />
+                                <EditorContent editor={editor} className={`${classes.editor} docs-editor`} />
                             </Grid>
 
                             <Grid item xs={12}>

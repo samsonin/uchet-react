@@ -107,10 +107,6 @@ const Personal = props => {
     const requiresDeletePassword = hasPassword !== undefined
         ? !!hasPassword
         : !hasLinkedProvider;
-    const deleteConfirmNormalized = (deleteConfirm || "").trim().toLowerCase();
-    const isDeleteConfirmationValid = requiresDeletePassword
-        ? !!deleteConfirm
-        : deleteConfirmNormalized === DELETE_CONFIRM_WORD;
 
     const [name, setName] = useState(userName);
     const [savingName, setSavingName] = useState(false);
@@ -145,6 +141,10 @@ const Personal = props => {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState("");
     const [deleting, setDeleting] = useState(false);
+    const deleteConfirmNormalized = (deleteConfirm || "").trim().toLowerCase();
+    const isDeleteConfirmationValid = requiresDeletePassword
+        ? !!deleteConfirm
+        : deleteConfirmNormalized === DELETE_CONFIRM_WORD;
 
     useEffect(() => {
         setName(userName);
