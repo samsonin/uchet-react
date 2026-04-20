@@ -525,13 +525,20 @@ export default connect(state => state, mapDispatchToProps)(props => {
             setOauthState(state);
             setRequesting(true);
 
-            fetch(`${SERVER}/auth/social/register-data?state=${encodeURIComponent(state)}`, {
-                method: 'GET',
-                mode: 'cors',
-                cache: 'no-cache',
+            rest(`auth/social/register-data?state=${encodeURIComponent(state)}`, 'GET', '', false, {
+                auth: false,
+                responseType: 'text',
+                updateStore: false,
             })
                 .then(async res => {
-                    const { data, text } = await readAuthResponse(res);
+                    const text = res?.body || '';
+                    let data = null;
+
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        data = null;
+                    }
 
                     if (!res || (res.status !== 200 && res.status !== 201)) {
                         enqueueSnackbar(data?.message || data?.error || 'Ошибка регистрации через соцсервис', {

@@ -1,31 +1,22 @@
-import { SERVER } from '../constants';
 import { enqueueSnackbar } from "../actions/actionCreator";
+import rest from "./Rest";
 
 
 export default async function authRequest(data = {}, url = '') {
 
     const circularln = document.getElementById('circularln');
 
-    const init = {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        ...(data ? { body: JSON.stringify(data) } : {}),
-    };
-
     if (circularln) circularln.style.display = '';
 
-    return fetch(`${SERVER}/${url}`, init)
-        .finally(() => {
-            if (circularln) circularln.style.display = 'none';
-        })
+    return rest(url, 'POST', data, false, {
+        auth: false,
+        responseType: 'raw',
+        updateStore: false,
+    })
         .catch(error => {
             if (circularln) circularln.style.display = 'none';
-            enqueueSnackbar("Ошибка сети", { variant: "error" });
-            return null; // или другое значение по умолчанию
+            enqueueSnackbar("РћС€РёР±РєР° СЃРµС‚Рё", { variant: "error" });
+            return null;
         });
 
 }

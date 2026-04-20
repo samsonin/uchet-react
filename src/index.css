@@ -1052,16 +1052,12 @@
     }
 
     .order-tabs .MuiTabs-indicator {
-        height: calc(100% - 10px);
-        margin: 5px;
-        border-radius: 12px;
-        background: var(--brand-soft);
-        z-index: 0;
+        height: 3px;
+        border-radius: 999px;
+        background: var(--brand);
     }
 
     .order-tabs .MuiTabs-flexContainer {
-        position: relative;
-        z-index: 1;
         gap: 0.25rem;
     }
 
@@ -1480,16 +1476,20 @@
 
     :root[data-theme="dark"] .order-tabs .MuiTab-root {
         color: rgba(232, 243, 255, 0.74) !important;
+        border-radius: 12px 12px 0 0;
     }
 
     :root[data-theme="dark"] .order-tabs .MuiTab-root.Mui-selected,
     :root[data-theme="dark"] .order-tabs .Mui-selected {
         color: #f7fffe !important;
         text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.04) !important;
     }
 
     :root[data-theme="dark"] .order-tabs .MuiTabs-indicator {
-        background: linear-gradient(135deg, rgba(23, 163, 155, 0.42), rgba(46, 196, 182, 0.28));
+        height: 3px !important;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--brand), var(--ink-blue)) !important;
     }
 
     :root[data-theme="dark"] .order-header,
@@ -1754,6 +1754,13 @@
         border-color: var(--line) !important;
         background: var(--surface-tint) !important;
         color: var(--text) !important;
+    }
+
+    .docs-select-item,
+    .docs-select-item *,
+    .docs-select-item .MuiListItemText-root,
+    .docs-select-item .MuiTypography-root {
+        cursor: pointer !important;
     }
 
 }

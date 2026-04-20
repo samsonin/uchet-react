@@ -4,6 +4,7 @@ import {connect} from "react-redux";
 import {makeStyles} from "muiLegacyStyles";
 import IconButton from "@mui/material/IconButton";
 import PrintIcon from "@mui/icons-material/Print";
+import EditNoteIcon from "@mui/icons-material/EditNote";
 import {Tab, Tabs, Typography} from "@mui/material";
 import Grid from "@mui/material/Grid";
 
@@ -19,9 +20,12 @@ import {totalSum} from "./common/order/functions";
 
 
 const useStyles = makeStyles(() => ({
-    printButton: {
-        right: '4rem',
-    }
+    actions: {
+        marginRight: '.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '.25rem',
+    },
 }))
 
 
@@ -63,6 +67,7 @@ const Order = props => {
         : ['order', 'remont']
 
     const doc = docs.find(d => docNames.includes(d.name || d.doc_name))
+    const editableDocName = order && order.status_id === 6 ? 'checkout' : 'remont'
 
     const category = order ? appCategories.find(c => c.id === order.category_id) : null
 
@@ -152,6 +157,10 @@ const Order = props => {
 
     const disabled = !!id
 
+    const openDocTemplate = () => {
+        props.history.push(`/settings/docs?doc=${editableDocName}`)
+    }
+
     return <div className="order-page">
 
         <Grid container
@@ -171,11 +180,20 @@ const Order = props => {
                     : 'Новый заказ'}
             </Typography>
 
-            {disabled && order && <IconButton className={classes.printButton}
-                                              onClick={() => Print(doc, alias, aliasFunction)}
-            >
-                <PrintIcon/>
-            </IconButton>}
+            {disabled && order && <div className={classes.actions}>
+                <IconButton
+                    aria-label="edit-document-template"
+                    onClick={openDocTemplate}
+                >
+                    <EditNoteIcon/>
+                </IconButton>
+                <IconButton
+                    aria-label="print-order"
+                    onClick={() => Print(doc, alias, aliasFunction)}
+                >
+                    <PrintIcon/>
+                </IconButton>
+            </div>}
         </Grid>
 
         {order

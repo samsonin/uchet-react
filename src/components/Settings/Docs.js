@@ -15,12 +15,8 @@ import {
     FormControl,
     Grid,
     InputLabel,
-    List,
-    ListItem,
-    ListItemText,
     MenuItem,
     Select,
-    TextField,
     Typography,
 } from "@mui/material";
 import { makeStyles } from "muiLegacyStyles";
@@ -212,7 +208,7 @@ const getMockValue = name => {
     if (key.includes("address") || key.includes("адрес")) return "г. Владивосток, ул. Светланская, 10";
     if (key.includes("sum") || key.includes("price") || key.includes("cost") || key.includes("сум") || key.includes("цен")) return "12 500 ₽";
     if (key.includes("number") || key.includes("num") || key.includes("номер")) return "000123";
-    if (key.includes("barcode") || key.includes("штрих")) return "112116021526";
+    if (key.includes("barcode") || key.includes("\u0448\u0442\u0440\u0438\u0445")) return "112116021526";
     if (key.includes("imei")) return "356789012345678";
     if (key.includes("model") || key.includes("goods") || key.includes("товар") || key.includes("модель")) return "iPhone 13";
 
@@ -227,14 +223,20 @@ const updateDocShape = (doc, title, text) => ({
     ...(doc.doc_text !== undefined ? { doc_text: text } : {}),
 });
 
+const normalizeDocToken = value => (value || "").trim().toLowerCase();
+const DOC_EDITOR_TITLE = String.fromCharCode(1056,1077,1076,1072,1082,1090,1080,1088,1086,1074,1072,1085,1080,1077,32,1076,1086,1082,1091,1084,1077,1085,1090,1072);
+const DOC_LABEL = String.fromCharCode(1044,1086,1082,1091,1084,1077,1085,1090);
+
 const Docs = props => {
     const classes = useStyles();
     const { enqueueSnackbar } = useSnackbar();
 
     const docs = useMemo(() => getDocsSource(props.app.docs), [props.app.docs]);
+    const selectedDocName = new URLSearchParams(props.location?.search || "").get("doc") || "";
     const fields = props.app.fields?.allElements || [];
     const [currentIndex, setCurrentIndex] = useState(0);
     const [title, setTitle] = useState("");
+    const [savedTitle, setSavedTitle] = useState("");
     const [savedHtml, setSavedHtml] = useState("");
     const [dirty, setDirty] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -244,6 +246,35 @@ const Docs = props => {
     const [previewOrientation, setPreviewOrientation] = useState("portrait");
 
     const currentDoc = docs[currentIndex] || docs[0];
+
+    const syncDirty = (nextTitle = title, nextHtml = editor?.getHTML() || "") => {
+        setDirty(
+            nextHtml !== savedHtml ||
+            nextTitle.trim() !== savedTitle.trim()
+        );
+    };
+
+    const buildDocSearch = docName => {
+        const params = new URLSearchParams(props.location?.search || "");
+
+        if (docName) params.set("doc", docName);
+        else params.delete("doc");
+
+        const query = params.toString();
+        return query ? `?${query}` : "";
+    };
+
+    const replaceDocSearch = docName => {
+        const nextSearch = buildDocSearch(docName);
+        const currentSearch = props.location?.search || "";
+
+        if (nextSearch !== currentSearch) {
+            props.history.replace({
+                pathname: props.location?.pathname || "/settings/docs",
+                search: nextSearch,
+            });
+        }
+    };
 
     const editor = useEditor({
         extensions: [
@@ -262,7 +293,7 @@ const Docs = props => {
         ],
         content: "",
         onUpdate: ({ editor }) => {
-            setDirty(editor.getHTML() !== savedHtml);
+            syncDirty(title, editor.getHTML());
         },
     });
 
@@ -278,16 +309,39 @@ const Docs = props => {
     }, [currentIndex, docs]);
 
     useEffect(() => {
+        if (!docs.length || !selectedDocName) return;
+
+        const normalizedName = normalizeDocToken(selectedDocName);
+        const targetIndex = docs.findIndex(doc => {
+            const name = normalizeDocToken(getDocName(doc));
+            const title = normalizeDocToken(getDocTitle(doc));
+
+            return name === normalizedName || title === normalizedName;
+        });
+
+        if (targetIndex >= 0 && targetIndex !== currentIndex) {
+            setCurrentIndex(targetIndex);
+        }
+    }, [currentIndex, docs, selectedDocName]);
+
+    useEffect(() => {
         if (!editor || !currentDoc) return;
 
         const text = getDocText(currentDoc);
         const nextTitle = getDocTitle(currentDoc);
 
         setTitle(nextTitle);
+        setSavedTitle(nextTitle);
         setSavedHtml(text);
         setDirty(false);
         editor.commands.setContent(text || "", false);
     }, [currentDoc, editor]);
+
+    useEffect(() => {
+        if (!docs.length || !currentDoc) return;
+
+        replaceDocSearch(getDocName(currentDoc));
+    }, [currentDoc, docs.length]);
 
     const updateDocsInStore = (nextDoc, html) => {
         const nextDocs = docs.map((doc, index) => index === currentIndex
@@ -334,9 +388,10 @@ const Docs = props => {
 
             if (res.status >= 200 && res.status < 300 && res.body?.ok !== false) {
                 updateDocsInStore(currentDoc, html);
+                setSavedTitle(title.trim());
                 setSavedHtml(html);
                 setDirty(false);
-                enqueueSnackbar(res.body?.message || "Документ сохранен", { variant: "success" });
+                enqueueSnackbar(res.body?.message || "\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d", { variant: "success" });
                 return;
             }
 
@@ -344,16 +399,16 @@ const Docs = props => {
 
             if (fallback?.result || fallback?.ok) {
                 updateDocsInStore(currentDoc, html);
+                setSavedTitle(title.trim());
                 setSavedHtml(html);
                 setDirty(false);
-                enqueueSnackbar("Документ сохранен", { variant: "success" });
+                enqueueSnackbar("\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d", { variant: "success" });
                 return;
             }
 
-            enqueueSnackbar(fallback?.message || res.body?.message || "Ошибка сохранения документа", {
+            enqueueSnackbar(fallback?.message || res.body?.message || "\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430", {
                 variant: "error",
             });
-        } catch (error) {
             enqueueSnackbar("Ошибка сети", { variant: "error" });
         } finally {
             setSaving(false);
@@ -377,8 +432,14 @@ const Docs = props => {
     };
 
     const selectDoc = index => {
-        if (dirty && !window.confirm("Есть несохраненные изменения. Перейти к другому документу?")) {
+        if (dirty) {
+            enqueueSnackbar("\u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u0435 \u0438\u043b\u0438 \u043e\u0442\u043c\u0435\u043d\u0438\u0442\u0435 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0432 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0435", { variant: "warning" });
             return;
+        }
+
+        const nextDoc = docs[index];
+        if (nextDoc) {
+            replaceDocSearch(getDocName(nextDoc));
         }
 
         setCurrentIndex(index);
@@ -429,51 +490,33 @@ const Docs = props => {
     }
 
     return <div className={classes.root}>
-        <Grid container spacing={2}>
-            <Grid item xs={12} md={3}>
+        <Grid container spacing={3}>
+            <Grid item xs={12}>
                 <Card className={classes.card}>
                     <CardHeader
-                        title="Документы"
-                        className={classes.cardHeader}
-                        titleTypographyProps={{ variant: "h6" }}
-                    />
-                    <List className={classes.list}>
-                        {docs.map((doc, index) => <ListItem
-                            button
-                            selected={index === currentIndex}
-                            onClick={() => selectDoc(index)}
-                            key={"settings-doc-" + (getDocId(doc) || index)}
-                        >
-                            <ListItemText
-                                primary={getDocDisplayTitle(doc, index)}
-                            />
-                        </ListItem>)}
-                    </List>
-                </Card>
-            </Grid>
-
-            <Grid item xs={12} md={9}>
-                <Card className={classes.card}>
-                    <CardHeader
-                        title="Редактирование документа"
-                        subheader={getDocDisplayTitle(currentDoc, currentIndex)}
+                        title={DOC_EDITOR_TITLE}
                         className={classes.cardHeader}
                         titleTypographyProps={{ variant: "h5" }}
                     />
                     <CardContent>
                         <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                <TextField
-                                    label="Название"
-                                    value={title}
-                                    onChange={event => {
-                                        setTitle(event.target.value);
-                                        setDirty(true);
-                                    }}
-                                    fullWidth
-                                    variant="outlined"
-                                    size="small"
-                                />
+                            <Grid item xs={12} md={6}>
+                                <FormControl fullWidth variant="outlined" size="small">
+                                    <InputLabel id="docs-select-label">{DOC_LABEL}</InputLabel>
+                                    <Select
+                                        labelId="docs-select-label"
+                                        value={currentIndex}
+                                        label={DOC_LABEL}
+                                        onChange={event => selectDoc(Number(event.target.value))}
+                                    >
+                                        {docs.map((doc, index) => <MenuItem
+                                            key={"settings-doc-" + (getDocId(doc) || index)}
+                                            value={index}
+                                        >
+                                            {getDocDisplayTitle(doc, index)}
+                                        </MenuItem>)}
+                                    </Select>
+                                </FormControl>
                             </Grid>
 
                             <Grid item xs={12}>

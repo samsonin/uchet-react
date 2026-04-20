@@ -4,12 +4,20 @@ import store from '../store'
 
 let response = {};
 
-export default function fetchPost(url, method = 'GET', data = '', isFile = false) {
+export default function fetchPost(url, method = 'GET', data = '', isFile = false, options = {}) {
 
-    let auth = JSON.parse(window.localStorage.getItem('auth'));
+    const {
+        auth: useAuth = true,
+        headers: customHeaders = {},
+        responseType = 'json',
+        updateStore = true,
+        baseUrl = SERVER,
+    } = options;
 
-    let jwt = auth
-        ? auth.jwt
+    let authData = JSON.parse(window.localStorage.getItem('auth'));
+
+    let jwt = authData
+        ? authData.jwt
         : ''
 
     let circularln = document.getElementById('circularln');
@@ -21,7 +29,8 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         cache: 'no-cache',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + jwt
+            ...(useAuth && jwt ? {'Authorization': 'Bearer ' + jwt} : {}),
+            ...customHeaders,
         },
     }
 
@@ -41,7 +50,7 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
 
     }
 
-    return fetch(SERVER + '/' + url, init)
+    return fetch(baseUrl + '/' + url, init)
         .then(res => {
 
             if (res.status === 401) {
@@ -58,16 +67,39 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
                 status: res.status,
                 ok: res.ok
             };
+            if (responseType === 'raw') {
+                response.res = res;
+                return res;
+            }
             return res;
         })
-        .then(res => res.json())
-        .then(res => {
-            response.body = res;
+        .then(async res => {
+            if (responseType === 'raw') return res;
+
+            if (responseType === 'text') {
+                response.body = await res.text();
+                return response;
+            }
+
+            if (responseType === 'auto') {
+                const text = await res.text();
+
+                try {
+                    response.body = JSON.parse(text);
+                } catch (error) {
+                    response.body = text;
+                }
+
+                return response;
+            }
+
+            const body = await res.json();
+            response.body = body;
             return response;
         })
         .then(res => {
 
-            if (res.status === 200) {
+            if (responseType !== 'raw' && updateStore && res.status === 200 && typeof res.body === 'object' && res.body) {
 
                 store.dispatch({
                     type: 'UPD_APP',

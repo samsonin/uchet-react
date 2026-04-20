@@ -1,35 +1,22 @@
-import {SERVER, NEW_SERVER} from '../constants';
+import rest from "./Rest";
 
 
 export default function fetchPost(data = {}, url = "", jwt = "") {
 
-    let circularln = document.getElementById('circularln');
-    if (circularln) circularln.style.display = '';
-
-    let headers = {
-        'Content-Type': 'application/json'
-    }
-    if (jwt) {
-        headers['Jwt'] = jwt
-        headers['Authorization'] = jwt
-    }
-    let init = {
-        method: 'POST',
-        mode: 'cors', // no-cors, cors, *same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        headers,
-    }
-    if (data) init.body = JSON.stringify(data);
-
-    return fetch(SERVER + '/api' + url, init)
-        .then(res => {
-            if (circularln) circularln.style.display = 'none';
-            return res.json()
-        })
-        .then(data => data === undefined ? {result: false} : data)
+    return rest('api' + url, 'POST', data, false, {
+        auth: false,
+        responseType: 'json',
+        updateStore: false,
+        headers: jwt
+            ? {
+                Jwt: jwt,
+                Authorization: jwt,
+            }
+            : {},
+    })
+        .then(res => res?.body === undefined ? {result: false} : res.body)
         .catch(error => {
-            if (circularln) circularln.style.display = 'none';
-            console.error('Ошибка запроса: ', error)
+            console.error('РћС€РёР±РєР° Р·Р°РїСЂРѕСЃР°: ', error)
             return {result: false}
         });
 

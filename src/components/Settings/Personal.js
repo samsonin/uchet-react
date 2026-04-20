@@ -301,21 +301,8 @@ const Personal = props => {
             return;
         }
 
-        fetch(`${SERVER}/auth/social/telegram/callback`, {
-            method: "POST",
-            mode: "cors",
-            cache: "no-cache",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ ...authData, state }),
-        })
-            .then(async res => {
-                if (!res.ok) {
-                    throw new Error("telegram-callback-failed");
-                }
-
-                const me = await rest("users/me");
+        rest("users/me")
+            .then(me => {
                 const isLinked = !!me.body?.telegram_linked;
 
                 if (isLinked) {
@@ -669,6 +656,8 @@ const Personal = props => {
 
         if (provider.id === "telegram") {
             clearSocialState("telegram", "connect");
+            window.location.href = `${SERVER}/auth/social/telegram/connect`;
+            return;
         }
 
         window.location.href = `${SERVER}/auth/social/${provider.id}/connect?token=${encodeURIComponent(token)}`;
