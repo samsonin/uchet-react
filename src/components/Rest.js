@@ -12,6 +12,7 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         responseType = 'json',
         updateStore = true,
         baseUrl = SERVER,
+        credentials = 'same-origin',
     } = options;
 
     let authData = JSON.parse(window.localStorage.getItem('auth'));
@@ -27,6 +28,7 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         method,
         mode: 'cors',
         cache: 'no-cache',
+        credentials,
         headers: {
             'Content-Type': 'application/json',
             ...(useAuth && jwt ? {'Authorization': 'Bearer ' + jwt} : {}),

@@ -656,7 +656,24 @@ const Personal = props => {
 
         if (provider.id === "telegram") {
             clearSocialState("telegram", "connect");
-            window.location.href = `${SERVER}/auth/social/telegram/connect`;
+            rest("auth/social/session/from-jwt", "POST", "", false, {
+                credentials: "include",
+                updateStore: false,
+            })
+                .then(res => {
+                    if (res.ok && res.body?.ok) {
+                        window.location.href = `${SERVER}/auth/social/telegram/connect`;
+                        return;
+                    }
+
+                    enqueueSnackbar(
+                        res.body?.message || "Ошибка подготовки Telegram авторизации",
+                        { variant: "error" }
+                    );
+                })
+                .catch(() => {
+                    enqueueSnackbar("Ошибка сети", { variant: "error" });
+                });
             return;
         }
 
