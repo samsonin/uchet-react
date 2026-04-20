@@ -1672,6 +1672,48 @@
         -webkit-text-fill-color: var(--text-muted) !important;
     }
 
+    :root[data-theme="dark"] .settings-personal-page .MuiInputBase-root,
+    :root[data-theme="dark"] .settings-personal-page .MuiOutlinedInput-root,
+    :root[data-theme="dark"] .settings-personal-page .MuiFilledInput-root {
+        background: var(--surface-soft) !important;
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .settings-personal-page .MuiInputBase-input,
+    :root[data-theme="dark"] .settings-personal-page input,
+    :root[data-theme="dark"] .settings-personal-page textarea {
+        color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
+        caret-color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .settings-personal-page .MuiOutlinedInput-notchedOutline {
+        border-color: var(--line) !important;
+    }
+
+    :root[data-theme="dark"] .settings-personal-page .MuiInputLabel-root,
+    :root[data-theme="dark"] .settings-personal-page .MuiFormLabel-root,
+    :root[data-theme="dark"] .settings-personal-page .MuiFormHelperText-root {
+        color: var(--text-muted) !important;
+    }
+
+    :root[data-theme="dark"] .settings-personal-page .MuiInputLabel-root.Mui-focused,
+    :root[data-theme="dark"] .settings-personal-page .MuiFormLabel-root.Mui-focused {
+        color: var(--brand) !important;
+    }
+
+    :root[data-theme="dark"] .settings-personal-page input:-webkit-autofill,
+    :root[data-theme="dark"] .settings-personal-page input:-webkit-autofill:hover,
+    :root[data-theme="dark"] .settings-personal-page input:-webkit-autofill:focus,
+    :root[data-theme="dark"] .settings-personal-page textarea:-webkit-autofill,
+    :root[data-theme="dark"] .settings-personal-page select:-webkit-autofill {
+        -webkit-text-fill-color: var(--text) !important;
+        caret-color: var(--text) !important;
+        -webkit-box-shadow: 0 0 0 1000px var(--surface-soft) inset !important;
+        box-shadow: 0 0 0 1000px var(--surface-soft) inset !important;
+        transition: background-color 9999s ease-in-out 0s;
+    }
+
     :root[data-theme="dark"] .MuiCheckbox-root,
     :root[data-theme="dark"] .MuiRadio-root,
     :root[data-theme="dark"] .MuiSwitch-root,

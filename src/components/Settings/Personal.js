@@ -44,6 +44,68 @@ const socialErrors = {
     SBER_ALREADY_LINKED: "Sber уже привязан к другому пользователю",
 };
 
+const parseTelegramAuthResult = tgAuthResult => {
+    const normalizeObject = value => {
+        if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+        return value.id && value.hash ? value : null;
+    };
+
+    const tryJson = value => {
+        try {
+            return normalizeObject(JSON.parse(value));
+        } catch (e) {
+            return null;
+        }
+    };
+
+    const tryParams = value => {
+        const params = new URLSearchParams(value.replace(/^#/, "").replace(/^\?/, ""));
+        const result = {};
+
+        params.forEach((paramValue, key) => {
+            result[key] = paramValue;
+        });
+
+        return normalizeObject(result);
+    };
+
+    const tryDecode = value => {
+        try {
+            return decodeURIComponent(value);
+        } catch (e) {
+            return value;
+        }
+    };
+
+    const tryBase64Json = value => {
+        try {
+            const normalizedBase64 = value
+                .replace(/-/g, "+")
+                .replace(/_/g, "/");
+            const paddedBase64 = normalizedBase64 + "=".repeat((4 - normalizedBase64.length % 4) % 4);
+            const binary = window.atob(paddedBase64);
+            const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+            const decoded = new TextDecoder("utf-8").decode(bytes);
+
+            return normalizeObject(JSON.parse(decoded));
+        } catch (e) {
+            return null;
+        }
+    };
+
+    const normalized = tgAuthResult || "";
+    const decoded = tryDecode(normalized);
+
+    return (
+        tryJson(normalized) ||
+        tryJson(decoded) ||
+        tryBase64Json(normalized) ||
+        tryBase64Json(decoded) ||
+        tryParams(normalized) ||
+        tryParams(decoded)
+    );
+};
+
 const useStyles = makeStyles({
     root: {
         width: "100%",
@@ -98,6 +160,7 @@ const Personal = props => {
     const user = (props.app.users || []).find(u => u.id === auth.user_id);
     const history = props.history;
     const locationSearch = props.location?.search || "";
+    const locationHash = props.location?.hash || window.location.hash || "";
     const userName = user?.name || "";
     const userEmail = user?.email || "";
     const userPhone = user?.phone_number || "";
@@ -178,6 +241,16 @@ const Personal = props => {
 
     useEffect(() => {
         const search = new URLSearchParams(locationSearch);
+        const hashParams = new URLSearchParams(locationHash.replace(/^#/, ""));
+        const tgAuthResult = hashParams.get("tgAuthResult");
+        const telegramHashAuth = (() => {
+            const authKeys = ["id", "hash", "auth_date"];
+            const hasTelegramPayload = authKeys.every(key => hashParams.get(key));
+
+            if (!hasTelegramPayload) return "";
+
+            return locationHash.replace(/^#/, "");
+        })();
 
         let handled = false;
 
@@ -202,8 +275,52 @@ const Personal = props => {
 
         if (handled) {
             history.replace("/settings/personal");
+            return;
         }
-    }, [enqueueSnackbar, history, locationSearch]);
+
+        const state = search.get("state");
+
+        if (!state || !(tgAuthResult || telegramHashAuth)) return;
+
+        const authData = parseTelegramAuthResult(tgAuthResult || telegramHashAuth);
+
+        if (!authData) {
+            enqueueSnackbar("Не удалось обработать ответ Telegram", { variant: "error" });
+            history.replace("/settings/personal");
+            return;
+        }
+
+        fetch(`${SERVER}/auth/social/telegram/callback`, {
+            method: "POST",
+            mode: "cors",
+            cache: "no-cache",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ...authData, state }),
+        })
+            .then(async res => {
+                if (!res.ok) {
+                    throw new Error("telegram-callback-failed");
+                }
+
+                const me = await rest("users/me");
+                const isLinked = !!me.body?.telegram_linked;
+
+                if (isLinked) {
+                    setLinkedProviders(prev => ({ ...prev, telegram: true }));
+                    enqueueSnackbar("Telegram успешно привязан", { variant: "success" });
+                } else {
+                    enqueueSnackbar("Привязка Telegram не сохранилась", { variant: "error" });
+                }
+            })
+            .catch(() => {
+                enqueueSnackbar("Ошибка привязки Telegram", { variant: "error" });
+            })
+            .finally(() => {
+                history.replace("/settings/personal");
+            });
+    }, [enqueueSnackbar, history, locationHash, locationSearch]);
 
     useEffect(() => {
         if (emailResendLeft <= 0) return;
@@ -597,7 +714,7 @@ const Personal = props => {
     };
 
     return (
-        <div className={classes.root}>
+        <div className={`${classes.root} settings-personal-page`}>
             <Card className={classes.card}>
                 <CardHeader
                     title="Личные настройки"
