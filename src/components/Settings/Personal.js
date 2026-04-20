@@ -690,6 +690,10 @@ const Personal = props => {
                     return;
                 }
 
+                if (body?.state) {
+                    storeSocialState("telegram", body.state, "connect");
+                }
+
                 window.location.assign(`${SERVER}/auth/social/telegram/connect`);
                 return;
             } catch (e) {

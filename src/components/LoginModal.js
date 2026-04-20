@@ -16,6 +16,7 @@ import License from "./License";
 import Privacy from "./Privacy";
 import { makeStyles } from "muiLegacyStyles";
 import { SERVER } from '../constants';
+import { clearSocialState, readSocialState } from "./socialAuthState";
 import logo from '../images/logo.png';
 import googleIcon from '../images/google.svg';
 import telegramIcon from '../images/telegram.svg';
@@ -498,6 +499,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
         const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
         const token = params.get("token");
         const state = params.get("state");
+        const isTelegramConnectFlow = Boolean(readSocialState("telegram", "connect"));
         const tgAuthResult = hashParams.get("tgAuthResult");
         const telegramHashAuth = (() => {
             const authKeys = ['id', 'hash', 'auth_date'];
@@ -515,6 +517,43 @@ export default connect(state => state, mapDispatchToProps)(props => {
         }
 
         if (tgAuthResult || telegramHashAuth) {
+            if (isTelegramConnectFlow) {
+                const connectState = readSocialState("telegram", "connect");
+                const authData = parseTelegramAuthResult(tgAuthResult || telegramHashAuth);
+
+                if (!connectState || !authData) {
+                    clearSocialState("telegram", "connect");
+                    enqueueSnackbar('Не удалось обработать ответ Telegram', {
+                        variant: 'error'
+                    });
+                    return;
+                }
+
+                const form = document.createElement("form");
+                form.method = "POST";
+                form.action = `${SERVER}/auth/social/telegram/connect/callback`;
+                form.style.display = "none";
+
+                const payload = {
+                    ...authData,
+                    state: connectState,
+                };
+
+                Object.entries(payload).forEach(([key, value]) => {
+                    if (value === undefined || value === null || value === "") return;
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = key;
+                    input.value = String(value);
+                    form.appendChild(input);
+                });
+
+                document.body.appendChild(form);
+                clearSocialState("telegram", "connect");
+                form.submit();
+                return;
+            }
+
             setRequesting(true);
             completeTelegramAuth(tgAuthResult || telegramHashAuth, state)
                 .finally(() => setRequesting(false));
