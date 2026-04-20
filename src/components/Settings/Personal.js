@@ -301,24 +301,28 @@ const Personal = props => {
             return;
         }
 
-        rest("users/me")
-            .then(me => {
-                const isLinked = !!me.body?.telegram_linked;
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = `${SERVER}/auth/social/telegram/connect/callback`;
+        form.style.display = "none";
 
-                if (isLinked) {
-                    setLinkedProviders(prev => ({ ...prev, telegram: true }));
-                    enqueueSnackbar("Telegram успешно привязан", { variant: "success" });
-                } else {
-                    enqueueSnackbar("Привязка Telegram не сохранилась", { variant: "error" });
-                }
-            })
-            .catch(() => {
-                enqueueSnackbar("Ошибка привязки Telegram", { variant: "error" });
-            })
-            .finally(() => {
-                clearSocialState("telegram", "connect");
-                history.replace("/settings/personal");
-            });
+        const payload = {
+            ...authData,
+            state,
+        };
+
+        Object.entries(payload).forEach(([key, value]) => {
+            if (value === undefined || value === null) return;
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = key;
+            input.value = String(value);
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        clearSocialState("telegram", "connect");
+        form.submit();
     }, [enqueueSnackbar, history, locationHash, locationSearch]);
 
     useEffect(() => {
@@ -646,7 +650,7 @@ const Personal = props => {
         return auth.jwt || storedAuth.jwt;
     };
 
-    const linkProvider = provider => {
+    const linkProvider = async provider => {
         const token = getToken();
 
         if (!token) {
@@ -656,6 +660,42 @@ const Personal = props => {
 
         if (provider.id === "telegram") {
             clearSocialState("telegram", "connect");
+            try {
+                const res = await fetch(`${SERVER}/auth/social/session/from-jwt`, {
+                    method: "POST",
+                    mode: "cors",
+                    credentials: "include",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                    body: "{}",
+                });
+
+                const bodyText = await res.text();
+                let body = {};
+
+                try {
+                    body = bodyText ? JSON.parse(bodyText) : {};
+                } catch (e) {
+                    body = {};
+                }
+
+                if (!res.ok || !body?.ok) {
+                    enqueueSnackbar(
+                        body?.message || "РћС€РёР±РєР° РїРѕРґРіРѕС‚РѕРІРєРё Telegram Р°РІС‚РѕСЂРёР·Р°С†РёРё",
+                        { variant: "error" }
+                    );
+                    return;
+                }
+
+                window.location.assign(`${SERVER}/auth/social/telegram/connect`);
+                return;
+            } catch (e) {
+                enqueueSnackbar("РћС€РёР±РєР° СЃРµС‚Рё", { variant: "error" });
+                return;
+            }
             rest("auth/social/session/from-jwt", "POST", "", false, {
                 credentials: "include",
                 updateStore: false,
