@@ -1017,7 +1017,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
             </span>
         </DialogContentText>
 
-        else if (n === 'invites') return <Invites key="login-modal-invites" />
+        else if (n === 'invites') return renderInvites()
         else if (n === 'privacy') return <Privacy key="login-modal-privacy" />
         else if (n === 'license') return <License key="login-modal-license" />
 
@@ -1101,7 +1101,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
     </Button>
 
 
-    const Invite = ({ invite }) => (
+    const renderInvite = invite => (
         <div
             key={invite.id || invite.invite_id}
             className={classes.inviteCard}
@@ -1120,20 +1120,21 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 </Button>}
             </div>
         </div>
-    )
+    );
 
-    const Invites = () => (
+    const renderInvites = () => (
         <div>
             {invites.length > 0 ? (
                 <>
                     <DialogContentText className={classes.legalText}>
                         Мы нашли доступные приглашения. Вы можете присоединиться к существующей организации или зарегистрироваться отдельно.
                     </DialogContentText>
-                    {invites.map(i => <Invite key={i.id || i.invite_id} invite={i} />)}
+                    {invites.map(renderInvite)}
                 </>
             ) : (
                 <DialogContentText className={classes.legalText}>
-                    Мы не нашли существующий аккаунт или приглашение. Чтобы продолжить, укажите название организации и подтвердите создание новой организации.
+                    Мы не нашли для вас существующий аккаунт или приглашение.
+                    Укажите название организации, и мы создадим для вас новую организацию, после чего вы сможете продолжить работу.
                 </DialogContentText>
             )}
 
@@ -1143,7 +1144,7 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 </div>
 
                 <TextField
-                    label="Название организации"
+                    label="Как назвать организацию"
                     fullWidth
                     margin="dense"
                     variant="outlined"
@@ -1151,12 +1152,15 @@ export default connect(state => state, mapDispatchToProps)(props => {
                     disabled={requesting}
                     value={organizationName}
                     onChange={e => setOrganizationName(e.target.value)}
+                    helperText={invites.length > 0
+                        ? 'Можно указать простое рабочее название.'
+                        : 'Можно указать простое рабочее название, которое будет понятно вам и команде.'}
                 />
 
                 <DialogContentText className={classes.legalText}>
                     {invites.length > 0
                         ? 'Этот вариант создаст для вас новую отдельную организацию.'
-                        : 'Новая организация будет создана только после вашего явного подтверждения.'}
+                        : 'После подтверждения мы создадим новую организацию и продолжим регистрацию.'}
                 </DialogContentText>
 
                 <Button
@@ -1167,11 +1171,11 @@ export default connect(state => state, mapDispatchToProps)(props => {
                 >
                     {invites.length > 0
                         ? 'Создать новую организацию'
-                        : 'Создать организацию и продолжить'}
+                        : 'Создать организацию и войти'}
                 </Button>
             </div>}
         </div>
-    )
+    );
 
     const statuses = {
         signIn: {
