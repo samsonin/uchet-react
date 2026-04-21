@@ -22,7 +22,7 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
         rest('initial')
 
         const configuredUrl = process.env.REACT_APP_WS_URL;
-        const wsBaseUrl = configuredUrl || (IS_LOCALHOST ? '' : 'wss://appblog.ru:3333');
+        const wsBaseUrl = configuredUrl || (IS_LOCALHOST ? '' : `wss://${window.location.hostname}:3333`);
 
         if (!wsBaseUrl) return
 

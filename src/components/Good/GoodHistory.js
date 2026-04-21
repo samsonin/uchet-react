@@ -61,17 +61,14 @@ const GoodHistory = props => {
 
             })
 
-        return <Accordion key={uuid()}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                <Typography style={{width: unix ? '50%' : '30%'}}>
+        return <Accordion key={uuid()} className="good-history-accordion">
+            <AccordionSummary expandIcon={<ExpandMoreIcon/>} className="good-history-summary">
+                <Typography className={`good-history-summary-label ${unix ? 'is-wide' : ''}`}>
                     {summaryLabel}
                 </Typography>
-                {(log.unix || unix) && <Typography>{toLocalTimeStr(log.unix || unix)}</Typography>}
+                {(log.unix || unix) && <Typography className="good-history-summary-date">{toLocalTimeStr(log.unix || unix)}</Typography>}
             </AccordionSummary>
-            <AccordionDetails style={{
-                display: 'flex',
-                flexDirection: 'column'
-            }}>
+            <AccordionDetails className="good-history-details">
 
                 {log.customer && <CustomerLine customer={log.customer}/>}
 
@@ -94,11 +91,7 @@ const GoodHistory = props => {
                 : 'Время оприходования'
         : null
 
-    return <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '.5rem'
-    }}>
+    return <div className="good-history-root">
 
         {!wfLabel || lineConst(wfLabel + ':', props.good.unix
             ? toLocalTimeStr(props.good.unix)

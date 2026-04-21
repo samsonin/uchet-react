@@ -305,6 +305,7 @@ const App = props => {
                                 <Route path="/zp" element={routeElement(Zp)} />
                                 <Route path="/showcase" element={routeElement(Showcase)} />
                                 <Route path="/showcase/buy" element={routeElement(Buy)} />
+                                <Route path="/store/showcase/buy" element={<Navigate replace to="/showcase/buy" />} />
                                 <Route path="/inventory" element={routeElement(Inventory)} />
                                 <Route path="/customers" element={routeElement(Customers)} />
                                 <Route path="/entities" element={routeElement(Entities)} />
@@ -348,6 +349,9 @@ const App = props => {
                                         setScrollDown,
                                     })}
                                 />
+                                <Route path="/store/arrival" element={<Navigate replace to="/arrival" />} />
+                                <Route path="/store/produce" element={<Navigate replace to="/produce" />} />
+                                <Route path="/store/reals/:id?" element={<Navigate replace to="/reals/0" />} />
 
                                 <Route
                                     path="/arrival/today"

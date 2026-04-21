@@ -102,7 +102,7 @@ const Showcase = props => {
             />
 
             <Tooltip title={'Купить'}>
-                <IconButton onClick={() => props.history.push('showcase/buy')}>
+                <IconButton onClick={() => props.history.push('/showcase/buy')}>
                     <AddCircleIcon/>
                 </IconButton>
             </Tooltip>

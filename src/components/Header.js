@@ -26,7 +26,6 @@ const applyTheme = preference => {
 };
 
 const NavbarPage = props => {
-    const [isOpen, setIsOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [themePreference, setThemePreference] = useState(() => window.localStorage.getItem(THEME_STORAGE_KEY) || "system");
 
@@ -107,8 +106,6 @@ const NavbarPage = props => {
         setSidebarOpen(!shouldHide);
     };
 
-    const toggleCollapse = () => setIsOpen(!isOpen);
-
     const pointChange = e => props.upd_app({ current_stock_id: +e.target.value });
     const pointExit = () => props.upd_app({ current_stock_id: 0 });
     const newDay = () => rest("daily/" + props.app.current_stock_id, "POST");
@@ -176,7 +173,6 @@ const NavbarPage = props => {
     const exit = () => {
         props.init_user("", 0, "", "", "", 0);
         props.exit_app();
-        setIsOpen(false);
     };
 
     const getUserName = () => {
@@ -211,7 +207,10 @@ const NavbarPage = props => {
                         key={"theme-option-" + option.value}
                         type="button"
                         className={`header-theme-option ${themePreference === option.value ? "is-active" : ""}`}
-                        onClick={() => setTheme(option.value)}
+                        onClick={() => {
+                            setTheme(option.value);
+                            close();
+                        }}
                     >
                         {option.label}
                     </button>)}
@@ -250,19 +249,10 @@ const NavbarPage = props => {
             {accessPoints()}
         </div>
         <div className="header-spacer" />
-        <button
-            type="button"
-            className="header-collapse-toggle"
-            onClick={toggleCollapse}
-            aria-label={isOpen ? "Скрыть меню" : "Показать меню"}
-        >
-            <span className="header-menu-symbol" aria-hidden="true" />
-        </button>
-        <div className={`header-nav ${isOpen ? "is-open" : ""}`}>
+        <div className="header-nav">
             {props.auth.organization_id === 1 && <Link
                 className="header-nav-link"
                 to="/zp"
-                onClick={() => setIsOpen(false)}
             >
                 <span aria-hidden="true">₽</span>
                 {props.app.zp || 0}

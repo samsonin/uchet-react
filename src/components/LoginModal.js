@@ -11,6 +11,7 @@ import { connect } from "react-redux";
 import { TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import authRequest from "./authRequest";
+import rest from "./Rest";
 import { bindActionCreators } from "redux";
 import { init_user } from "../actions/actionCreator";
 import License from "./License";
@@ -1308,12 +1309,16 @@ export default connect(state => state, mapDispatchToProps)(props => {
             </div>
 
             <DialogContent className={`${classes.content} ${isLegalScreen ? classes.scrollContent : ''}`}>
-                {statuses[status].fields.map(f => renderField(f))}
+                {statuses[status].fields.map(f => <React.Fragment key={`login-modal-field-${f}`}>
+                    {renderField(f)}
+                </React.Fragment>)}
             </DialogContent>
 
             <div className={classes.actions}>
                 <DialogActions className={classes.actionsRow}>
-                    {statuses[status].buttons.map(b => renderButton(b))}
+                    {statuses[status].buttons.map(b => <React.Fragment key={`login-modal-button-${b}`}>
+                        {renderButton(b)}
+                    </React.Fragment>)}
                 </DialogActions>
 
                 {status !== 'invites' ? <div className={classes.socialSection}>

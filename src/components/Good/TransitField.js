@@ -17,18 +17,18 @@ const TransitField = props => {
     const dir = ['Транзит', stock ? stock.name : '']
     if (log.action === 'to_transit') [dir[0], dir[1]] = [dir[1], dir[0]]
 
-    return <Accordion key={uuid()}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography style={{width: '30%'}}>
+    return <Accordion key={uuid()} className="good-history-accordion">
+        <AccordionSummary expandIcon={<ExpandMoreIcon/>} className="good-history-summary">
+            <Typography className="good-history-summary-label">
                 {dir[0]}
             </Typography>
-            <ArrowRightAltIcon style={{width: '30%'}}/>
-            <Typography style={{width: '30%'}}>
+            <ArrowRightAltIcon className="good-history-transit-icon"/>
+            <Typography className="good-history-summary-label">
                 {dir[1]}
             </Typography>
         </AccordionSummary>
-        <AccordionDetails>
-                <span style={{width: '30%'}}>
+        <AccordionDetails className="good-history-transit-details">
+                <span className="good-history-transit-user">
                     {user && user.name}
                 </span>
             {log.unix && toLocalTimeStr(log.unix)}

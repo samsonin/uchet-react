@@ -304,10 +304,10 @@ const Store = props => {
                 </IconButton>
 
                 {showButtons && [
-                    { label: 'Оприходование', onClick: () => props.history.push('arrival') },
-                    { label: 'Покупка техники', onClick: () => props.history.push('showcase/buy') },
-                    { label: 'Изготовление', onClick: () => props.history.push('produce') },
-                    { label: 'На реализацию', onClick: () => props.history.push('reals/0') },
+                    { label: 'Оприходование', onClick: () => props.history.push('/arrival') },
+                    { label: 'Покупка техники', onClick: () => props.history.push('/showcase/buy') },
+                    // TODO: вернуть кнопку "Изготовление", когда сценарий снова будет нужен в store-меню.
+                    { label: 'На реализацию', onClick: () => props.history.push('/reals/0') },
                 ]
                     .map(b => <Button
                         key={'label-in-store-' + b.label}

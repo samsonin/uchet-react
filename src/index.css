@@ -706,6 +706,11 @@
         background: #e4edf5;
     }
 
+    .ui-modal .ui-button-secondary,
+    .category-handler-tree-actions .ui-button-secondary {
+        color: var(--text) !important;
+    }
+
     .ui-button-danger {
         background: #dc3545;
         border-color: #dc3545;
@@ -1248,6 +1253,130 @@
         color: inherit !important;
     }
 
+    .customer-fields-card {
+        margin: 0.3rem;
+        padding: 0.2rem 0.2rem 0.35rem;
+        border: 1px solid rgba(111, 196, 146, 0.38);
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(226, 246, 226, 0.92), rgba(244, 251, 244, 0.96));
+    }
+
+    .customer-fields-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin: 0.1rem;
+        padding: 0.1rem;
+    }
+
+    .customer-fields-card-title {
+        margin: 1rem;
+        font-weight: 700;
+        color: #234438;
+    }
+
+    .customer-fields-input {
+        margin: 0.4rem !important;
+        width: calc(100% - 0.8rem);
+    }
+
+    .good-dialog-titlebar {
+        position: relative;
+        padding-right: 4.25rem !important;
+    }
+
+    .good-dialog-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        padding-right: 1.25rem;
+    }
+
+    .good-dialog-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-weight: 800;
+        color: var(--text);
+    }
+
+    .good-actions-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.2rem;
+        padding-right: 0.25rem;
+    }
+
+    .good-dialog-copy-button,
+    .good-dialog-icon-button {
+        color: inherit !important;
+    }
+
+    .good-history-root {
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+        padding: 0.75rem;
+    }
+
+    .good-history-accordion {
+        border: 1px solid var(--line) !important;
+        border-radius: 12px !important;
+        box-shadow: none !important;
+        overflow: hidden;
+    }
+
+    .good-history-summary {
+        min-height: 52px !important;
+    }
+
+    .good-history-summary .MuiAccordionSummary-content {
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .good-history-summary-label {
+        width: 30%;
+        min-width: 140px;
+        font-weight: 700 !important;
+        color: var(--text);
+    }
+
+    .good-history-summary-label.is-wide {
+        width: 50%;
+    }
+
+    .good-history-summary-date {
+        color: var(--text-muted);
+    }
+
+    .good-history-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .good-history-transit-icon {
+        width: 30% !important;
+        min-width: 42px;
+        color: var(--text-muted);
+    }
+
+    .good-history-transit-details {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .good-history-transit-user {
+        width: 30%;
+        min-width: 140px;
+        font-weight: 700;
+    }
+
     .MuiTabs-indicator {
         background-color: var(--brand) !important;
     }
@@ -1562,6 +1691,73 @@
         background: linear-gradient(180deg, rgba(23, 163, 155, 0.12), rgba(22, 33, 43, 0.96));
     }
 
+    :root[data-theme="dark"] .customer-fields-card {
+        border-color: rgba(77, 117, 140, 0.42);
+        background: linear-gradient(180deg, rgba(28, 45, 42, 0.98), rgba(22, 33, 43, 0.98));
+        box-shadow: 0 12px 28px rgba(6, 12, 18, 0.22);
+    }
+
+    :root[data-theme="dark"] .customer-fields-card-header,
+    :root[data-theme="dark"] .customer-fields-card-title,
+    :root[data-theme="dark"] .customer-fields-card .MuiIconButton-root,
+    :root[data-theme="dark"] .customer-fields-card .MuiSvgIcon-root {
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .customer-fields-card .MuiInputBase-root,
+    :root[data-theme="dark"] .customer-fields-card .MuiOutlinedInput-root,
+    :root[data-theme="dark"] .customer-fields-card .MuiAutocomplete-inputRoot {
+        background: var(--surface-soft) !important;
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .customer-fields-card .MuiInputBase-input,
+    :root[data-theme="dark"] .customer-fields-card input,
+    :root[data-theme="dark"] .customer-fields-card textarea {
+        color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
+        caret-color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .customer-fields-card .MuiInputLabel-root,
+    :root[data-theme="dark"] .customer-fields-card .MuiFormLabel-root {
+        color: var(--text-muted) !important;
+    }
+
+    :root[data-theme="dark"] .customer-fields-card .MuiInputLabel-root.Mui-focused,
+    :root[data-theme="dark"] .customer-fields-card .MuiFormLabel-root.Mui-focused {
+        color: var(--brand) !important;
+    }
+
+    :root[data-theme="dark"] .customer-fields-card .MuiOutlinedInput-notchedOutline {
+        border-color: var(--line) !important;
+    }
+
+    :root[data-theme="dark"] .good-dialog-titlebar,
+    :root[data-theme="dark"] .good-history-accordion,
+    :root[data-theme="dark"] .good-history-summary,
+    :root[data-theme="dark"] .good-history-details,
+    :root[data-theme="dark"] .good-history-transit-details {
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        border-color: var(--line) !important;
+    }
+
+    :root[data-theme="dark"] .good-history-summary-date,
+    :root[data-theme="dark"] .good-history-transit-icon,
+    :root[data-theme="dark"] .good-dialog-copy-button,
+    :root[data-theme="dark"] .good-dialog-icon-button,
+    :root[data-theme="dark"] .good-dialog-titlebar .MuiIconButton-root,
+    :root[data-theme="dark"] .good-dialog-titlebar .MuiSvgIcon-root,
+    :root[data-theme="dark"] .good-history-accordion .MuiSvgIcon-root {
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .good-dialog-titlebar .MuiIconButton-root:hover,
+    :root[data-theme="dark"] .good-history-accordion .MuiButtonBase-root:hover {
+        background: rgba(127, 176, 255, 0.12) !important;
+    }
+
     :root[data-theme="dark"] .customers-select-status {
         color: var(--brand-strong);
     }
@@ -1626,6 +1822,21 @@
 
     :root[data-theme="dark"] .MuiSvgIcon-root {
         color: inherit;
+    }
+
+    :root[data-theme="dark"] .ui-modal .ui-button-secondary,
+    :root[data-theme="dark"] .category-handler-tree-actions .ui-button-secondary {
+        background: var(--surface-soft) !important;
+        border-color: var(--line) !important;
+        color: var(--text) !important;
+        box-shadow: none;
+    }
+
+    :root[data-theme="dark"] .ui-modal .ui-button-secondary:hover,
+    :root[data-theme="dark"] .category-handler-tree-actions .ui-button-secondary:hover {
+        background: var(--surface-tint) !important;
+        border-color: rgba(127, 176, 255, 0.28) !important;
+        color: #f3fbff !important;
     }
 
     :root[data-theme="dark"] .MuiDivider-root {
@@ -1799,40 +2010,35 @@
         margin: 0.25rem 0 0;
     }
 
-    .header-collapse-toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
     .header-nav {
-        order: 11;
-        display: none;
-        width: 100%;
-        align-items: stretch;
-        flex-direction: column;
-        padding-top: 0.5rem;
-    }
-
-    .header-nav.is-open {
         display: flex;
+        order: initial;
+        width: auto;
+        align-items: center;
+        flex-direction: row;
+        padding-top: 0;
     }
 
     .header-nav-link,
     .header-user-button {
-        width: 100%;
-        justify-content: flex-start;
+        width: auto;
+        justify-content: center;
+    }
+
+    .header-nav-link {
+        display: none;
     }
 
     .header-nav .ui-dropdown {
-        display: block;
-        width: 100%;
+        display: inline-flex;
+        width: auto;
     }
 
     .header-nav .ui-dropdown-menu {
-        position: static;
+        position: absolute;
         margin-top: 0.35rem;
-        width: 100%;
+        width: max-content;
+        min-width: 220px;
     }
 
     #sidebar-wrapper {

@@ -8,6 +8,9 @@ export const IS_LOCALHOST = Boolean(
     )
 );
 
+const ENV_SERVER = process.env.REACT_APP_SERVER;
+const ENV_NEW_SERVER = process.env.REACT_APP_NEW_SERVER;
+
 export const
 
     ENQUEUE_SNACKBAR = 'ENQUEUE_SNACKBAR',
@@ -20,10 +23,10 @@ export const
     DELETE_GOOD = 'DELETE_GOOD',
     EXIT_APP = 'EXIT_APP',
 
-    SERVER = IS_LOCALHOST ?
+    SERVER = ENV_SERVER || (IS_LOCALHOST ?
         'http://127.0.0.1:8000' :
-        'https://api.uchet.store',
+        'https://api.uchet.store'),
 
-    NEW_SERVER = IS_LOCALHOST ?
+    NEW_SERVER = ENV_NEW_SERVER || (IS_LOCALHOST ?
         'http://127.0.0.1:8000' :
-        'https://api.appblog.ru';
+        'https://api.appblog.ru');

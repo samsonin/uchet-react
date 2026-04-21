@@ -19,11 +19,16 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const useStyles = makeStyles((theme) => ({
+    dialogTitle: {
+        padding: '1rem 4.25rem 0.9rem 1.2rem !important',
+        borderBottom: '1px solid rgba(144, 160, 176, 0.22)',
+    },
     closeButton: {
         position: 'absolute',
-        right: theme.spacing(1),
+        right: theme.spacing(1.25),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
+        zIndex: 2,
     },
 }));
 
@@ -67,13 +72,13 @@ const Good = props => {
     return <Dialog
         open={!!good}
         slots={{ transition: Transition }}
-        keepMounted
         onClose={() => close()}
         className='non-printable'
         fullWidth
+        maxWidth="sm"
     >
 
-        <DialogTitle>
+        <DialogTitle className={`${classes.dialogTitle} good-dialog-titlebar`}>
 
             <GoodActions
                 statusId={statusId}
