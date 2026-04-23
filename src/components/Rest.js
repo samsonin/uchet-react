@@ -13,6 +13,8 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         updateStore = true,
         baseUrl = SERVER,
         credentials = 'same-origin',
+        bodyType = '',
+        fileFieldName = 'image',
     } = options;
 
     let authData = JSON.parse(window.localStorage.getItem('auth'));
@@ -38,12 +40,15 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
 
     if (data) {
 
-        if (isFile) {
+        if (bodyType === 'formData' || data instanceof FormData) {
+            delete(init.headers["Content-Type"])
+            init.body = data
+        } else if (isFile) {
             delete(init.headers["Content-Type"])
             init.enctype="multipart/form-data"
 
             const fd = new FormData()
-            fd.append('image', data)
+            fd.append(fileFieldName, data)
 
             init.body = fd
         } else {

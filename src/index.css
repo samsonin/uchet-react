@@ -1104,12 +1104,11 @@
         min-height: 46px;
         min-width: 150px;
         padding: 0.75rem 1.15rem;
-        position: relative;
-        border: 1px solid rgba(58, 92, 140, 0.26);
+        border: 1px solid rgba(83, 98, 137, 0.92);
         border-radius: 14px;
-        background: linear-gradient(135deg, #29527f 0%, #315f91 58%, #4d79a8 100%);
+        background: linear-gradient(180deg, #6477a4 0%, #5c6f9b 100%);
         color: #ffffff !important;
-        box-shadow: 0 10px 22px rgba(29, 52, 79, 0.18);
+        box-shadow: 0 6px 14px rgba(46, 58, 86, 0.24);
         font-weight: 700;
         line-height: 1.15;
         text-align: center;
@@ -1117,42 +1116,29 @@
         transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease, background 150ms ease, color 150ms ease;
         opacity: 1 !important;
         visibility: visible !important;
-        overflow: hidden;
-    }
-
-    .main-button::before {
-        content: "";
-        position: absolute;
-        inset: 0 auto 0 0;
-        width: 4px;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.28) 100%);
-        opacity: 1;
     }
 
     .main-button:hover {
         transform: translateY(-1px);
-        border-color: rgba(58, 92, 140, 0.36);
-        background: linear-gradient(135deg, #23496f 0%, #2c567f 56%, #436d9b 100%);
+        border-color: rgba(75, 90, 129, 0.98);
+        background: linear-gradient(180deg, #5b6d98 0%, #53658f 100%);
         color: #ffffff !important;
-        box-shadow: 0 16px 30px rgba(29, 52, 79, 0.24);
+        box-shadow: 0 10px 20px rgba(46, 58, 86, 0.28);
         text-decoration: none !important;
     }
 
     .main-button-primary {
-        border-color: rgba(30, 64, 175, 0.18);
-        background: linear-gradient(135deg, #1d4f91 0%, #315f91 55%, #4b7db2 100%);
+        border-color: rgba(50, 112, 235, 0.95);
+        background: linear-gradient(180deg, #4b88f6 0%, #3f79df 100%);
         color: #ffffff !important;
-        box-shadow: 0 14px 28px rgba(29, 79, 145, 0.22);
-    }
-
-    .main-button-primary::before {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.76) 0%, rgba(255, 255, 255, 0.22) 100%);
+        box-shadow: 0 8px 18px rgba(55, 108, 208, 0.32);
     }
 
     .main-button-primary:hover {
-        background: linear-gradient(135deg, #1a467f 0%, #2a5787 55%, #426f9e 100%);
+        border-color: rgba(44, 103, 221, 1);
+        background: linear-gradient(180deg, #437fe9 0%, #3a71d2 100%);
         color: #ffffff !important;
-        box-shadow: 0 18px 34px rgba(29, 79, 145, 0.28);
+        box-shadow: 0 12px 22px rgba(55, 108, 208, 0.38);
     }
 
     .ui-dropdown-menu-right {
@@ -1274,6 +1260,37 @@
         margin: 1rem;
         font-weight: 700;
         color: #234438;
+    }
+
+    .customer-fields-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-right: 0.35rem;
+    }
+
+    .customer-fields-passport-input {
+        display: none;
+    }
+
+    .customer-fields-passport-button {
+        flex: 0 0 auto;
+        min-height: 34px;
+        border-radius: 10px !important;
+        border-color: rgba(35, 68, 56, 0.18) !important;
+        background: rgba(255, 255, 255, 0.72) !important;
+        color: #234438 !important;
+    }
+
+    .customer-fields-passport-button:hover {
+        border-color: rgba(35, 68, 56, 0.28) !important;
+        background: rgba(255, 255, 255, 0.94) !important;
+    }
+
+    .customer-fields-passport-hint {
+        margin: 0 0.8rem 0.35rem;
+        color: #4f675f;
+        font-size: 0.82rem;
     }
 
     .customer-fields-input {
@@ -1581,14 +1598,31 @@
     }
 
     :root[data-theme="dark"] .main-button {
-        border-color: rgba(127, 176, 255, 0.18);
-        background: linear-gradient(135deg, #214161 0%, #2a537d 56%, #3b6794 100%);
+        border-color: rgba(106, 125, 166, 0.72);
+        background: linear-gradient(180deg, #526282 0%, #4a5876 100%);
         color: #ffffff !important;
+        box-shadow: 0 8px 18px rgba(7, 12, 19, 0.28);
     }
 
-    :root[data-theme="dark"] .main-button:hover,
-    :root[data-theme="dark"] .main-button-primary:hover {
+    :root[data-theme="dark"] .main-button-primary {
+        border-color: rgba(83, 145, 255, 0.88);
+        background: linear-gradient(180deg, #447ce0 0%, #396fcb 100%);
         color: #ffffff !important;
+        box-shadow: 0 10px 22px rgba(23, 63, 132, 0.34);
+    }
+
+    :root[data-theme="dark"] .main-button:hover {
+        border-color: rgba(122, 141, 183, 0.9);
+        background: linear-gradient(180deg, #5a6b8d 0%, #51607f 100%);
+        color: #ffffff !important;
+        box-shadow: 0 12px 22px rgba(7, 12, 19, 0.34);
+    }
+
+    :root[data-theme="dark"] .main-button-primary:hover {
+        border-color: rgba(97, 156, 255, 1);
+        background: linear-gradient(180deg, #4c86ee 0%, #4078d8 100%);
+        color: #ffffff !important;
+        box-shadow: 0 14px 24px rgba(23, 63, 132, 0.42);
     }
 
     :root[data-theme="dark"] .orders-page,
@@ -1731,6 +1765,22 @@
 
     :root[data-theme="dark"] .customer-fields-card .MuiOutlinedInput-notchedOutline {
         border-color: var(--line) !important;
+    }
+
+    :root[data-theme="dark"] .customer-fields-passport-button {
+        border-color: rgba(127, 176, 255, 0.24) !important;
+        background: var(--surface-soft) !important;
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .customer-fields-passport-button:hover {
+        border-color: rgba(127, 176, 255, 0.34) !important;
+        background: var(--surface-tint) !important;
+        color: #eef7ff !important;
+    }
+
+    :root[data-theme="dark"] .customer-fields-passport-hint {
+        color: var(--text-muted) !important;
     }
 
     :root[data-theme="dark"] .good-dialog-titlebar,

@@ -24,9 +24,19 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const useStyles = makeStyles((theme) => ({
     title: {
-        position: 'relative',
-        padding: '1rem 3.5rem 0.85rem 1.2rem !important',
+        padding: '1rem 1.2rem 0.85rem !important',
         minHeight: '56px',
+    },
+    titleRow: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '0.75rem',
+        width: '100%',
+    },
+    titleText: {
+        flex: '1 1 auto',
+        minWidth: 0,
     },
     field: {
         margin: '0 !important',
@@ -43,11 +53,9 @@ const useStyles = makeStyles((theme) => ({
         gap: '0.65rem'
     },
     closeButton: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1),
+        flex: '0 0 auto',
         color: theme.palette.grey[500],
-        zIndex: 1,
+        marginRight: '-0.35rem',
     }
 }));
 
@@ -211,6 +219,8 @@ const DailyModal = props => {
         onClose={() => props.close()}
     >
         <DialogTitle className={classes.title}>
+            <div className={classes.titleRow}>
+                <div className={classes.titleText}>
 
             {props.type === 'Расходы, зарплата'
                 ? <Select
@@ -229,11 +239,13 @@ const DailyModal = props => {
                 : props.type
             }
 
+                </div>
+
             <IconButton aria-label="close" className={classes.closeButton}
                         onClick={() => props.close()}>
                 <CloseIcon/>
             </IconButton>
-
+            </div>
         </DialogTitle>
         <DialogContent className={classes.content}>
 

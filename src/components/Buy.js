@@ -193,6 +193,7 @@ const Buy = props => {
         {isNeedDoc && <Fields
             customer={customer}
             setCustomer={setCustomer}
+            enablePassportOcr
         />}
 
         <TableContainer component={Paper}>
