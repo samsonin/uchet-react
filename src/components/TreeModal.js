@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 
 import Tree from "./Tree";
@@ -8,6 +8,10 @@ import { UiButton, UiModal } from "./common/Ui";
 const TreeModal = props => {
 
     const [currentId, setCurrentId] = useState(() => props.initialCategoryId)
+
+    useEffect(() => {
+        setCurrentId(props.initialCategoryId || 0);
+    }, [props.initialCategoryId, props.isOpen]);
 
     return <UiModal
         isOpen={props.isOpen}

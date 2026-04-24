@@ -4,7 +4,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
 
-export default function ControlledTreeView({ categories, initialId, onSelected }) {
+export default function ControlledTreeView({ categories, initialId, onSelected, finished }) {
     const expandedInitial = useRef([]);
 
     const normalizedCategories = useMemo(() => (categories || []).map(cat => ({
@@ -56,11 +56,26 @@ export default function ControlledTreeView({ categories, initialId, onSelected }
             .filter(cat => cat.parent_id === Number(parentId))
             .map(cat => {
                 const children = makeTree(cat.id);
+                const isLeaf = children.length === 0;
 
                 return <TreeItem
                     key={"treekeychild" + cat.id}
                     itemId={cat.id.toString()}
                     label={cat.name}
+                    onClick={event => {
+                        if (!isLeaf) return;
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        const nodeId = cat.id.toString();
+                        setSelected(nodeId);
+                        onSelected(nodeId);
+
+                        if (typeof finished === "function") {
+                            finished(nodeId);
+                        }
+                    }}
                 >
                     {children.length ? children : null}
                 </TreeItem>;
