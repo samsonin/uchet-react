@@ -14,6 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ReferalSelect from "../ReferalSelect";
 import {BottomButtons} from "../common/BottomButtons";
 import TextField from "@mui/material/TextField";
+import PassportUploadButton from "./PassportUploadButton";
 
 const types = {
     birthday: 'date',
@@ -67,6 +68,12 @@ const View = props => {
             : null}
 
         <Grid item xs={12}>
+            <PassportUploadButton
+                visible={!props.customer.id && isDetails}
+                customer={props.customer}
+                setCustomer={props.setCustomer}
+                className="customer-view-passport-upload"
+            />
             {props.allElements
                     .filter(field => field.index === 'customer' && field.is_valid)
                     .filter(field => isDetails || ['fio', 'phone_number'].includes(field.name))

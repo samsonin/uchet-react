@@ -1281,6 +1281,16 @@
         width: calc(100% - 0.8rem);
     }
 
+    .customer-passport-upload {
+        display: flex;
+        justify-content: flex-start;
+        padding: 0.2rem 0.4rem 0.55rem;
+    }
+
+    .customer-passport-upload .MuiButton-root {
+        border-radius: 10px;
+    }
+
     .good-dialog-titlebar {
         position: relative;
         padding-right: 4.25rem !important;
@@ -1731,6 +1741,17 @@
 
     :root[data-theme="dark"] .customer-fields-card .MuiOutlinedInput-notchedOutline {
         border-color: var(--line) !important;
+    }
+
+    :root[data-theme="dark"] .customer-passport-upload .MuiButton-root {
+        color: var(--text) !important;
+        border-color: var(--line) !important;
+        background: rgba(255, 255, 255, 0.03) !important;
+    }
+
+    :root[data-theme="dark"] .customer-passport-upload .MuiButton-root:hover {
+        background: rgba(102, 209, 199, 0.08) !important;
+        border-color: var(--brand) !important;
     }
 
     :root[data-theme="dark"] .good-dialog-titlebar,

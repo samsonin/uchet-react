@@ -28,6 +28,7 @@ const Pledges = props => {
     const [currentPledge, setCurrentPledge] = useState()
 
     const dateNow = Date.now()
+    const visibleColumns = props.app.current_stock_id ? 3 : 4
 
     const getSum2 = (date1, date2, sum) => {
 
@@ -230,10 +231,10 @@ const Pledges = props => {
                                                               style={{color: p.isDelay ? 'red' : 'black'}}>
                                         {c}
                                     </TableCell>)}
-                            < /TableRow>
+                            </TableRow>
                         })}
                     {total > 0 && <TableRow>
-                        <TableCell align={"right"} colSpan={3}>Итого</TableCell>
+                        <TableCell align={"right"} colSpan={visibleColumns - 1}>Итого</TableCell>
                         <TableCell>
                             <span style={{fontWeight: 'bold'}}>{total}</span>
                         </TableCell>

@@ -10,6 +10,7 @@ import { Autocomplete } from "@mui/material";
 
 import rest from "../Rest";
 import { fioHandler, phoneNumberHandler } from "../common/InputHandlers";
+import PassportUploadButton from "./PassportUploadButton";
 
 const types = {
     birthday: "date",
@@ -78,6 +79,12 @@ const Fields = props => {
                 </IconButton>
             </Tooltip>
         </div>
+
+        <PassportUploadButton
+            visible={!props.customer.id && isDetails}
+            customer={props.customer}
+            setCustomer={props.setCustomer}
+        />
 
         {props.allElements
             .filter(field => field.index === "customer" && field.is_valid)

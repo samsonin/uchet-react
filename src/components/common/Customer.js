@@ -104,6 +104,7 @@ export const Customer = props => {
 
     return <View
         customer={customer}
+        setCustomer={setCustomer}
         disabled={isRequesting || isEqual}
         handleChange={handleChange}
         create={create}
@@ -113,4 +114,3 @@ export const Customer = props => {
     />
 
 }
-
