@@ -1,18 +1,18 @@
-import React, {forwardRef, useEffect, useRef, useState} from 'react';
-import {connect} from "react-redux";
-import {Button, TextField} from "@mui/material";
-import {intInputHandler} from "./common/InputHandlers";
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
+import { connect } from "react-redux";
+import { Button, TextField } from "@mui/material";
+import { intInputHandler } from "./common/InputHandlers";
 import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PrintIcon from '@mui/icons-material/Print';
-import {useSnackbar} from "notistack";
+import { useSnackbar } from "notistack";
 import Fields from "./customer/Fields";
 import rest from "./Rest";
-import {createDate, Print} from "./common/Print";
+import { createDate, Print } from "./common/Print";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Dialog from "@mui/material/Dialog";
-import {makeStyles} from "muiLegacyStyles";
+import { makeStyles } from "muiLegacyStyles";
 import Slide from "@mui/material/Slide";
 
 
@@ -42,7 +42,7 @@ const Pledge = props => {
         ? (Date.now() - Date.parse(pledge.ransomdate)) / 3600000 + timeZone > 24
         : false
 
-    const {enqueueSnackbar} = useSnackbar()
+    const { enqueueSnackbar } = useSnackbar()
 
     const needPrint = useRef(false)
 
@@ -147,7 +147,7 @@ const Pledge = props => {
 
     const save = () => {
 
-        rest('pledges/' + props.app.current_stock_id + '/' + pledge.id, 'PATCH', {note})
+        rest('pledges/' + props.app.current_stock_id + '/' + pledge.id, 'PATCH', { note })
             .then(res => {
 
                 if (res.status === 200) {
@@ -239,9 +239,9 @@ const Pledge = props => {
     }
 
     const mb = (value, onClick) => <Button size="small"
-                                           color="primary"
-                                           variant="contained"
-                                           onClick={onClick}>
+        color="primary"
+        variant="contained"
+        onClick={onClick}>
         {value}
     </Button>
 
@@ -276,34 +276,34 @@ const Pledge = props => {
                     alignItems: 'center'
                 }}>
                     Необходимо оплатить: <span style={{
-                    fontWeight: 'bold',
-                }}>
-                    {checkoutSum() - pledge.sum}
-                </span>
+                        fontWeight: 'bold',
+                    }}>
+                        {checkoutSum() - pledge.sum}
+                    </span>
                 </div>
 
                 <TextField label="Продлить до"
-                           className={classes.field}
-                           type="date"
-                           value={prolongDate}
-                           onChange={e => dateHandler(e.target.value, setProlongDate)}
+                    className={classes.field}
+                    type="date"
+                    value={prolongDate}
+                    onChange={e => dateHandler(e.target.value, setProlongDate)}
                 />
 
                 <TextField label="Новая сумма выкупа"
-                           className={classes.field}
-                           value={prolongSum}
-                           onChange={e => intInputHandler(e.target.value, setProlongSum)}
+                    className={classes.field}
+                    value={prolongSum}
+                    onChange={e => intInputHandler(e.target.value, setProlongSum)}
                 />
 
             </DialogContent>
 
             <DialogActions>
                 <Button onClick={() => setIsOpen(false)}
-                        color="secondary">
+                    color="secondary">
                     Отмена
                 </Button>
                 <Button onClick={() => prolong()}
-                        color="primary">
+                    color="primary">
                     Оплатить
                 </Button>
             </DialogActions>
@@ -312,7 +312,9 @@ const Pledge = props => {
 
         <div style={{
             padding: '0 1rem 0 0',
-            background: '#fff',
+            background: 'var(--surface)',
+            color: 'var(--text)',
+            border: '1px solid var(--line)',
             borderRadius: 3
         }}>
 
@@ -324,26 +326,26 @@ const Pledge = props => {
             }}>
 
                 <IconButton onClick={() => props.setCurrent(false)}>
-                    <ArrowBackIcon/>
+                    <ArrowBackIcon />
                 </IconButton>
 
                 <span style={{
                     fontSize: 20, fontWeight: 'bold',
                 }}>
-                Залог
-            </span>
+                    Залог
+                </span>
 
                 <span style={{
                     fontSize: 20, fontWeight: 'bold',
                 }}>
                     {renderId()}
-            </span>
+                </span>
 
                 {pledge.id && pledge.status === 'new' && pledge.stock === props.app.current_stock_id &&
                     <IconButton
                         onClick={() => Print(doc, alias)}
                     >
-                        <PrintIcon/>
+                        <PrintIcon />
                     </IconButton>}
 
             </div>
@@ -351,75 +353,76 @@ const Pledge = props => {
             <Fields
                 customer={customer}
                 setCustomer={setCustomer}
+                enablePassportOcr
             />
 
             <TextField label="Наименование"
-                       style={fieldsStyle}
-                       value={model}
-                       onChange={e => pledge.id ? {} : setModel(e.target.value)}
+                style={fieldsStyle}
+                value={model}
+                onChange={e => pledge.id ? {} : setModel(e.target.value)}
             />
 
             <TextField label="Imei или S/N"
-                       style={fieldsStyle}
-                       value={imei}
-                       onChange={e => pledge.id ? {} : setImei(e.target.value)}
+                style={fieldsStyle}
+                value={imei}
+                onChange={e => pledge.id ? {} : setImei(e.target.value)}
             />
 
             <TextField label="Пароль"
-                       style={fieldsStyle}
-                       value={password}
-                       onChange={e => pledge.id ? {} : setPassword(e.target.value)}
+                style={fieldsStyle}
+                value={password}
+                onChange={e => pledge.id ? {} : setPassword(e.target.value)}
             />
 
             {pledge.time && <TextField label="Дата залога"
-                                       style={fieldsStyle}
-                                       type="date"
-                                       value={pledge.time.substring(0, 10)}
+                style={fieldsStyle}
+                type="date"
+                value={pledge.time.substring(0, 10)}
             />}
 
             <TextField label="Сумма залога"
-                       style={fieldsStyle}
-                       value={sum}
-                       onChange={e => pledge.id || intInputHandler(e.target.value, setSum)}
+                style={fieldsStyle}
+                value={sum}
+                onChange={e => pledge.id || intInputHandler(e.target.value, setSum)}
             />
 
             <TextField label="Дата выкупа"
-                       style={fieldsStyle}
-                       type="date"
-                       value={ransomdate}
-                       error={isDelay}
-                       onChange={e => pledge.id || dateHandler(e.target.value, setRansomdate)}
+                style={fieldsStyle}
+                type="date"
+                value={ransomdate}
+                error={isDelay}
+                onChange={e => pledge.id || dateHandler(e.target.value, setRansomdate)}
             />
 
             <TextField label="Сумма выкупа"
-                       style={fieldsStyle}
-                       value={checkoutSum()}
-                       error={isDelay}
-                       onChange={e => pledge.id ? {} : intInputHandler(e.target.value, setSum2)}
+                style={fieldsStyle}
+                value={checkoutSum()}
+                error={isDelay}
+                onChange={e => pledge.id ? {} : intInputHandler(e.target.value, setSum2)}
             />
 
             <TextField label="Примечание"
-                       style={fieldsStyle}
-                       value={note}
-                       onChange={e => setNote(e.target.value)}
+                style={fieldsStyle}
+                value={note}
+                onChange={e => setNote(e.target.value)}
             />
 
             {props.app.current_stock_id
                 ? <div style={{
-                padding: '.3rem',
-                display: "flex",
-                justifyContent: 'space-around'
-            }}>
-                {pledge.stock === props.app.current_stock_id
-                    ? <>
-                        {note === pledge.note || mb('Сохранить', () => save())}
-                        {mb('Выкупают', () => checkout())}
-                        {mb('Продлить', () => setIsOpen(true))}
-                        {isDelay && mb('На продажу', () => checkout(true))}
-                    </>
-                    : mb('Принять в залог', () => create())}
-            </div>
-            : null}
+                    padding: '.3rem',
+                    display: "flex",
+                    justifyContent: 'space-around'
+                }}>
+                    {pledge.stock === props.app.current_stock_id
+                        ? <>
+                            {note === pledge.note || mb('Сохранить', () => save())}
+                            {mb('Выкупают', () => checkout())}
+                            {mb('Продлить', () => setIsOpen(true))}
+                            {isDelay && mb('На продажу', () => checkout(true))}
+                        </>
+                        : mb('Принять в залог', () => create())}
+                </div>
+                : null}
 
         </div>
 

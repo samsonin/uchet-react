@@ -223,6 +223,7 @@ const updateDocShape = (doc, title, text) => ({
     ...(doc.doc_text !== undefined ? { doc_text: text } : {}),
 });
 
+const normalizeEditorHtml = html => (html || "").trim();
 const normalizeDocToken = value => (value || "").trim().toLowerCase();
 const DOC_EDITOR_TITLE = String.fromCharCode(1056,1077,1076,1072,1082,1090,1080,1088,1086,1074,1072,1085,1080,1077,32,1076,1086,1082,1091,1084,1077,1085,1090,1072);
 const DOC_LABEL = String.fromCharCode(1044,1086,1082,1091,1084,1077,1085,1090);
@@ -249,7 +250,7 @@ const Docs = props => {
 
     const syncDirty = (nextTitle = title, nextHtml = editor?.getHTML() || "") => {
         setDirty(
-            nextHtml !== savedHtml ||
+            normalizeEditorHtml(nextHtml) !== savedHtml ||
             nextTitle.trim() !== savedTitle.trim()
         );
     };
@@ -330,11 +331,13 @@ const Docs = props => {
         const text = getDocText(currentDoc);
         const nextTitle = getDocTitle(currentDoc);
 
+        editor.commands.setContent(text || "", false);
+        const nextHtml = normalizeEditorHtml(editor.getHTML());
+
         setTitle(nextTitle);
         setSavedTitle(nextTitle);
-        setSavedHtml(text);
+        setSavedHtml(nextHtml);
         setDirty(false);
-        editor.commands.setContent(text || "", false);
     }, [currentDoc, editor]);
 
     useEffect(() => {
@@ -367,7 +370,7 @@ const Docs = props => {
     const saveDoc = async () => {
         if (!editor || !currentDoc) return;
 
-        const html = editor.getHTML();
+        const html = normalizeEditorHtml(editor.getHTML());
 
         if (!html || html === "<p></p>") {
             enqueueSnackbar("Документ пустой", { variant: "error" });

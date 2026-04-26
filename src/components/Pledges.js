@@ -28,6 +28,7 @@ const Pledges = props => {
     const [currentPledge, setCurrentPledge] = useState()
 
     const dateNow = Date.now()
+    const tableColumnCount = props.app.current_stock_id ? 3 : 4
 
     const getSum2 = (date1, date2, sum) => {
 
@@ -125,16 +126,18 @@ const Pledges = props => {
             delPledge={delPledge}
         />
         : <div style={{
-            backgroundColor: '#fff',
+            backgroundColor: 'var(--surface)',
+            color: 'var(--text)',
             borderRadius: 5,
-            padding: '1rem'
+            padding: '1rem',
+            border: '1px solid var(--line)',
         }}
         >
             <Table size="small">
 
                 <TableHead>
                     <TableRow>
-                        <TableCell>
+                        <TableCell style={{color: 'var(--text)'}}>
                             <Typography variant="h6">
                                 Залоги
                             </Typography>
@@ -227,14 +230,14 @@ const Pledges = props => {
                                     p.ransomdate,
                                     p.sum2]
                                     .map(c => c && <TableCell key={uuid()}
-                                                              style={{color: p.isDelay ? 'red' : 'black'}}>
+                                                              style={{color: p.isDelay ? 'var(--danger)' : 'var(--text)'}}>
                                         {c}
                                     </TableCell>)}
                             < /TableRow>
                         })}
                     {total > 0 && <TableRow>
-                        <TableCell align={"right"} colSpan={3}>Итого</TableCell>
-                        <TableCell>
+                        <TableCell align={"right"} colSpan={tableColumnCount - 1}>Итого</TableCell>
+                        <TableCell style={{color: 'var(--text)'}}>
                             <span style={{fontWeight: 'bold'}}>{total}</span>
                         </TableCell>
 

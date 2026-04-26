@@ -69,7 +69,11 @@ const Reals = props => {
             del={del}
         />
         : <Table size="small"
-                 style={{background: 'white'}}
+                 style={{
+                     background: 'var(--surface)',
+                     color: 'var(--text)',
+                     border: '1px solid var(--line)',
+                 }}
         >
             <TableHead>
 
@@ -105,7 +109,7 @@ const Reals = props => {
                 {reals.length
                     ? reals.map(r => {
 
-                        const color = 'black'
+                        const color = 'var(--text)'
 
                         return r.good && r.customer && <TableRow key={uuid()}
                                                                  style={{

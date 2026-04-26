@@ -9,6 +9,7 @@ import {
     CardMedia,
     Fade,
     TextField,
+    TextareaAutosize,
 } from "@mui/material";
 import { makeStyles } from "muiLegacyStyles";
 import { useSnackbar } from "notistack";
@@ -21,7 +22,7 @@ import rest from "../Rest";
 import { Print } from "../common/Print";
 import { groupAlias } from "../common/GroupAliases";
 import AddCosts from "../common/AddCosts";
-import { line, note } from "../common/InputHandlers";
+import { line } from "../common/InputHandlers";
 import CategoryHandler from "../common/CategoryHandler";
 import GoodHistory from "./GoodHistory";
 
@@ -219,6 +220,23 @@ const GoodContent = props => {
 
     }
 
+    const noteField = (label, value, onChange) => {
+        if (!isEditable && !value) return null
+
+        const hasValue = !!(value && value.trim())
+
+        return <div className={`good-note-card ${hasValue ? '' : 'is-empty'}`}>
+            <div className="good-note-label">{label}</div>
+            <TextareaAutosize
+                minRows={hasValue ? 3 : 1}
+                className="good-note-textarea"
+                value={value || ''}
+                onChange={onChange}
+                readOnly={!isEditable}
+            />
+        </div>
+    }
+
 
     const onDrag = (e, isLeave) => {
 
@@ -269,7 +287,7 @@ const GoodContent = props => {
         setImage(reader.result)
     }
 
-    const border = isDrag ? '3px dashed black' : '3px black'
+    const border = isDrag ? '3px dashed var(--text-muted)' : '3px solid var(--line)'
 
     let ui_wo = good.ui_wo
 
@@ -379,7 +397,7 @@ const GoodContent = props => {
                 flexDirection: 'column',
                 justifyContent: 'space-around',
                 padding: '0 1rem',
-            }}>
+            }} className="good-dialog-content-root">
 
                 {isEditable
                     ? image
@@ -413,7 +431,7 @@ const GoodContent = props => {
                                 <div style={{
                                     width: '100%',
                                     height: '100px',
-                                    backgroundColor: 'lightgray',
+                                    backgroundColor: isDrag ? 'var(--surface)' : 'var(--surface-soft)',
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',
@@ -461,9 +479,9 @@ const GoodContent = props => {
                     onChange={() => setIsPublic(!isPublic)}
                 />}
 
-                {note('Информация для сотрудников:', privateNote, isEditable, e => setPrivateNote(e.target.value))}
+                {noteField('\u0418\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u044f \u0434\u043b\u044f \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u043e\u0432', privateNote, e => setPrivateNote(e.target.value))}
 
-                {note('Информация для покупателей:', publicNote, isEditable, e => setPublicNote(e.target.value))}
+                {noteField('\u0418\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u044f \u0434\u043b\u044f \u043f\u043e\u043a\u0443\u043f\u0430\u0442\u0435\u043b\u0435\u0439', publicNote, e => setPublicNote(e.target.value))}
 
                 {isEditable
                     ? <UsersSelect

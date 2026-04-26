@@ -8,26 +8,30 @@ import {v4 as uuidv4} from 'uuid';
 
 export default function ({users, user, setUser, onlyValid, disabled, classes, label}) {
 
-    return (<FormControl variant="outlined" className={classes}>
+    const visibleUsers = users.filter(u => !onlyValid || u.is_valid)
+    const normalizedUser = +(user || 0)
+
+    return (<FormControl variant="outlined" className={`${classes || ""} users-select`}>
         <InputLabel id="funds-users-control-select-outlined-label">
             {label || "Сотрудник"}
         </InputLabel>
         <Select
             labelId="funds-users-control-select-outlined-label"
             disabled={disabled}
-            value={user || 0}
-            onChange={e => setUser(e.target.value)}
+            value={normalizedUser}
+            onChange={e => setUser(+e.target.value)}
+            renderValue={value => visibleUsers.find(u => +u.id === +value)?.name || ""}
         >
             <MenuItem key={uuidv4()}
                       value={0}>
                 <br/>
             </MenuItem>
-            {users.map(u => !onlyValid || u.is_valid
-                ? <MenuItem key={uuidv4()}
-                            value={u.id}>
+            {visibleUsers.map(u =>
+                <MenuItem key={uuidv4()}
+                            value={+u.id}>
                     {u.name}
                 </MenuItem>
-                : null)}
+            )}
         </Select>
     </FormControl>)
 }

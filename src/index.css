@@ -1300,7 +1300,7 @@
 
     .good-dialog-titlebar {
         position: relative;
-        padding-right: 4.25rem !important;
+        padding-right: 4.75rem !important;
     }
 
     .good-dialog-header {
@@ -1308,7 +1308,7 @@
         align-items: flex-start;
         justify-content: space-between;
         gap: 1rem;
-        padding-right: 1.25rem;
+        padding-right: 2.5rem;
     }
 
     .good-dialog-title {
@@ -1319,12 +1319,71 @@
         color: var(--text);
     }
 
+    .good-dialog-close-button {
+        position: absolute !important;
+        top: 12px !important;
+        right: 12px !important;
+        z-index: 2;
+    }
+
     .good-actions-toolbar {
         display: flex;
         flex-wrap: wrap;
         justify-content: flex-end;
         gap: 0.2rem;
         padding-right: 0.25rem;
+    }
+
+    .good-dialog-content-root {
+        gap: 0.45rem;
+        padding-bottom: 1rem !important;
+    }
+
+    .good-note-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+        margin: 0.45rem 0;
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(245, 248, 252, 0.96), rgba(255, 255, 255, 0.98));
+        box-shadow: 0 8px 18px rgba(31, 52, 88, 0.05);
+    }
+
+    .good-note-card.is-empty {
+        gap: 0.35rem;
+        padding-top: 0.65rem;
+        padding-bottom: 0.65rem;
+    }
+
+    .good-note-label {
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .good-note-textarea {
+        width: 100%;
+        min-height: 42px;
+        padding: 0.65rem 0.8rem;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.96);
+        color: var(--text);
+        line-height: 1.45;
+        resize: vertical;
+        outline: none;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .good-note-textarea:focus {
+        border-color: var(--brand);
+        box-shadow: 0 0 0 3px rgba(80, 145, 255, 0.16);
+    }
+
+    .good-note-textarea[readonly] {
+        background: rgba(246, 248, 252, 0.92);
+        color: var(--text);
     }
 
     .good-dialog-copy-button,
@@ -1533,6 +1592,12 @@
         caret-color: var(--text);
     }
 
+    .users-select .MuiSelect-nativeInput {
+        opacity: 0 !important;
+        color: transparent !important;
+        -webkit-text-fill-color: transparent !important;
+    }
+
     :root[data-theme="dark"] .MuiOutlinedInput-notchedOutline,
     :root[data-theme="dark"] .form-control,
     :root[data-theme="dark"] .MuiTableCell-root,
@@ -1687,6 +1752,13 @@
         color: var(--text) !important;
     }
 
+    :root[data-theme="dark"] .order-page .users-select .MuiSelect-nativeInput,
+    :root[data-theme="dark"] .order-page .users-select input.MuiSelect-nativeInput:disabled {
+        opacity: 0 !important;
+        color: transparent !important;
+        -webkit-text-fill-color: transparent !important;
+    }
+
     :root[data-theme="dark"] .bg-light,
     :root[data-theme="dark"] .table,
     :root[data-theme="dark"] .list-group-item {
@@ -1787,7 +1859,8 @@
     :root[data-theme="dark"] .good-history-accordion,
     :root[data-theme="dark"] .good-history-summary,
     :root[data-theme="dark"] .good-history-details,
-    :root[data-theme="dark"] .good-history-transit-details {
+    :root[data-theme="dark"] .good-history-transit-details,
+    :root[data-theme="dark"] .good-note-card {
         background: var(--surface) !important;
         color: var(--text) !important;
         border-color: var(--line) !important;
@@ -1806,6 +1879,22 @@
     :root[data-theme="dark"] .good-dialog-titlebar .MuiIconButton-root:hover,
     :root[data-theme="dark"] .good-history-accordion .MuiButtonBase-root:hover {
         background: rgba(127, 176, 255, 0.12) !important;
+    }
+
+    :root[data-theme="dark"] .good-note-textarea {
+        background: var(--surface-soft);
+        color: var(--text) !important;
+        border-color: var(--line);
+        box-shadow: none;
+    }
+
+    :root[data-theme="dark"] .good-note-textarea:focus {
+        border-color: var(--brand);
+        box-shadow: 0 0 0 3px rgba(80, 145, 255, 0.14);
+    }
+
+    :root[data-theme="dark"] .good-note-textarea[readonly] {
+        background: rgba(24, 31, 48, 0.92);
     }
 
     :root[data-theme="dark"] .customers-select-status {
