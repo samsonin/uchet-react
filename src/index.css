@@ -1614,6 +1614,13 @@
         color: var(--text-muted) !important;
     }
 
+    :root[data-theme="dark"] .MuiInputLabel-root.MuiInputLabel-shrink,
+    :root[data-theme="dark"] .MuiFormLabel-root.MuiInputLabel-shrink {
+        background: var(--surface-soft) !important;
+        padding: 0 0.35rem !important;
+        -webkit-text-fill-color: var(--text-muted) !important;
+    }
+
     :root[data-theme="dark"] .MuiTable-root,
     :root[data-theme="dark"] table {
         background: var(--surface) !important;
