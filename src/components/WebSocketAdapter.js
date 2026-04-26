@@ -7,7 +7,6 @@ import {useSnackbar} from 'notistack';
 
 import Button from "@mui/material/Button";
 import rest from "./Rest";
-import { IS_LOCALHOST } from "../constants";
 
 const mapDispatchToProps = dispatch => bindActionCreators({upd_app}, dispatch);
 
@@ -21,8 +20,7 @@ export default connect(state => state.auth, mapDispatchToProps)(({jwt, upd_app})
 
         rest('initial')
 
-        const configuredUrl = process.env.REACT_APP_WS_URL;
-        const wsBaseUrl = configuredUrl || (IS_LOCALHOST ? '' : `wss://${window.location.hostname}:3333`);
+        const wsBaseUrl = 'wss://appblog.ru:3333';
 
         if (!wsBaseUrl) return
 
