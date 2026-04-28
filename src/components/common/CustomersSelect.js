@@ -1,12 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import EditIcon from "@mui/icons-material/Edit";
 
 import rest from "../Rest";
 import { fioHandler, phoneNumberHandler } from "./InputHandlers";
 
 const fields = ["id", "fio", "phone_number"];
 const SEARCH_DEBOUNCE_MS = 400;
+const CUSTOMER_FROM_BASE_LABEL = "Заказчик из базы";
+const NEW_CUSTOMER_LABEL = "Новый заказчик";
+const EDIT_CUSTOMER_LABEL = "Редактировать заказчика";
 const hasCustomerValue = value => Boolean(
     value && typeof value === "object" && Object.values(value).some(Boolean)
 );
@@ -94,11 +100,28 @@ export default function CustomersSelect(props) {
         setCustomers([]);
     };
 
+    const openCustomer = () => {
+        if (!props.customer.id) return;
+        window.open(`/customers/${props.customer.id}`, "_blank", "noopener,noreferrer");
+    };
+
     return <div className="customers-select">
         {!props.onlySearch && <div className="customers-select-status">
-            {props.customer.id
-                ? "Заказчик из базы"
-                : "Новый заказчик"}
+            <span>
+                {props.customer.id
+                    ? CUSTOMER_FROM_BASE_LABEL
+                    : NEW_CUSTOMER_LABEL}
+            </span>
+            {props.customer.id && <Tooltip title={EDIT_CUSTOMER_LABEL}>
+                <IconButton
+                    size="small"
+                    className="customers-select-edit-button"
+                    aria-label={EDIT_CUSTOMER_LABEL}
+                    onClick={openCustomer}
+                >
+                    <EditIcon fontSize="small" />
+                </IconButton>
+            </Tooltip>}
         </div>}
 
         {[

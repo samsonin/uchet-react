@@ -19,8 +19,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 
-import {v4 as uuidv4} from 'uuid';
-
 const toLowerSafe = value => String(value || '').toLowerCase();
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -175,7 +173,13 @@ const Inventory = props => {
             justifyContent: 'space-around',
             alignItems: 'center',
             gap: '0.75rem',
-            flexWrap: 'wrap'
+            flexWrap: 'wrap',
+            color: 'var(--text)',
+            background: 'var(--surface)',
+            border: '1px solid var(--line)',
+            borderRadius: 5,
+            padding: '0.75rem',
+            marginBottom: '0.75rem'
         }}>
 
             <FormControlLabel
@@ -213,7 +217,9 @@ const Inventory = props => {
 
         <Table size="small"
                style={{
-                   background: 'white'
+                   background: 'var(--surface)',
+                   color: 'var(--text)',
+                   border: '1px solid var(--line)'
                }}
         >
             <TableHead>
@@ -256,28 +262,29 @@ const Inventory = props => {
 
                             const isInStock = g.storage === 'instock'
 
-                            return (<Fade key={uuidv4()}
+                            return (<Fade key={'inventory-good-' + g.id}
                                 in={true}
                                 timeout={1000}
                             >
                                 <TableRow style={{
                                               cursor: 'pointer',
                                               backgroundColor: isInStock
-                                                  ? 'green'
-                                                  : 'white'
+                                                  ? 'rgba(76, 175, 80, 0.16)'
+                                                  : 'var(--surface)',
+                                              color: 'var(--text)'
                                           }}
                                           onClick={() => {
                                           }}
                                 >
-                                    <TableCell>{g.id}</TableCell>
-                                    <TableCell>{g.group}</TableCell>
-                                    <TableCell>
+                                    <TableCell style={{color: 'var(--text)'}}>{g.id}</TableCell>
+                                    <TableCell style={{color: 'var(--text)'}}>{g.group}</TableCell>
+                                    <TableCell style={{color: 'var(--text)'}}>
                                         {TwoLineInCell(g.model, g.imei)}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell style={{color: 'var(--text)'}}>
                                         {g.sum}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell style={{color: 'var(--text)'}}>
                                         <IconButton
                                             onClick={() => setStorage(g.id)}
                                         >

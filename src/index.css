@@ -1216,9 +1216,23 @@
     }
 
     .customers-select-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
         margin: 0 0.3rem 0.4rem;
         color: var(--brand-strong);
         font-weight: 800;
+    }
+
+    .customers-select-edit-button {
+        width: 30px !important;
+        height: 30px !important;
+        color: var(--brand-strong) !important;
+    }
+
+    .customers-select-edit-button:hover {
+        background: var(--brand-soft) !important;
     }
 
     .customers-select-field {
@@ -1296,6 +1310,71 @@
     .customer-fields-input {
         margin: 0.4rem !important;
         width: calc(100% - 0.8rem);
+    }
+
+    .customer-view-page {
+        width: 100%;
+        padding: 1rem;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        border: 1px solid var(--line);
+        border-radius: var(--radius) !important;
+    }
+
+    .customer-view-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.25rem 0.35rem 0.85rem;
+        border-bottom: 1px solid var(--line-soft);
+        margin-bottom: 1rem;
+    }
+
+    .customer-view-nav,
+    .customer-view-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .customer-view-title {
+        font-size: 1.18rem;
+        font-weight: 800;
+        color: var(--text);
+    }
+
+    .customer-view-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 0.85rem;
+    }
+
+    .customer-view-field.is-wide {
+        grid-column: 1 / -1;
+    }
+
+    .customer-view-footer > .MuiGrid-root {
+        margin: 0.75rem 0 0 !important;
+        padding: 0.75rem 0 0 !important;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        border-top: 1px solid var(--line-soft);
+    }
+
+    @media (max-width: 720px) {
+        .customer-view-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .customer-view-actions {
+            align-self: flex-end;
+        }
+
+        .customer-view-fields {
+            grid-template-columns: 1fr;
+        }
     }
 
     .good-dialog-titlebar {

@@ -1,4 +1,8 @@
+import { getPrintPageStyle, getSavedPrintSettings } from "./PrintSettings";
+
 export function Print(doc, alias, aliasFunction, afterPrint) {
+
+    const printSettings = getSavedPrintSettings("document")
 
     const html = doc
         ? doc.text
@@ -32,17 +36,23 @@ export function Print(doc, alias, aliasFunction, afterPrint) {
 
     }
 
+    const style = document.createElement('style')
+    style.className = 'print-page-style'
+    style.innerText = getPrintPageStyle(printSettings)
+    document.head.append(style)
+
     document.body.append(div)
     document.body.classList.add('printing-document')
-
-    window.print()
 
     window.onafterprint = () => {
         document.body.classList.remove('printing-document')
         if (typeof (afterPrint) === "function") afterPrint()
         window.onafterprint = null
+        style.remove()
         div.remove()
     }
+
+    window.print()
 
 }
 
