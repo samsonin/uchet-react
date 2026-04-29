@@ -12,9 +12,11 @@ import {
     TextField
 } from "@mui/material";
 import TableHead from "@mui/material/TableHead";
+import Tooltip from "@mui/material/Tooltip";
 import SearchIcon from "@mui/icons-material/Search";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import LineWeightIcon from "@mui/icons-material/LineWeight";
 
 import rest from "./Rest";
 import TwoLineInCell from "./common/TwoLineInCell";
@@ -24,6 +26,7 @@ import CategoryHandler from "./common/CategoryHandler";
 import CloseIcon from "@mui/icons-material/Close";
 import store from "../store";
 import { makeGroup } from "../Models/Good";
+import { PrintBarcodes } from "./common/PrintBarcodes";
 
 const oftenUsedButtons = [
     { label: 'Аксессуары', catId: 6 },
@@ -31,6 +34,24 @@ const oftenUsedButtons = [
     { label: 'Техника', catId: 5 },
     { label: 'Расходники', catId: 999 },
 ]
+
+const normalizeSearchText = value => String(value || '').toLowerCase()
+
+const matchesStoreSearch = (good, searchValue) => {
+    const parts = normalizeSearchText(searchValue).split(' ').filter(Boolean)
+    if (!parts.length) return true
+
+    const model = normalizeSearchText(good.model)
+    const imei = normalizeSearchText(good.imei)
+    const sum = String(good.sum || '')
+    const id = String(good.id || '')
+
+    return parts.every(part =>
+        model.includes(part) || imei.includes(part) || sum === part || id === part
+    )
+}
+
+const getGoodKey = good => String(good.barcode || `${good.category_id}-${good.model}-${good.stock_id}`)
 
 const Store = props => {
     const appStocks = props.app.stocks || [];
@@ -47,6 +68,7 @@ const Store = props => {
 
     const limit = useRef(25);
     const isRequest = useRef(false);
+    const requestId = useRef(0);
     const currentStock = appStocks.find(s => s.id === props.app.current_stock_id);
     const validStocks = useMemo(() => appStocks.filter(s => s.is_valid), [appStocks]);
     const hasMultipleStocks = validStocks.length > 1;
@@ -58,7 +80,7 @@ const Store = props => {
     ), [props.app.transit]);
 
     const filteredGoods = useMemo(() => {
-        const lowerSearch = search.toLowerCase().split(' ');
+        const lowerSearch = normalizeSearchText(search).split(' ').filter(Boolean);
 
         return goodsView
             .filter(g => !isReject || g.wo === 'reject')
@@ -66,8 +88,8 @@ const Store = props => {
             .filter(g => {
                 if (!search || g.sum == search || g.id == search) return true;
 
-                const model = g.model.toLowerCase();
-                const imei = g.imei?.toLowerCase();
+                const model = normalizeSearchText(g.model);
+                const imei = normalizeSearchText(g.imei);
 
                 return lowerSearch.every(part =>
                     model.includes(part) || (imei && imei.includes(part))
@@ -75,9 +97,12 @@ const Store = props => {
             });
     }, [goodsView, isReject, isAllStocks, currentStock, search]);
 
-    const sendRequest = () => {
-        if (isRequest.current) return;
+    const showGroupedBarcodes = isGroup && props.auth.admin;
+
+    const sendRequest = ({ reset = false, append = false } = {}) => {
+        const currentRequestId = ++requestId.current;
         isRequest.current = true;
+        if (reset) setGoods([]);
 
         let url = 'goods?';
         if (catId) url += '&category_id=' + catId;
@@ -88,10 +113,22 @@ const Store = props => {
         if (!isGroup && limit.current > 0) url += '&limit=' + limit.current;
 
         rest(url).then(res => {
-            isRequest.current = false;
+            if (currentRequestId !== requestId.current) return;
+
             if (res.status === 200) {
-                setGoods(res.body);
+                const nextGoods = Array.isArray(res.body) ? res.body : [];
+
+                setGoods(prev => {
+                    if (!append) return nextGoods;
+
+                    const existingKeys = new Set(prev.map(getGoodKey));
+                    const addedGoods = nextGoods.filter(g => !existingKeys.has(getGoodKey(g)));
+
+                    return [...prev, ...addedGoods];
+                });
             }
+        }).finally(() => {
+            if (currentRequestId === requestId.current) isRequest.current = false;
         });
     };
 
@@ -103,7 +140,7 @@ const Store = props => {
 
             props.setScrollDown(false)
             limit.current += 25
-            sendRequest()
+            sendRequest({ append: true })
 
         }
 
@@ -111,19 +148,19 @@ const Store = props => {
 
     useEffect(() => {
 
-        if ([4, 5, 6, 999].includes(catId)) sendRequest()
+        if ([4, 5, 6, 999].includes(catId)) sendRequest({ reset: true })
 
     }, [catId])
 
     useEffect(() => {
 
-        if (isGroup) sendRequest()
+        if (isGroup) sendRequest({ reset: true })
 
     }, [isGroup])
 
     useEffect(() => {
 
-        if (isAllStocks) sendRequest()
+        if (isAllStocks) sendRequest({ reset: true })
 
     }, [isAllStocks])
 
@@ -133,7 +170,7 @@ const Store = props => {
 
     useEffect(() => {
 
-        if (props.enterPress) sendRequest()
+        if (props.enterPress) sendRequest({ reset: true })
 
         if (typeof (props.setEnterPress) === 'function') props.setEnterPress(false)
 
@@ -194,6 +231,8 @@ const Store = props => {
 
         setError(false)
         limit.current = 25
+        requestId.current++
+        setGoods(prev => prev.filter(g => matchesStoreSearch(g, v)))
         setSearch(v)
 
     }
@@ -241,11 +280,11 @@ const Store = props => {
 
         const opacity = g.wo === 't' || props.app.current_stock_id !== g.stock_id ? '50%' : '100%';
         const sumText = isGroup && (g.minSum !== g.maxSum) ? `${g.minSum} - ${g.maxSum}` : g.sum;
-        const costText = g.remcost || g.cost;
+        const costText = isGroup ? g.avgCost : g.remcost || g.cost;
 
         return (
             <TableRow
-                key={g.barcode}
+                key={g.barcode || `${g.category_id}-${g.model}-${g.stock_id}`}
                 style={{ cursor: 'pointer', opacity }}
                 onClick={() => isGroup ? null : setGood(g.barcode)}
             >
@@ -259,6 +298,20 @@ const Store = props => {
                 <TableCell style={{ color }}>
                     {isGroup ? g.count : storage}
                 </TableCell>
+                {showGroupedBarcodes && <TableCell style={{ color }}>
+                    <Tooltip title="штрихкоды">
+                        <IconButton
+                            size="small"
+                            disabled={!g.barcodes?.length}
+                            onClick={e => {
+                                e.stopPropagation();
+                                PrintBarcodes(g.barcodes || []);
+                            }}
+                        >
+                            <LineWeightIcon />
+                        </IconButton>
+                    </Tooltip>
+                </TableCell>}
             </TableRow>
         );
     };
@@ -340,7 +393,7 @@ const Store = props => {
                     onChange={e => searchHandle(e.target.value)}
                 />
 
-                <Button onClick={() => sendRequest()}
+                <Button onClick={() => sendRequest({ reset: true })}
                     style={{
                         marginInline: '.3rem'
                     }}
@@ -392,6 +445,7 @@ const Store = props => {
                             <TableCell>Товар</TableCell>
                             <TableCell>Цена / Себестоимость</TableCell>
                             <TableCell>{isGroup ? 'Кол-во' : 'Хранение'}</TableCell>
+                            {showGroupedBarcodes && <TableCell>{'\u0428\u0442\u0440\u0438\u0445\u043a\u043e\u0434\u044b'}</TableCell>}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -399,7 +453,7 @@ const Store = props => {
 
                         {isRequest.current && (
                             <TableRow>
-                                <TableCell colSpan={4}>
+                                <TableCell colSpan={showGroupedBarcodes ? 5 : 4}>
                                     <LinearProgress />
                                 </TableCell>
                             </TableRow>

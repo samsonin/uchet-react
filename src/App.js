@@ -51,7 +51,10 @@ import Zp from "./components/Zp";
 import Produce from "./components/Produce";
 import Reals from "./components/Reals";
 import { useSnackbar } from "notistack";
-import { Button } from "@mui/material";
+import { IconButton } from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
+import CheckIcon from "@mui/icons-material/Check";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Sales from "./components/Sales";
 import Users from "./components/Settings/Users";
 
@@ -120,12 +123,48 @@ const App = props => {
     const [globalBarcode, setGlobalBarcode] = useState()
     const [enterPress, setEnterPress] = useState(false)
     const [scrollDown, setScrollDown] = useState(false)
+    const [hiddenNeedCallbacks, setHiddenNeedCallbacks] = useState([])
+    const [deletingNeedCallbacks, setDeletingNeedCallbacks] = useState([])
 
     const barcode = useRef('')
 
     const { enqueueSnackbar, closeSnackbar } = useSnackbar()
 
     let path = window.location.pathname
+
+    const needCallbackKey = nc => String(nc.id || nc.callback_id || nc.phone_number || '')
+
+    const deleteNeedCallback = (nc, snackbarId) => {
+        const callbackId = nc.id || nc.callback_id
+        const callbackKey = needCallbackKey(nc)
+
+        if (!props.auth.admin || !callbackKey || deletingNeedCallbacks.includes(callbackKey)) return
+
+        setDeletingNeedCallbacks(prev => [...prev, callbackKey])
+
+        const url = callbackId
+            ? 'need-callbacks/' + encodeURIComponent(callbackId)
+            : 'need-callbacks'
+
+        const data = callbackId
+            ? ''
+            : { phone_number: nc.phone_number }
+
+        rest(url, 'DELETE', data)
+            .then(res => {
+                if (res.ok) {
+                    setHiddenNeedCallbacks(prev => prev.includes(callbackKey) ? prev : [...prev, callbackKey])
+                    closeSnackbar(snackbarId)
+                    enqueueSnackbar('Уведомление удалено', { variant: 'success' })
+                } else {
+                    enqueueSnackbar(res.body?.error || 'Не удалось удалить уведомление', { variant: 'error' })
+                }
+            })
+            .catch(() => enqueueSnackbar('Ошибка удаления уведомления', { variant: 'error' }))
+            .finally(() => {
+                setDeletingNeedCallbacks(prev => prev.filter(key => key !== callbackKey))
+            })
+    }
 
     const isBarcodeValid = barcode => {
 
@@ -151,7 +190,14 @@ const App = props => {
 
         window.addEventListener("scroll", () => {
 
-            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+            const pageHeight = Math.max(
+                document.body.scrollHeight,
+                document.documentElement.scrollHeight,
+                document.body.offsetHeight,
+                document.documentElement.offsetHeight,
+            )
+
+            if ((window.innerHeight + window.pageYOffset) >= pageHeight - 80) {
 
                 setScrollDown(true)
 
@@ -240,14 +286,38 @@ const App = props => {
 
     return <>
 
-        {props.app.need_callbacks && props.app.need_callbacks.map(nc => {
+        {props.app.need_callbacks && props.app.need_callbacks
+            .filter(nc => !hiddenNeedCallbacks.includes(needCallbackKey(nc)))
+            .map(nc => {
 
-            const action = snackbarId => <Button onClick={() => closeSnackbar(snackbarId)}
-                size="small"
-                variant="outlined"
-            >
-                Ok
-            </Button>
+            const callbackKey = needCallbackKey(nc)
+            const isDeleting = deletingNeedCallbacks.includes(callbackKey)
+
+            const action = snackbarId => <>
+                {props.auth.admin && <Tooltip title={isDeleting ? 'Удаляем...' : 'Удалить'}>
+                    <span>
+                        <IconButton
+                            size="small"
+                            color="inherit"
+                            className="snackbar-action-button snackbar-action-button-delete"
+                            onClick={() => deleteNeedCallback(nc, snackbarId)}
+                            disabled={isDeleting}
+                        >
+                            <DeleteIcon fontSize="small" />
+                        </IconButton>
+                    </span>
+                </Tooltip>}
+                <Tooltip title="Закрыть">
+                    <IconButton
+                        size="small"
+                        color="inherit"
+                        className="snackbar-action-button"
+                        onClick={() => closeSnackbar(snackbarId)}
+                    >
+                        <CheckIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            </>
 
             enqueueSnackbar(nc.phone_number, {
                 variant: 'error',
