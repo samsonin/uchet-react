@@ -373,6 +373,7 @@ const App = props => {
                                 />}
 
                                 <Route path="/prepaids" element={routeElement(Prepaids)} />
+                                <Route path="/prepaids/:id" element={routeElement(Prepaids)} />
                                 <Route path="/reals/:id?" element={routeElement(Reals)} />
                                 <Route path="/zp" element={routeElement(Zp)} />
                                 <Route path="/showcase" element={routeElement(Showcase)} />

@@ -1434,6 +1434,38 @@
         border-top: 1px solid var(--line-soft);
     }
 
+    .sales-page {
+        color: var(--text);
+    }
+
+    .sales-panel {
+        padding: 0.5rem 1rem 0.5rem 0.5rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: var(--text);
+    }
+
+    .sales-results-panel {
+        margin-top: 1rem;
+    }
+
+    .sales-table,
+    .sales-table .MuiTableCell-root {
+        background: var(--surface);
+        color: var(--text);
+    }
+
+    .sales-table .MuiTableHead-root .MuiTableCell-root,
+    .sales-total-row .MuiTableCell-root {
+        background: var(--surface-soft);
+        font-weight: 700;
+    }
+
+    .sales-table-row:hover .MuiTableCell-root {
+        background: var(--surface-tint);
+    }
+
     @media (max-width: 720px) {
         .customer-view-header {
             align-items: flex-start;

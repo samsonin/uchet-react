@@ -38,6 +38,7 @@ const ORDER_HISTORY_LABEL = "\u0417\u0430\u043a\u0430\u0437\u044b";
 const PLEDGE_HISTORY_LABEL = "\u0417\u0430\u043b\u043e\u0433\u0438";
 const SALE_HISTORY_LABEL = "\u041f\u0440\u043e\u0434\u0430\u0436\u0438";
 const BUY_HISTORY_LABEL = "\u041f\u043e\u043a\u0443\u043f\u043a\u0438";
+const PREPAID_HISTORY_LABEL = "\u041f\u0440\u0435\u0434\u043e\u043f\u043b\u0430\u0442\u044b";
 const UNKNOWN_HISTORY_LABEL = "\u0414\u0440\u0443\u0433\u0438\u0435";
 
 const passportFieldAliases = {
@@ -71,11 +72,19 @@ const mainUrl = document.location.protocol + "//" + document.location.host;
 const interactionConfig = table => {
     const normalizedTable = String(table || "").toLowerCase();
     const remMatch = normalizedTable.match(/^rem(\d+)$/);
+    const saleMatch = normalizedTable.match(/^sale(\d*)$/);
 
     if (remMatch) {
         return {
             group: `${ORDER_HISTORY_LABEL}: ${remMatch[1]}`,
             getUrl: id => `/order/${remMatch[1]}/${id}`,
+        };
+    }
+
+    if (normalizedTable.match(/^zakaz\d*$/) || ["prepaid", "prepaids"].includes(normalizedTable)) {
+        return {
+            group: PREPAID_HISTORY_LABEL,
+            getUrl: id => `/prepaids/${id}`,
         };
     }
 
@@ -86,10 +95,14 @@ const interactionConfig = table => {
         };
     }
 
-    if (["sale", "sales"].includes(normalizedTable)) {
+    if (saleMatch || normalizedTable === "sales") {
         return {
-            group: SALE_HISTORY_LABEL,
-            getUrl: () => "/sales",
+            group: saleMatch && saleMatch[1] ? `${SALE_HISTORY_LABEL}: ${saleMatch[1]}` : SALE_HISTORY_LABEL,
+            getUrl: id => {
+                const query = new URLSearchParams({str: id});
+                if (saleMatch && saleMatch[1]) query.set("stock_id", saleMatch[1]);
+                return `/sales?${query.toString()}`;
+            },
         };
     }
 

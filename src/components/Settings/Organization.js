@@ -350,8 +350,9 @@ const Organization = props => {
                 updateFields({ inn: v })
             }}
             renderInput={params => {
-                const htmlInputProps = params.inputProps || {}
-                const inputProps = params.InputProps || {}
+                const slotProps = params.slotProps || {}
+                const htmlInputProps = slotProps.htmlInput || params.inputProps || {}
+                const inputProps = slotProps.input || params.InputProps || {}
 
                 return <TextField
                     {...params}
@@ -362,6 +363,7 @@ const Organization = props => {
                     error={Boolean(validationErrors.inn)}
                     helperText={validationErrors.inn}
                     slotProps={{
+                        ...slotProps,
                         htmlInput: {
                             ...htmlInputProps,
                             maxLength: lengthValidation.inn.maxLength,
@@ -408,8 +410,9 @@ const Organization = props => {
                 updateFields({ ogrn: v })
             }}
             renderInput={params => {
-                const htmlInputProps = params.inputProps || {}
-                const inputProps = params.InputProps || {}
+                const slotProps = params.slotProps || {}
+                const htmlInputProps = slotProps.htmlInput || params.inputProps || {}
+                const inputProps = slotProps.input || params.InputProps || {}
 
                 return <TextField
                     {...params}
@@ -420,6 +423,7 @@ const Organization = props => {
                     error={Boolean(validationErrors.ogrn)}
                     helperText={validationErrors.ogrn}
                     slotProps={{
+                        ...slotProps,
                         htmlInput: {
                             ...htmlInputProps,
                             maxLength: lengthValidation.ogrn.maxLength,

@@ -31,6 +31,7 @@ const Prepaids = props => {
     const [prepaidData, setPrepaidData] = useState()
     const [prepaids, setPrepaids] = useState([])
     const [search, setSearch] = useState('')
+    const routePrepaidId = +props.match.params.id || 0
 
     const getPrepaids = () => {
 
@@ -50,6 +51,14 @@ const Prepaids = props => {
     useEffect(() => {
         getPrepaids()
     }, [props.app.current_stock_id])
+
+    useEffect(() => {
+        if (!routePrepaidId) return
+
+        setPrepaidId(routePrepaidId)
+        setPrepaidData()
+        setIsPrepaidOpen(true)
+    }, [routePrepaidId])
 
     const openPrepaid = prepaid => {
 
@@ -74,6 +83,7 @@ const Prepaids = props => {
             close={() => {
                 setIsPrepaidOpen(false)
                 setPrepaidId(null)
+                if (routePrepaidId) props.history.push('/prepaids')
             }}
             preId={prepaidId}
             preData={prepaidData}
