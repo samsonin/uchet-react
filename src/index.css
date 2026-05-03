@@ -1225,6 +1225,14 @@
         font-weight: 800;
     }
 
+    .customers-select-status-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
     .customers-select-edit-button {
         width: 30px !important;
         height: 30px !important;
@@ -1266,6 +1274,59 @@
 
     .customers-select-indicator {
         color: inherit !important;
+    }
+
+    .customers-select-document-button {
+        min-height: 32px !important;
+        padding: 0.25rem 0.65rem !important;
+        border-color: var(--line) !important;
+        color: var(--text) !important;
+        background: var(--surface) !important;
+        font-size: 0.82rem !important;
+    }
+
+    .customers-select-document-button:hover {
+        border-color: rgba(15, 143, 135, 0.34) !important;
+        background: var(--brand-soft) !important;
+    }
+
+    .customers-select-contacts {
+        display: grid;
+        gap: 0.5rem;
+        margin: 0.65rem 0.3rem 0;
+        padding-top: 0.65rem;
+        border-top: 1px solid var(--line-soft);
+    }
+
+    .customers-select-contacts-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        color: var(--text-muted);
+        font-size: 0.86rem;
+        font-weight: 800;
+    }
+
+    .customers-select-contact-row {
+        display: grid;
+        grid-template-columns: minmax(120px, 0.35fr) minmax(160px, 1fr) auto;
+        gap: 0.45rem;
+        align-items: center;
+    }
+
+    .customers-select-contact-type,
+    .customers-select-contact-value {
+        min-width: 0;
+    }
+
+    .customers-select-contact-remove {
+        color: var(--text-muted) !important;
+    }
+
+    .customers-select-contact-remove:hover {
+        color: #dc3545 !important;
+        background: rgba(220, 53, 69, 0.08) !important;
     }
 
     .customer-fields-card {
@@ -1369,6 +1430,234 @@
         grid-column: 1 / -1;
     }
 
+    .customers-list-page {
+        width: 100%;
+        padding: 1rem;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+    }
+
+    .customers-list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .customers-list-title {
+        color: var(--text);
+        font-weight: 800 !important;
+    }
+
+    .customers-list-search {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: min(420px, 100%);
+    }
+
+    .customers-list-search .MuiInput-root {
+        width: 100%;
+        color: var(--text);
+    }
+
+    .customers-list-add-button {
+        color: var(--brand-strong) !important;
+    }
+
+    .customers-list {
+        display: grid;
+        gap: 0.55rem;
+    }
+
+    .customers-list-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        min-height: 66px;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: linear-gradient(180deg, var(--surface-soft), var(--surface));
+        cursor: pointer;
+        transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 140ms ease;
+    }
+
+    .customers-list-item:hover {
+        border-color: rgba(15, 143, 135, 0.34);
+        background: var(--surface-tint);
+        box-shadow: var(--shadow-subtle);
+        transform: translateY(-1px);
+    }
+
+    .customers-list-person {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 0;
+    }
+
+    .customers-list-avatar {
+        width: 42px !important;
+        height: 42px !important;
+        flex: 0 0 auto;
+        background: linear-gradient(135deg, var(--brand-strong), var(--ink-blue)) !important;
+        color: #fff !important;
+        font-size: 0.9rem !important;
+        font-weight: 800 !important;
+    }
+
+    .customers-list-name {
+        min-width: 0;
+        overflow: hidden;
+        color: var(--text);
+        font-size: 0.98rem;
+        font-weight: 800;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .customers-list-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.35rem;
+        flex: 0 0 auto;
+    }
+
+    .customers-list-contact-button {
+        width: 36px !important;
+        height: 36px !important;
+        border: 1px solid var(--line) !important;
+        background: var(--surface) !important;
+        color: var(--brand-strong) !important;
+    }
+
+    .customers-list-contact-button:hover {
+        border-color: rgba(15, 143, 135, 0.34) !important;
+        background: var(--brand-soft) !important;
+        color: var(--brand-strong) !important;
+    }
+
+    .customers-list-contact-button.Mui-disabled {
+        color: var(--text-muted) !important;
+        opacity: 0.55;
+    }
+
+    .customers-list-loading {
+        padding: 1rem;
+        color: var(--text-muted);
+        text-align: center;
+    }
+
+    .customer-contacts {
+        margin-top: 1rem;
+        padding: 0.85rem;
+        border: 1px solid var(--line-soft);
+        border-radius: 12px;
+        background: linear-gradient(180deg, var(--surface-soft), var(--surface));
+    }
+
+    .customer-contacts.is-dense {
+        margin: 0.35rem 0.2rem 0;
+        padding: 0.65rem;
+    }
+
+    .customer-contacts-title {
+        margin-bottom: 0.55rem;
+        color: var(--text);
+        font-size: 0.9rem;
+        font-weight: 800;
+    }
+
+    .customer-contacts-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 0.55rem;
+    }
+
+    .customer-contacts.is-dense .customer-contacts-list {
+        grid-template-columns: 1fr;
+    }
+
+    .customer-contact-card {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.65rem;
+        min-width: 0;
+        padding: 0.62rem 0.7rem;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--text);
+        text-decoration: none;
+        box-shadow: 0 8px 18px rgba(28, 43, 54, 0.05);
+        transition: border-color 160ms ease, background-color 160ms ease, transform 140ms ease;
+    }
+
+    .customer-contact-card:hover {
+        border-color: rgba(15, 143, 135, 0.34);
+        background: var(--surface-tint);
+        color: var(--text);
+        transform: translateY(-1px);
+    }
+
+    .customer-contact-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: var(--brand-soft);
+        color: var(--brand-strong);
+    }
+
+    .customer-contact-icon-img {
+        display: block;
+        max-width: 20px;
+        max-height: 20px;
+        object-fit: contain;
+    }
+
+    .customer-contact-main {
+        display: grid;
+        min-width: 0;
+        gap: 0.12rem;
+    }
+
+    .customer-contact-type {
+        color: var(--text-muted);
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+
+    .customer-contact-value {
+        min-width: 0;
+        overflow: hidden;
+        color: var(--text);
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .customer-contact-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.2rem 0.42rem;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 0.72rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
     .customer-history {
         margin-top: 1rem;
         padding-top: 1rem;
@@ -1402,23 +1691,29 @@
         font-weight: 500;
     }
 
-    .customer-history-items {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.45rem;
+    .customer-history-table-wrap {
+        border: 1px solid var(--line);
+        background: var(--surface) !important;
+        box-shadow: none !important;
     }
 
-    .customer-history-link {
-        min-width: 86px !important;
-        border-color: var(--line) !important;
-        color: var(--text) !important;
-        background: var(--surface-soft) !important;
-        text-transform: none !important;
+    .customer-history-table,
+    .customer-history-table .MuiTableCell-root {
+        background: var(--surface);
+        color: var(--text);
     }
 
-    .customer-history-link:hover {
-        border-color: var(--brand) !important;
-        background: var(--surface-tint) !important;
+    .customer-history-table .MuiTableHead-root .MuiTableCell-root {
+        background: var(--surface-soft);
+        font-weight: 700;
+    }
+
+    .customer-history-row.is-clickable {
+        cursor: pointer;
+    }
+
+    .customer-history-row.is-clickable:hover .MuiTableCell-root {
+        background: var(--surface-tint);
     }
 
     .customer-history-empty {
@@ -1466,7 +1761,66 @@
         background: var(--surface-tint);
     }
 
+    .pledge-sales-history {
+        margin: 0.75rem 0.4rem;
+        border: 1px solid var(--line);
+        background: var(--surface) !important;
+        box-shadow: none !important;
+    }
+
+    .pledge-sales-history .MuiTableCell-root {
+        background: var(--surface);
+        color: var(--text);
+    }
+
+    .pledge-sales-history .MuiTableHead-root .MuiTableCell-root {
+        background: var(--surface-soft);
+        font-weight: 700;
+    }
+
     @media (max-width: 720px) {
+        .customers-list-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .customers-list-search {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .customers-list-item {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .customers-list-actions {
+            width: 100%;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            padding-left: 54px;
+        }
+
+        .customers-select-status,
+        .customers-select-contacts-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .customers-select-status-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .customers-select-contact-row {
+            grid-template-columns: 1fr auto;
+        }
+
+        .customers-select-contact-type,
+        .customers-select-contact-value {
+            grid-column: 1 / -1;
+        }
+
         .customer-view-header {
             align-items: flex-start;
             flex-direction: column;
@@ -2029,6 +2383,34 @@
         border-color: var(--line) !important;
     }
 
+    :root[data-theme="dark"] .customers-list-page,
+    :root[data-theme="dark"] .customers-list-item,
+    :root[data-theme="dark"] .customers-list-contact-button {
+        border-color: var(--line) !important;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .customers-list-item:hover {
+        border-color: rgba(102, 209, 199, 0.34) !important;
+        background: var(--surface-tint) !important;
+    }
+
+    :root[data-theme="dark"] .customers-list-search .MuiInput-root,
+    :root[data-theme="dark"] .customers-list-search .MuiInput-input,
+    :root[data-theme="dark"] .customers-list-search .MuiSvgIcon-root {
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .customers-list-contact-button {
+        color: var(--brand-strong) !important;
+    }
+
+    :root[data-theme="dark"] .customers-list-contact-button:hover {
+        background: var(--brand-soft) !important;
+        color: var(--brand-strong) !important;
+    }
+
     :root[data-theme="dark"] .customer-fields-passport-button {
         border-color: rgba(127, 176, 255, 0.24) !important;
         background: var(--surface-soft) !important;
@@ -2101,6 +2483,24 @@
 
     :root[data-theme="dark"] .customers-select-field .MuiOutlinedInput-notchedOutline {
         border-color: var(--line) !important;
+    }
+
+    :root[data-theme="dark"] .customers-select-document-button,
+    :root[data-theme="dark"] .customers-select-contact-row .MuiInputBase-root,
+    :root[data-theme="dark"] .customers-select-contact-row .MuiOutlinedInput-root,
+    :root[data-theme="dark"] .customers-select-contact-row .MuiInputBase-input,
+    :root[data-theme="dark"] .customers-select-contact-row .MuiInputLabel-root,
+    :root[data-theme="dark"] .customers-select-contact-row .MuiSvgIcon-root {
+        background: var(--surface-soft) !important;
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .customers-select-contact-row .MuiOutlinedInput-notchedOutline {
+        border-color: var(--line) !important;
+    }
+
+    :root[data-theme="dark"] .customers-select-contacts {
+        border-top-color: var(--line);
     }
 
     :root[data-theme="dark"] .customers-select-paper,

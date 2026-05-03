@@ -13,6 +13,7 @@ let initialState = {
     fields: [],
     providers: [],
     categories: [],
+    contact_types: [],
 }
 
 const probableKeys = [
@@ -32,6 +33,7 @@ const probableKeys = [
     'entities',
     'providers',
     'categories',
+    'contact_types',
     'order',
     'orders',
     'referals',

@@ -29,6 +29,7 @@ const Pledges = props => {
 
     const dateNow = Date.now()
     const tableColumnCount = props.app.current_stock_id ? 3 : 4
+    const routePledgeId = +props.match.params.id || 0
 
     const getSum2 = (date1, date2, sum) => {
 
@@ -44,48 +45,60 @@ const Pledges = props => {
 
     }
 
+    const preparePledge = pledge => {
+        const stock = appStocks.find(s => s.id === pledge.stock)
+        const timeZone = stock?.timezone_offset ?? 0
+
+        const prepared = {
+            ...pledge,
+            stockName: stock?.name || '',
+            isDelay: (dateNow - Date.parse(pledge.ransomdate)) / 3600000 + timeZone > 24,
+        }
+
+        if (prepared.isDelay) {
+
+            const sum2 = getSum2(Date.parse(prepared.time), dateNow, prepared.sum)
+
+            prepared.sum2 = Math.max(sum2, prepared.sum2)
+
+        }
+
+        return prepared
+    }
+
     useEffect(() => {
+
+        if (routePledgeId) return
 
         rest('pledges')
             .then(res => {
 
                 if (res.status === 200) {
 
-                    const pledges = res.body.map(p => {
-
-                        const stock = appStocks.find(s => s.id === p.stock)
-                        const timeZone = stock?.timezone_offset ?? 0
-
-                        p.stockName = stock?.name || ''
-                        p.isDelay = (dateNow - Date.parse(p.ransomdate)) / 3600000 + timeZone > 24
-
-                        if (p.isDelay) {
-
-                            const sum2 = getSum2(Date.parse(p.time), dateNow, p.sum)
-
-                            p.sum2 = Math.max(sum2, p.sum2)
-
-                        }
-
-                        return p
-                    })
-
-                    setPledges(pledges)
-
-                    const id = +props.match.params.id
-
-                    if (id) {
-
-                        const pledge = res.body.find(p => p.id === id)
-                        if (pledge) setCurrentPledge(pledge)
-
-                    }
+                    setPledges(res.body.map(preparePledge))
 
                 }
 
             })
 
-    }, [])
+    }, [routePledgeId])
+
+    useEffect(() => {
+
+        if (!routePledgeId) return
+
+        rest('pledges/' + routePledgeId)
+            .then(res => {
+
+                if (res.status !== 200 || !res.body) return
+
+                const pledge = res.body.pledge || res.body
+
+                setCurrentPledge(preparePledge(pledge))
+
+            })
+
+    }, [routePledgeId])
 
     const addPledge = pledge => {
 
@@ -119,7 +132,10 @@ const Pledges = props => {
     return currentPledge
         ? <Pledge
             current={currentPledge}
-            setCurrent={setCurrentPledge}
+            setCurrent={pledge => {
+                setCurrentPledge(pledge)
+                if (!pledge && routePledgeId) props.history.push('/pledges')
+            }}
             getSum2={getSum2}
             addPledge={addPledge}
             updPledge={updPledge}

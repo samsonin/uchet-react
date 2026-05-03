@@ -1,6 +1,6 @@
-import React, { forwardRef, useEffect, useRef, useState } from 'react';
+﻿import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { connect } from "react-redux";
-import { Button, TextField } from "@mui/material";
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from "@mui/material";
 import { intInputHandler } from "./common/InputHandlers";
 import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -14,6 +14,8 @@ import DialogActions from "@mui/material/DialogActions";
 import Dialog from "@mui/material/Dialog";
 import { makeStyles } from "muiLegacyStyles";
 import Slide from "@mui/material/Slide";
+import Paper from "@mui/material/Paper";
+import InteractionTableRow from "./common/InteractionTableRow";
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -37,10 +39,18 @@ const Pledge = props => {
     const classes = useStyles()
 
     const stock = appStocks.find(s => s.id === pledge.stock)
+    const normalizedStatus = String(pledge.status || '').toLowerCase()
+    const isNewStatus = !pledge.id || ['new', 'новая'].includes(normalizedStatus)
+    const isSameStock = pledge.stock === props.app.current_stock_id
+    const canEditPledge = !pledge.id || (isNewStatus && isSameStock)
     const timeZone = stock ? stock.timezone_offset : 0
     const isDelay = pledge.ransomdate
         ? (Date.now() - Date.parse(pledge.ransomdate)) / 3600000 + timeZone > 24
         : false
+    const pledgeSales = Array.isArray(pledge.sales)
+        ? [...pledge.sales].sort((a, b) => Date.parse(a.created_at || 0) - Date.parse(b.created_at || 0))
+        : []
+    const hasSalesHistory = pledgeSales.length > 0
 
     const { enqueueSnackbar } = useSnackbar()
 
@@ -68,6 +78,11 @@ const Pledge = props => {
     const fieldsStyle = {
         margin: '.4rem',
         width: '100%',
+    }
+
+    const salesHistoryValue = (row, valueName) => {
+        if (valueName === 'date') return String(row.created_at || '').slice(0, 16)
+        return row[valueName] ?? ''
     }
 
     const doc = appDocs.find(d => d.name === 'zalog')
@@ -109,7 +124,7 @@ const Pledge = props => {
 
         let error = ''
         if (!customer.fio) error = 'ФИО'
-        else if (!model) error = 'наменование'
+        else if (!model) error = 'наименование'
         else if (!imei) error = 'imei или S/N'
         else if (!sum) error = 'сумму залога'
         else if (!password) error = 'пароль'
@@ -341,7 +356,7 @@ const Pledge = props => {
                     {renderId()}
                 </span>
 
-                {pledge.id && pledge.status === 'new' && pledge.stock === props.app.current_stock_id &&
+                {pledge.id && isNewStatus &&
                     <IconButton
                         onClick={() => Print(doc, alias)}
                     >
@@ -374,32 +389,53 @@ const Pledge = props => {
                 onChange={e => pledge.id ? {} : setPassword(e.target.value)}
             />
 
-            {pledge.time && <TextField label="Дата залога"
+            {hasSalesHistory && <TableContainer component={Paper} className="pledge-sales-history">
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Дата</TableCell>
+                            <TableCell>Действие</TableCell>
+                            <TableCell>Сумма</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {pledgeSales.map(row => <InteractionTableRow
+                            key={'pledge-sales-history-row-' + row.id}
+                            row={row}
+                            values={['date', 'action', 'sum']}
+                            getValue={({row, valueName}) => salesHistoryValue(row, valueName)}
+                            cellKeyPrefix="pledge-sales-history-cell"
+                        />)}
+                    </TableBody>
+                </Table>
+            </TableContainer>}
+
+            {pledge.time && !hasSalesHistory && <TextField label="Дата залога"
                 style={fieldsStyle}
                 type="date"
                 value={pledge.time.substring(0, 10)}
             />}
 
-            <TextField label="Сумма залога"
+            {!hasSalesHistory && <TextField label="Сумма залога"
                 style={fieldsStyle}
                 value={sum}
                 onChange={e => pledge.id || intInputHandler(e.target.value, setSum)}
-            />
+            />}
 
-            <TextField label="Дата выкупа"
+            {!hasSalesHistory && <TextField label="Дата выкупа"
                 style={fieldsStyle}
                 type="date"
                 value={ransomdate}
                 error={isDelay}
                 onChange={e => pledge.id || dateHandler(e.target.value, setRansomdate)}
-            />
+            />}
 
-            <TextField label="Сумма выкупа"
+            {!hasSalesHistory && <TextField label="Сумма выкупа"
                 style={fieldsStyle}
                 value={checkoutSum()}
                 error={isDelay}
                 onChange={e => pledge.id ? {} : intInputHandler(e.target.value, setSum2)}
-            />
+            />}
 
             <TextField label="Примечание"
                 style={fieldsStyle}
@@ -407,13 +443,13 @@ const Pledge = props => {
                 onChange={e => setNote(e.target.value)}
             />
 
-            {props.app.current_stock_id
+            {props.app.current_stock_id && canEditPledge
                 ? <div style={{
                     padding: '.3rem',
                     display: "flex",
                     justifyContent: 'space-around'
                 }}>
-                    {pledge.stock === props.app.current_stock_id
+                    {isSameStock
                         ? <>
                             {note === pledge.note || mb('Сохранить', () => save())}
                             {mb('Выкупают', () => checkout())}

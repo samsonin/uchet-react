@@ -52,6 +52,7 @@ const Info = props => {
         id: 0,
         phone_number: '',
         fio: '',
+        contacts: [],
     })
     const [model, setModel] = useState('')
     const [presum, setPresum] = useState(initPresum)
@@ -109,9 +110,11 @@ const Info = props => {
     const create = () => {
 
         let error = ''
+        const hasCustomerContact = Array.isArray(customer.contacts)
+            && customer.contacts.some(contact => String(contact?.value || '').trim())
 
         if (!props.app.current_stock_id) error = 'Выберите точку'
-        if (!(customer.id || customer.fio || customer.phone_number)) error = 'Нет заказчика'
+        if (!(customer.id || customer.fio || customer.phone_number || hasCustomerContact)) error = 'Нет заказчика'
         if (customer.phone_number && customer.phone_number.length !== 10) error = 'неправильный номер телефона'
         if (!category_id) error = 'Выберите категорию'
         if (category_id === 1000 && !otherCategory) error = 'Впишите другую категорию'
@@ -249,6 +252,7 @@ const Info = props => {
                 id: 0,
                 phone_number: '',
                 fio: '',
+                contacts: [],
             })
             setCategory_id(order.category_id)
             setModel(order.model || '')
@@ -358,6 +362,8 @@ const Info = props => {
                 customer={customer}
                 setCustomer={setCustomer}
                 disabled={!!order || !isEditable}
+                allowAdditionalContacts={!order}
+                enablePassportOcr={!order}
             />
             : null}
 
@@ -454,3 +460,4 @@ const Info = props => {
 }
 
 export default connect(state => state)(Info)
+

@@ -396,6 +396,7 @@ const App = props => {
                                     <Route path="/customers/:id" element={routeElement(Customer)} />
                                     <Route path="/pledges" element={routeElement(Pledges)} />
                                     <Route path="/pledges/:id" element={routeElement(Pledges)} />
+                                    <Route path="/pledge/:id" element={routeElement(Pledges)} />
                                     <Route path="/entities/:id" element={routeElement(Entity)} />
                                     <Route
                                         path="/sales"

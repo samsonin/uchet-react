@@ -29,7 +29,7 @@ import PrepaidModal from './Modals/Prepaid'
 import Consignment from "./Consignment";
 import DailyModal from "./Modals/Daily";
 import { numberInputHandler } from "./common/InputHandlers";
-import TwoLineInCell from "./common/TwoLineInCell";
+import InteractionTableRow from "./common/InteractionTableRow";
 import { setInRange, today } from "./common/Time";
 
 const mainUrl = document.location.protocol + '//' + document.location.host
@@ -246,7 +246,7 @@ const Daily = props => {
 
                 try {
 
-                    if (row.wf.zalog_id) props.history.push('pledges/' + row.wf.zalog_id)
+                    if (row.wf.zalog_id) props.history.push('/pledges/' + row.wf.zalog_id)
 
                 } catch (e) {
                     console.log(e)
@@ -483,48 +483,14 @@ const Daily = props => {
                                         </TableHead>
 
                                         <TableBody>
-                                            {t.rows.map(row => {
-
-                                                return <TableRow
-                                                    key={'table-row-in-daily-' + row.id + row.created_at}
-                                                    style={{
-                                                        cursor: 'pointer'
-                                                    }}
-                                                    onClick={() => handler(t.title, row)}
-                                                >
-                                                    {t.rowsValues.map((v,index) => {
-
-                                                        let value = row[v]
-
-                                                        const user = appUsers.find(u => u.id === row.ui_user_id)
-
-                                                        const userName = user ? user.name : row.ui_user_id
-
-                                                        if (v === 'ui_user_id') value = userName
-
-                                                        if (row.action === 'зарплата' && v === 'note') {
-
-                                                            return <TableCell key={`${row.item}-${v}-${index}`}>
-                                                                {TwoLineInCell(userName, row.note)}
-                                                            </TableCell>
-
-                                                        }
-
-                                                        return <TableCell
-                                                            key={`${row.item}-${v}-${index}`}
-                                                        >
-                                                            {row.work && row.action !== 'расход'
-                                                                ? v === 'item'
-                                                                    ? TwoLineInCell(row.item, row.work)
-                                                                    : value
-                                                                : v === 'id'
-                                                                    ? ''
-                                                                    : value}
-                                                        </TableCell>
-
-                                                    })}
-                                                </TableRow>
-                                            })}
+                                            {t.rows.map(row => <InteractionTableRow
+                                                key={'table-row-in-daily-' + row.id + row.created_at}
+                                                row={row}
+                                                values={t.rowsValues}
+                                                users={appUsers}
+                                                style={{cursor: 'pointer'}}
+                                                onClick={() => handler(t.title, row)}
+                                            />)}
                                         </TableBody>
 
                                         <TableHead>
