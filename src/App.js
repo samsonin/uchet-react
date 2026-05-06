@@ -35,6 +35,7 @@ import IntegrationSmsRu from "./components/IntegrationSmsRu";
 import { Records } from "./components/Records";
 import Docs from "./components/Settings/Docs";
 import PrintSettingsPage from "./components/Settings/Print";
+import AppSettings from "./components/Settings/appSettings";
 import Daily from "./components/Daily";
 import LoginModal from "./components/LoginModal";
 import Prepaids from "./components/Prepaids";
@@ -362,6 +363,7 @@ const App = props => {
                                 <Route path="/" element={routeElement(Main)} />
                                 <Route path="/profile" element={<ProfileRedirect />} />
                                 <Route path="/settings/personal" element={routeElement(Personal)} />
+                                <Route path="/settings/app" element={routeElement(AppSettings)} />
                                 <Route path="/settings/print" element={routeElement(PrintSettingsPage)} />
                                 <Route path="/subscribe" element={routeElement(Subscribe)} />
 

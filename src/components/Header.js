@@ -9,6 +9,12 @@ import { init_user, upd_app, exit_app } from "../actions/actionCreator";
 import rest from "./Rest";
 import { toLocalTimeStr } from "./common/Time";
 import { UiButton, UiDropdown, UiDropdownItem } from "./common/Ui";
+import AssistantChat from "./assistant/AssistantChat";
+import {
+    APP_SETTINGS_CHANGE_EVENT,
+    applyAppSettings,
+    getAppSettings,
+} from "./Settings/appSettingsStore";
 
 const THEME_STORAGE_KEY = "themePreference";
 const THEME_OPTIONS = [
@@ -27,6 +33,8 @@ const applyTheme = preference => {
 
 const NavbarPage = props => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [assistantOpen, setAssistantOpen] = useState(false);
+    const [appSettings, setAppSettings] = useState(() => getAppSettings());
     const [themePreference, setThemePreference] = useState(() => window.localStorage.getItem(THEME_STORAGE_KEY) || "system");
 
     const app = props.app || {};
@@ -47,11 +55,23 @@ const NavbarPage = props => {
     useEffect(() => {
         if ((Date.now() - props.auth.time) > 43200000) exit();
 
+        applyAppSettings(appSettings);
         syncSidebarState();
         window.addEventListener("resize", syncSidebarState);
 
         return () => window.removeEventListener("resize", syncSidebarState);
         // eslint-disable-next-line
+    }, []);
+
+    useEffect(() => {
+        const onAppSettingsChange = event => {
+            const nextSettings = event.detail || getAppSettings();
+            setAppSettings(nextSettings);
+            if (!nextSettings.assistantEnabled) setAssistantOpen(false);
+        };
+
+        window.addEventListener(APP_SETTINGS_CHANGE_EVENT, onAppSettingsChange);
+        return () => window.removeEventListener(APP_SETTINGS_CHANGE_EVENT, onAppSettingsChange);
     }, []);
 
     useEffect(() => {
@@ -225,7 +245,10 @@ const NavbarPage = props => {
         </div>
         : null;
 
-    return <nav className="navbar">
+    const userName = getUserName();
+
+    return <>
+    <nav className="navbar">
         <div className="header-brand">
             <Link to="/" className="header-brand-link">
                 <span className="header-brand-text">Uchet</span>
@@ -265,7 +288,14 @@ const NavbarPage = props => {
                 {auth_menu}
             </UiDropdown>
         </div>
-    </nav>;
+    </nav>
+    {props.auth.user_id > 0 && appSettings.assistantEnabled && <AssistantChat
+        isOpen={assistantOpen}
+        onOpen={() => setAssistantOpen(true)}
+        onClose={() => setAssistantOpen(false)}
+        userName={userName}
+    />}
+    </>;
 };
 
 const mapDispatchToProps = dispatch => bindActionCreators({

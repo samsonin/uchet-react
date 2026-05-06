@@ -21,6 +21,7 @@ export const siteMap = isAdmin => {
         { id: 35, path: "sales", text: "Поиск по продажам" },
 
         { id: 40, path: "settings/personal", text: "Личные данные" },
+        { id: 44, path: "settings/app", text: "Интерфейс" },
         { id: 49, path: "settings/print", text: "Печать" },
 
         { id: 53, path: "integration/prices", text: "Прайс-листы" },

@@ -260,6 +260,306 @@
         justify-content: center;
     }
 
+    .assistant-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: 38px;
+        max-width: 180px;
+        padding: 0.28rem 0.68rem 0.28rem 0.34rem;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.13);
+        color: #ffffff;
+        font: inherit;
+        white-space: nowrap;
+        cursor: pointer;
+        box-shadow: 0 12px 30px rgba(15, 35, 45, 0.18);
+        transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+    }
+
+    .assistant-badge:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 16px 36px rgba(15, 35, 45, 0.22);
+    }
+
+    .assistant-badge:focus-visible {
+        outline: 2px solid rgba(102, 209, 199, 0.9);
+        outline-offset: 3px;
+    }
+
+    .assistant-badge-avatar {
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .assistant-badge-text {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        line-height: 1.05;
+    }
+
+    .assistant-badge-name,
+    .assistant-badge-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .assistant-badge-name {
+        font-size: 0.82rem;
+        font-weight: 800;
+    }
+
+    .assistant-badge-title {
+        margin-top: 0.12rem;
+        color: rgba(236, 254, 255, 0.74);
+        font-size: 0.68rem;
+        font-weight: 700;
+    }
+
+    .assistant-chat-launcher,
+    .assistant-chat-layer {
+        position: fixed;
+        right: 1.2rem;
+        bottom: 1.2rem;
+        z-index: 1500;
+    }
+
+    .assistant-chat-launcher .assistant-badge {
+        min-height: 74px;
+        max-width: 230px;
+        padding: 0.52rem 1rem 0.52rem 0.52rem;
+        border-color: rgba(255, 255, 255, 0.34);
+        background: linear-gradient(135deg, #17313c 0%, #0f8f87 100%);
+    }
+
+    .assistant-chat-launcher .assistant-badge-avatar {
+        width: 58px;
+        height: 58px;
+        flex-basis: 58px;
+        border-width: 2px;
+        box-shadow: 0 12px 28px rgba(15, 35, 45, 0.28);
+    }
+
+    .assistant-chat-launcher .assistant-badge-name {
+        font-size: 0.95rem;
+    }
+
+    .assistant-chat {
+        display: flex;
+        width: min(380px, calc(100vw - 2rem));
+        height: min(620px, calc(100vh - 2rem));
+        max-height: 620px;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--surface);
+        color: var(--text);
+        box-shadow: 0 24px 70px rgba(15, 35, 45, 0.24);
+    }
+
+    .assistant-chat-header {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.82rem 0.9rem;
+        background: linear-gradient(90deg, #17313c 0%, #0f8f87 100%);
+        color: #ffffff;
+    }
+
+    .assistant-chat-avatar {
+        width: 76px;
+        height: 76px;
+        flex: 0 0 76px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.68);
+        box-shadow: 0 10px 22px rgba(15, 35, 45, 0.24);
+    }
+
+    .assistant-chat-heading {
+        min-width: 0;
+        flex: 1;
+        line-height: 1.1;
+    }
+
+    .assistant-chat-name {
+        font-weight: 850;
+    }
+
+    .assistant-chat-status {
+        margin-top: 0.18rem;
+        color: rgba(236, 254, 255, 0.78);
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .assistant-chat-close {
+        color: #ffffff !important;
+    }
+
+    .assistant-chat-disable {
+        min-height: 30px;
+        padding: 0.35rem 0.55rem;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        font: inherit;
+        font-size: 0.75rem;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .assistant-chat-disable:hover {
+        background: rgba(255, 255, 255, 0.22);
+    }
+
+    .assistant-chat-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0.9rem;
+        background: var(--surface-soft);
+    }
+
+    .assistant-chat-message-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.46rem;
+        margin-bottom: 0.62rem;
+    }
+
+    .assistant-chat-message-row-user {
+        justify-content: flex-end;
+    }
+
+    .assistant-chat-message {
+        width: fit-content;
+        max-width: 88%;
+        padding: 0.68rem 0.78rem;
+        border-radius: 14px;
+        font-size: 0.92rem;
+        line-height: 1.38;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .assistant-chat-message-assistant {
+        border: 1px solid var(--line-soft);
+        background: var(--surface);
+        color: var(--text);
+    }
+
+    .assistant-chat-message-user {
+        margin-left: auto;
+        background: var(--brand);
+        color: #ffffff;
+    }
+
+    .assistant-chat-link {
+        color: var(--brand-strong);
+        font-weight: 800;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    .assistant-chat-message-user .assistant-chat-link {
+        color: #ffffff;
+    }
+
+    .assistant-chat-prompts {
+        display: flex;
+        gap: 0.45rem;
+        padding: 0.7rem 0.85rem 0;
+        overflow-x: auto;
+        background: var(--surface);
+    }
+
+    .assistant-chat-prompt {
+        flex: 0 0 auto;
+        min-height: 32px;
+        padding: 0.42rem 0.64rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface-soft);
+        color: var(--text);
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .assistant-chat-prompt:hover {
+        border-color: var(--brand);
+        color: var(--brand-strong);
+    }
+
+    .assistant-chat-form {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.75rem 0.85rem 0.85rem;
+        background: var(--surface);
+    }
+
+    .assistant-chat-input {
+        min-width: 0;
+        flex: 1;
+        min-height: 42px;
+        padding: 0.65rem 0.78rem;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface-soft);
+        color: var(--text);
+        font: inherit;
+    }
+
+    .assistant-chat-input:focus {
+        border-color: var(--brand);
+        outline: 0;
+        box-shadow: 0 0 0 3px rgba(15, 143, 135, 0.14);
+    }
+
+    .assistant-chat-send {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        border: 1px solid var(--brand) !important;
+        background: var(--brand) !important;
+        color: #ffffff !important;
+    }
+
+    .assistant-chat-send.Mui-disabled {
+        border-color: var(--line) !important;
+        background: var(--surface-soft) !important;
+        color: var(--text-muted) !important;
+    }
+
+    .app-settings-reset {
+        min-height: 34px;
+        padding: 0.45rem 0.75rem;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface-soft);
+        color: var(--text);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .app-settings-reset:hover {
+        border-color: var(--brand);
+        color: var(--brand-strong);
+    }
+
     .header-user-avatar {
         display: inline-flex;
         align-items: center;
@@ -2754,6 +3054,44 @@
     .header-user-button {
         width: auto;
         justify-content: center;
+    }
+
+    .assistant-badge {
+        max-width: 42px;
+        padding-right: 0.34rem;
+    }
+
+    .assistant-chat-launcher,
+    .assistant-chat-layer {
+        right: 0.8rem;
+        bottom: 0.8rem;
+    }
+
+    .assistant-chat-launcher .assistant-badge {
+        min-height: 66px;
+        max-width: 66px;
+        padding: 0.32rem;
+    }
+
+    .assistant-chat-launcher .assistant-badge-avatar {
+        width: 56px;
+        height: 56px;
+    }
+
+    .assistant-chat-avatar {
+        width: 68px;
+        height: 68px;
+        flex-basis: 68px;
+    }
+
+    .assistant-chat {
+        width: calc(100vw - 1.2rem);
+        height: min(620px, calc(100vh - 1.2rem));
+        border-radius: 16px;
+    }
+
+    .assistant-badge-text {
+        display: none;
     }
 
     .header-nav-link {
