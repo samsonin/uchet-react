@@ -2520,10 +2520,12 @@
 
     :root[data-theme="dark"] .customers-select-popper .MuiAutocomplete-option,
     :root[data-theme="dark"] .customers-select-option,
+    :root[data-theme="dark"] .customers-select-option *,
     :root[data-theme="dark"] .customers-select-popper .MuiAutocomplete-loading,
     :root[data-theme="dark"] .customers-select-popper .MuiAutocomplete-noOptions {
         background: transparent !important;
         color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
     }
 
     :root[data-theme="dark"] .MuiMenuItem-root.Mui-selected,

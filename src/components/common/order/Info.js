@@ -30,14 +30,42 @@ const Transition = forwardRef(function Transition(props, ref) {
 const initSum = 'Предварительная стоимость'
 const initPresum = 'Предоплата при оформлении заказа'
 
+const parseOrderJson = order => {
+
+    if (!order?.json) return {}
+    if (typeof order.json === 'object') return order.json
+
+    try {
+        return JSON.parse(order.json)
+    } catch (e) {
+        return {}
+    }
+
+}
+
+const getOrderFieldValue = (order, name) => {
+
+    const json = parseOrderJson(order)
+
+    if (order?.[name] !== undefined && order?.[name] !== null) return order[name]
+    if (json?.[name] !== undefined && json?.[name] !== null) return json[name]
+    if (json?.fields?.[name] !== undefined && json?.fields?.[name] !== null) return json.fields[name]
+    if (json?.order?.[name] !== undefined && json?.order?.[name] !== null) return json.order[name]
+
+    return ''
+
+}
+
+const getOrderTotal = order => order?.sum2 ?? order?.sum ?? 0
+
 const Info = props => {
 
     const {order, setOrder, needPrint} = props
-    const appFields = props.app.fields?.allElements || []
+    const appFields = props.app.fields?.allElements
     const appStatuses = props.app.statuses || []
     const appUsers = props.app.users || []
     const appCategories = props.app.categories || []
-    const fields = appFields.filter(f => f.index === 'order' && f.is_valid && !f.is_system)
+    const fields = (appFields || []).filter(f => f.index === 'order' && f.is_valid && !f.is_system)
     
     const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
@@ -73,7 +101,7 @@ const Info = props => {
         setState(prev => {
 
             const newState = {...prev}
-            newState[name] = value || ''
+            newState[name] = value ?? ''
             return newState
 
         })
@@ -256,16 +284,25 @@ const Info = props => {
             })
             setCategory_id(order.category_id)
             setModel(order.model || '')
-            setSum(order.sum)
-            setSum2(order.sum2)
+            setSum(order.sum ?? initSum)
+            setSum2(getOrderTotal(order))
             setFor_client(order.for_client || '')
 
-            fields.map(f => {
-                setField(f.name, order[f.name])
+            setState(prev => {
+
+                const newState = {...prev}
+
+                fields.map(f => {
+                    newState[f.name] = getOrderFieldValue(order, f.name)
+                    return f
+                })
+
+                return newState
+
             })
         }
 
-    }, [order])
+    }, [order, appFields])
 
     const warranty = () => {
 
@@ -426,8 +463,8 @@ const Info = props => {
                                     key={'text-field-keys-in-info-' + f.value + f.name}
                                     disabled={!isEditable}
                                     style={fieldsStyle}
-                                    value={state[f.name] || ''}
-                                    onChange={e => setField([f.name], e.target.value)}
+                                    value={state[f.name] ?? ''}
+                                    onChange={e => setField(f.name, e.target.value)}
         />)}
 
         {order

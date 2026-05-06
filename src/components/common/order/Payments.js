@@ -33,7 +33,18 @@ const totalSum = payments => {
 
 }
 
-export const Payments = ({order, isEditable}) => {
+const paymentUserId = payment => payment.user_id ?? payment.ui_user_id ?? payment.employee ?? 0
+
+const paymentUserName = (payment, users) => {
+
+    const userId = paymentUserId(payment)
+    const user = users.find(u => +u.id === +userId)
+
+    return user ? user.name : ''
+
+}
+
+export const Payments = ({order, isEditable, users = []}) => {
 
     const [sum, setSum] = useState(0)
 
@@ -62,6 +73,7 @@ export const Payments = ({order, isEditable}) => {
                 <TableHead>
                     <TableRow>
                         <TableCell>Дата, время</TableCell>
+                        <TableCell>Сотрудник</TableCell>
                         <TableCell>Сумма</TableCell>
                     </TableRow>
                 </TableHead>
@@ -69,12 +81,13 @@ export const Payments = ({order, isEditable}) => {
                     {order.json.payments && order.json.payments.map(p => <TableRow
                         key={'tablerowkeyforpaymentsinordes' + p.sum + p.created_at}>
                         <TableCell>{toLocalTimeStr(p.created_at)}</TableCell>
+                        <TableCell>{paymentUserName(p, users)}</TableCell>
                         <TableCell>
                             {TwoLineInCell(+p.sum, PAYMENTMETHODS[p.paymentsMethod])}
                         </TableCell>
                     </TableRow>)}
                     <TableRow>
-                        <TableCell colSpan={2} style={{
+                        <TableCell colSpan={3} style={{
                             fontWeight: 'bold',
                             textAlign: 'center'
                         }}>

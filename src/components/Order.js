@@ -39,8 +39,11 @@ const Order = props => {
 
     const [tabId, setTabId] = useState(0)
 
-    const [id, setId] = useState(+props.match.params.order_id || null)
-    const [stockId, setStockId] = useState(+props.match.params.stock_id || null)
+    const routeOrderId = +(props.match.params.order_id || props.match.params.id || 0) || null
+    const routeStockId = +props.match.params.stock_id || null
+
+    const [id, setId] = useState(routeOrderId)
+    const [stockId, setStockId] = useState(routeStockId)
     const [created, setCreated] = useState()
 
     const needPrint = useRef(false)
@@ -121,6 +124,13 @@ const Order = props => {
     }
 
     useEffect(() => {
+        setId(routeOrderId)
+        setStockId(routeStockId)
+        setCreated(undefined)
+        setTabId(0)
+    }, [routeOrderId, routeStockId])
+
+    useEffect(() => {
 
         if (stockId && id && !order) {
 
@@ -128,7 +138,7 @@ const Order = props => {
 
         }
 
-    }, [])
+    }, [stockId, id, order])
 
     const setOrder = order => {
 
@@ -212,7 +222,8 @@ const Order = props => {
             : null}
 
         {tabId === 0 &&
-            <Info order={order}
+            <Info key={order ? 'order-' + order.stock_id + '-' + order.id : 'new-order'}
+                  order={order}
                   setOrder={setOrder}
                   isEditable={canEdit()}
                   needPrint={needPrint}
@@ -229,6 +240,7 @@ const Order = props => {
 
         {order && tabId === 2 &&
             <Payments order={order}
+                      users={props.app.users}
                       isEditable={canEdit() && isSale}
             />
         }

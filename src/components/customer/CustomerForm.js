@@ -293,6 +293,14 @@ const CustomerForm = props => {
                 noOptionsText="Ничего не найдено"
                 filterSelectedOptions={true}
                 filterOptions={options => Array.isArray(options) ? options : []}
+                slotProps={{
+                    paper: {
+                        className: "customers-select-paper",
+                    },
+                    popper: {
+                        className: "customers-select-popper",
+                    },
+                }}
                 onInputChange={(e, v, r) => handlerInput(v, r, field.name)}
                 onChange={(e, v) => handler(v)}
                 getOptionLabel={option => option ? option[field.name] || "" : ""}
