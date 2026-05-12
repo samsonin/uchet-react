@@ -9,8 +9,18 @@ import AssistantBadge from "./AssistantBadge";
 import { getAssistantForUserName } from "./assistants";
 import rest from "../Rest";
 import { getAppSettings, saveAppSettings } from "../Settings/appSettingsStore";
+import {
+    completeOnboardingStep,
+    dismissOnboarding,
+    firstSetupScenario,
+    getCurrentOnboardingStep,
+    getOnboardingProgress,
+    ONBOARDING_CHANGE_EVENT,
+    resetOnboardingProgress,
+} from "./onboarding";
 
 const FALLBACK_QUICK_PROMPTS = [
+    "Начать первичную настройку",
     "Что на этой странице?",
     "Как создать заказ?",
     "Где найти клиента?",
@@ -41,9 +51,50 @@ const getAuth = () => {
     }
 };
 
-const formatAssistantAnswer = body => {
-    const answer = body?.answer || body?.text || "";
-    const links = Array.isArray(body?.links) ? body.links : [];
+const escapeRegExp = value => String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const normalizeAssistantRoute = value => {
+    const route = String(value || "")
+        .replace(/^https?:\/\/[^/]+/i, "")
+        .split("#")[0]
+        .split("?")[0]
+        .replace(/\/+$/, "");
+
+    return route || "/";
+};
+
+const isSameRoute = (firstRoute, secondRoute) => (
+    normalizeAssistantRoute(firstRoute) === normalizeAssistantRoute(secondRoute)
+);
+
+const removeCurrentPageOpenPrompt = (answer, currentPath) => {
+    if (!currentPath) return answer;
+
+    const normalizedPath = normalizeAssistantRoute(currentPath);
+    if (normalizedPath === "/") return answer;
+
+    const routePattern = `${escapeRegExp(normalizedPath)}(?:[/?#][^\\s.!?,;:)]*)?`;
+    const navigationWords = "если хотите начать|первый шаг|начните|начать|откройте|перейдите|зайдите|открыть|перейти|зайти";
+    const currentPagePromptPattern = new RegExp(
+        `(^|[.!?]\\s+|\\n+)` +
+        `([^.!?\\n]*(?:${navigationWords})[^.!?\\n]*\`?${routePattern}\`?[^.!?\\n]*[.!?]?)`,
+        "gi"
+    );
+
+    return answer
+        .replace(currentPagePromptPattern, (match, prefix) => (
+            prefix.startsWith("\n") ? "\n" : prefix.match(/^[.!?]\s+/) ? prefix.slice(0, 1) + " " : ""
+        ))
+        .replace(/\n{3,}/g, "\n\n")
+        .replace(/[ \t]{2,}/g, " ")
+        .trim();
+};
+
+const formatAssistantAnswer = (body, currentPath = "") => {
+    const answer = removeCurrentPageOpenPrompt(body?.answer || body?.text || "", currentPath);
+    const links = Array.isArray(body?.links)
+        ? body.links.filter(link => link?.to && !isSameRoute(link.to, currentPath))
+        : [];
 
     if (!links.length) return answer;
 
@@ -51,7 +102,6 @@ const formatAssistantAnswer = body => {
         answer,
         "",
         ...links
-            .filter(link => link?.to)
             .map(link => `${link.label || link.to}: ${link.to}`),
     ].filter(Boolean).join("\n");
 };
@@ -107,19 +157,44 @@ const renderMessageLine = (line, keyPrefix) => {
     return parts.length ? parts : line;
 };
 
-const AssistantChat = ({ isOpen, onOpen, onClose, userName = "" }) => {
+const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "" }) => {
     const assistant = getAssistantForUserName(userName);
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [quickPrompts, setQuickPrompts] = useState(FALLBACK_QUICK_PROMPTS);
     const [isSending, setIsSending] = useState(false);
+    const [onboardingProgress, setOnboardingProgress] = useState(() => getOnboardingProgress(userId));
     const bodyRef = useRef(null);
     const currentPath = window.location.pathname;
+    const onboardingStep = onboardingProgress.dismissed
+        ? null
+        : getCurrentOnboardingStep(onboardingProgress);
+
+    useEffect(() => {
+        setOnboardingProgress(getOnboardingProgress(userId));
+    }, [userId]);
+
+    useEffect(() => {
+        const onOnboardingChange = event => {
+            if (String(event.detail?.userId || "guest") !== String(userId || "guest")) return;
+
+            setOnboardingProgress(event.detail?.progress || getOnboardingProgress(userId));
+        };
+
+        window.addEventListener(ONBOARDING_CHANGE_EVENT, onOnboardingChange);
+        return () => window.removeEventListener(ONBOARDING_CHANGE_EVENT, onOnboardingChange);
+    }, [userId]);
 
     useEffect(() => {
         let isMounted = true;
 
         const loadContext = async () => {
+            if (onboardingStep) {
+                setMessages([]);
+                setQuickPrompts(FALLBACK_QUICK_PROMPTS);
+                return;
+            }
+
             const query = new URLSearchParams({
                 currentPath,
                 userName,
@@ -130,10 +205,10 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "" }) => {
 
             if (!isMounted) return;
 
-            const intro = res?.body?.intro || (
+            const intro = removeCurrentPageOpenPrompt(res?.body?.intro || (
                 `Здравствуйте, я ${assistant.name}. Я помогу быстрее освоиться в приложении.\n\n` +
                 "Спросите, что нужно сделать, или напишите: `что на этой странице?`."
-            );
+            ), currentPath);
 
             setMessages([createAssistantMessage(intro)]);
             setQuickPrompts(
@@ -148,12 +223,16 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "" }) => {
         return () => {
             isMounted = false;
         };
-    }, [assistant.name, currentPath]);
+    }, [assistant.name, currentPath, onboardingStep, userName]);
 
     useEffect(() => {
         if (!bodyRef.current) return;
+        if (onboardingStep) {
+            bodyRef.current.scrollTop = 0;
+            return;
+        }
         bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
-    }, [messages, isOpen]);
+    }, [messages, isOpen, onboardingStep]);
 
     useEffect(() => {
         if (!isOpen) return undefined;
@@ -202,7 +281,7 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "" }) => {
             updateStore: false,
         });
 
-        const answer = res?.ok ? formatAssistantAnswer(res?.body) : "";
+        const answer = res?.ok ? formatAssistantAnswer(res?.body, currentPath) : "";
 
         setMessages(prev => [
             ...prev,
@@ -222,6 +301,21 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "" }) => {
             assistantEnabled: false,
         });
         onClose();
+    };
+
+    const completeCurrentOnboardingStep = () => {
+        if (!onboardingStep) return;
+
+        setOnboardingProgress(prev => completeOnboardingStep(prev, onboardingStep.id, userId));
+    };
+
+    const hideOnboarding = () => {
+        setOnboardingProgress(prev => dismissOnboarding(prev, userId));
+    };
+
+    const restartOnboarding = () => {
+        setMessages([]);
+        setOnboardingProgress(resetOnboardingProgress(userId));
     };
 
     if (!isOpen) {
@@ -248,6 +342,13 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "" }) => {
                     >
                         Выкл
                     </button>
+                    <button
+                        className="assistant-chat-training"
+                        type="button"
+                        onClick={restartOnboarding}
+                    >
+                        Обучение
+                    </button>
                     <IconButton
                         className="assistant-chat-close"
                         onClick={onClose}
@@ -259,6 +360,56 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "" }) => {
                 </div>
 
                 <div className="assistant-chat-body" ref={bodyRef}>
+                    {onboardingStep && <div className="assistant-onboarding-card">
+                        <div className="assistant-onboarding-kicker">
+                            {firstSetupScenario.title}
+                        </div>
+                        <div className="assistant-onboarding-title">
+                            {onboardingStep.title}
+                        </div>
+                        <div className="assistant-onboarding-text">
+                            {onboardingStep.intro}
+                        </div>
+                        <ol className="assistant-onboarding-list">
+                            {onboardingStep.checklist.map(item => (
+                                <li key={item.text || item}>
+                                    <span>{item.text || item}</span>
+                                    {item.to && <Link className="assistant-onboarding-inline-link" to={item.to}>
+                                        {item.label || item.to}
+                                    </Link>}
+                                    {item.action && <span
+                                        className="assistant-onboarding-action-chip"
+                                        title={item.actionLabel || item.action}
+                                        aria-label={item.actionLabel || item.action}
+                                    >
+                                        {item.action}
+                                    </span>}
+                                </li>
+                            ))}
+                        </ol>
+                        {onboardingStep.note && <div className="assistant-onboarding-note">
+                            {onboardingStep.note}
+                        </div>}
+                        <div className="assistant-onboarding-actions">
+                            <Link className="assistant-onboarding-link" to={onboardingStep.path}>
+                                Открыть страницу
+                            </Link>
+                            <button
+                                className="assistant-onboarding-button"
+                                type="button"
+                                onClick={completeCurrentOnboardingStep}
+                            >
+                                Готово, дальше
+                            </button>
+                            <button
+                                className="assistant-onboarding-ghost"
+                                type="button"
+                                onClick={hideOnboarding}
+                            >
+                                Скрыть
+                            </button>
+                        </div>
+                    </div>}
                     {messages.map((item, index) => {
                         const lines = item.content.split("\n");
 

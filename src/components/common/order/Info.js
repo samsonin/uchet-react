@@ -36,21 +36,84 @@ const parseOrderJson = order => {
     if (typeof order.json === 'object') return order.json
 
     try {
-        return JSON.parse(order.json)
+        const parsed = JSON.parse(order.json)
+        return typeof parsed === 'string' ? JSON.parse(parsed) : parsed
     } catch (e) {
         return {}
     }
 
 }
 
-const getOrderFieldValue = (order, name) => {
+const normalizeFieldKey = value => String(value || '')
+    .trim()
+    .toLowerCase()
+    .replaceAll('ё', 'е')
+    .replace(/[^a-zа-я0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+
+const getOrderFieldNames = field => {
+
+    const names = [field?.name]
+
+    return names
+        .filter(value => value !== undefined && value !== null && String(value).trim() !== '')
+        .reduce((acc, value) => {
+            const normalized = normalizeFieldKey(value)
+            return acc.includes(value) || acc.includes(normalized)
+                ? acc
+                : acc.concat(value, normalized)
+        }, [])
+
+}
+
+const getValueByFieldNames = (source, fieldNames) => {
+
+    if (!source || typeof source !== 'object') return undefined
+
+    for (const fieldName of fieldNames) {
+        if (source[fieldName] !== undefined && source[fieldName] !== null) return source[fieldName]
+    }
+
+    const normalizedSource = Object.keys(source).reduce((acc, key) => {
+        acc[normalizeFieldKey(key)] = source[key]
+        return acc
+    }, {})
+
+    for (const fieldName of fieldNames.map(normalizeFieldKey)) {
+        if (normalizedSource[fieldName] !== undefined && normalizedSource[fieldName] !== null) return normalizedSource[fieldName]
+    }
+
+    return undefined
+
+}
+
+const getValueFromFieldList = (fieldsValue, fieldNames) => {
+
+    if (!Array.isArray(fieldsValue)) return undefined
+
+    const normalizedFieldNames = fieldNames.map(normalizeFieldKey)
+    const fieldValue = fieldsValue.find(item => {
+        const itemKeys = [item?.name, item?.key, item?.field].map(normalizeFieldKey)
+        return itemKeys.some(key => normalizedFieldNames.includes(key))
+    })
+
+    return fieldValue?.value ?? fieldValue?.value_value ?? fieldValue?.val ?? fieldValue?.text ?? fieldValue?.answer
+
+}
+
+const getOrderFieldValue = (order, field) => {
 
     const json = parseOrderJson(order)
+    const fieldNames = getOrderFieldNames(field)
+    const sources = [order, json, json?.fields, json?.order, order?.fields]
 
-    if (order?.[name] !== undefined && order?.[name] !== null) return order[name]
-    if (json?.[name] !== undefined && json?.[name] !== null) return json[name]
-    if (json?.fields?.[name] !== undefined && json?.fields?.[name] !== null) return json.fields[name]
-    if (json?.order?.[name] !== undefined && json?.order?.[name] !== null) return json.order[name]
+    for (const source of sources) {
+        const value = Array.isArray(source)
+            ? getValueFromFieldList(source, fieldNames)
+            : getValueByFieldNames(source, fieldNames)
+
+        if (value !== undefined && value !== null) return value
+    }
 
     return ''
 
@@ -293,7 +356,7 @@ const Info = props => {
                 const newState = {...prev}
 
                 fields.map(f => {
-                    newState[f.name] = getOrderFieldValue(order, f.name)
+                    newState[f.name] = getOrderFieldValue(order, f)
                     return f
                 })
 

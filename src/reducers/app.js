@@ -14,6 +14,8 @@ let initialState = {
     providers: [],
     categories: [],
     contact_types: [],
+    description_tolerance: {},
+    payment_types: [],
 }
 
 const probableKeys = [
@@ -34,6 +36,8 @@ const probableKeys = [
     'providers',
     'categories',
     'contact_types',
+    'description_tolerance',
+    'payment_types',
     'order',
     'orders',
     'referals',

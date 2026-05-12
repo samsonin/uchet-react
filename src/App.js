@@ -35,6 +35,7 @@ import IntegrationSmsRu from "./components/IntegrationSmsRu";
 import { Records } from "./components/Records";
 import Docs from "./components/Settings/Docs";
 import PrintSettingsPage from "./components/Settings/Print";
+import PaymentTypes from "./components/Settings/PaymentTypes";
 import AppSettings from "./components/Settings/appSettings";
 import Daily from "./components/Daily";
 import LoginModal from "./components/LoginModal";
@@ -128,6 +129,7 @@ const App = props => {
     const [deletingNeedCallbacks, setDeletingNeedCallbacks] = useState([])
 
     const barcode = useRef('')
+    const lastNetworkErrorAt = useRef(0)
 
     const { enqueueSnackbar, closeSnackbar } = useSnackbar()
 
@@ -189,6 +191,26 @@ const App = props => {
 
         document.addEventListener('keydown', handleKeyPress)
 
+        const handleNetworkError = event => {
+            const now = Date.now()
+
+            if (now - lastNetworkErrorAt.current < 7000) return
+
+            lastNetworkErrorAt.current = now
+
+            enqueueSnackbar(
+                event.detail?.isTimeout
+                    ? 'Запрос не вернулся. Проверьте интернет или доступность сервера.'
+                    : 'Проблемы с интернетом. Запрос не отправлен.',
+                {
+                    variant: 'error',
+                    preventDuplicate: true,
+                }
+            )
+        }
+
+        window.addEventListener('app-network-error', handleNetworkError)
+
         window.addEventListener("scroll", () => {
 
             const pageHeight = Math.max(
@@ -224,6 +246,10 @@ const App = props => {
             })
 
         // eslint-disable-next-line
+        return () => {
+            document.removeEventListener('keydown', handleKeyPress)
+            window.removeEventListener('app-network-error', handleNetworkError)
+        }
     }, [])
 
     useEffect(() => {
@@ -365,6 +391,7 @@ const App = props => {
                                 <Route path="/settings/personal" element={routeElement(Personal)} />
                                 <Route path="/settings/app" element={routeElement(AppSettings)} />
                                 <Route path="/settings/print" element={routeElement(PrintSettingsPage)} />
+                                <Route path="/settings/payment-types" element={routeElement(PaymentTypes)} />
                                 <Route path="/subscribe" element={routeElement(Subscribe)} />
 
                                 {props.app.stocks[0] && <Route

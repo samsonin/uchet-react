@@ -419,7 +419,21 @@
         cursor: pointer;
     }
 
-    .assistant-chat-disable:hover {
+    .assistant-chat-training {
+        min-height: 30px;
+        padding: 0.35rem 0.55rem;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        font: inherit;
+        font-size: 0.75rem;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .assistant-chat-disable:hover,
+    .assistant-chat-training:hover {
         background: rgba(255, 255, 255, 0.22);
     }
 
@@ -473,6 +487,153 @@
 
     .assistant-chat-message-user .assistant-chat-link {
         color: #ffffff;
+    }
+
+    .assistant-onboarding-card {
+        margin-bottom: 0.85rem;
+        padding: 0.82rem;
+        border: 1px solid rgba(15, 143, 135, 0.28);
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(226, 243, 241, 0.92), rgba(255, 255, 255, 0.96));
+        color: var(--text);
+        box-shadow: 0 10px 24px rgba(28, 43, 54, 0.08);
+    }
+
+    .assistant-onboarding-kicker {
+        color: var(--brand-strong);
+        font-size: 0.74rem;
+        font-weight: 850;
+        text-transform: uppercase;
+    }
+
+    .assistant-onboarding-title {
+        margin-top: 0.18rem;
+        font-size: 1rem;
+        font-weight: 850;
+    }
+
+    .assistant-onboarding-text,
+    .assistant-onboarding-note {
+        margin-top: 0.45rem;
+        color: var(--text-muted);
+        font-size: 0.86rem;
+        line-height: 1.35;
+    }
+
+    .assistant-onboarding-list {
+        margin: 0.6rem 0 0;
+        padding-left: 1.25rem;
+        font-size: 0.86rem;
+        line-height: 1.38;
+    }
+
+    .assistant-onboarding-list li + li {
+        margin-top: 0.24rem;
+    }
+
+    .assistant-onboarding-inline-link,
+    .assistant-onboarding-action-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 26px;
+        margin: 0.28rem 0.28rem 0.08rem 0;
+        padding: 0.24rem 0.48rem;
+        border-radius: 999px;
+        font-size: 0.76rem;
+        font-weight: 800;
+        line-height: 1;
+        vertical-align: middle;
+    }
+
+    .assistant-onboarding-list span + .assistant-onboarding-inline-link,
+    .assistant-onboarding-list span + .assistant-onboarding-action-chip {
+        margin-left: 0.38rem;
+    }
+
+    .assistant-onboarding-inline-link {
+        border: 1px solid var(--brand);
+        background: var(--brand-soft);
+        color: var(--brand-strong) !important;
+        text-decoration: none;
+    }
+
+    .assistant-onboarding-action-chip {
+        min-width: 26px;
+        border: 1px solid rgba(49, 95, 145, 0.28);
+        background: var(--ink-blue-soft);
+        color: var(--ink-blue);
+    }
+
+    .assistant-onboarding-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.42rem;
+        margin-top: 0.75rem;
+    }
+
+    .assistant-onboarding-link,
+    .assistant-onboarding-button,
+    .assistant-onboarding-ghost {
+        min-height: 34px;
+        padding: 0.45rem 0.65rem;
+        border-radius: 10px;
+        font: inherit;
+        font-size: 0.8rem;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .assistant-onboarding-link,
+    .assistant-onboarding-button {
+        border: 1px solid var(--brand);
+        background: var(--brand);
+        color: #ffffff !important;
+    }
+
+    .assistant-onboarding-ghost {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        color: var(--text-muted);
+    }
+
+    :root[data-theme="dark"] .assistant-chat-body {
+        background: #101a23;
+    }
+
+    :root[data-theme="dark"] .assistant-chat-message-assistant {
+        border-color: rgba(102, 209, 199, 0.24);
+        background: #1f2d38;
+        color: #edf7fb;
+    }
+
+    :root[data-theme="dark"] .assistant-onboarding-card {
+        border-color: rgba(102, 209, 199, 0.34);
+        background: linear-gradient(180deg, #1d3338, #182732);
+        color: #edf7fb;
+    }
+
+    :root[data-theme="dark"] .assistant-onboarding-text,
+    :root[data-theme="dark"] .assistant-onboarding-note {
+        color: #b8c8d5;
+    }
+
+    :root[data-theme="dark"] .assistant-onboarding-ghost {
+        border-color: rgba(157, 176, 194, 0.32);
+        background: #243441;
+        color: #dce8f0;
+    }
+
+    :root[data-theme="dark"] .assistant-onboarding-inline-link {
+        border-color: rgba(102, 209, 199, 0.5);
+        background: rgba(23, 163, 155, 0.22);
+        color: #9be7df !important;
+    }
+
+    :root[data-theme="dark"] .assistant-onboarding-action-chip {
+        border-color: rgba(127, 176, 255, 0.38);
+        background: rgba(127, 176, 255, 0.16);
+        color: #b8d2ff;
     }
 
     .assistant-chat-prompts {
@@ -557,6 +718,29 @@
 
     .app-settings-reset:hover {
         border-color: var(--brand);
+        color: var(--brand-strong);
+    }
+
+    .app-settings-training {
+        margin-top: 0.75rem;
+        border-color: var(--brand);
+        background: var(--brand);
+        color: #ffffff;
+    }
+
+    .app-settings-training:hover {
+        border-color: var(--brand-strong);
+        background: var(--brand-strong);
+        color: #ffffff;
+    }
+
+    :root[data-theme="dark"] .app-settings-font-slider,
+    :root[data-theme="dark"] .app-settings-font-slider .MuiSlider-markLabel {
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .app-settings-font-slider .MuiSlider-rail,
+    :root[data-theme="dark"] .app-settings-font-slider .MuiSlider-track {
         color: var(--brand-strong);
     }
 
@@ -850,6 +1034,13 @@
         background: linear-gradient(135deg, #087f73 0%, #0f9f8f 100%);
         box-shadow: 0 16px 30px rgba(15, 159, 143, 0.26);
         transform: translateY(-1px);
+    }
+
+    .sidebar-section-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none !important;
     }
 
     #wrapper > div[style] {
@@ -1297,6 +1488,27 @@
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 249, 250, 0.96));
         box-shadow: var(--shadow-subtle);
+    }
+
+    .arrival-today-page {
+        width: 100%;
+        padding: 0.5rem;
+        color: var(--text);
+    }
+
+    .arrival-today-page .MuiPaper-root {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        color: var(--text);
+    }
+
+    .arrival-today-row {
+        cursor: pointer;
+        background: var(--surface);
+    }
+
+    .arrival-today-row.is-in-stock {
+        background: rgba(27, 138, 76, 0.18);
     }
 
     .orders-toolbar {
@@ -2535,10 +2747,51 @@
     }
 
     :root[data-theme="dark"] .orders-page,
-    :root[data-theme="dark"] .order-page {
+    :root[data-theme="dark"] .order-page,
+    :root[data-theme="dark"] .arrival-today-page {
         background:
             linear-gradient(180deg, rgba(22, 33, 43, 0.98), rgba(27, 40, 51, 0.98));
         border-color: var(--line);
+    }
+
+    :root[data-theme="dark"] .arrival-today-page,
+    :root[data-theme="dark"] .arrival-today-page .MuiPaper-root,
+    :root[data-theme="dark"] .arrival-today-page .MuiTable-root,
+    :root[data-theme="dark"] .arrival-today-page .MuiTableCell-root,
+    :root[data-theme="dark"] .arrival-today-page .MuiFormControlLabel-label,
+    :root[data-theme="dark"] .arrival-today-page .MuiIconButton-root,
+    :root[data-theme="dark"] .arrival-today-page .MuiSvgIcon-root {
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .arrival-today-page .MuiInputBase-root,
+    :root[data-theme="dark"] .arrival-today-page .MuiOutlinedInput-root {
+        background: var(--surface-soft) !important;
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .arrival-today-page .MuiInputBase-input,
+    :root[data-theme="dark"] .arrival-today-page input {
+        color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
+        caret-color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .arrival-today-page .MuiOutlinedInput-notchedOutline,
+    :root[data-theme="dark"] .arrival-today-page .MuiTableCell-root {
+        border-color: var(--line) !important;
+    }
+
+    :root[data-theme="dark"] .arrival-today-row {
+        background: var(--surface) !important;
+    }
+
+    :root[data-theme="dark"] .arrival-today-row:hover {
+        background: var(--surface-tint) !important;
+    }
+
+    :root[data-theme="dark"] .arrival-today-row.is-in-stock {
+        background: rgba(27, 138, 76, 0.28) !important;
     }
 
     :root[data-theme="dark"] .order-tabs {
@@ -2944,16 +3197,44 @@
         color: var(--brand) !important;
     }
 
-    :root[data-theme="dark"] .settings-personal-page input:-webkit-autofill,
-    :root[data-theme="dark"] .settings-personal-page input:-webkit-autofill:hover,
-    :root[data-theme="dark"] .settings-personal-page input:-webkit-autofill:focus,
-    :root[data-theme="dark"] .settings-personal-page textarea:-webkit-autofill,
-    :root[data-theme="dark"] .settings-personal-page select:-webkit-autofill {
+    :root[data-theme="dark"] input:-webkit-autofill,
+    :root[data-theme="dark"] input:-webkit-autofill:hover,
+    :root[data-theme="dark"] input:-webkit-autofill:focus,
+    :root[data-theme="dark"] textarea:-webkit-autofill,
+    :root[data-theme="dark"] textarea:-webkit-autofill:hover,
+    :root[data-theme="dark"] textarea:-webkit-autofill:focus,
+    :root[data-theme="dark"] select:-webkit-autofill,
+    :root[data-theme="dark"] select:-webkit-autofill:hover,
+    :root[data-theme="dark"] select:-webkit-autofill:focus {
         -webkit-text-fill-color: var(--text) !important;
         caret-color: var(--text) !important;
         -webkit-box-shadow: 0 0 0 1000px var(--surface-soft) inset !important;
         box-shadow: 0 0 0 1000px var(--surface-soft) inset !important;
         transition: background-color 9999s ease-in-out 0s;
+    }
+
+    :root[data-theme="dark"] input:-internal-autofill-selected,
+    :root[data-theme="dark"] textarea:-internal-autofill-selected,
+    :root[data-theme="dark"] select:-internal-autofill-selected {
+        appearance: none !important;
+        background-color: var(--surface-soft) !important;
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] select,
+    :root[data-theme="dark"] option,
+    :root[data-theme="dark"] datalist,
+    :root[data-theme="dark"] datalist option {
+        background: var(--surface) !important;
+        color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .MuiAutocomplete-option,
+    :root[data-theme="dark"] .MuiAutocomplete-option *,
+    :root[data-theme="dark"] .MuiAutocomplete-loading,
+    :root[data-theme="dark"] .MuiAutocomplete-noOptions {
+        color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
     }
 
     :root[data-theme="dark"] .MuiCheckbox-root,

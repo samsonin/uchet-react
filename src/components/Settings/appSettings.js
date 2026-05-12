@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
 import {
     Card,
     CardContent,
@@ -17,6 +18,7 @@ import {
     getAppSettings,
     saveAppSettings,
 } from "./appSettingsStore";
+import { resetOnboardingProgress } from "../assistant/onboarding";
 
 const useStyles = makeStyles({
     root: {
@@ -26,10 +28,13 @@ const useStyles = makeStyles({
     },
     card: {
         marginBottom: 10,
+        background: "var(--surface)",
+        color: "var(--text)",
     },
     cardHeader: {
-        backgroundColor: "#F7F7F7",
-        borderBottom: "1px solid #e9ecef",
+        backgroundColor: "var(--surface-soft)",
+        borderBottom: "1px solid var(--line)",
+        color: "var(--text)",
     },
     row: {
         marginBottom: 18,
@@ -45,11 +50,15 @@ const useStyles = makeStyles({
         background: "var(--surface-soft)",
         color: "var(--text)",
     },
+    text: {
+        color: "var(--text)",
+    },
 });
 
-const AppSettings = () => {
+const AppSettings = props => {
     const classes = useStyles();
     const [settings, setSettings] = useState(() => getAppSettings());
+    const [trainingRestarted, setTrainingRestarted] = useState(false);
 
     useEffect(() => {
         applyAppSettings(settings);
@@ -64,6 +73,12 @@ const AppSettings = () => {
 
     const resetFontSize = () => update({ fontSize: defaultAppSettings.fontSize });
 
+    const restartTraining = () => {
+        update({ assistantEnabled: true });
+        resetOnboardingProgress(props.auth?.user_id);
+        setTrainingRestarted(true);
+    };
+
     return (
         <div className={classes.root}>
             <Card className={classes.card}>
@@ -75,26 +90,11 @@ const AppSettings = () => {
                 <CardContent>
                     <Grid container spacing={3}>
                         <Grid size={12} className={classes.row}>
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={settings.assistantEnabled}
-                                        onChange={event => update({ assistantEnabled: event.target.checked })}
-                                        color="primary"
-                                    />
-                                }
-                                label="Показывать помощника"
-                            />
-                            <Typography variant="body2" className={classes.helper}>
-                                Если выключить помощника, кнопка чата справа внизу исчезнет.
-                            </Typography>
-                        </Grid>
-
-                        <Grid size={12} className={classes.row}>
-                            <Typography variant="subtitle1">
+                            <Typography variant="subtitle1" className={classes.text}>
                                 Размер шрифта приложения: {settings.fontSize}px
                             </Typography>
                             <Slider
+                                className="app-settings-font-slider"
                                 value={settings.fontSize}
                                 min={14}
                                 max={20}
@@ -124,8 +124,54 @@ const AppSettings = () => {
                     </Grid>
                 </CardContent>
             </Card>
+
+            <Card className={classes.card}>
+                <CardHeader
+                    title="Ассистент"
+                    className={classes.cardHeader}
+                    titleTypographyProps={{ variant: "h6" }}
+                />
+                <CardContent>
+                    <Grid container spacing={3}>
+                        <Grid size={12} className={classes.row}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={settings.assistantEnabled}
+                                        onChange={event => update({ assistantEnabled: event.target.checked })}
+                                        color="primary"
+                                    />
+                                }
+                                label="Показывать помощника"
+                            />
+                            <Typography variant="body2" className={classes.helper}>
+                                Если выключить помощника, кнопка чата справа внизу исчезнет.
+                            </Typography>
+                        </Grid>
+
+                        <Grid size={12}>
+                            <Typography variant="subtitle1" className={classes.text}>
+                                Обучение
+                            </Typography>
+                            <Typography variant="body2" className={classes.helper}>
+                                Повторный запуск покажет первичную настройку заново только для вашей учетной записи.
+                            </Typography>
+                            <button
+                                type="button"
+                                className="app-settings-reset app-settings-training"
+                                onClick={restartTraining}
+                            >
+                                Пройти обучение заново
+                            </button>
+                            {trainingRestarted && <Typography variant="body2" className={classes.helper}>
+                                Обучение сброшено. Откройте помощника, чтобы начать с первого шага.
+                            </Typography>}
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
         </div>
     );
 };
 
-export default AppSettings;
+export default connect(state => ({ auth: state.auth }))(AppSettings);

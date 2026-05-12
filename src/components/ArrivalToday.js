@@ -60,7 +60,7 @@ const ArrivalToday = props => {
         ? makeGroup(goods)
         : goods
 
-    return <>
+    return <div className="arrival-today-page">
 
         <div style={{
             display: 'flex',
@@ -172,10 +172,7 @@ const ArrivalToday = props => {
 
                             return <TableRow
                                 key={uuidv4()}
-                                style={{
-                                    cursor: 'pointer',
-                                    background: !isGroup && good.isInStock ? 'green' : 'white'
-                                }}
+                                className={`arrival-today-row ${!isGroup && good.isInStock ? 'is-in-stock' : ''}`}
                             >
                                 {isGroup || <TableCell>{good.id}</TableCell>}
                                 <TableCell>{good.category}</TableCell>
@@ -204,7 +201,7 @@ const ArrivalToday = props => {
         </TableContainer>
 
 
-    </>
+    </div>
 
 }
 

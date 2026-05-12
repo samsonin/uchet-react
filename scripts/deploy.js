@@ -9,13 +9,25 @@ const htaccessPath = path.join(rootDir, '.htaccess');
 const buildHtaccessPath = path.join(buildDir, '.htaccess');
 
 const remoteUser = process.env.DEPLOY_USER || 'u0087004';
-const remoteHost = process.env.DEPLOY_HOST || 'uchet.store';
+const remoteHost = process.env.DEPLOY_HOST || '31.31.198.201';
 const remoteDir = process.env.DEPLOY_DIR || 'httpdocs/app.uchet.store';
 const remote = `${remoteUser}@${remoteHost}`;
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const tarCommand = process.env.DEPLOY_TAR_COMMAND || 'tar';
-const sshCommand = process.env.DEPLOY_SSH_COMMAND || 'ssh';
 const deployTimeoutMs = Number(process.env.DEPLOY_TIMEOUT_MS || 120000);
+
+function getSshCommand() {
+    if (process.env.DEPLOY_SSH_COMMAND) return process.env.DEPLOY_SSH_COMMAND;
+
+    if (process.platform === 'win32') {
+        const systemSsh = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'OpenSSH', 'ssh.exe');
+        if (fs.existsSync(systemSsh)) return systemSsh;
+    }
+
+    return 'ssh';
+}
+
+const sshCommand = getSshCommand();
 
 function run(command, args, options = {}) {
     return new Promise((resolve, reject) => {

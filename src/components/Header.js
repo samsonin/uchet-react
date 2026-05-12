@@ -294,6 +294,7 @@ const NavbarPage = props => {
         onOpen={() => setAssistantOpen(true)}
         onClose={() => setAssistantOpen(false)}
         userName={userName}
+        userId={props.auth.user_id}
     />}
     </>;
 };

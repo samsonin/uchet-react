@@ -1,5 +1,5 @@
-import sofiaAvatar from "../../images/assistant-sofia.png";
-import alexanderAvatar from "../../images/assistant-alexander.png";
+import sofiaAvatar from "../../images/assistant-sofia-optimized.jpg";
+import alexanderAvatar from "../../images/assistant-alexander-optimized.jpg";
 
 export const ASSISTANTS = {
     female: {

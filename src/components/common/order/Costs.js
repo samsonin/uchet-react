@@ -44,11 +44,14 @@ const useStyles = makeStyles((theme) => ({
         minHeight: '56px',
     },
     field: {
-        margin: '1rem .3rem',
         width: '100%'
     },
     content: {
-        padding: '0.75rem 1.2rem !important',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        minWidth: 'min(92vw, 440px)',
+        padding: '1.1rem 1.2rem !important',
     },
     actions: {
         padding: '0.75rem 1.2rem 1rem !important',
@@ -189,6 +192,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
                 />}
 
                 {!user_id && <FormControlLabel
+                    style={{marginTop: '-0.2rem'}}
                     control={<Checkbox checked={cash}
                                        onChange={() => setCash(!cash)}
                     />}

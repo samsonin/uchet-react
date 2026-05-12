@@ -1,10 +1,15 @@
 import {SERVER} from '../constants';
 import store from '../store'
 
+const NETWORK_ERROR_EVENT = 'app-network-error'
+const DEFAULT_TIMEOUT_MS = 30000
 
-let response = {};
+const notifyNetworkError = detail => {
+    window.dispatchEvent(new CustomEvent(NETWORK_ERROR_EVENT, {detail}))
+}
 
 export default function fetchPost(url, method = 'GET', data = '', isFile = false, options = {}) {
+    let response = {};
 
     const {
         auth: useAuth = true,
@@ -15,6 +20,8 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         credentials = 'same-origin',
         bodyType = '',
         fileFieldName = 'image',
+        timeoutMs = DEFAULT_TIMEOUT_MS,
+        showGlobalLoader = true,
     } = options;
 
     let authData = JSON.parse(window.localStorage.getItem('auth'));
@@ -24,7 +31,7 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         : ''
 
     let circularln = document.getElementById('circularln');
-    if (circularln && url !== 'upd') circularln.style.display = '';
+    if (showGlobalLoader && circularln && url !== 'upd') circularln.style.display = '';
 
     let init = {
         method,
@@ -56,6 +63,11 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         }
 
     }
+
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+
+    init.signal = controller.signal
 
     return fetch(baseUrl + '/' + url, init)
         .then(res => {
@@ -100,8 +112,19 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
                 return response;
             }
 
-            const body = await res.json();
-            response.body = body;
+            const text = await res.text();
+
+            if (!text) {
+                response.body = null;
+                return response;
+            }
+
+            try {
+                response.body = JSON.parse(text);
+            } catch (error) {
+                response.body = text;
+            }
+
             return response;
         })
         .then(res => {
@@ -119,13 +142,23 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         })
         .catch(error => {
 
-            console.log(error)
+            const isNetworkError = error?.name === 'AbortError' || !response.status
+
+            if (isNetworkError) {
+                notifyNetworkError({
+                    isTimeout: error?.name === 'AbortError',
+                    url,
+                })
+            } else if (!String(error?.message || '').includes('Unexpected end of JSON input')) {
+                console.log(error)
+            }
 
             if (!response.ok) response.error = error;
             return response;
         })
         .finally(() => {
-            if (circularln) circularln.style.display = 'none'
+            clearTimeout(timeout)
+            if (showGlobalLoader && circularln) circularln.style.display = 'none'
         });
 
 }

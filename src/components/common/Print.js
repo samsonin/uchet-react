@@ -30,8 +30,6 @@ export function Print(doc, alias, aliasFunction, afterPrint) {
 
         span.innerHTML = html
 
-        if (!html) console.error(i.name)
-
         i.parentNode.replaceChild(span, i)
 
     }
