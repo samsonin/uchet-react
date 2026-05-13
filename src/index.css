@@ -489,6 +489,35 @@
         color: #ffffff;
     }
 
+    .assistant-chat-route-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        margin: 0.12rem 0.16rem;
+        padding: 0.28rem 0.58rem;
+        border: 1px solid var(--brand);
+        border-radius: 999px;
+        background: var(--brand-soft);
+        color: var(--brand-strong) !important;
+        font-size: 0.78rem;
+        font-weight: 850;
+        line-height: 1.15;
+        text-decoration: none !important;
+        vertical-align: middle;
+    }
+
+    .assistant-chat-route-button:hover {
+        background: var(--brand);
+        color: #ffffff !important;
+    }
+
+    .assistant-chat-message-user .assistant-chat-route-button {
+        border-color: rgba(255, 255, 255, 0.7);
+        background: rgba(255, 255, 255, 0.18);
+        color: #ffffff !important;
+    }
+
     .assistant-onboarding-card {
         margin-bottom: 0.85rem;
         padding: 0.82rem;

@@ -56,8 +56,21 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const useStyles = makeStyles((theme) => ({
     field: {
-        margin: '1rem .3rem',
+        margin: '0 !important',
         width: '100%'
+    },
+    title: {
+        padding: '1rem 1.2rem 0.85rem !important',
+    },
+    content: {
+        display: 'grid',
+        gap: '0.9rem',
+        padding: '1rem 1.2rem 0.75rem !important',
+        minWidth: 'min(92vw, 420px)'
+    },
+    actions: {
+        padding: '0.75rem 1.2rem 1rem !important',
+        gap: '0.65rem'
     },
     titleBar: {
         display: 'flex',
@@ -159,7 +172,20 @@ const Prepaid = props => {
 
     const doc = props.app.docs.find(d => d.name === 'prepaid')
 
-    const sendRest = () => {
+    const buildAlias = (overrides = {}) => ({
+        organization_organization: props.app.organization.organization,
+        organization_legal_address: props.app.organization.legal_address,
+        organization_inn: props.app.organization.inn,
+        today: createDate(overrides.created || created),
+        fio: overrides.customer?.fio || customer.fio,
+        model: overrides.item ?? item,
+        sum: overrides.sum ?? sum,
+        presum: overrides.presum ?? presum
+    })
+
+    const printPrepaid = (overrides = {}) => Print(doc, buildAlias(overrides))
+
+    const sendRest = (shouldPrint = false) => {
 
         let url = 'zakaz/' + props.app.current_stock_id
         const data = {item, presum, sum, customer, status, note}
@@ -177,7 +203,7 @@ const Prepaid = props => {
 
                         if (props.setPrepaids && res.body.prepaids) props.setPrepaids(res.body.prepaids)
 
-                        if (!id) Print(doc, alias)
+                        if (!id || shouldPrint) printPrepaid(res.body || {})
 
                         exit()
 
@@ -196,7 +222,7 @@ const Prepaid = props => {
 
     }
 
-    const save = afterCheckPhoneNumber => {
+    const save = (afterCheckPhoneNumber, shouldPrint = false) => {
 
         let error;
 
@@ -227,7 +253,7 @@ const Prepaid = props => {
 
         if (error) return enqueueSnackbar(error, {variant: 'error'})
 
-        sendRest()
+        sendRest(shouldPrint)
 
     }
 
@@ -254,17 +280,6 @@ const Prepaid = props => {
 
     }
 
-    const alias = {
-        organization_organization: props.app.organization.organization,
-        organization_legal_address: props.app.organization.legal_address,
-        organization_inn: props.app.organization.inn,
-        today: createDate(created),
-        fio: customer.fio,
-        model: item,
-        sum: sum,
-        presum: presum
-    }
-
     return <Dialog
         open={props.isOpen}
         slots={{ transition: Transition }}
@@ -272,14 +287,14 @@ const Prepaid = props => {
         onClose={() => exit()}
         className='non-printable'
     >
-        <DialogTitle>
+        <DialogTitle className={classes.title}>
             <div className={classes.titleBar}>
                 <span className={classes.titleText}>Предоплата</span>
                 <div className={classes.titleActions}>
                     <IconButton
                         className={classes.printButton}
-                        disabled={!id}
-                        onClick={() => Print(doc, alias)}
+                        disabled={disabled}
+                        onClick={() => id ? printPrepaid() : save(false, true)}
                     >
                         <PrintIcon/>
                     </IconButton>
@@ -292,7 +307,7 @@ const Prepaid = props => {
             </div>
         </DialogTitle>
 
-        <DialogContent>
+        <DialogContent className={classes.content}>
 
             {created
                 ? <DialogContentText>
@@ -308,12 +323,12 @@ const Prepaid = props => {
             />
 
             {sumField(initPrepaid, presum, setPresum, {
-                margin: '1rem .3rem',
+                margin: '0',
                 width: '100%'
             }, disabled)}
 
             {sumField(initSum, sum, setSum, {
-                margin: '1rem .3rem',
+                margin: '0',
                 width: '100%'
             }, disabled)}
 
@@ -361,7 +376,7 @@ const Prepaid = props => {
 
         {disabled
             ? ''
-            : <DialogActions>
+            : <DialogActions className={classes.actions}>
                 <Button onClick={() => id
                     ? del()
                     : exit()}
@@ -375,6 +390,13 @@ const Prepaid = props => {
                     {id
                         ? 'Сохранить'
                         : 'Внести'}
+                </Button>
+                <Button
+                    onClick={() => id ? printPrepaid() : save(false, true)}
+                    color="primary"
+                    startIcon={<PrintIcon/>}
+                >
+                    Печать
                 </Button>
             </DialogActions>
         }

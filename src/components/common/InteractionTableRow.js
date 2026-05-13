@@ -32,17 +32,23 @@ const InteractionTableRow = ({
     className,
     style,
     getValue = defaultGetValue,
+    getCellProps = () => ({}),
     cellKeyPrefix = "interaction-table-row",
 }) => <TableRow
     className={className}
     style={style}
     onClick={onClick}
 >
-    {values.map((valueName, index) => <TableCell
-        key={`${cellKeyPrefix}-${row.id || row.item || "row"}-${valueName}-${index}`}
-    >
-        {getValue({row, valueName, users})}
-    </TableCell>)}
+    {values.map((valueName, index) => {
+        const cellProps = getCellProps({row, valueName, index}) || {};
+
+        return <TableCell
+            key={`${cellKeyPrefix}-${row.id || row.item || "row"}-${valueName}-${index}`}
+            {...cellProps}
+        >
+            {getValue({row, valueName, users})}
+        </TableCell>;
+    })}
 </TableRow>;
 
 export default InteractionTableRow;

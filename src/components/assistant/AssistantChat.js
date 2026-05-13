@@ -43,6 +43,53 @@ const createUserMessage = content => ({
     createdAt: Date.now(),
 });
 
+const getDailyAssistantIntro = (assistantName, app = {}) => {
+    const currentStockId = app.current_stock_id;
+    const stock = (app.stocks || []).find(item => +item.id === +currentStockId);
+    const daily = (app.daily || []).find(item => +item.stock_id === +currentStockId);
+
+    if (!currentStockId) {
+        return (
+            `Здравствуйте, я ${assistantName}. Вижу, что вы открыли раздел «Ежедневный отчет».\n\n` +
+            "Здесь ведется отчет по смене: сотрудники, предоплаты, товары, работы, расходы, подотчеты и итоги дня. Сначала выберите рабочую точку, после этого можно будет работать с отчетом смены."
+        );
+    }
+
+    if (!daily) {
+        return (
+            `Здравствуйте, я ${assistantName}. Вижу, что вы открыли раздел «Ежедневный отчет».\n\n` +
+            `Точка${stock?.name ? ` «${stock.name}»` : ""} уже выбрана. В этом разделе отображаются сотрудники смены, операции за день и итоговые суммы. Если смена еще не открыта, начните ее в шапке приложения.`
+        );
+    }
+
+    return (
+        `Здравствуйте, я ${assistantName}. Вижу, что вы открыли раздел «Ежедневный отчет».\n\n` +
+        `Точка${stock?.name ? ` «${stock.name}»` : ""} выбрана, смена уже открыта. Здесь можно проверить сотрудников смены, предоплаты, продажи, работы и услуги, расходы, подотчеты, способы оплаты и итоговые суммы за день.`
+    );
+};
+
+const normalizePromptText = value => String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[?.!]+$/g, "");
+
+const getLocalAssistantReply = (content, currentPath, app = {}, assistantName = "") => {
+    const prompt = normalizePromptText(content);
+
+    if (/^где\s+найти\s+клиент/.test(prompt)) {
+        return (
+            "Клиентов нужно искать в разделе «Физические лица» на странице /customers. " +
+            "Перейдите туда и воспользуйтесь поиском по разделу: можно искать по имени, телефону, документам, адресу и дополнительным контактам."
+        );
+    }
+
+    if (normalizeAssistantRoute(currentPath) === "/daily" && /^что\s+на\s+этой\s+странице/.test(prompt)) {
+        return getDailyAssistantIntro(assistantName, app);
+    }
+
+    return "";
+};
+
 const getAuth = () => {
     try {
         return JSON.parse(window.localStorage.getItem("auth") || "null");
@@ -66,6 +113,25 @@ const normalizeAssistantRoute = value => {
 const isSameRoute = (firstRoute, secondRoute) => (
     normalizeAssistantRoute(firstRoute) === normalizeAssistantRoute(secondRoute)
 );
+
+const pageIntroOverrides = {
+    "/settings/employees": assistantName => (
+        `Здравствуйте, я ${assistantName}. Вижу, что вы открыли раздел «Сотрудники».\n\n` +
+        "На этой странице можно управлять сотрудниками организации: искать сотрудников, назначать конкретным сотрудникам должности, менять их статус, добавлять новые должности и регулировать полномочия для каждой должности."
+    ),
+    "/daily": (assistantName, app) => getDailyAssistantIntro(assistantName, app),
+};
+
+const getPageIntroOverride = (currentPath, assistantName, app) => {
+    const override = pageIntroOverrides[normalizeAssistantRoute(currentPath)];
+
+    return typeof override === "function" ? override(assistantName, app) : override;
+};
+
+const removeAccessAvailabilityNotes = answer => String(answer || "")
+    .replace(/(^|[.!?]\s+|\n+)([^.!?\n]*(?:раздел|страница)[^.!?\n]*доступ[^\n.!?]*(?:администратор|пользовател)[^.!?\n]*[.!?]?)/gi, (match, prefix) => (
+        prefix.startsWith("\n") ? "\n" : prefix.match(/^[.!?]\s+/) ? prefix.slice(0, 1) + " " : ""
+    ));
 
 const removeCurrentPageOpenPrompt = (answer, currentPath) => {
     if (!currentPath) return answer;
@@ -91,7 +157,9 @@ const removeCurrentPageOpenPrompt = (answer, currentPath) => {
 };
 
 const formatAssistantAnswer = (body, currentPath = "") => {
-    const answer = removeCurrentPageOpenPrompt(body?.answer || body?.text || "", currentPath);
+    const answer = removeAccessAvailabilityNotes(
+        removeCurrentPageOpenPrompt(body?.answer || body?.text || "", currentPath)
+    ).replace(/\n{3,}/g, "\n\n").trim();
     const links = Array.isArray(body?.links)
         ? body.links.filter(link => link?.to && !isSameRoute(link.to, currentPath))
         : [];
@@ -133,11 +201,11 @@ const renderMessageLine = (line, keyPrefix) => {
 
         parts.push(
             <Link
-                className="assistant-chat-link"
+                className="assistant-chat-route-button"
                 to={path}
                 key={`${keyPrefix}-link-${match.index}`}
             >
-                {path}
+                {`Открыть ${path}`}
             </Link>
         );
 
@@ -157,7 +225,7 @@ const renderMessageLine = (line, keyPrefix) => {
     return parts.length ? parts : line;
 };
 
-const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "" }) => {
+const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "", app = {} }) => {
     const assistant = getAssistantForUserName(userName);
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
@@ -169,6 +237,7 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "" }) 
     const onboardingStep = onboardingProgress.dismissed
         ? null
         : getCurrentOnboardingStep(onboardingProgress);
+    const pageIntroOverride = getPageIntroOverride(currentPath, assistant.name, app);
 
     useEffect(() => {
         setOnboardingProgress(getOnboardingProgress(userId));
@@ -205,10 +274,13 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "" }) 
 
             if (!isMounted) return;
 
-            const intro = removeCurrentPageOpenPrompt(res?.body?.intro || (
+            const intro = removeAccessAvailabilityNotes(removeCurrentPageOpenPrompt(
+                pageIntroOverride || res?.body?.intro || (
                 `Здравствуйте, я ${assistant.name}. Я помогу быстрее освоиться в приложении.\n\n` +
                 "Спросите, что нужно сделать, или напишите: `что на этой странице?`."
-            ), currentPath);
+                ),
+                currentPath
+            )).replace(/\n{3,}/g, "\n\n").trim();
 
             setMessages([createAssistantMessage(intro)]);
             setQuickPrompts(
@@ -223,7 +295,7 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "" }) 
         return () => {
             isMounted = false;
         };
-    }, [assistant.name, currentPath, onboardingStep, userName]);
+    }, [assistant.name, currentPath, onboardingStep, pageIntroOverride, userName]);
 
     useEffect(() => {
         if (!bodyRef.current) return;
@@ -251,6 +323,7 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "" }) 
 
         const currentPath = window.location.pathname;
         const userMessage = createUserMessage(content);
+        const localAnswer = getLocalAssistantReply(content, currentPath, app, assistant.name);
         const history = messages
             .filter(item => ["user", "assistant"].includes(item.role))
             .slice(-8)
@@ -259,8 +332,18 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "" }) 
                 content: item.content,
             }));
 
-        setMessages(prev => [...prev, userMessage]);
         setMessage("");
+
+        if (localAnswer) {
+            setMessages(prev => [
+                ...prev,
+                userMessage,
+                createAssistantMessage(localAnswer),
+            ]);
+            return;
+        }
+
+        setMessages(prev => [...prev, userMessage]);
         setIsSending(true);
 
         const auth = getAuth();

@@ -18,12 +18,9 @@ import {
     TableHead,
     TableRow,
     TextField,
-    Tooltip,
     Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 
 import rest from "../Rest";
 
@@ -36,11 +33,7 @@ const CANCEL_LABEL = '\u041e\u0442\u043c\u0435\u043d\u0430';
 const SAVE_LABEL = '\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c';
 const NAME_LABEL = '\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435';
 const ACTIVE_LABEL = '\u0410\u043a\u0442\u0438\u0432\u0435\u043d';
-const STATUS_LABEL = '\u0421\u0442\u0430\u0442\u0443\u0441';
-const ACTIONS_LABEL = '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u044f';
 const EMPTY_LABEL = '\u0421\u043f\u043e\u0441\u043e\u0431\u044b \u043e\u043f\u043b\u0430\u0442\u044b \u043f\u043e\u043a\u0430 \u043d\u0435 \u0437\u0430\u0434\u0430\u043d\u044b';
-const ACTIVE_STATUS = '\u0412\u043a\u043b\u044e\u0447\u0435\u043d';
-const INACTIVE_STATUS = '\u0412\u044b\u043a\u043b\u044e\u0447\u0435\u043d';
 const CASH_PAYMENT_NAME = '\u043d\u0430\u043b\u0438\u0447\u043d\u044b\u0435';
 
 const getPaymentTypesFromResponse = body => {
@@ -114,7 +107,7 @@ const PaymentTypes = props => {
         const isEdit = Boolean(dialog.item);
         const payload = {
             name: dialog.name.trim(),
-            is_active: Boolean(dialog.is_active),
+            is_active: isEdit ? Boolean(dialog.is_active) : true,
         };
 
         setSaving(true);
@@ -144,6 +137,25 @@ const PaymentTypes = props => {
             .finally(() => setSaving(false));
     };
 
+    const toggleActive = (event, item) => {
+        event.stopPropagation();
+
+        if (!isAdmin || isCashPaymentType(item) || isSaving) return;
+
+        setSaving(true);
+
+        rest('payment-types/' + item.id, 'PATCH', {
+            name: item.name,
+            is_active: !Boolean(item.is_active),
+        })
+            .then(res => {
+                if (!res?.ok) return;
+
+                loadPaymentTypes();
+            })
+            .finally(() => setSaving(false));
+    };
+
     const renderDialog = () => dialog && <Dialog
         open
         onClose={closeDialog}
@@ -160,13 +172,13 @@ const PaymentTypes = props => {
                     value={dialog.name}
                     onChange={e => setDialog(prev => ({ ...prev, name: e.target.value }))}
                 />
-                <FormControlLabel
+                {dialog.item && <FormControlLabel
                     control={<Checkbox
                         checked={dialog.is_active}
                         onChange={e => setDialog(prev => ({ ...prev, is_active: e.target.checked }))}
                     />}
                     label={ACTIVE_LABEL}
-                />
+                />}
             </Box>
         </DialogContent>
         <DialogActions>
@@ -202,14 +214,6 @@ const PaymentTypes = props => {
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>{PAGE_TITLE}</Typography>
                 <Typography variant="body2" color="text.secondary">{PAGE_SUBTITLE}</Typography>
             </Box>
-            {isAdmin && <Button
-                variant="contained"
-                size="small"
-                startIcon={<AddIcon />}
-                onClick={() => openDialog(null)}
-            >
-                {ADD_LABEL}
-            </Button>}
         </Box>
 
         <TableContainer component={Paper} elevation={0} sx={{
@@ -219,37 +223,58 @@ const PaymentTypes = props => {
             <Table size="small">
                 <TableHead>
                     <TableRow>
-                        <TableCell sx={{ fontWeight: 700 }}>{NAME_LABEL}</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>{STATUS_LABEL}</TableCell>
-                        {isAdmin && <TableCell align="right" sx={{ fontWeight: 700 }}>
-                            {ACTIONS_LABEL}
-                        </TableCell>}
+                        <TableCell sx={{ fontWeight: 700 }}>
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: 2,
+                            }}>
+                                <span>{NAME_LABEL}</span>
+                                {isAdmin && <IconButton
+                                    size="small"
+                                    color="primary"
+                                    aria-label={ADD_LABEL}
+                                    title={ADD_LABEL}
+                                    onClick={() => openDialog(null)}
+                                >
+                                    <AddIcon />
+                                </IconButton>}
+                            </Box>
+                        </TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {!isLoading && !sortedItems.length && <TableRow>
-                        <TableCell colSpan={isAdmin ? 3 : 2}>{EMPTY_LABEL}</TableCell>
+                        <TableCell>{EMPTY_LABEL}</TableCell>
                     </TableRow>}
                     {sortedItems.map(item => {
                         const isCash = isCashPaymentType(item);
 
-                        return <TableRow key={'payment-type-' + item.id} hover>
-                            <TableCell>{item.name}</TableCell>
-                            <TableCell>{item.is_active ? ACTIVE_STATUS : INACTIVE_STATUS}</TableCell>
-                            {isAdmin && <TableCell align="right">
-                                {!isCash && <>
-                                    <Tooltip title={EDIT_LABEL}>
-                                        <IconButton size="small" onClick={() => openDialog(item)}>
-                                            <EditIcon fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title={DELETE_LABEL}>
-                                        <IconButton size="small" color="error" onClick={() => deleteItem(item)}>
-                                            <DeleteIcon fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </>}
-                            </TableCell>}
+                        return <TableRow
+                            key={'payment-type-' + item.id}
+                            hover={!isCash && isAdmin}
+                            onClick={() => !isCash && isAdmin && openDialog(item)}
+                            sx={{
+                                cursor: !isCash && isAdmin ? 'pointer' : 'default',
+                            }}
+                        >
+                            <TableCell>
+                                <Box sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 2,
+                                }}>
+                                    <span>{item.name}</span>
+                                    <Checkbox
+                                        checked={Boolean(item.is_active)}
+                                        disabled={!isAdmin || isCash || isSaving}
+                                        onClick={event => event.stopPropagation()}
+                                        onChange={event => toggleActive(event, item)}
+                                    />
+                                </Box>
+                            </TableCell>
                         </TableRow>
                     })}
                 </TableBody>
