@@ -1528,6 +1528,11 @@
         background: var(--surface);
     }
 
+    :root[data-theme="dark"] .orders-id-field .MuiInputAdornment-root,
+    :root[data-theme="dark"] .orders-id-field .MuiSvgIcon-root {
+        color: var(--text-muted) !important;
+    }
+
     .orders-action-button,
     .orders-secondary-button {
         margin: 0.35rem 0.35rem 0.35rem 0 !important;
