@@ -55,6 +55,22 @@ const getContrastText = color => {
     return darkContrast > whiteContrast ? '#102331' : '#ffffff';
 }
 
+const prioritizeExactOrderMatch = (orders, search) => {
+    const exactSearch = search.trim()
+
+    if (!exactSearch || !Array.isArray(orders)) return orders
+
+    const exactIndex = orders.findIndex(order => [order.id, order.order_id]
+        .some(value => String(value || '') === exactSearch))
+
+    if (exactIndex < 1) return orders
+
+    const nextOrders = [...orders]
+    const [exactOrder] = nextOrders.splice(exactIndex, 1)
+
+    return [exactOrder, ...nextOrders]
+}
+
 const Orders = props => {
 
     const appStocks = props.app.stocks || []
@@ -93,10 +109,11 @@ const Orders = props => {
         if (res.status === 200) {
 
             setParameters(false)
-            setOrders(res.body)
+            setOrders(prioritizeExactOrderMatch(res.body, search))
 
         } else if (res.status === 204) {
 
+            setOrders([])
             enqueueSnackbar('Заказов не найдено', {variant: 'error'})
 
         }
