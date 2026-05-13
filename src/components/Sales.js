@@ -25,6 +25,22 @@ const style = {
     padding: '.5em',
 }
 
+const isJsonLikeNote = value => {
+    if (typeof value !== 'string') return false
+
+    const note = value.trim()
+    if (!note || !['{', '['].includes(note[0])) return false
+
+    try {
+        const parsed = JSON.parse(note)
+        return typeof parsed === 'object' && parsed !== null
+    } catch (error) {
+        return false
+    }
+}
+
+const getPublicNote = note => isJsonLikeNote(note) ? '' : note
+
 const Sales = props => {
 
     const appStocks = props.app.stocks || []
@@ -123,7 +139,7 @@ const Sales = props => {
                 {TwoLineInCell(sale.action, toLocalTimeStr(sale.unix))}
             </TableCell>
             <TableCell>
-                {TwoLineInCell(sale.item, sale.note)}
+                {TwoLineInCell(sale.item, getPublicNote(sale.note))}
             </TableCell>
             <TableCell>{sale.sum}</TableCell>
             <TableCell>
