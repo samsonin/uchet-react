@@ -5,13 +5,18 @@ import TableRow from "@mui/material/TableRow";
 
 import TwoLineInCell from "./TwoLineInCell";
 
-const defaultGetValue = ({row, valueName, users}) => {
+const defaultGetValue = ({ row, valueName, users }) => {
+
     let value = row[valueName];
 
     const user = users.find(u => u.id === row.ui_user_id);
     const userName = user ? user.name : row.ui_user_id;
 
     if (valueName === "ui_user_id") value = userName;
+
+    if (row.action === "0" && valueName === "item") {
+        return TwoLineInCell(row.item, row.note);
+    }
 
     if (row.action === "зарплата" && valueName === "note") {
         return TwoLineInCell(userName, row.note);
@@ -20,6 +25,8 @@ const defaultGetValue = ({row, valueName, users}) => {
     if (row.work && row.action !== "расход" && valueName === "item") {
         return TwoLineInCell(row.item, row.work);
     }
+
+
 
     return value ?? "";
 };
@@ -39,16 +46,16 @@ const InteractionTableRow = ({
     style={style}
     onClick={onClick}
 >
-    {values.map((valueName, index) => {
-        const cellProps = getCellProps({row, valueName, index}) || {};
+        {values.map((valueName, index) => {
+            const cellProps = getCellProps({ row, valueName, index }) || {};
 
-        return <TableCell
-            key={`${cellKeyPrefix}-${row.id || row.item || "row"}-${valueName}-${index}`}
-            {...cellProps}
-        >
-            {getValue({row, valueName, users})}
-        </TableCell>;
-    })}
-</TableRow>;
+            return <TableCell
+                key={`${cellKeyPrefix}-${row.id || row.item || "row"}-${valueName}-${index}`}
+                {...cellProps}
+            >
+                {getValue({ row, valueName, users })}
+            </TableCell>;
+        })}
+    </TableRow>;
 
 export default InteractionTableRow;
