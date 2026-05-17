@@ -17,6 +17,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Slide from "@mui/material/Slide";
 import {connect} from "react-redux";
+import QuickTextField from "../QuickTextField";
+import {getQuickTextOptions} from "../quickTexts";
 
 const fieldsStyle = {
     margin: '.4rem',
@@ -121,6 +123,17 @@ const getOrderFieldValue = (order, field) => {
 
 const getOrderTotal = order => order?.sum2 ?? order?.sum ?? 0
 
+const getOrderQuickTextPath = field => {
+
+    const label = String(field?.value || field?.name || '').toLowerCase()
+
+    if (label.includes('неисправ') || label.includes('defect')) return 'orders.defects'
+    if (label.includes('работ') || label.includes('work')) return 'orders.works'
+
+    return null
+
+}
+
 const Info = props => {
 
     const {order, setOrder, needPrint} = props
@@ -129,6 +142,7 @@ const Info = props => {
     const appUsers = props.app.users || []
     const appCategories = props.app.categories || []
     const fields = (appFields || []).filter(f => f.index === 'order' && f.is_valid && !f.is_system)
+    const quickTextOptions = path => getQuickTextOptions(props.app.quick_texts, path)
     
     const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
@@ -409,10 +423,11 @@ const Info = props => {
 
             <DialogContent>
 
-                <TextField label="Неисправность"
-                           style={{width: '100%'}}
-                           value={reason}
-                           onChange={e => setReason(e.target.value)}
+                <QuickTextField label="Неисправность"
+                                style={{width: '100%'}}
+                                value={reason}
+                                onChange={setReason}
+                                options={quickTextOptions('warranty.defects')}
                 />
 
             </DialogContent>
@@ -515,19 +530,21 @@ const Info = props => {
                                             disabled={!isEditable}
         />}
 
-        <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
-                   style={fieldsStyle}
-                   value={model || ''}
-                   onChange={e => setModel(e.target.value)}
-                   disabled={!isEditable}
+        <QuickTextField label="Модель телефона, планшета, ноутбука или другого устройства"
+                        style={fieldsStyle}
+                        value={model || ''}
+                        onChange={setModel}
+                        disabled={!isEditable}
+                        options={quickTextOptions(order ? 'warranty.models' : 'orders.models')}
         />
 
-        {fields.map(f => <TextField label={f.value}
-                                    key={'text-field-keys-in-info-' + f.value + f.name}
-                                    disabled={!isEditable}
-                                    style={fieldsStyle}
-                                    value={state[f.name] ?? ''}
-                                    onChange={e => setField(f.name, e.target.value)}
+        {fields.map(f => <QuickTextField label={f.value}
+                                         key={'text-field-keys-in-info-' + f.value + f.name}
+                                         disabled={!isEditable}
+                                         style={fieldsStyle}
+                                         value={state[f.name] ?? ''}
+                                         onChange={value => setField(f.name, value)}
+                                         options={quickTextOptions(getOrderQuickTextPath(f))}
         />)}
 
         {order

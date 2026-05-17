@@ -34,14 +34,18 @@ const getPaymentMethodOptions = paymentTypes => {
         : []
 
     if (activeTypes.length) {
-        return activeTypes.map(type => ({
-            value: type.id,
+        const options = activeTypes.map(type => ({
+            value: String(type.id),
             name: type.name,
         }))
+
+        return options.some(option => +option.value === 0)
+            ? options
+            : [{value: '0', name: CASH_PAYMENT_NAME}, ...options]
     }
 
     return PAYMENTMETHODS.map((name, index) => ({
-        value: index,
+        value: String(index),
         name,
     }))
 
@@ -60,23 +64,40 @@ const getDefaultPaymentMethod = paymentOptions => {
 
     const cash = paymentOptions.find(option => normalizeName(option.name) === CASH_PAYMENT_NAME)
 
-    return cash ? cash.value : paymentOptions[0]?.value ?? 0
+    return cash ? cash.value : paymentOptions[0]?.value ?? '0'
 
 }
 
 const paymentMethodName = (payment, paymentOptions) => {
 
-    if (payment.payment_type?.name) return payment.payment_type.name
-    if (payment.paymentType?.name) return payment.paymentType.name
-
-    const paymentMethod = payment.payment_type_id
-        ?? payment.paymentTypeId
-        ?? payment.payment_type
-        ?? payment.paymentsMethod
+    const paymentMethod = payment.payment_id ?? 0
 
     const option = paymentOptions.find(option => String(option.value) === String(paymentMethod))
 
-    return option?.name || PAYMENTMETHODS[payment.paymentsMethod] || CASH_PAYMENT_NAME
+    return option?.name || CASH_PAYMENT_NAME
+
+}
+
+const paymentMethodId = payment => String(payment.payment_id ?? 0)
+
+const paymentRowId = payment => payment.sale_id ?? payment.id ?? payment.created_at
+
+const isTodayPayment = payment => {
+
+    if (!payment?.created_at) return false
+
+    const value = String(payment.created_at)
+    const date = /^\d+$/.test(value)
+        ? new Date(+value * 1000)
+        : new Date(payment.created_at)
+
+    if (Number.isNaN(date.getTime())) return false
+
+    const today = new Date()
+
+    return date.getFullYear() === today.getFullYear()
+        && date.getMonth() === today.getMonth()
+        && date.getDate() === today.getDate()
 
 }
 
@@ -103,7 +124,7 @@ const paymentUserName = (payment, users) => {
 
 }
 
-export const Payments = ({order, isEditable, users = [], paymentTypes = []}) => {
+export const Payments = ({order, isEditable, users = [], paymentTypes = [], canChangePaymentMethods = false}) => {
 
     const [loadedPaymentTypes, setLoadedPaymentTypes] = useState([])
     const availablePaymentTypes = Array.isArray(paymentTypes) && paymentTypes.length
@@ -113,6 +134,8 @@ export const Payments = ({order, isEditable, users = [], paymentTypes = []}) => 
 
     const [sum, setSum] = useState(0)
     const [paymentMethod, setPaymentMethod] = useState(() => getDefaultPaymentMethod(paymentOptions))
+    const [paymentMethodByRow, setPaymentMethodByRow] = useState({})
+    const [savingPaymentRow, setSavingPaymentRow] = useState()
 
     const {enqueueSnackbar} = useSnackbar()
 
@@ -138,8 +161,7 @@ export const Payments = ({order, isEditable, users = [], paymentTypes = []}) => 
 
         rest('order/payments/' + order.stock_id + '/' + order.id, 'POST', {
             sum,
-            paymentsMethod: paymentMethod,
-            payment_type_id: paymentMethod,
+            payment_id: +paymentMethod,
         })
             .then(res => {
                 if (res.status === 200) {
@@ -149,6 +171,36 @@ export const Payments = ({order, isEditable, users = [], paymentTypes = []}) => 
                     enqueueSnackbar('Ошибка', {variant: 'error'})
                 }
             })
+
+    }
+
+    const changePaymentMethod = (payment, value) => {
+
+        const rowId = paymentRowId(payment)
+        if (!rowId || savingPaymentRow) return
+
+        setPaymentMethodByRow(prev => ({
+            ...prev,
+            [rowId]: value,
+        }))
+        setSavingPaymentRow(rowId)
+
+        rest('order/payments/' + order.stock_id + '/' + order.id, 'PATCH', {
+            sale_id: payment.sale_id,
+            payment_id: +value,
+        })
+            .then(res => {
+                if (res.status === 200) {
+                    enqueueSnackbar('ok', {variant: 'success'})
+                } else {
+                    setPaymentMethodByRow(prev => ({
+                        ...prev,
+                        [rowId]: paymentMethodId(payment),
+                    }))
+                    enqueueSnackbar('Ошибка', {variant: 'error'})
+                }
+            })
+            .finally(() => setSavingPaymentRow(undefined))
 
     }
 
@@ -169,7 +221,23 @@ export const Payments = ({order, isEditable, users = [], paymentTypes = []}) => 
                         key={'tablerowkeyforpaymentsinordes' + p.sum + p.created_at}>
                         <TableCell>{toLocalTimeStr(p.created_at)}</TableCell>
                         <TableCell>{paymentUserName(p, users)}</TableCell>
-                        <TableCell>{paymentMethodName(p, paymentOptions)}</TableCell>
+                        <TableCell>
+                            {canChangePaymentMethods && isTodayPayment(p)
+                                ? <FormControl size="small" fullWidth disabled={savingPaymentRow === paymentRowId(p)}>
+                                    <Select
+                                        value={paymentMethodByRow[paymentRowId(p)] ?? paymentMethodId(p)}
+                                        onChange={e => changePaymentMethod(p, e.target.value)}
+                                    >
+                                        {paymentOptions.map(option => <MenuItem
+                                            key={'order-payment-row-method-' + paymentRowId(p) + '-' + option.value}
+                                            value={option.value}
+                                        >
+                                            {option.name}
+                                        </MenuItem>)}
+                                    </Select>
+                                </FormControl>
+                                : paymentMethodName(p, paymentOptions)}
+                        </TableCell>
                         <TableCell>
                             {+p.sum}
                         </TableCell>

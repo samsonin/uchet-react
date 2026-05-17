@@ -16,6 +16,7 @@ let initialState = {
     contact_types: [],
     description_tolerance: {},
     payment_types: [],
+    quick_texts: {},
 }
 
 const probableKeys = [
@@ -38,6 +39,7 @@ const probableKeys = [
     'contact_types',
     'description_tolerance',
     'payment_types',
+    'quick_texts',
     'order',
     'orders',
     'referals',

@@ -9,7 +9,6 @@ import {
     CardMedia,
     Fade,
     TextField,
-    TextareaAutosize,
 } from "@mui/material";
 import { makeStyles } from "muiLegacyStyles";
 import { useSnackbar } from "notistack";
@@ -25,6 +24,8 @@ import AddCosts from "../common/AddCosts";
 import { line } from "../common/InputHandlers";
 import CategoryHandler from "../common/CategoryHandler";
 import GoodHistory from "./GoodHistory";
+import QuickTextField from "../common/QuickTextField";
+import {getQuickTextOptions} from "../common/quickTexts";
 
 const woAlliases = {
     use: "В пользовании",
@@ -88,6 +89,7 @@ const GoodContent = props => {
     const { enqueueSnackbar } = useSnackbar()
 
     const good = props.app.good
+    const quickTextOptions = path => getQuickTextOptions(props.app.quick_texts, path)
 
     useEffect(() => {
 
@@ -227,12 +229,14 @@ const GoodContent = props => {
 
         return <div className={`good-note-card ${hasValue ? '' : 'is-empty'}`}>
             <div className="good-note-label">{label}</div>
-            <TextareaAutosize
+            <QuickTextField
+                multiline
                 minRows={hasValue ? 3 : 1}
                 className="good-note-textarea"
                 value={value || ''}
-                onChange={onChange}
-                readOnly={!isEditable}
+                onChange={nextValue => onChange({target: {value: nextValue}})}
+                disabled={!isEditable}
+                options={quickTextOptions(label.includes('сотрудников') ? 'goods.private_notes' : 'goods.public_notes')}
             />
         </div>
     }
@@ -456,7 +460,7 @@ const GoodContent = props => {
                     />
                     : category && line('Категория:', category.name, isEditable)}
 
-                {line('Наименование:', model, isEditable, e => setModel(e.target.value))}
+                {line('Наименование:', model, isEditable, e => setModel(e.target.value), quickTextOptions('goods.models'))}
 
                 {isShowcase && line('imei, S/N', imei, isEditable, e => setImei(e.target.value))}
 
@@ -472,7 +476,7 @@ const GoodContent = props => {
 
                 {good.wo === 't' || line('Точка:', stock ? stock.name : null, isEditable)}
 
-                {!good.wo && line('Хранение', storagePlace, isEditable, e => setStoragePlace(e.target.value))}
+                {!good.wo && line('Хранение', storagePlace, isEditable, e => setStoragePlace(e.target.value), quickTextOptions('goods.storage_places'))}
 
                 {isEditable && (!isPublic || props.auth.admin) && <IsPublicCheckBox
                     value={isPublic}

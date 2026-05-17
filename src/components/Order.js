@@ -235,6 +235,7 @@ const Order = props => {
                    isEditable={canEdit()}
                    users={props.app.users}
                    providers={props.app.providers}
+                   quickTexts={props.app.quick_texts}
             />
         }
 
@@ -242,6 +243,7 @@ const Order = props => {
             <Payments order={order}
                       users={props.app.users}
                       paymentTypes={props.app.payment_types}
+                      canChangePaymentMethods={props.app.current_stock_id === order.stock_id}
                       isEditable={canEdit() && isSale}
             />
         }

@@ -24,6 +24,8 @@ import {connect} from "react-redux";
 
 import {Print, createDate} from "../common/Print"
 import {sumField} from "../common/InputHandlers";
+import QuickTextField from "../common/QuickTextField";
+import {getQuickTextOptions} from "../common/quickTexts";
 
 const statuses = [
     'Новая',
@@ -120,6 +122,7 @@ const Prepaid = props => {
     const [note, setNote] = useState('')
 
     const [disabled, setDisabled] = useState(false)
+    const quickTextOptions = path => getQuickTextOptions(props.app.quick_texts, path)
 
     const reset = () => {
         setId(0)
@@ -315,11 +318,12 @@ const Prepaid = props => {
                 </DialogContentText>
                 : null}
 
-            <TextField label="Наименование"
-                       disabled={disabled}
-                       className={classes.field}
-                       value={item}
-                       onChange={e => setItem(e.target.value)}
+            <QuickTextField label="Наименование"
+                            disabled={disabled}
+                            className={classes.field}
+                            value={item}
+                            onChange={setItem}
+                            options={quickTextOptions('preorders.items')}
             />
 
             {sumField(initPrepaid, presum, setPresum, {
@@ -365,11 +369,12 @@ const Prepaid = props => {
                     />
                 : ''}
 
-            <TextField label="Примечание"
-                       disabled={disabled}
-                       className={classes.field}
-                       value={note}
-                       onChange={e => setNote(e.target.value)}
+            <QuickTextField label="Примечание"
+                            disabled={disabled}
+                            className={classes.field}
+                            value={note}
+                            onChange={setNote}
+                            options={quickTextOptions('preorders.notes')}
             />
 
         </DialogContent>

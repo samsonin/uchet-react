@@ -21,6 +21,8 @@ import UsersSelect from "../UsersSelect";
 import {intInputHandler} from "../InputHandlers";
 import {GoodSearch} from "../GoodSearch";
 import GoodsTable from "../CostsTable";
+import QuickTextField from "../QuickTextField";
+import {getQuickTextOptions} from "../quickTexts";
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -67,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-export const Costs = ({order, isEditable, users, providers}) => {
+export const Costs = ({order, isEditable, users, providers, quickTexts}) => {
 
     const [serviceOpen, setServiceOpen] = useState(false)
     const [job, setJob] = useState('')
@@ -171,10 +173,11 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
             <DialogContent className={classes.content}>
 
-                <TextField label="Выполненная работа"
-                           className={classes.field}
-                           value={job}
-                           onChange={e => setJob(e.target.value)}
+                <QuickTextField label="Выполненная работа"
+                                className={classes.field}
+                                value={job}
+                                onChange={setJob}
+                                options={getQuickTextOptions(quickTexts, 'orders.works')}
                 />
 
                 <TextField label="Сумма"

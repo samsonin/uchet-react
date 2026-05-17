@@ -2,6 +2,7 @@ import React from "react";
 
 import {TextareaAutosize, TextField} from "@mui/material";
 import { v4 as uuid } from "uuid";
+import QuickTextField from "./QuickTextField";
 
 export const intInputHandler = (value, setInt) => {
 
@@ -41,7 +42,7 @@ export const sumField = (initValue, value, setValue, style, disabled) => <TextFi
     onChange={e => intInputHandler(e.target.value, setValue)}
 />
 
-export const line = (label, value, isEditable, onChange) => {
+export const line = (label, value, isEditable, onChange, options = []) => {
 
     const isEd = isEditable && typeof (onChange) === 'function'
 
@@ -56,7 +57,12 @@ export const line = (label, value, isEditable, onChange) => {
 
         <span style={spanStyle}>{label}</span>
 
-        <TextField fullWidth value={value || ''} onChange={onChange}/>
+        <QuickTextField
+            fullWidth
+            value={value || ''}
+            onChange={nextValue => onChange({target: {value: nextValue}})}
+            options={options}
+        />
 
     </div>
 }

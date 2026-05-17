@@ -327,7 +327,7 @@
     .assistant-chat-launcher,
     .assistant-chat-layer {
         position: fixed;
-        right: 1.2rem;
+        right: 0.8rem;
         bottom: 1.2rem;
         z-index: 1500;
     }
@@ -692,6 +692,13 @@
         color: var(--brand-strong);
     }
 
+    .assistant-chat-page-video {
+        border-color: rgba(15, 143, 135, 0.35);
+        background: rgba(15, 143, 135, 0.08);
+        color: var(--brand-strong);
+        font-weight: 850;
+    }
+
     .assistant-chat-form {
         display: flex;
         align-items: center;
@@ -731,6 +738,157 @@
         border-color: var(--line) !important;
         background: var(--surface-soft) !important;
         color: var(--text-muted) !important;
+    }
+
+    .assistant-video-backdrop {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: rgba(9, 18, 26, 0.56);
+        z-index: 1800;
+    }
+
+    .assistant-video {
+        width: min(720px, calc(100vw - 2rem));
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 18px;
+        background: #101923;
+        color: #ffffff;
+        box-shadow: 0 26px 80px rgba(0, 0, 0, 0.38);
+    }
+
+    .assistant-video-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.9rem 1rem;
+        background: linear-gradient(135deg, #0b5f59, #123247);
+    }
+
+    .assistant-video-kicker {
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.76rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .assistant-video-title {
+        margin-top: 0.12rem;
+        font-size: 1.08rem;
+        font-weight: 900;
+    }
+
+    .assistant-video-close {
+        color: #ffffff !important;
+    }
+
+    .assistant-video-stage {
+        position: relative;
+        min-height: 360px;
+        background:
+            linear-gradient(135deg, rgba(15, 143, 135, 0.18), rgba(57, 92, 130, 0.16)),
+            repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 96px),
+            #101923;
+    }
+
+    .assistant-video-frame {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: clamp(1.1rem, 4vw, 3rem);
+        animation: assistantVideoIn 5200ms ease-in-out both;
+    }
+
+    .assistant-video-accent {
+        width: fit-content;
+        min-height: 34px;
+        padding: 0.42rem 0.72rem;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        color: #bff8ef;
+        font-weight: 850;
+    }
+
+    .assistant-video-scene-title {
+        max-width: 620px;
+        margin-top: 1rem;
+        font-size: clamp(2rem, 5vw, 4rem);
+        font-weight: 950;
+        line-height: 1;
+    }
+
+    .assistant-video-caption {
+        max-width: 560px;
+        margin-top: 1rem;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: clamp(1rem, 2.2vw, 1.28rem);
+        line-height: 1.45;
+    }
+
+    .assistant-video-timeline {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.16);
+    }
+
+    .assistant-video-timeline span {
+        display: block;
+        height: 100%;
+        background: #66d1c7;
+        transition: width 260ms ease;
+    }
+
+    .assistant-video-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.85rem 1rem 1rem;
+        background: #101923;
+    }
+
+    .assistant-video-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        min-height: 36px;
+        padding: 0.42rem 0.7rem;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        font-weight: 800;
+    }
+
+    .assistant-video-count {
+        margin-left: auto;
+        color: rgba(255, 255, 255, 0.68);
+        font-weight: 800;
+    }
+
+    @keyframes assistantVideoIn {
+        0% {
+            opacity: 0;
+            transform: translateY(18px) scale(0.98);
+        }
+        16%, 82% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-10px) scale(1.01);
+        }
     }
 
     .app-settings-reset {

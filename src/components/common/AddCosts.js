@@ -13,6 +13,7 @@ import rest from "../Rest";
 import {intInputHandler, line} from "./InputHandlers";
 import UsersSelect from "./UsersSelect";
 import EnteredGood from "../EnteredGood";
+import {getQuickTextOptions} from "./quickTexts";
 
 
 const AddCosts = props => {
@@ -146,7 +147,7 @@ const AddCosts = props => {
 
         {line('Общая стоимость:', sum, true, e => handleSum(e.target.value))}
 
-        {line('Выполненная работа:', job, true, e => setJob(e.target.value))}
+        {line('Выполненная работа:', job, true, e => setJob(e.target.value), getQuickTextOptions(props.app.quick_texts, 'jobs.services'))}
 
         {!!masterId && line('Зарплата', zp, true, e => handleZp(e.target.value))}
 

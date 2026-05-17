@@ -6,9 +6,19 @@ import SendIcon from "@mui/icons-material/Send";
 import IconButton from "@mui/material/IconButton";
 
 import AssistantBadge from "./AssistantBadge";
+import AssistantPageVideo from "./AssistantPageVideo";
 import { getAssistantForUserName } from "./assistants";
 import rest from "../Rest";
 import { getAppSettings, saveAppSettings } from "../Settings/appSettingsStore";
+import {
+    buildAssistantIntro,
+    FALLBACK_QUICK_PROMPTS,
+    getDailyAssistantIntro,
+    getDailySectionWalkthrough,
+    getPageVideoStory,
+    normalizeAssistantRoute,
+    resolveQuickPrompts,
+} from "./AssistantChat.helpers";
 import {
     completeOnboardingStep,
     dismissOnboarding,
@@ -18,14 +28,6 @@ import {
     ONBOARDING_CHANGE_EVENT,
     resetOnboardingProgress,
 } from "./onboarding";
-
-const FALLBACK_QUICK_PROMPTS = [
-    "Начать первичную настройку",
-    "Что на этой странице?",
-    "Как создать заказ?",
-    "Где найти клиента?",
-    "Как работать со складом?",
-];
 
 const getAssistantErrorReply = () => (
     "Не получилось получить ответ от backend. Попробуйте еще раз чуть позже."
@@ -42,31 +44,6 @@ const createUserMessage = content => ({
     content,
     createdAt: Date.now(),
 });
-
-const getDailyAssistantIntro = (assistantName, app = {}) => {
-    const currentStockId = app.current_stock_id;
-    const stock = (app.stocks || []).find(item => +item.id === +currentStockId);
-    const daily = (app.daily || []).find(item => +item.stock_id === +currentStockId);
-
-    if (!currentStockId) {
-        return (
-            `Здравствуйте, я ${assistantName}. Вижу, что вы открыли раздел «Ежедневный отчет».\n\n` +
-            "Здесь ведется отчет по смене: сотрудники, предоплаты, товары, работы, расходы, подотчеты и итоги дня. Сначала выберите рабочую точку, после этого можно будет работать с отчетом смены."
-        );
-    }
-
-    if (!daily) {
-        return (
-            `Здравствуйте, я ${assistantName}. Вижу, что вы открыли раздел «Ежедневный отчет».\n\n` +
-            `Точка${stock?.name ? ` «${stock.name}»` : ""} уже выбрана. В этом разделе отображаются сотрудники смены, операции за день и итоговые суммы. Если смена еще не открыта, начните ее в шапке приложения.`
-        );
-    }
-
-    return (
-        `Здравствуйте, я ${assistantName}. Вижу, что вы открыли раздел «Ежедневный отчет».\n\n` +
-        `Точка${stock?.name ? ` «${stock.name}»` : ""} выбрана, смена уже открыта. Здесь можно проверить сотрудников смены, предоплаты, продажи, работы и услуги, расходы, подотчеты, способы оплаты и итоговые суммы за день.`
-    );
-};
 
 const normalizePromptText = value => String(value || "")
     .trim()
@@ -87,6 +64,35 @@ const getLocalAssistantReply = (content, currentPath, app = {}, assistantName = 
         return getDailyAssistantIntro(assistantName, app);
     }
 
+    if (normalizeAssistantRoute(currentPath) === "/daily" && /^(быстро\s+)?пройтись\s+по\s+разделам/.test(prompt)) {
+        return getDailySectionWalkthrough();
+    }
+
+    if (normalizeAssistantRoute(currentPath) === "/daily" && /^что\s+проверить\s+в\s+отчете\s+смены/.test(prompt)) {
+        return (
+            "Проверьте дату и точку, список сотрудников смены, затем таблицы с предоплатами, товарами, работами и услугами, расходами, зарплатой и подотчетами. " +
+            "В конце сверьте итоговые суммы: остаток на утро, выручку, подотчеты, безналичные оплаты, сданную сумму и остаток."
+        );
+    }
+
+    if (normalizeAssistantRoute(currentPath) === "/daily" && /^как\s+внести\s+расход\s+или\s+зарплату/.test(prompt)) {
+        return (
+            "В блоке «Расходы, зарплата» нажмите плюс. В открывшемся окне выберите расход или зарплату, заполните наименование или период зарплаты, сумму, сотрудника и примечание. " +
+            "После проверки нажмите «Внести»."
+        );
+    }
+
+    if (normalizeAssistantRoute(currentPath) === "/daily" && /^как\s+проверить\s+способ\s+оплаты/.test(prompt)) {
+        return (
+            "Нажмите на сумму в строке операции. Откроется окно со способом оплаты: наличные, безнал или другой активный способ оплаты. " +
+            "Если отчет открыт за текущую смену и доступно редактирование, способ можно изменить и сохранить."
+        );
+    }
+
+    if (normalizeAssistantRoute(currentPath) === "/daily" && /^как\s+выйти\s+из\s+смены/.test(prompt)) {
+        return "Когда работа закончена, откройте меню пользователя и нажмите кнопку «Выйти».";
+    }
+
     return "";
 };
 
@@ -100,33 +106,9 @@ const getAuth = () => {
 
 const escapeRegExp = value => String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const normalizeAssistantRoute = value => {
-    const route = String(value || "")
-        .replace(/^https?:\/\/[^/]+/i, "")
-        .split("#")[0]
-        .split("?")[0]
-        .replace(/\/+$/, "");
-
-    return route || "/";
-};
-
 const isSameRoute = (firstRoute, secondRoute) => (
     normalizeAssistantRoute(firstRoute) === normalizeAssistantRoute(secondRoute)
 );
-
-const pageIntroOverrides = {
-    "/settings/employees": assistantName => (
-        `Здравствуйте, я ${assistantName}. Вижу, что вы открыли раздел «Сотрудники».\n\n` +
-        "На этой странице можно управлять сотрудниками организации: искать сотрудников, назначать конкретным сотрудникам должности, менять их статус, добавлять новые должности и регулировать полномочия для каждой должности."
-    ),
-    "/daily": (assistantName, app) => getDailyAssistantIntro(assistantName, app),
-};
-
-const getPageIntroOverride = (currentPath, assistantName, app) => {
-    const override = pageIntroOverrides[normalizeAssistantRoute(currentPath)];
-
-    return typeof override === "function" ? override(assistantName, app) : override;
-};
 
 const removeAccessAvailabilityNotes = answer => String(answer || "")
     .replace(/(^|[.!?]\s+|\n+)([^.!?\n]*(?:раздел|страница)[^.!?\n]*доступ[^\n.!?]*(?:администратор|пользовател)[^.!?\n]*[.!?]?)/gi, (match, prefix) => (
@@ -231,13 +213,14 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "", ap
     const [messages, setMessages] = useState([]);
     const [quickPrompts, setQuickPrompts] = useState(FALLBACK_QUICK_PROMPTS);
     const [isSending, setIsSending] = useState(false);
+    const [isPageVideoOpen, setPageVideoOpen] = useState(false);
     const [onboardingProgress, setOnboardingProgress] = useState(() => getOnboardingProgress(userId));
     const bodyRef = useRef(null);
     const currentPath = window.location.pathname;
+    const pageVideoStory = getPageVideoStory(currentPath);
     const onboardingStep = onboardingProgress.dismissed
         ? null
         : getCurrentOnboardingStep(onboardingProgress);
-    const pageIntroOverride = getPageIntroOverride(currentPath, assistant.name, app);
 
     useEffect(() => {
         setOnboardingProgress(getOnboardingProgress(userId));
@@ -275,19 +258,18 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "", ap
             if (!isMounted) return;
 
             const intro = removeAccessAvailabilityNotes(removeCurrentPageOpenPrompt(
-                pageIntroOverride || res?.body?.intro || (
-                `Здравствуйте, я ${assistant.name}. Я помогу быстрее освоиться в приложении.\n\n` +
-                "Спросите, что нужно сделать, или напишите: `что на этой странице?`."
-                ),
+                buildAssistantIntro({
+                    assistantName: assistant.name,
+                    currentPath,
+                    userId,
+                    app,
+                    backendIntro: res?.body?.intro,
+                }),
                 currentPath
             )).replace(/\n{3,}/g, "\n\n").trim();
 
             setMessages([createAssistantMessage(intro)]);
-            setQuickPrompts(
-                Array.isArray(res?.body?.quickPrompts) && res.body.quickPrompts.length
-                    ? res.body.quickPrompts
-                    : FALLBACK_QUICK_PROMPTS
-            );
+            setQuickPrompts(resolveQuickPrompts(currentPath, res?.body?.quickPrompts));
         };
 
         loadContext();
@@ -295,7 +277,7 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "", ap
         return () => {
             isMounted = false;
         };
-    }, [assistant.name, currentPath, onboardingStep, pageIntroOverride, userName]);
+    }, [assistant.name, app, currentPath, onboardingStep, userId, userName]);
 
     useEffect(() => {
         if (!bodyRef.current) return;
@@ -416,7 +398,7 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "", ap
                     <img className="assistant-chat-avatar" src={assistant.avatar} alt={assistant.name} />
                     <div className="assistant-chat-heading">
                         <div className="assistant-chat-name">{assistant.name}</div>
-                        <div className="assistant-chat-status">Помощник по приложению</div>
+                        <div className="assistant-chat-status">Ваш помощник</div>
                     </div>
                     <button
                         className="assistant-chat-disable"
@@ -515,6 +497,13 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "", ap
                 </div>
 
                 <div className="assistant-chat-prompts">
+                    {pageVideoStory && <button
+                        className="assistant-chat-prompt assistant-chat-page-video"
+                        type="button"
+                        onClick={() => setPageVideoOpen(true)}
+                    >
+                        Расскажи мне об этой странице
+                    </button>}
                     {quickPrompts.map(prompt => (
                         <button
                             className="assistant-chat-prompt"
@@ -546,6 +535,10 @@ const AssistantChat = ({ isOpen, onOpen, onClose, userName = "", userId = "", ap
                     </IconButton>
                 </form>
             </div>
+            {isPageVideoOpen && <AssistantPageVideo
+                story={pageVideoStory}
+                onClose={() => setPageVideoOpen(false)}
+            />}
         </div>
     );
 };

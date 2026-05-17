@@ -15,16 +15,16 @@ import TableBody from "@mui/material/TableBody";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import Collapse from "@mui/material/Collapse";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
@@ -73,13 +73,10 @@ const serviceArray = ['0']
 const costsArray = ['поступление', 'покупка', 'в залог', 'вернули', 'расход', 'зарплата', 'другое']
 
 
-const PAYMENT_DIALOG_TITLE = '\u0421\u043f\u043e\u0441\u043e\u0431\u044b \u043e\u043f\u043b\u0430\u0442\u044b'
 const PAYMENT_TYPE_LABEL = '\u0421\u043f\u043e\u0441\u043e\u0431'
-const PAYMENT_SUM_LABEL = '\u0421\u0443\u043c\u043c\u0430'
 const PAYMENT_EMPTY_LABEL = '\u0414\u0430\u043d\u043d\u044b\u0435 \u043f\u043e \u0441\u043f\u043e\u0441\u043e\u0431\u0430\u043c \u043e\u043f\u043b\u0430\u0442\u044b \u043d\u0435 \u0443\u043a\u0430\u0437\u0430\u043d\u044b'
 const CLOSE_LABEL = '\u0417\u0430\u043a\u0440\u044b\u0442\u044c'
 const SAVE_LABEL = '\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c'
-const TOTAL_LABEL = '\u0418\u0442\u043e\u0433\u043e:'
 const CASH_LABEL = '\u041d\u0430\u043b\u0438\u0447\u043d\u044b\u0435'
 
 const parseMaybeJson = value => {
@@ -99,21 +96,30 @@ const getPaymentTypeName = (paymentTypes, id) => {
 
 const getPaymentKey = id => (id === 'cash' || +id === 0) ? 'cash' : String(id)
 
+const getPaymentTypeOptions = paymentTypes => {
+    const hasCash = paymentTypes.some(type => +type.id === 0)
+    const activeTypes = paymentTypes
+        .filter(type => type.is_active !== false)
+        .map(type => ({
+            value: type.id,
+            name: type.name,
+        }))
+
+    return hasCash
+        ? activeTypes
+        : [{ value: 0, name: CASH_LABEL }, ...activeTypes]
+}
+
 const getRowPayments = (row, paymentTypes) => {
     const wf = parseMaybeJson(row?.wf)
-    const payments = wf?.payments || {}
-    const entries = Array.isArray(payments)
-        ? payments.map(payment => [payment.payment_type_id || payment.id || payment.type_id, payment.sum])
-        : Object.entries(payments)
+    const paymentId = wf?.payment_id ?? row?.payment_id ?? 0
 
-    return entries
-        .map(([id, sum]) => ({
-            id,
-            key: getPaymentKey(id),
-            name: getPaymentTypeName(paymentTypes, id),
-            sum: +sum || 0,
-        }))
-        .filter(payment => payment.id && payment.sum)
+    return [{
+        id: paymentId,
+        key: getPaymentKey(paymentId),
+        name: getPaymentTypeName(paymentTypes, paymentId),
+        sum: +row?.sum || 0,
+    }].filter(payment => payment.sum)
 }
 
 const getPaymentTotals = (rows, paymentTypes) => {
@@ -148,40 +154,18 @@ const getPaymentTotals = (rows, paymentTypes) => {
     return Array.from(totals.values())
 }
 
-const buildPaymentsPayload = paymentRows => {
-    const payments = paymentRows.reduce((acc, payment) => {
-        if (payment.sum > 0) acc[payment.key === 'cash' ? 0 : payment.id] = payment.sum
-        return acc
-    }, {})
-
-    return { payments }
-}
+const buildPaymentsPayload = paymentRows => ({ payment_id: paymentRows[0]?.id ?? 0 })
 
 const getPaymentDraftRows = (row, paymentTypes) => {
     const currentPayments = getRowPayments(row, paymentTypes)
-    const paymentRows = paymentTypes
-        .filter(type => type.is_active !== false)
-        .map(type => {
-            const current = currentPayments.find(payment => payment.key === getPaymentKey(type.id))
+    const currentPayment = currentPayments[0]
 
-            return {
-                id: type.id,
-                key: getPaymentKey(type.id),
-                name: type.name,
-                sum: current ? current.sum : 0,
-            }
-        })
+    return currentPayment ? [currentPayment] : []
+}
 
-    currentPayments.forEach(payment => {
-        if (payment.key === 'cash') return
-
-        const existing = paymentRows.find(row => row.key === payment.key)
-
-        if (existing) existing.sum = payment.sum
-        else paymentRows.push(payment)
-    })
-
-    return paymentRows
+const getSaleId = row => {
+    const wf = parseMaybeJson(row?.wf)
+    return row?.sale_id ?? wf?.sale_id ?? row?.id
 }
 
 const Daily = props => {
@@ -199,7 +183,6 @@ const Daily = props => {
     const [date, setDate] = useState(() => today)
     const [localDaily, setLocalDaily] = useState({})
 
-    const [cashless, setCashless] = useState(0)
     const [handed, setHanded] = useState(0)
 
     const [row, setRow] = useState()
@@ -211,7 +194,6 @@ const Daily = props => {
     const [isConsignmentOpen, setIsConsignmentOpen] = useState(false)
     const [paymentRow, setPaymentRow] = useState()
     const [paymentDrafts, setPaymentDrafts] = useState([])
-    const [isPaymentTotalsOpen, setPaymentTotalsOpen] = useState(false)
     const [isPaymentSaving, setPaymentSaving] = useState(false)
 
     const classes = useStyles()
@@ -281,13 +263,6 @@ const Daily = props => {
 
     }
 
-    const cashlessRest = data => {
-
-        rest('daily/' + stock, 'PATCH', data)
-            .then(res => afterRes(res, setCashless, 'безнал: ' + data.cashless))
-
-    }
-
     const handedRest = handed => {
 
         if (!props.auth.admin) return
@@ -296,10 +271,6 @@ const Daily = props => {
             .then(res => afterRes(res, setHanded, 'сдано: ' + handed))
 
     }
-
-    const cashlessHandler = () => cashlessRest({ cashless })
-
-    const cashlessHandlerAdd = () => cashlessRest({ cashless: daily.cashless + +cashless })
 
     const handedHandler = () => handedRest(handed)
 
@@ -415,7 +386,6 @@ const Daily = props => {
     let [services, serviceSum] = makeForTable(serviceArray)
     let [costs, costSum] = makeForTable(costsArray)
     const paymentTotals = getPaymentTotals(daily?.sales || [], appPaymentTypes)
-    const hasPaymentTotalsDropdown = paymentTotals.length > 1
 
     let imprests = daily && daily.imprests
         ? daily.imprests
@@ -424,6 +394,12 @@ const Daily = props => {
     let imprestsSum = 0
 
     imprests.map(i => imprestsSum += i.sum)
+    const cashlessTotalRows = paymentTotals.length
+        ? paymentTotals.map(payment => ({
+            text: payment.name + ':',
+            value: payment.sum,
+        }))
+        : [{ text: 'Безнал:', value: daily?.cashless }]
 
     let prepaidId
     if (row && row.wf) {
@@ -435,40 +411,20 @@ const Daily = props => {
     }
 
     const paymentRows = paymentDrafts
-    const paymentTotal = paymentRows.reduce((total, payment) => total + payment.sum, 0)
-    const paymentExpectedTotal = paymentRow ? +paymentRow.sum || paymentTotal : paymentTotal
+    const paymentTypeOptions = getPaymentTypeOptions(appPaymentTypes)
     const openPayments = (event, row) => {
         event.stopPropagation()
         setPaymentRow(row)
     }
-    const changePaymentDraft = (id, value) => {
-        const nextValue = Math.max(0, +value || 0)
+    const changePaymentDraft = id => {
+        const paymentType = appPaymentTypes.find(type => String(type.id) === String(id))
 
-        setPaymentDrafts(prev => {
-            const rows = prev.map(payment => ({ ...payment }))
-            const index = rows.findIndex(payment => payment.key === getPaymentKey(id))
-            const adjustIndex = rows.findIndex((payment, i) => i !== index && payment.sum > 0)
-            const fallbackAdjustIndex = rows.findIndex((payment, i) => i !== index)
-            const targetAdjustIndex = adjustIndex >= 0 ? adjustIndex : fallbackAdjustIndex
-
-            if (index < 0) return prev
-
-            if (targetAdjustIndex < 0) {
-                rows[index].sum = Math.min(nextValue, paymentExpectedTotal)
-                return rows
-            }
-
-            const fixedOtherSum = rows.reduce((sum, payment, i) => i !== index && i !== targetAdjustIndex
-                ? sum + payment.sum
-                : sum, 0)
-            const maxValue = Math.max(0, paymentExpectedTotal - fixedOtherSum)
-            const nextSum = Math.min(nextValue, maxValue)
-
-            rows[index].sum = nextSum
-            rows[targetAdjustIndex].sum = Math.max(0, paymentExpectedTotal - fixedOtherSum - nextSum)
-
-            return rows
-        })
+        setPaymentDrafts(prev => prev.map(payment => ({
+            ...payment,
+            id,
+            key: getPaymentKey(id),
+            name: paymentType?.name || getPaymentTypeName(appPaymentTypes, id),
+        })))
     }
     const savePaymentDrafts = () => {
         if (!paymentRow || isPaymentSaving) return
@@ -477,13 +433,12 @@ const Daily = props => {
 
         setPaymentSaving(true)
 
-        rest('sales/' + stock + '/' + paymentRow.id, 'PATCH', payload)
+        rest('sales/' + stock + '/' + getSaleId(paymentRow), 'PATCH', payload)
             .then(res => {
                 if (res.status === 200) {
-                    const nextWf = {
-                        ...parseMaybeJson(paymentRow.wf),
-                        payments: payload.payments,
-                    }
+                    const nextWf = parseMaybeJson(paymentRow.wf)
+                    delete nextWf.payments
+                    nextWf.payment_id = payload.payment_id
 
                     setPaymentRow({
                         ...paymentRow,
@@ -510,31 +465,34 @@ const Daily = props => {
                 maxWidth="xs"
                 fullWidth
             >
-                <DialogTitle>{PAYMENT_DIALOG_TITLE}</DialogTitle>
                 <DialogContent>
                     {paymentRows.length
-                        ? <Table size="small">
-                            <TableBody>
-                                {paymentRows.map(payment => <TableRow key={'daily-payment-row-' + payment.key}>
-                                    <TableCell>{payment.name}</TableCell>
-                                    <TableCell align="right">
-                                        <TextField
-                                            type="number"
-                                            size="small"
-                                            value={payment.sum}
-                                            onChange={event => changePaymentDraft(payment.id, event.target.value)}
-                                            disabled={!canChange}
-                                            slotProps={{ htmlInput: { min: 0 } }}
-                                            style={{ width: 120 }}
-                                        />
-                                    </TableCell>
-                                </TableRow>)}
-                                <TableRow>
-                                    <TableCell style={{ fontWeight: 'bold' }}>{TOTAL_LABEL}</TableCell>
-                                    <TableCell align="right" style={{ fontWeight: 'bold' }}>{paymentExpectedTotal}</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
+                        ? paymentRows.map(payment => <div
+                            key={'daily-payment-row-' + payment.key}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 12,
+                            }}
+                        >
+                            <FormControl size="small" fullWidth disabled={!canChange}>
+                                <InputLabel id="daily-payment-method-label">{PAYMENT_TYPE_LABEL}</InputLabel>
+                                <Select
+                                    labelId="daily-payment-method-label"
+                                    label={PAYMENT_TYPE_LABEL}
+                                    value={payment.id}
+                                    onChange={event => changePaymentDraft(event.target.value)}
+                                >
+                                    {paymentTypeOptions.map(type => <MenuItem
+                                        key={'daily-payment-type-' + type.value}
+                                        value={type.value}
+                                    >
+                                        {type.name}
+                                    </MenuItem>)}
+                                </Select>
+                            </FormControl>
+                            <Typography style={{ minWidth: 72, textAlign: 'right' }}>{payment.sum}</Typography>
+                        </div>)
                         : <Typography color="textSecondary">
                             {PAYMENT_EMPTY_LABEL}
                         </Typography>}
@@ -774,14 +732,7 @@ const Daily = props => {
                                         { text: 'Остаток на утро:', value: daily.morning },
                                         { text: 'Выручка:', value: daily.proceeds },
                                         { text: 'Подотчеты:', value: imprestsSum },
-                                        {
-                                            text: 'Безнал:', value: daily.cashless,
-                                            localValue: cashless,
-                                            change: e => numberInputHandler(e.target.value, setCashless),
-                                            click: canChange && cashlessHandler,
-                                            clickAdd: canChange && cashlessHandlerAdd,
-                                            payments: true,
-                                        },
+                                        ...cashlessTotalRows,
                                         {
                                             text: 'Сдали:', value: daily.handed,
                                             localValue: handed,
@@ -798,25 +749,45 @@ const Daily = props => {
                                             <TableCell style={{
                                                 fontWeight: 'bold'
                                             }}>
-                                                {l.payments && hasPaymentTotalsDropdown && <IconButton
-                                                    className={classes.icon}
-                                                    onClick={() => setPaymentTotalsOpen(open => !open)}
-                                                    size="small"
-                                                >
-                                                    {isPaymentTotalsOpen ? <KeyboardArrowDownIcon /> : <KeyboardArrowRightIcon />}
-                                                </IconButton>}
                                                 {l.text}
                                             </TableCell>
 
                                             <TableCell>
                                                 {l.value}
+                                                {l.warning && <Typography
+                                                    variant="caption"
+                                                    color="error"
+                                                    style={{
+                                                        display: 'block',
+                                                        lineHeight: 1.2,
+                                                    }}
+                                                >
+                                                    {l.warning}
+                                                </Typography>}
                                             </TableCell>
 
                                             {l.click && <TableCell>
 
                                                 <TextField
+                                                    size="small"
                                                     value={l.localValue}
                                                     onChange={l.change}
+                                                    slotProps={{
+                                                        input: {
+                                                            style: {
+                                                                height: 30,
+                                                            },
+                                                        },
+                                                        htmlInput: {
+                                                            style: {
+                                                                padding: '4px 8px',
+                                                            },
+                                                        },
+                                                    }}
+                                                    style={{
+                                                        width: 110,
+                                                        verticalAlign: 'middle',
+                                                    }}
                                                 />
 
                                                 <IconButton
@@ -837,20 +808,6 @@ const Daily = props => {
                                             </TableCell>}
 
                                         </TableRow>
-                                        {l.payments && hasPaymentTotalsDropdown && <TableRow>
-                                            <TableCell colSpan={3} style={{ paddingBottom: 0, paddingTop: 0 }}>
-                                                <Collapse in={isPaymentTotalsOpen} timeout="auto" unmountOnExit>
-                                                    <Table size="small">
-                                                        <TableBody>
-                                                            {paymentTotals.map(payment => <TableRow key={'daily-payment-total-' + payment.key}>
-                                                                <TableCell>{payment.name}</TableCell>
-                                                                <TableCell align="right">{payment.sum}</TableCell>
-                                                            </TableRow>)}
-                                                        </TableBody>
-                                                    </Table>
-                                                </Collapse>
-                                            </TableCell>
-                                        </TableRow>}
                                     </React.Fragment>)}
                                 </TableBody>
                             </Table>
