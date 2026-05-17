@@ -241,6 +241,7 @@ const Order = props => {
         {order && tabId === 2 &&
             <Payments order={order}
                       users={props.app.users}
+                      paymentTypes={props.app.payment_types}
                       isEditable={canEdit() && isSale}
             />
         }

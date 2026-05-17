@@ -533,6 +533,8 @@ const Info = props => {
         {order
             ? <TextField label="В чек для заказчика"
                          disabled={!isEditable}
+                         multiline
+                         minRows={3}
                          variant="outlined"
                          style={{
                              ...fieldsStyle,

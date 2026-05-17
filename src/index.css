@@ -3278,6 +3278,40 @@
         color: var(--text) !important;
     }
 
+    :root[data-theme="dark"] .MuiInputAdornment-root,
+    :root[data-theme="dark"] .MuiInputAdornment-root .MuiTypography-root,
+    :root[data-theme="dark"] .MuiInputAdornment-root .MuiSvgIcon-root,
+    :root[data-theme="dark"] .MuiInputBase-root .MuiSvgIcon-root,
+    :root[data-theme="dark"] .MuiOutlinedInput-root .MuiSvgIcon-root,
+    :root[data-theme="dark"] .MuiFilledInput-root .MuiSvgIcon-root,
+    :root[data-theme="dark"] .MuiInput-root .MuiSvgIcon-root,
+    :root[data-theme="dark"] .MuiSelect-icon,
+    :root[data-theme="dark"] .MuiNativeSelect-icon,
+    :root[data-theme="dark"] .MuiAutocomplete-endAdornment .MuiSvgIcon-root,
+    :root[data-theme="dark"] .MuiAutocomplete-clearIndicator,
+    :root[data-theme="dark"] .MuiAutocomplete-popupIndicator,
+    :root[data-theme="dark"] .MuiPickersCalendarHeader-switchViewIcon,
+    :root[data-theme="dark"] .MuiPickersArrowSwitcher-button,
+    :root[data-theme="dark"] .MuiPickersArrowSwitcher-button .MuiSvgIcon-root,
+    :root[data-theme="dark"] .MuiDateCalendar-root .MuiSvgIcon-root {
+        color: var(--text-muted) !important;
+    }
+
+    :root[data-theme="dark"] .MuiInputBase-root .MuiIconButton-root,
+    :root[data-theme="dark"] .MuiOutlinedInput-root .MuiIconButton-root,
+    :root[data-theme="dark"] .MuiFilledInput-root .MuiIconButton-root,
+    :root[data-theme="dark"] .MuiInput-root .MuiIconButton-root {
+        color: var(--text-muted) !important;
+    }
+
+    :root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+    :root[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator,
+    :root[data-theme="dark"] input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+    :root[data-theme="dark"] input[type="month"]::-webkit-calendar-picker-indicator {
+        filter: invert(1) brightness(1.8) contrast(0.85);
+        opacity: 0.85;
+    }
+
     :root[data-theme="dark"] .MuiSwitch-track {
         background-color: #425465 !important;
         opacity: 1 !important;

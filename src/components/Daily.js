@@ -160,7 +160,7 @@ const buildPaymentsPayload = paymentRows => {
 const getPaymentDraftRows = (row, paymentTypes) => {
     const currentPayments = getRowPayments(row, paymentTypes)
     const paymentRows = paymentTypes
-        .filter(type => +type.id !== 0 && type.is_active !== false)
+        .filter(type => type.is_active !== false)
         .map(type => {
             const current = currentPayments.find(payment => payment.key === getPaymentKey(type.id))
 
@@ -451,7 +451,12 @@ const Daily = props => {
             const fallbackAdjustIndex = rows.findIndex((payment, i) => i !== index)
             const targetAdjustIndex = adjustIndex >= 0 ? adjustIndex : fallbackAdjustIndex
 
-            if (index < 0 || targetAdjustIndex < 0) return prev
+            if (index < 0) return prev
+
+            if (targetAdjustIndex < 0) {
+                rows[index].sum = Math.min(nextValue, paymentExpectedTotal)
+                return rows
+            }
 
             const fixedOtherSum = rows.reduce((sum, payment, i) => i !== index && i !== targetAdjustIndex
                 ? sum + payment.sum
@@ -485,6 +490,7 @@ const Daily = props => {
                         wf: nextWf,
                     })
                     enqueueSnackbar('ok', { variant: 'success' })
+                    setPaymentRow(null)
                 } else {
                     enqueueSnackbar('ошибка', { variant: 'error' })
                 }
@@ -517,7 +523,7 @@ const Daily = props => {
                                             size="small"
                                             value={payment.sum}
                                             onChange={event => changePaymentDraft(payment.id, event.target.value)}
-                                            disabled={!canChange || paymentRows.length < 2}
+                                            disabled={!canChange}
                                             slotProps={{ htmlInput: { min: 0 } }}
                                             style={{ width: 120 }}
                                         />
@@ -534,7 +540,7 @@ const Daily = props => {
                         </Typography>}
                 </DialogContent>
                 <DialogActions>
-                    {canChange && paymentRows.length > 1 && <Button
+                    {canChange && paymentRows.length > 0 && <Button
                         onClick={savePaymentDrafts}
                         disabled={isPaymentSaving}
                         color="primary"
