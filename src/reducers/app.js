@@ -18,6 +18,7 @@ let initialState = {
     payment_types: [],
     quick_texts: {},
     passport_ocr_session: null,
+    good_picture_session: null,
 }
 
 const probableKeys = [
@@ -42,6 +43,7 @@ const probableKeys = [
     'payment_types',
     'quick_texts',
     'passport_ocr_session',
+    'good_picture_session',
     'order',
     'orders',
     'referals',

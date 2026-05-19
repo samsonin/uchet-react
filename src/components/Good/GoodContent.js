@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 
 import {
@@ -26,6 +26,16 @@ import CategoryHandler from "../common/CategoryHandler";
 import GoodHistory from "./GoodHistory";
 import QuickTextField from "../common/QuickTextField";
 import {getQuickTextOptions} from "../common/quickTexts";
+import { GOOD_PICTURE_SESSION_PATH } from "../../constants";
+import GoodPictureQrDialog from "./GoodPictureQrDialog";
+import {
+    getGoodPictureFromSession,
+    getGoodPictureSessionStatusPath,
+    isMatchingGoodPictureSession,
+    normalizeGoodPictureSession,
+} from "./goodPictureQr";
+
+const GOOD_PICTURE_POLL_INTERVAL_MS = 3000;
 
 const woAlliases = {
     use: "В пользовании",
@@ -81,6 +91,11 @@ const GoodContent = props => {
     const [responsibleId, setResponsibleId] = useState(0)
     const [privateNote, setPrivateNote] = useState()
     const [publicNote, setPublicNote] = useState()
+    const [isPictureQrOpen, setIsPictureQrOpen] = useState(false)
+    const [pictureQrSession, setPictureQrSession] = useState(null)
+    const [pictureQrStatus, setPictureQrStatus] = useState('waiting')
+    const [pictureQrError, setPictureQrError] = useState('')
+    const manualPictureInputRef = useRef(null)
 
     const [reason, setReason] = useState('')
     const [isReasonOpen, setIsReasonOpen] = useState(false)
@@ -287,6 +302,100 @@ const GoodContent = props => {
 
     }
 
+    const applyGoodPictureSession = session => {
+        if (!session) return
+
+        if (session.status) setPictureQrStatus(session.status)
+
+        const nextPicture = getGoodPictureFromSession(session)
+        if (nextPicture) {
+            file = null
+            setImage()
+            setPicture(nextPicture)
+            setPictureQrStatus(session.status || 'uploaded')
+            setIsPictureQrOpen(false)
+            enqueueSnackbar('Фото товара загружено', { variant: 'success' })
+        }
+
+        if (session.status === 'error' || session.status === 'expired') {
+            setPictureQrError(session.error || '')
+        }
+    }
+
+    const openGoodPictureQr = async () => {
+        setPictureQrError('')
+        setPictureQrStatus('waiting')
+        setPictureQrSession(null)
+        setIsPictureQrOpen(true)
+
+        const res = await rest(GOOD_PICTURE_SESSION_PATH, 'POST', { barcode: good.barcode }, false, {
+            updateStore: false,
+            responseType: 'auto',
+        })
+
+        const session = res.body?.session || res.body
+
+        if (!res.ok || !session?.capture_url) {
+            setPictureQrStatus('error')
+            setPictureQrError('Не удалось создать QR-ссылку.')
+            return
+        }
+
+        setPictureQrSession(session)
+    }
+
+    useEffect(() => {
+        const incomingSession = props.app.good_picture_session
+
+        if (!isPictureQrOpen || !isMatchingGoodPictureSession(incomingSession, pictureQrSession, good.barcode)) return
+
+        applyGoodPictureSession(incomingSession)
+    }, [props.app.good_picture_session, isPictureQrOpen, pictureQrSession, good.barcode])
+
+    useEffect(() => {
+        if (!isPictureQrOpen || !pictureQrSession) return
+
+        const statusPath = getGoodPictureSessionStatusPath(GOOD_PICTURE_SESSION_PATH, pictureQrSession)
+        if (!statusPath) return
+
+        let isCancelled = false
+
+        const pollGoodPictureSession = async () => {
+            const res = await rest(statusPath, 'GET', '', false, {
+                updateStore: false,
+                responseType: 'auto',
+                showGlobalLoader: false,
+            })
+
+            if (isCancelled || !res.ok) return
+
+            const incomingSession = normalizeGoodPictureSession(res.body)
+            if (!isMatchingGoodPictureSession(incomingSession, pictureQrSession, good.barcode)) return
+
+            applyGoodPictureSession(incomingSession)
+        }
+
+        pollGoodPictureSession()
+        const intervalId = window.setInterval(pollGoodPictureSession, GOOD_PICTURE_POLL_INTERVAL_MS)
+
+        return () => {
+            isCancelled = true
+            window.clearInterval(intervalId)
+        }
+    }, [isPictureQrOpen, pictureQrSession, good.barcode])
+
+    const closeGoodPictureQr = () => {
+        setIsPictureQrOpen(false)
+        setPictureQrSession(null)
+        setPictureQrStatus('waiting')
+        setPictureQrError('')
+    }
+
+    const uploadGoodPictureFromComputer = () => {
+        closeGoodPictureQr()
+        manualPictureInputRef.current?.click()
+    }
+
     reader.onloadend = () => {
         setImage(reader.result)
     }
@@ -378,9 +487,9 @@ const GoodContent = props => {
 
     const pictureRender = () => <img
         src={
-            isFullUrl(good.picture)
-                ? good.picture
-                : 'https://uchet.store/uploads/' + good.picture
+            isFullUrl(picture)
+                ? picture
+                : 'https://uchet.store/uploads/' + picture
         }
         alt={good.model}
         width={'100%'}
@@ -449,7 +558,17 @@ const GoodContent = props => {
                                         ? 'Отпустите фото, чтобы загрузить'
                                         : 'Перетащите фото, чтобы загрузить'}
                                 </div>
-                                <input type='file' onChange={e => onManualSelect(e.target.files[0])} />
+                                <div className="good-picture-upload-actions">
+                                    <Button size="small" color="primary"
+                                        onClick={openGoodPictureQr}>
+                                        С телефона
+                                    </Button>
+                                    <input
+                                        ref={manualPictureInputRef}
+                                        type='file'
+                                        onChange={e => onManualSelect(e.target.files[0])}
+                                    />
+                                </div>
                             </>
                     : picture && pictureRender()}
 
@@ -525,6 +644,15 @@ const GoodContent = props => {
                         </Button>
                     : null
                 }
+
+                <GoodPictureQrDialog
+                    open={isPictureQrOpen}
+                    session={pictureQrSession}
+                    status={pictureQrStatus}
+                    error={pictureQrError}
+                    onCancel={closeGoodPictureQr}
+                    onComputerUpload={uploadGoodPictureFromComputer}
+                />
 
             </div>
 

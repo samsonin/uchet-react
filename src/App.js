@@ -60,6 +60,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import Sales from "./components/Sales";
 import Users from "./components/Settings/Users";
 import PassportCapturePage from "./components/customer/PassportCapturePage";
+import GoodPictureCapturePage from "./components/Good/GoodPictureCapturePage";
 
 const LegacyRouteElement = ({ Component, componentProps = {} }) => {
 
@@ -312,9 +313,10 @@ const App = props => {
 
     const orgId = props.auth.organization_id
 
-    if (path.startsWith('/passport-capture/')) {
+    if (path.startsWith('/passport-capture/') || path.startsWith('/good-picture-capture/')) {
         return <Routes>
             <Route path="/passport-capture/:token" element={<PassportCapturePage />} />
+            <Route path="/good-picture-capture/:token" element={<GoodPictureCapturePage />} />
             <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
     }
