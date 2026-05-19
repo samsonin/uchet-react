@@ -16,12 +16,16 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import { useSnackbar } from "notistack";
 
-import { PASSPORT_OCR_PATH } from "../../constants";
+import { PASSPORT_OCR_PATH, PASSPORT_OCR_SESSION_PATH } from "../../constants";
 import ReferalSelect from "../ReferalSelect";
 import rest from "../Rest";
 import { fioHandler, phoneNumberHandler } from "../common/InputHandlers";
 import CustomerContacts from "./Contacts";
-import { normalizePassportPayload } from "./passportOcr";
+import PassportQrDialog from "./PassportQrDialog";
+import {
+    isMatchingPassportOcrSession,
+    normalizePassportPayload,
+} from "./passportOcr";
 
 const customerSelectFields = ["id", "fio", "phone_number", "contacts"];
 const SEARCH_DEBOUNCE_MS = 400;
@@ -83,6 +87,10 @@ const CustomerForm = props => {
     const [value, setValue] = useState(null);
     const [isDetails, setIsDetails] = useState(props.details ?? props.defaultDetails ?? !props.customer.id);
     const [isRecognizingDocument, setIsRecognizingDocument] = useState(false);
+    const [isPassportQrOpen, setIsPassportQrOpen] = useState(false);
+    const [passportQrSession, setPassportQrSession] = useState(null);
+    const [passportQrStatus, setPassportQrStatus] = useState("waiting");
+    const [passportQrError, setPassportQrError] = useState("");
 
     const isExistingCustomer = Boolean(props.customer.id);
     const lockExistingCustomer = props.lockExistingCustomer ?? true;
@@ -210,6 +218,36 @@ const CustomerForm = props => {
         });
     };
 
+    const applyRecognizedPassportFields = recognizedFields => {
+        if (!Object.keys(recognizedFields).length) return false;
+
+        setCustomerPatch(recognizedFields);
+        setIsDetails(true);
+        return true;
+    };
+
+    const openPassportQr = async () => {
+        setPassportQrError("");
+        setPassportQrStatus("waiting");
+        setPassportQrSession(null);
+        setIsPassportQrOpen(true);
+
+        const res = await rest(PASSPORT_OCR_SESSION_PATH, "POST", {}, false, {
+            updateStore: false,
+            responseType: "auto",
+        });
+
+        const session = res.body?.session || res.body;
+
+        if (!res.ok || !session?.capture_url) {
+            setPassportQrStatus("error");
+            setPassportQrError("Не удалось создать QR-ссылку.");
+            return;
+        }
+
+        setPassportQrSession(session);
+    };
+
     const handleDocumentPhoto = async event => {
         const file = event.target.files?.[0];
         event.target.value = "";
@@ -230,15 +268,13 @@ const CustomerForm = props => {
 
             const recognizedFields = normalizePassportPayload(res.body);
 
-            if (!res.ok || !Object.keys(recognizedFields).length) {
+            if (!res.ok || !applyRecognizedPassportFields(recognizedFields)) {
                 enqueueSnackbar("Не удалось распознать данные. Заполните поля вручную.", {
                     variant: "warning",
                 });
                 return;
             }
 
-            setCustomerPatch(recognizedFields);
-            setIsDetails(true);
             enqueueSnackbar("Данные документа распознаны.", {
                 variant: "success",
             });
@@ -249,6 +285,45 @@ const CustomerForm = props => {
         } finally {
             setIsRecognizingDocument(false);
         }
+    };
+
+    useEffect(() => {
+        const incomingSession = props.passportOcrSession;
+
+        if (!isPassportQrOpen || !isMatchingPassportOcrSession(incomingSession, passportQrSession)) return;
+
+        if (incomingSession.status) setPassportQrStatus(incomingSession.status);
+
+        if (incomingSession.status === "recognized") {
+            const recognizedFields = normalizePassportPayload(incomingSession.fields || incomingSession);
+
+            if (applyRecognizedPassportFields(recognizedFields)) {
+                setPassportQrStatus("recognized");
+                setIsPassportQrOpen(false);
+                enqueueSnackbar("Данные документа распознаны.", {
+                    variant: "success",
+                });
+            } else {
+                setPassportQrStatus("error");
+                setPassportQrError("Не удалось распознать данные. Заполните поля вручную.");
+            }
+        }
+
+        if (incomingSession.status === "error" || incomingSession.status === "expired") {
+            setPassportQrError(incomingSession.error || "");
+        }
+    }, [props.passportOcrSession, isPassportQrOpen, passportQrSession]);
+
+    const closePassportQr = () => {
+        setIsPassportQrOpen(false);
+        setPassportQrSession(null);
+        setPassportQrStatus("waiting");
+        setPassportQrError("");
+    };
+
+    const uploadPassportFromComputer = () => {
+        closePassportQr();
+        documentInputRef.current?.click();
     };
 
     const renderCustomerField = field => {
@@ -350,7 +425,7 @@ const CustomerForm = props => {
                     variant="outlined"
                     className={showDetailedFields ? "customer-fields-passport-button" : "customers-select-document-button"}
                     startIcon={isRecognizingDocument ? <CircularProgress size={14} /> : <CameraAltOutlinedIcon />}
-                    onClick={() => documentInputRef.current?.click()}
+                    onClick={openPassportQr}
                     disabled={isRecognizingDocument}
                 >
                     {isRecognizingDocument ? RECOGNIZING_LABEL : props.documentLabel || DOC_PHOTO_LABEL}
@@ -439,10 +514,19 @@ const CustomerForm = props => {
         </div>}
 
         {!showContactsEditor && <CustomerContacts contacts={props.customer.contacts} dense={showDetailedFields} />}
+        <PassportQrDialog
+            open={isPassportQrOpen}
+            session={passportQrSession}
+            status={passportQrStatus}
+            error={passportQrError}
+            onCancel={closePassportQr}
+            onComputerUpload={uploadPassportFromComputer}
+        />
     </div>;
 };
 
 export default connect(state => ({
     ...(state.app.fields || {}),
     contactTypes: state.app.contact_types || [],
+    passportOcrSession: state.app.passport_ocr_session || null,
 }))(CustomerForm);
