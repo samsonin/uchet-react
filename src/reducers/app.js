@@ -17,6 +17,7 @@ let initialState = {
     description_tolerance: {},
     payment_types: [],
     quick_texts: {},
+    passport_ocr_session: null,
 }
 
 const probableKeys = [
@@ -40,6 +41,7 @@ const probableKeys = [
     'description_tolerance',
     'payment_types',
     'quick_texts',
+    'passport_ocr_session',
     'order',
     'orders',
     'referals',
