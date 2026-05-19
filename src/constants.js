@@ -11,6 +11,7 @@ export const IS_LOCALHOST = Boolean(
 const ENV_SERVER = process.env.REACT_APP_SERVER;
 const ENV_NEW_SERVER = process.env.REACT_APP_NEW_SERVER;
 const ENV_PASSPORT_OCR_PATH = process.env.REACT_APP_PASSPORT_OCR_PATH;
+const ENV_PASSPORT_OCR_SESSION_PATH = process.env.REACT_APP_PASSPORT_OCR_SESSION_PATH;
 
 export const
 
@@ -29,6 +30,7 @@ export const
         'https://api.uchet.store'),
 
     PASSPORT_OCR_PATH = ENV_PASSPORT_OCR_PATH || 'ocr/passport',
+    PASSPORT_OCR_SESSION_PATH = ENV_PASSPORT_OCR_SESSION_PATH || 'ocr/passport/sessions',
 
     NEW_SERVER = ENV_NEW_SERVER || (IS_LOCALHOST ?
         'http://127.0.0.1:8000' :
