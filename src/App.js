@@ -59,6 +59,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Sales from "./components/Sales";
 import Users from "./components/Settings/Users";
+import PassportCapturePage from "./components/customer/PassportCapturePage";
 
 const LegacyRouteElement = ({ Component, componentProps = {} }) => {
 
@@ -310,6 +311,13 @@ const App = props => {
     const expire = !(+props.auth.user_id && (props.auth.expiration_time - 180 > Math.round(new Date().getTime() / 1000.0)))
 
     const orgId = props.auth.organization_id
+
+    if (path.startsWith('/passport-capture/')) {
+        return <Routes>
+            <Route path="/passport-capture/:token" element={<PassportCapturePage />} />
+            <Route path="*" element={<Navigate replace to="/" />} />
+        </Routes>
+    }
 
     return <>
 

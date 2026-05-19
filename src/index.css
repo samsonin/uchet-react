@@ -3677,6 +3677,33 @@
     font-size: .85rem;
 }
 
+.passport-capture-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--app-bg);
+    color: var(--text);
+}
+
+.passport-capture-panel {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+}
+
+.passport-capture-message {
+    color: var(--text-muted);
+}
+
+.passport-capture-error {
+    color: #b42318;
+}
+
 @media print {
 
     .d-print-none,
