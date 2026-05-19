@@ -1,6 +1,8 @@
 import {
     getPassportOcrSessionId,
+    getPassportOcrSessionStatusPath,
     isMatchingPassportOcrSession,
+    normalizePassportOcrSession,
     normalizePassportPayload,
 } from "./passportOcr";
 
@@ -64,5 +66,55 @@ describe("passport OCR helpers", () => {
             { token: "token-a" },
             { token: "token-b" }
         )).toBe(false);
+    });
+
+    it("normalizes polling session responses from common backend wrappers", () => {
+        expect(normalizePassportOcrSession({
+            session: {
+                id: "session-id",
+                status: "recognized",
+            },
+        })).toEqual({
+            id: "session-id",
+            status: "recognized",
+        });
+
+        expect(normalizePassportOcrSession({
+            data: {
+                session: {
+                    token: "token",
+                    status: "recognizing",
+                },
+            },
+        })).toEqual({
+            token: "token",
+            status: "recognizing",
+        });
+
+        expect(normalizePassportOcrSession({
+            passport_ocr_session: {
+                id: "ws-style",
+                status: "error",
+            },
+        })).toEqual({
+            id: "ws-style",
+            status: "error",
+        });
+    });
+
+    it("builds polling status path from explicit status_url or token", () => {
+        expect(getPassportOcrSessionStatusPath("ocr/passport/sessions", {
+            status_url: "ocr/passport/sessions/session-id/status",
+            token: "token",
+        })).toBe("ocr/passport/sessions/session-id/status");
+
+        expect(getPassportOcrSessionStatusPath("ocr/passport/sessions", {
+            token: "token with spaces",
+        })).toBe("ocr/passport/sessions/token%20with%20spaces");
+
+        expect(getPassportOcrSessionStatusPath("ocr/passport/sessions", {
+            id: "internal-id",
+            token: "public-token",
+        })).toBe("ocr/passport/sessions/public-token");
     });
 });

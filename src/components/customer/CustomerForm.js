@@ -23,12 +23,15 @@ import { fioHandler, phoneNumberHandler } from "../common/InputHandlers";
 import CustomerContacts from "./Contacts";
 import PassportQrDialog from "./PassportQrDialog";
 import {
+    getPassportOcrSessionStatusPath,
     isMatchingPassportOcrSession,
+    normalizePassportOcrSession,
     normalizePassportPayload,
 } from "./passportOcr";
 
 const customerSelectFields = ["id", "fio", "phone_number", "contacts"];
 const SEARCH_DEBOUNCE_MS = 400;
+const PASSPORT_OCR_POLL_INTERVAL_MS = 2000;
 const CUSTOMER_FROM_BASE_LABEL = "Заказчик из базы";
 const NEW_CUSTOMER_LABEL = "Новый заказчик";
 const EDIT_CUSTOMER_LABEL = "Редактировать заказчика";
@@ -226,6 +229,31 @@ const CustomerForm = props => {
         return true;
     };
 
+    const applyPassportOcrSession = incomingSession => {
+        if (!incomingSession) return;
+
+        if (incomingSession.status) setPassportQrStatus(incomingSession.status);
+
+        if (incomingSession.status === "recognized") {
+            const recognizedFields = normalizePassportPayload(incomingSession.fields || incomingSession);
+
+            if (applyRecognizedPassportFields(recognizedFields)) {
+                setPassportQrStatus("recognized");
+                setIsPassportQrOpen(false);
+                enqueueSnackbar("Данные документа распознаны.", {
+                    variant: "success",
+                });
+            } else {
+                setPassportQrStatus("error");
+                setPassportQrError("Не удалось распознать данные. Заполните поля вручную.");
+            }
+        }
+
+        if (incomingSession.status === "error" || incomingSession.status === "expired") {
+            setPassportQrError(incomingSession.error || "");
+        }
+    };
+
     const openPassportQr = async () => {
         setPassportQrError("");
         setPassportQrStatus("waiting");
@@ -292,27 +320,40 @@ const CustomerForm = props => {
 
         if (!isPassportQrOpen || !isMatchingPassportOcrSession(incomingSession, passportQrSession)) return;
 
-        if (incomingSession.status) setPassportQrStatus(incomingSession.status);
-
-        if (incomingSession.status === "recognized") {
-            const recognizedFields = normalizePassportPayload(incomingSession.fields || incomingSession);
-
-            if (applyRecognizedPassportFields(recognizedFields)) {
-                setPassportQrStatus("recognized");
-                setIsPassportQrOpen(false);
-                enqueueSnackbar("Данные документа распознаны.", {
-                    variant: "success",
-                });
-            } else {
-                setPassportQrStatus("error");
-                setPassportQrError("Не удалось распознать данные. Заполните поля вручную.");
-            }
-        }
-
-        if (incomingSession.status === "error" || incomingSession.status === "expired") {
-            setPassportQrError(incomingSession.error || "");
-        }
+        applyPassportOcrSession(incomingSession);
     }, [props.passportOcrSession, isPassportQrOpen, passportQrSession]);
+
+    useEffect(() => {
+        if (!isPassportQrOpen || !passportQrSession) return;
+
+        const statusPath = getPassportOcrSessionStatusPath(PASSPORT_OCR_SESSION_PATH, passportQrSession);
+        if (!statusPath) return;
+
+        let isCancelled = false;
+
+        const pollPassportOcrSession = async () => {
+            const res = await rest(statusPath, "GET", "", false, {
+                updateStore: false,
+                responseType: "auto",
+                showGlobalLoader: false,
+            });
+
+            if (isCancelled || !res.ok) return;
+
+            const incomingSession = normalizePassportOcrSession(res.body);
+            if (!isMatchingPassportOcrSession(incomingSession, passportQrSession)) return;
+
+            applyPassportOcrSession(incomingSession);
+        };
+
+        pollPassportOcrSession();
+        const intervalId = window.setInterval(pollPassportOcrSession, PASSPORT_OCR_POLL_INTERVAL_MS);
+
+        return () => {
+            isCancelled = true;
+            window.clearInterval(intervalId);
+        };
+    }, [isPassportQrOpen, passportQrSession]);
 
     const closePassportQr = () => {
         setIsPassportQrOpen(false);

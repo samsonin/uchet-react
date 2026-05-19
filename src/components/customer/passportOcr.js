@@ -30,6 +30,23 @@ export const getPassportOcrSessionId = session => {
     return String(session.id || session.session_id || session.token || "");
 };
 
+export const getPassportOcrSessionStatusPath = (basePath, session) => {
+    if (!session || typeof session !== "object") return "";
+    if (session.status_url) return String(session.status_url);
+
+    const sessionId = String(session.token || session.id || session.session_id || "");
+    if (!sessionId) return "";
+
+    return `${basePath}/${encodeURIComponent(sessionId)}`;
+};
+
+export const normalizePassportOcrSession = body => {
+    const source = body?.passport_ocr_session || body?.session || body?.data?.session || body?.data || body;
+    if (!source || typeof source !== "object" || Array.isArray(source)) return null;
+
+    return source;
+};
+
 export const isMatchingPassportOcrSession = (incomingSession, activeSession) => {
     const incomingId = getPassportOcrSessionId(incomingSession);
     const activeId = getPassportOcrSessionId(activeSession);
