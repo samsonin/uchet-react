@@ -1,28 +1,29 @@
-# Passport QR OCR Design
+# Распознавание паспорта через одноразовый QR
 
-## Goal
+## Цель
 
-Make passport recognition in `/pledges` convenient when the operator works on a desktop computer. The operator should be able to start passport capture from the desktop, take a photo on a phone through a one-time QR link, and continue filling the pledge form on the desktop after the recognized fields arrive.
+Сделать распознавание паспорта в `/pledges` удобным для оператора, который заполняет залог на компьютере. Оператор должен запускать съемку документа с компьютера, фотографировать паспорт телефоном по одноразовой QR-ссылке и продолжать заполнение залога в браузере на компьютере после получения распознанных данных.
 
-## User Flow
+## Пользовательский сценарий
 
-1. In the pledge customer block, the operator clicks `Документ`.
-2. The desktop opens a dialog with a one-time QR code and a fallback action to upload a file from the computer.
-3. The operator scans the QR code on a phone.
-4. The phone opens a minimal capture page without account login.
-5. The phone camera captures or selects a passport image and uploads it through the one-time token.
-6. The backend runs the existing passport OCR.
-7. The backend sends the recognized passport fields to the desktop through the existing WebSocket state update channel.
-8. The desktop fills the current customer form and shows success or error status.
+1. В блоке клиента при создании залога оператор нажимает `Документ`.
+2. На компьютере открывается окно с одноразовым QR-кодом и запасной загрузкой файла с компьютера.
+3. Оператор сканирует QR-код телефоном.
+4. На телефоне открывается минимальная страница съемки без входа в аккаунт.
+5. Оператор делает фото паспорта или выбирает фото из галереи.
+6. Телефон загружает изображение на backend по одноразовому токену.
+7. Backend запускает существующее OCR-распознавание паспорта.
+8. Backend отправляет результат на компьютер через существующий WebSocket-канал обновления общего state приложения.
+9. Компьютер автоматически заполняет поля текущего клиента и показывает успешный или ошибочный статус.
 
-## Desktop UI
+## Интерфейс на компьютере
 
-The current `Документ` button remains the entry point. For pledge creation and other editable customer forms, it should offer:
+Текущая кнопка `Документ` остается точкой входа. Для создания залога и других редактируемых форм клиента она должна предлагать два действия:
 
-- `С телефона`: opens the QR dialog.
-- `С компьютера`: keeps the current local file upload behavior.
+- `С телефона`: открыть окно с QR-кодом.
+- `С компьютера`: оставить текущий сценарий выбора локального файла.
 
-The QR dialog should show the QR code, a short URL, expiration status, and recognition state:
+Окно QR должно показывать QR-код, короткую ссылку, срок действия и состояние распознавания:
 
 - `Ожидаем фото`
 - `Фото загружено`
@@ -31,29 +32,29 @@ The QR dialog should show the QR code, a short URL, expiration status, and recog
 - `Ошибка`
 - `Ссылка истекла`
 
-The dialog should have `Отменить` and `Загрузить с компьютера` actions.
+В окне должны быть действия `Отменить` и `Загрузить с компьютера`.
 
-## Phone UI
+## Интерфейс на телефоне
 
-The phone page is opened by a one-time token URL. It should not require login. It should show only the capture flow:
+Телефонная страница открывается по URL с одноразовым токеном и не требует авторизации. На ней должен быть только сценарий съемки:
 
-- capture or select passport photo;
-- upload progress;
-- final message that the photo was accepted and the operator can return to the computer;
-- later, a link to open the native app can be added to the same page.
+- сделать или выбрать фото паспорта;
+- показать прогресс загрузки;
+- после успешной загрузки показать сообщение, что фото принято и можно вернуться к компьютеру;
+- позже на эту же страницу можно добавить ссылку для открытия мобильного приложения.
 
-The phone page should not show recognized passport data unless the backend explicitly needs it for confirmation later.
+Телефонная страница не должна показывать распознанные паспортные данные, если backend отдельно не потребует подтверждение данных пользователем.
 
-## Backend Contract
+## Контракт с backend
 
-The frontend expects backend support for short-lived one-time sessions:
+Frontend ожидает backend-поддержку короткоживущих одноразовых OCR-сессий:
 
-- `POST /ocr/passport/sessions` creates a session and returns `token`, `capture_url`, `expires_at`, and an optional `session_id`.
-- `POST /ocr/passport/sessions/:token/image` accepts the phone image upload.
-- The backend runs OCR using the same field shape already supported by the frontend passport parser.
-- The backend emits a WebSocket app-state update containing the recognized passport fields and enough session identity for the frontend to apply it only to the matching open QR dialog.
+- `POST /ocr/passport/sessions` создает сессию и возвращает `token`, `capture_url`, `expires_at` и, опционально, `session_id`.
+- `POST /ocr/passport/sessions/:token/image` принимает изображение с телефона.
+- Backend запускает OCR и возвращает поля в формате, который уже поддерживает frontend-парсер паспорта.
+- Backend отправляет WebSocket-обновление общего state с распознанными полями паспорта и идентификатором сессии, чтобы frontend применил данные только к подходящему открытому QR-окну.
 
-Suggested WebSocket payload shape:
+Рекомендуемая форма WebSocket payload:
 
 ```json
 {
@@ -75,36 +76,36 @@ Suggested WebSocket payload shape:
 }
 ```
 
-## Frontend Data Flow
+## Поток данных на frontend
 
-`CustomerForm` owns the editable customer fields, so it should also own the QR OCR dialog state. It should:
+`CustomerForm` владеет редактируемыми полями клиента, поэтому она же должна владеть состоянием QR OCR-окна. Компонент должен:
 
-1. Create an OCR session when the operator chooses phone capture.
-2. Store the active session id or token locally.
-3. Listen to the shared app state for matching `passport_ocr_session` updates.
-4. Normalize the incoming fields with the same logic used by local file OCR.
-5. Patch the current customer with recognized fields and expand detailed fields.
-6. Ignore WebSocket OCR updates that do not match the active local session.
+1. Создавать OCR-сессию, когда оператор выбирает съемку с телефона.
+2. Локально хранить активный `session_id` или `token`.
+3. Следить за общим state приложения и находить подходящие обновления `passport_ocr_session`.
+4. Нормализовать входящие поля той же логикой, которая используется для OCR локального файла.
+5. Заполнять текущего клиента распознанными полями и раскрывать подробные поля.
+6. Игнорировать WebSocket OCR-обновления, которые не относятся к активной локальной сессии.
 
-The existing direct file upload path should stay available and keep using `PASSPORT_OCR_PATH`.
+Существующая загрузка файла с компьютера должна остаться доступной и продолжить использовать `PASSPORT_OCR_PATH`.
 
-## Security And Limits
+## Безопасность и ограничения
 
-- Tokens must be long random values, short-lived, and single-use.
-- The capture URL must not contain recognized personal data.
-- Uploads should enforce image MIME types and size limits.
-- The backend should limit attempts per token.
-- Expired or already used tokens should return a clear error for the phone page.
-- Desktop should discard stale session updates after cancellation or expiration.
+- Токены должны быть длинными случайными значениями, короткоживущими и одноразовыми.
+- URL для съемки не должен содержать распознанные персональные данные.
+- Загрузка должна ограничивать MIME-типы изображений и размер файла.
+- Backend должен ограничивать количество попыток загрузки по одному токену.
+- Истекший или уже использованный токен должен возвращать понятную ошибку на телефонной странице.
+- Компьютер должен отбрасывать устаревшие обновления после отмены или истечения сессии.
 
-## Testing
+## Проверка
 
-Frontend tests should cover:
+Frontend-тесты должны покрывать:
 
-- local file OCR still patches customer fields;
-- QR session creation opens the dialog;
-- a matching WebSocket session update patches the customer;
-- a non-matching session update is ignored;
-- error and expiration statuses are displayed.
+- OCR локального файла по-прежнему заполняет поля клиента;
+- создание QR-сессии открывает окно с QR;
+- WebSocket-обновление с подходящей сессией заполняет клиента;
+- WebSocket-обновление с другой сессией игнорируется;
+- ошибки и истечение срока действия отображаются в интерфейсе.
 
-Manual verification should cover the full pledge flow: desktop opens QR, phone uploads image, desktop receives recognized fields, and pledge creation can continue without refreshing the page.
+Ручная проверка должна пройти полный сценарий залога: компьютер открывает QR, телефон загружает фото, компьютер получает распознанные поля, оператор продолжает создание залога без обновления страницы.
