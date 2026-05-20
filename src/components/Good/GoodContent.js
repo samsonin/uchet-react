@@ -566,7 +566,7 @@ const GoodContent = props => {
                                         color="primary"
                                         startIcon={<AddPhotoAlternateOutlinedIcon />}
                                         onClick={openGoodPictureQr}>
-                                        Загрузить
+                                        Загрузить фото
                                     </Button>
                                     <input
                                         ref={manualPictureInputRef}
