@@ -561,11 +561,12 @@ const GoodContent = props => {
                                 <div className="good-picture-upload-actions">
                                     <Button size="small" color="primary"
                                         onClick={openGoodPictureQr}>
-                                        С телефона
+                                        Загрузить
                                     </Button>
                                     <input
                                         ref={manualPictureInputRef}
                                         type='file'
+                                        accept="image/*"
                                         onChange={e => onManualSelect(e.target.files[0])}
                                     />
                                 </div>
