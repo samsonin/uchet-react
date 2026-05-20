@@ -43,6 +43,19 @@ describe("passport OCR helpers", () => {
         });
     });
 
+    it("normalizes fields from customer wrapper returned by direct upload", () => {
+        expect(normalizePassportPayload({
+            ok: true,
+            customer: {
+                fio: "Сидоров Сидор Сидорович",
+                doc_sn: "3333 444444",
+            },
+        })).toEqual({
+            fio: "Сидоров Сидор Сидорович",
+            doc_sn: "3333 444444",
+        });
+    });
+
     it("returns empty object for invalid payloads", () => {
         expect(normalizePassportPayload(null)).toEqual({});
         expect(normalizePassportPayload([])).toEqual({});

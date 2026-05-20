@@ -10,7 +10,19 @@ const passportFieldAliases = {
 };
 
 export const normalizePassportPayload = body => {
-    const source = body?.fields || body?.data?.fields || body?.data || body?.result || body;
+    const source = body?.fields
+        || body?.customer
+        || body?.passport
+        || body?.data?.fields
+        || body?.data?.customer
+        || body?.data?.passport
+        || body?.result?.fields
+        || body?.result?.customer
+        || body?.result?.passport
+        || body?.data
+        || body?.result
+        || body;
+
     if (!source || typeof source !== "object" || Array.isArray(source)) return {};
 
     return Object.entries(passportFieldAliases).reduce((acc, [fieldName, aliases]) => {
