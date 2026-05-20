@@ -3780,6 +3780,12 @@
     margin-top: 8px;
 }
 
+.good-picture-upload-button {
+    min-height: 40px;
+    font-weight: 600 !important;
+    text-transform: none !important;
+}
+
 .good-picture-upload-actions input {
     display: none;
 }

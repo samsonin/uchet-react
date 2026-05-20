@@ -10,6 +10,7 @@ import {
     Fade,
     TextField,
 } from "@mui/material";
+import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import { makeStyles } from "muiLegacyStyles";
 import { useSnackbar } from "notistack";
 
@@ -559,7 +560,11 @@ const GoodContent = props => {
                                         : 'Перетащите фото, чтобы загрузить'}
                                 </div>
                                 <div className="good-picture-upload-actions">
-                                    <Button size="small" color="primary"
+                                    <Button
+                                        className="good-picture-upload-button"
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<AddPhotoAlternateOutlinedIcon />}
                                         onClick={openGoodPictureQr}>
                                         Загрузить
                                     </Button>
