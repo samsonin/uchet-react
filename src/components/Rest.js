@@ -8,6 +8,14 @@ const notifyNetworkError = detail => {
     window.dispatchEvent(new CustomEvent(NETWORK_ERROR_EVENT, {detail}))
 }
 
+export const buildRequestUrl = (baseUrl, url) => {
+    const requestUrl = String(url);
+
+    if (/^[a-z][a-z\d+\-.]*:\/\//i.test(requestUrl)) return requestUrl;
+
+    return baseUrl + '/' + requestUrl;
+}
+
 export default function fetchPost(url, method = 'GET', data = '', isFile = false, options = {}) {
     let response = {};
 
@@ -69,7 +77,7 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
 
     init.signal = controller.signal
 
-    return fetch(baseUrl + '/' + url, init)
+    return fetch(buildRequestUrl(baseUrl, url), init)
         .then(res => {
 
             if (res.status === 401) {
