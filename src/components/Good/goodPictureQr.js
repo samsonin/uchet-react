@@ -11,6 +11,14 @@ export const getGoodPictureSessionId = session => {
     return String(session.id || session.session_id || session.token || "");
 };
 
+const getGoodPictureSessionIds = session => {
+    if (!session || typeof session !== "object") return [];
+
+    return [session.id, session.session_id, session.token]
+        .filter(value => value !== undefined && value !== null && String(value) !== "")
+        .map(value => String(value));
+};
+
 export const getGoodPictureSessionStatusPath = (basePath, session) => {
     if (!session || typeof session !== "object") return "";
     if (session.status_url) return String(session.status_url);
@@ -22,10 +30,10 @@ export const getGoodPictureSessionStatusPath = (basePath, session) => {
 };
 
 export const isMatchingGoodPictureSession = (incomingSession, activeSession, barcode) => {
-    const incomingId = getGoodPictureSessionId(incomingSession);
-    const activeId = getGoodPictureSessionId(activeSession);
+    const incomingIds = getGoodPictureSessionIds(incomingSession);
+    const activeIds = getGoodPictureSessionIds(activeSession);
 
-    if (!incomingId || !activeId || incomingId !== activeId) return false;
+    if (!incomingIds.length || !activeIds.length || !incomingIds.some(id => activeIds.includes(id))) return false;
     if (!barcode || incomingSession?.barcode === undefined || incomingSession?.barcode === null) return true;
 
     return String(incomingSession.barcode) === String(barcode);
@@ -34,5 +42,5 @@ export const isMatchingGoodPictureSession = (incomingSession, activeSession, bar
 export const getGoodPictureFromSession = session => {
     if (!session || typeof session !== "object") return "";
 
-    return String(session.picture || session.good?.picture || "");
+    return String(session.picture || session.picture_url || session.good?.picture || session.good?.picture_url || "");
 };

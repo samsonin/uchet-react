@@ -74,9 +74,19 @@ describe("good picture QR helpers", () => {
         )).toBe(false);
     });
 
-    it("extracts picture filename from session or nested good", () => {
+    it("matches when backend returns token but active desktop session has session_id first", () => {
+        expect(isMatchingGoodPictureSession(
+            { token: "public-token", barcode: "123" },
+            { session_id: "desktop-session", token: "public-token" },
+            "123"
+        )).toBe(true);
+    });
+
+    it("extracts picture filename from common session response shapes", () => {
         expect(getGoodPictureFromSession({ picture: "direct.jpg" })).toBe("direct.jpg");
+        expect(getGoodPictureFromSession({ picture_url: "https://uchet.store/uploads/direct.jpg" })).toBe("https://uchet.store/uploads/direct.jpg");
         expect(getGoodPictureFromSession({ good: { picture: "nested.jpg" } })).toBe("nested.jpg");
+        expect(getGoodPictureFromSession({ good: { picture_url: "https://uchet.store/uploads/nested.jpg" } })).toBe("https://uchet.store/uploads/nested.jpg");
         expect(getGoodPictureFromSession(null)).toBe("");
     });
 });
