@@ -40,11 +40,13 @@ const useStyles = makeStyles(() => ({
 const Zp = props => {
 
     const classes = useStyles()
+    const isAdmin = Boolean(props.auth.admin)
+    const authUserId = +props.auth.user_id
 
     const [zp, setZp] = useState([])
     const [from, setFrom] = useState(() => today)
     const [to, setTo] = useState(() => today)
-    const [userId, setUserId] = useState(() => props.auth.user_id)
+    const [userId, setUserId] = useState(() => authUserId)
     const [isAll, setIsAll] = useState(false);
     const [isRequest, setIsRequest] = useState(false);
 
@@ -54,7 +56,7 @@ const Zp = props => {
 
         url += '/' + (86399 + toUnix(to))
 
-        if (props.auth.admin && props.auth.admin !== userId) {
+        if (isAdmin && +userId && +userId !== authUserId) {
             url += '/' + userId
         }
 
@@ -73,6 +75,10 @@ const Zp = props => {
     }
 
     useEffect(() => getZp(), [])
+
+    useEffect(() => {
+        if (!isAdmin) setUserId(authUserId)
+    }, [authUserId, isAdmin])
 
     const handler = z => {
 
@@ -95,7 +101,7 @@ const Zp = props => {
     return (
         <>
 
-            {props.auth.admin && props.app.users && props.app.users.length &&
+            {isAdmin && props.app.users && props.app.users.length &&
                 <div className={classes.controlsRow}>
                     <UsersSelect
                         classes={classes.field}
