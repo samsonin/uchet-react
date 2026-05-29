@@ -10,6 +10,7 @@ import rest from "./Rest";
 import { toLocalTimeStr } from "./common/Time";
 import { UiButton, UiDropdown, UiDropdownItem } from "./common/Ui";
 import AssistantChat from "./assistant/AssistantChat";
+import { normalizeDailyReports } from "../common/dailyReports";
 import {
     APP_SETTINGS_CHANGE_EVENT,
     applyAppSettings,
@@ -139,7 +140,7 @@ const NavbarPage = props => {
         if (!props.app) return "";
 
         const appPositions = props.app.positions || [];
-        const appDaily = props.app.daily || [];
+        const appDaily = normalizeDailyReports(props.app.daily);
         const position = appPositions.find(p => p.id === props.auth.position_id);
         const isSale = position && position.is_sale;
         const currentStock = validStocks.find(stock => +stock.id === props.app.current_stock_id);
@@ -153,7 +154,7 @@ const NavbarPage = props => {
                     </strong>}
 
                     {(props.auth.admin || isSale) &&
-                        !appDaily.find(d => d.employees.includes(props.auth.user_id))
+                        !appDaily.find(d => Array.isArray(d.employees) && d.employees.includes(props.auth.user_id))
                         ? <Button
                             variant="outlined"
                             className="header-shift-button"

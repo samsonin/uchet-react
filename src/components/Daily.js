@@ -39,6 +39,13 @@ import DailyModal from "./Modals/Daily";
 import { numberInputHandler } from "./common/InputHandlers";
 import InteractionTableRow from "./common/InteractionTableRow";
 import { setInRange, today } from "./common/Time";
+import {
+    findCashPaymentDiscrepanciesBySaleId,
+    getUnmatchedCashPaymentDiscrepancies,
+    normalizeCashPaymentDiscrepancies,
+    normalizeDailyEmployees,
+    normalizeDailyReport,
+} from "../common/dailyReports";
 
 const mainUrl = document.location.protocol + '//' + document.location.host
 
@@ -182,6 +189,7 @@ const Daily = props => {
     })
     const [date, setDate] = useState(() => today)
     const [localDaily, setLocalDaily] = useState({})
+    const [localCashPaymentDiscrepancies, setLocalCashPaymentDiscrepancies] = useState([])
 
     const [handed, setHanded] = useState(0)
 
@@ -195,6 +203,7 @@ const Daily = props => {
     const [paymentRow, setPaymentRow] = useState()
     const [paymentDrafts, setPaymentDrafts] = useState([])
     const [isPaymentSaving, setPaymentSaving] = useState(false)
+    const [cashPaymentVideos, setCashPaymentVideos] = useState([])
 
     const classes = useStyles()
     const { enqueueSnackbar } = useSnackbar()
@@ -217,13 +226,17 @@ const Daily = props => {
             return setDate(date => setInRange(date))
         }
 
-        rest('daily/' + stock + '/' + date)
+        rest('daily/' + stock + '/' + date, 'GET', '', false, { updateStore: false })
             .then(res => {
 
-                if (res.status === 200) {
-                    setLocalDaily(res.body)
+                const dailyReport = normalizeDailyReport(res.body, stock)
+
+                if (res.status === 200 && dailyReport) {
+                    setLocalDaily(dailyReport)
+                    setLocalCashPaymentDiscrepancies(normalizeCashPaymentDiscrepancies(res.body))
                 } else {
                     setLocalDaily(null)
+                    setLocalCashPaymentDiscrepancies([])
                     enqueueSnackbar(date + ' не работали', { variant: 'error' })
                 }
 
@@ -240,8 +253,15 @@ const Daily = props => {
     }, [paymentRow, appPaymentTypes])
 
     const daily = date === today
-        ? appDaily.find(d => d.stock_id === stock)
+        ? appDaily.find(d => +d.stock_id === +stock)
         : localDaily
+    const dailyEmployees = normalizeDailyEmployees(daily?.employees, appUsers)
+    const cashPaymentDiscrepancies = props.auth.user_id === 4
+        ? (date === today
+            ? props.app.cash_payment_discrepancies || []
+            : localCashPaymentDiscrepancies)
+        : []
+    const unmatchedCashPaymentDiscrepancies = getUnmatchedCashPaymentDiscrepancies(cashPaymentDiscrepancies)
 
     const canChange = date === today && props.app.current_stock_id === stock
 
@@ -278,7 +298,7 @@ const Daily = props => {
 
     const employeeCheckout = employee_id => {
 
-        const employees = daily.employees.filter(e => e !== employee_id)
+        const employees = daily.employees.filter(e => +e !== +employee_id)
 
         rest('daily/' + stock, 'PATCH', { employees })
             .then(afterRes)
@@ -416,6 +436,37 @@ const Daily = props => {
         event.stopPropagation()
         setPaymentRow(row)
     }
+    const openCashPaymentVideos = (event, videos) => {
+        event.stopPropagation()
+        if (videos.length === 1) {
+            window.open(videos[0].url, '_blank', 'noopener,noreferrer')
+            return
+        }
+        setCashPaymentVideos(videos)
+    }
+    const renderSumCell = (row, value) => {
+        const videos = findCashPaymentDiscrepanciesBySaleId(cashPaymentDiscrepancies, getSaleId(row))
+
+        return <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+        }}>
+            <span>{value}</span>
+            {videos.length > 0 && <Button
+                size="small"
+                variant="outlined"
+                onClick={event => openCashPaymentVideos(event, videos)}
+                style={{
+                    minWidth: 0,
+                    padding: '1px 6px',
+                    lineHeight: 1.4,
+                }}
+            >
+                видео{videos.length > 1 ? ' ' + videos.length : ''}
+            </Button>}
+        </span>
+    }
     const changePaymentDraft = id => {
         const paymentType = appPaymentTypes.find(type => String(type.id) === String(id))
 
@@ -460,6 +511,39 @@ const Daily = props => {
         />
         : <>
             <Dialog
+                open={cashPaymentVideos.length > 0}
+                onClose={() => setCashPaymentVideos([])}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogContent>
+                    <Typography variant="h6" gutterBottom>
+                        Видео передачи наличных
+                    </Typography>
+                    <List dense>
+                        {cashPaymentVideos.map(item => <ListItem
+                            key={'cash-payment-video-' + item.id}
+                            component="a"
+                            href={item.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            button
+                        >
+                            <ListItemText
+                                primary={item.time || 'Видео'}
+                                secondary={item.status}
+                            />
+                        </ListItem>)}
+                    </List>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setCashPaymentVideos([])}>
+                        Закрыть
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
                 open={Boolean(paymentRow)}
                 onClose={() => setPaymentRow(null)}
                 maxWidth="xs"
@@ -475,7 +559,12 @@ const Daily = props => {
                                 gap: 12,
                             }}
                         >
-                            <FormControl size="small" fullWidth disabled={!canChange}>
+                            <FormControl
+                                className="daily-payment-method-control"
+                                size="small"
+                                fullWidth
+                                disabled={!canChange}
+                            >
                                 <InputLabel id="daily-payment-method-label">{PAYMENT_TYPE_LABEL}</InputLabel>
                                 <Select
                                     labelId="daily-payment-method-label"
@@ -584,11 +673,7 @@ const Daily = props => {
                 : <>
                     <div className="p-2">
                         <List dense>
-                            {daily && daily.employees && daily.employees.map(e => {
-
-                                const user = appUsers.find(u => u.id === e)
-
-                                return user && <ListItem
+                            {dailyEmployees.map(user => <ListItem
                                     key={'ListItem-users' + user.id}
                                     component={Paper}
                                     className="m-1"
@@ -596,15 +681,14 @@ const Daily = props => {
                                     <ListItemText
                                         primary={user.name}
                                     />
-                                    {(canAdminChange || props.auth.user_id === user.id) && <ListItemSecondaryAction>
+                                    {(canAdminChange || +props.auth.user_id === +user.id) && <ListItemSecondaryAction>
                                         <IconButton
                                             onClick={() => employeeCheckout(user.id)}
                                         >
                                             <ExitToAppIcon />
                                         </IconButton>
                                     </ListItemSecondaryAction>}
-                                </ListItem>
-                            })}
+                                </ListItem>)}
                         </List>
                     </div>
 
@@ -691,6 +775,9 @@ const Daily = props => {
                                                 users={appUsers}
                                                 style={{cursor: 'pointer'}}
                                                 onClick={() => handler(t.title, row)}
+                                                getCellContent={({row, valueName, value}) => valueName === 'sum'
+                                                    ? renderSumCell(row, value)
+                                                    : value}
                                                 getCellProps={({row, valueName}) => valueName === 'sum'
                                                     ? {
                                                         onClick: event => openPayments(event, row),
@@ -809,6 +896,49 @@ const Daily = props => {
 
                                         </TableRow>
                                     </React.Fragment>)}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </div>}
+
+                    {unmatchedCashPaymentDiscrepancies.length > 0 && <div style={{ margin: '0 1rem 0 0' }}>
+                        <TableContainer
+                            className={classes.table}
+                            component={Paper}
+                        >
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell colSpan={3}>
+                                            <Typography variant="h6">
+                                                Проверка наличных оплат
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Время</TableCell>
+                                        <TableCell>Статус</TableCell>
+                                        <TableCell>Видео</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {unmatchedCashPaymentDiscrepancies.map(item => <TableRow
+                                        key={'cash-payment-discrepancy-' + item.id}
+                                    >
+                                        <TableCell>{item.time}</TableCell>
+                                        <TableCell>{item.status}</TableCell>
+                                        <TableCell>
+                                            {item.url
+                                                ? <a
+                                                    href={item.url}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                >
+                                                    открыть
+                                                </a>
+                                                : ''}
+                                        </TableCell>
+                                    </TableRow>)}
                                 </TableBody>
                             </Table>
                         </TableContainer>

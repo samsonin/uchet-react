@@ -1,3 +1,5 @@
+import { normalizeDailyReports } from "../../common/dailyReports";
+
 export const FALLBACK_QUICK_PROMPTS = [
     "Начать первичную настройку",
     "Что на этой странице?",
@@ -69,7 +71,7 @@ export const stripAssistantGreeting = (text, assistantName = "") => {
 export const getDailyAssistantIntro = (assistantName, app = {}) => {
     const currentStockId = app.current_stock_id;
     const stock = (app.stocks || []).find(item => +item.id === +currentStockId);
-    const daily = (app.daily || []).find(item => +item.stock_id === +currentStockId);
+    const daily = normalizeDailyReports(app.daily).find(item => +item.stock_id === +currentStockId);
     const stockText = stock?.name ? `Точка «${stock.name}»` : "Точка";
 
     if (!currentStockId) {

@@ -39,6 +39,7 @@ const InteractionTableRow = ({
     className,
     style,
     getValue = defaultGetValue,
+    getCellContent,
     getCellProps = () => ({}),
     cellKeyPrefix = "interaction-table-row",
 }) => <TableRow
@@ -53,7 +54,14 @@ const InteractionTableRow = ({
                 key={`${cellKeyPrefix}-${row.id || row.item || "row"}-${valueName}-${index}`}
                 {...cellProps}
             >
-                {getValue({ row, valueName, users })}
+                {typeof getCellContent === "function"
+                    ? getCellContent({
+                        row,
+                        valueName,
+                        users,
+                        value: getValue({ row, valueName, users }),
+                    })
+                    : getValue({ row, valueName, users })}
             </TableCell>;
         })}
     </TableRow>;

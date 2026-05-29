@@ -612,7 +612,7 @@ const Consignment = props => {
 
     const currentTr = state.consignment.products[state.currentTr]
 
-    const dailyReport = (props.app.daily || []).find(d => d.stock_id === props.app.current_stock_id)
+    const dailyReport = (props.app.daily || []).find(d => +d.stock_id === +props.app.current_stock_id)
 
     return props.app.current_stock_id
         ? <>

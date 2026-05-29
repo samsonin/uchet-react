@@ -1,5 +1,6 @@
 import { CLOSE_GOOD, DELETE_GOOD, UPD_APP } from "../constants";
 import { EXIT_APP } from "../constants";
+import { normalizeDailyReports } from "../common/dailyReports";
 
 let initialState = {
     balance: 0,
@@ -17,6 +18,7 @@ let initialState = {
     description_tolerance: {},
     payment_types: [],
     quick_texts: {},
+    cash_payment_discrepancies: [],
     passport_ocr_session: null,
     good_picture_session: null,
 }
@@ -42,6 +44,7 @@ const probableKeys = [
     'description_tolerance',
     'payment_types',
     'quick_texts',
+    'cash_payment_discrepancies',
     'passport_ocr_session',
     'good_picture_session',
     'order',
@@ -62,6 +65,7 @@ const getItems = () => {
     if (!items) return null
 
     delete items.orders
+    items.daily = normalizeDailyReports(items.daily)
 
     return items
 
@@ -106,7 +110,9 @@ const app = (state = getItems() || initialState, action) => {
 
                     }
 
-                    newState[k] = action.data[k]
+                    newState[k] = k === 'daily'
+                        ? normalizeDailyReports(action.data[k])
+                        : action.data[k]
 
                 }
 

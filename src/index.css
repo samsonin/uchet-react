@@ -2833,6 +2833,34 @@
         caret-color: var(--text);
     }
 
+    :root[data-theme="dark"] .daily-payment-method-control,
+    :root[data-theme="dark"] .daily-payment-method-control .MuiInputBase-root,
+    :root[data-theme="dark"] .daily-payment-method-control .MuiOutlinedInput-root,
+    :root[data-theme="dark"] .daily-payment-method-control .MuiSelect-select {
+        background: var(--surface-soft) !important;
+        color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .daily-payment-method-control .MuiInputLabel-root {
+        color: var(--text-muted) !important;
+        -webkit-text-fill-color: var(--text-muted) !important;
+    }
+
+    :root[data-theme="dark"] .daily-payment-method-control .MuiInputLabel-root.Mui-focused {
+        color: var(--brand-strong) !important;
+        -webkit-text-fill-color: var(--brand-strong) !important;
+    }
+
+    :root[data-theme="dark"] .daily-payment-method-control .MuiOutlinedInput-notchedOutline {
+        border-color: var(--line) !important;
+    }
+
+    :root[data-theme="dark"] .daily-payment-method-control .MuiSvgIcon-root,
+    :root[data-theme="dark"] .daily-payment-method-control .MuiSelect-icon {
+        color: var(--text-muted) !important;
+    }
+
     .users-select .MuiSelect-nativeInput {
         opacity: 0 !important;
         color: transparent !important;

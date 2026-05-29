@@ -35,6 +35,16 @@ describe("AssistantChat helpers", () => {
         expect(intro).not.toMatch(/управляющ|продавц|0:|4543|1450|Первая речка|№31216/i);
     });
 
+    test("daily intro handles daily reports keyed by id", () => {
+        expect(() => getDailyAssistantIntro("Sofia", {
+            current_stock_id: 1,
+            stocks: [{ id: 1, name: "Center" }],
+            daily: {
+                12: { stock_id: 1 },
+            },
+        })).not.toThrow();
+    });
+
     test("daily walkthrough explains each report section", () => {
         const text = getDailySectionWalkthrough();
 
