@@ -10,11 +10,11 @@ const SIDEBAR_SECTIONS = [
     { name: "\u041a\u043e\u043d\u0442\u0440\u0430\u0433\u0435\u043d\u0442\u044b", arr: [21, 22, 24] },
     { name: "\u0410\u043d\u0430\u043b\u0438\u0442\u0438\u043a\u0430", arr: [31, 32, 33, 35] },
     { name: "\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438", arr: [40, 44, 41, 42, 43, 45, 46, 47, 48, 49, 50] },
-    { name: "\u0418\u043d\u0442\u0435\u0433\u0440\u0430\u0446\u0438\u0438", arr: [51, 52, 53] },
+    { name: "\u0418\u043d\u0442\u0435\u0433\u0440\u0430\u0446\u0438\u0438", arr: [51, 52, 53, 54] },
 ];
 
 const Sidebar = props => {
-    const map = siteMap(props.admin);
+    const map = siteMap(props.admin, props.user_id);
 
     const nextDivToggle = nextDiv => {
         if (nextDiv) {

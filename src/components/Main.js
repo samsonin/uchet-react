@@ -9,7 +9,7 @@ const primaryIds = [1, 10, 31];
 
 // расстановка кнопок на главной странице
 
-const Main = ({ admin }) => {
+const Main = ({ admin, user_id }) => {
 
     return <div className="main-button-board">
         {[
@@ -19,14 +19,14 @@ const Main = ({ admin }) => {
             [21, 22, 24],
             [40, 44, 41, 42, 43, 45, 46, 47, 48, 49],
             [50],
-            [51, 52, 53],
+            [51, 52, 53, 54],
         ].map(arr => <div
             className="main-button-row"
             key={arr.toString()}
         >
             {arr.map(id => {
 
-                const smItem = siteMap(admin)
+                const smItem = siteMap(admin, user_id)
                     .find(sm => sm.id === id)
 
                 return smItem

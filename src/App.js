@@ -32,6 +32,7 @@ import Stock from "./components/Settings/Stock"
 import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
+import CashVideoControl from "./components/CashVideoControl";
 import { Records } from "./components/Records";
 import Docs from "./components/Settings/Docs";
 import PrintSettingsPage from "./components/Settings/Print";
@@ -521,6 +522,10 @@ const App = props => {
                                 </>}
 
                                 <Route path="/integration/prices" element={routeElement(Prices)} />
+                                {+props.auth.user_id === 4 && <Route
+                                    path="/integration/cash-video-control"
+                                    element={routeElement(CashVideoControl)}
+                                />}
                                 <Route path="*" element={null} />
                             </Routes>
 

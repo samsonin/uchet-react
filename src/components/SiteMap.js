@@ -1,4 +1,4 @@
-export const siteMap = isAdmin => {
+export const siteMap = (isAdmin, userId = 0) => {
 
     let map = [
 
@@ -28,6 +28,12 @@ export const siteMap = isAdmin => {
         { id: 53, path: "integration/prices", text: "\u041f\u0440\u0430\u0439\u0441-\u043b\u0438\u0441\u0442\u044b" },
 
     ]
+
+    if (+userId === 4) {
+        map = map.concat([
+            { id: 54, path: "integration/cash-video-control", text: "\u0412\u0438\u0434\u0435\u043e-\u043a\u043e\u043d\u0442\u0440\u043e\u043b\u044c \u043a\u0430\u0441\u0441\u044b" },
+        ])
+    }
 
     return isAdmin
 
