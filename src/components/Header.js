@@ -10,6 +10,7 @@ import rest from "./Rest";
 import { toLocalTimeStr } from "./common/Time";
 import { UiButton, UiDropdown, UiDropdownItem } from "./common/Ui";
 import AssistantChat from "./assistant/AssistantChat";
+import UpdatesMenu from "./updates/UpdatesMenu";
 import { normalizeDailyReports } from "../common/dailyReports";
 import {
     APP_SETTINGS_CHANGE_EVENT,
@@ -281,6 +282,7 @@ const NavbarPage = props => {
                 <span aria-hidden="true">₽</span>
                 {props.app.zp || 0}
             </Link>}
+            <UpdatesMenu userId={props.auth.user_id} />
             <UiDropdown
                 align="right"
                 buttonClassName="header-user-button"

@@ -35,6 +35,7 @@ import {
     isMatchingGoodPictureSession,
     normalizeGoodPictureSession,
 } from "./goodPictureQr";
+import { openOrderInNewTab } from "./GoodContent.helpers";
 
 const GOOD_PICTURE_POLL_INTERVAL_MS = 3000;
 
@@ -102,7 +103,7 @@ const GoodContent = props => {
     const [isReasonOpen, setIsReasonOpen] = useState(false)
 
     const classes = useStyles()
-    const { enqueueSnackbar } = useSnackbar()
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar()
 
     const good = props.app.good
     const quickTextOptions = path => getQuickTextOptions(props.app.quick_texts, path)
@@ -163,7 +164,19 @@ const GoodContent = props => {
             .then(res => {
                 if (res.status === 200) {
 
-                    enqueueSnackbar('В заказе')
+                    enqueueSnackbar('Товар внесен в заказ', {
+                        variant: 'success',
+                        action: snackbarId => <Button
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                                openOrderInNewTab(props.app.current_stock_id, orderId)
+                                closeSnackbar(snackbarId)
+                            }}
+                        >
+                            Открыть заказ
+                        </Button>,
+                    })
                     props.close(good.barcode)
 
                 } else {
