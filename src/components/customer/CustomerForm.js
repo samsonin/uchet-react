@@ -23,13 +23,16 @@ import { fioHandler, phoneNumberHandler } from "../common/InputHandlers";
 import CustomerContacts from "./Contacts";
 import PassportQrDialog from "./PassportQrDialog";
 import {
+    buildPassportOcrSessionRequest,
+    normalizeCustomerFromBase,
+} from "./customerFormHelpers";
+import {
     getPassportOcrSessionStatusPath,
     isMatchingPassportOcrSession,
     normalizePassportOcrSession,
     normalizePassportPayload,
 } from "./passportOcr";
 
-const customerSelectFields = ["id", "fio", "phone_number", "contacts"];
 const SEARCH_DEBOUNCE_MS = 400;
 const PASSPORT_OCR_POLL_INTERVAL_MS = 2000;
 const CUSTOMER_FROM_BASE_LABEL = "Заказчик из базы";
@@ -188,10 +191,7 @@ const CustomerForm = props => {
 
     const handler = val => {
         setValue(val || null);
-        if (val) props.setCustomer(customerSelectFields.reduce((acc, field) => {
-            acc[field] = val[field] ?? (field === "contacts" ? [] : "");
-            return acc;
-        }, {}));
+        if (val) props.setCustomer(normalizeCustomerFromBase(val));
         setCustomers([]);
     };
 
@@ -260,7 +260,7 @@ const CustomerForm = props => {
         setPassportQrSession(null);
         setIsPassportQrOpen(true);
 
-        const res = await rest(PASSPORT_OCR_SESSION_PATH, "POST", {}, false, {
+        const res = await rest(PASSPORT_OCR_SESSION_PATH, "POST", buildPassportOcrSessionRequest(), false, {
             updateStore: false,
             responseType: "auto",
         });

@@ -127,6 +127,28 @@ const Pledges = props => {
 
     }
 
+    const openPledge = pledge => {
+
+        if (!pledge?.id) {
+            setCurrentPledge(pledge)
+            return
+        }
+
+        setCurrentPledge(preparePledge(pledge))
+
+        rest('pledges/' + pledge.id)
+            .then(res => {
+
+                if (res.status !== 200 || !res.body) return
+
+                const detailedPledge = res.body.pledge || res.body
+
+                setCurrentPledge(preparePledge(detailedPledge))
+
+            })
+
+    }
+
     let total = 0
 
     return currentPledge
@@ -239,7 +261,7 @@ const Pledges = props => {
                                 cursor: 'pointer',
                             }}
                                              key={uuid()}
-                                             onClick={() => setCurrentPledge(p)}
+                                             onClick={() => openPledge(p)}
                             >
                                 {[props.app.current_stock_id ? null : p.stockName,
                                     TwoLineInCell(p.model, p.imei),

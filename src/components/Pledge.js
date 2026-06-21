@@ -75,6 +75,19 @@ const Pledge = props => {
     const [prolongDate, setProlongDate] = useState(nextDay)
     const [prolongSum, setProlongSum] = useState(sum2)
 
+    useEffect(() => {
+        setCustomer(pledge.customer ? pledge.customer : {})
+        setModel(pledge.model ?? '')
+        setImei(pledge.imei ?? '')
+        setPassword(pledge.password ?? '')
+        setSum(pledge.sum ?? 0)
+        setSum2(pledge.sum2 ?? 0)
+        setRansomdate(pledge.ransomdate ?? nextDay)
+        setNote(pledge.note ?? '')
+        setProlongDate(nextDay)
+        setProlongSum(pledge.sum2 ?? 0)
+    }, [pledge, nextDay])
+
     const fieldsStyle = {
         margin: '.4rem',
         width: '100%',
