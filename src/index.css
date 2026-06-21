@@ -2674,6 +2674,22 @@
         font-weight: 700;
     }
 
+    :root[data-theme="dark"] .pledge-page .MuiInputBase-input.Mui-disabled,
+    :root[data-theme="dark"] .pledge-page input:disabled,
+    :root[data-theme="dark"] .pledge-page textarea:disabled {
+        color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
+        opacity: 1 !important;
+    }
+
+    :root[data-theme="dark"] .pledge-page .MuiInputLabel-root.Mui-disabled,
+    :root[data-theme="dark"] .pledge-page .MuiFormLabel-root.Mui-disabled,
+    :root[data-theme="dark"] .pledge-page .MuiFormHelperText-root.Mui-disabled {
+        color: var(--text-muted) !important;
+        -webkit-text-fill-color: var(--text-muted) !important;
+        opacity: 1 !important;
+    }
+
     @media (max-width: 720px) {
         .customers-list-header {
             align-items: stretch;

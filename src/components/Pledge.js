@@ -340,7 +340,7 @@ const Pledge = props => {
 
         </Dialog>
 
-        <div style={{
+        <div className="pledge-page" style={{
             padding: '0 1rem 0 0',
             background: 'var(--surface)',
             color: 'var(--text)',
