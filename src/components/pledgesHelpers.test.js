@@ -1,6 +1,8 @@
 import {
+    buildCompletedPledgesPath,
     buildCopiedPledgeDraft,
     isCompletedPledge,
+    normalizeCompletedPledgesResponse,
     splitPledgesByCompletion,
 } from "./pledgesHelpers";
 
@@ -46,6 +48,34 @@ describe("pledges helpers", () => {
             password: "1111",
             sum: 2500,
             note: "",
+        });
+    });
+
+    it("builds the paginated completed pledges route", () => {
+        expect(buildCompletedPledgesPath()).toBe("pledges/completed?limit=50");
+        expect(buildCompletedPledgesPath({
+            stockId: 1,
+            search: "redmi ax3",
+            limit: 200,
+            cursor: "2026-05-06T00:00:00Z:2005",
+        })).toBe("pledges/completed?limit=100&stock_id=1&search=redmi+ax3&cursor=2026-05-06T00%3A00%3A00Z%3A2005");
+    });
+
+    it("normalizes completed pledges response", () => {
+        expect(normalizeCompletedPledgesResponse({
+            items: [{ id: 1 }],
+            next_cursor: "next",
+            meta: { limit: 50 },
+        })).toEqual({
+            items: [{ id: 1 }],
+            nextCursor: "next",
+            meta: { limit: 50 },
+        });
+
+        expect(normalizeCompletedPledgesResponse([])).toEqual({
+            items: [],
+            nextCursor: "",
+            meta: {},
         });
     });
 });

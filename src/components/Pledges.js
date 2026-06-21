@@ -16,8 +16,10 @@ import rest from "../components/Rest";
 import TwoLineInCell from "./common/TwoLineInCell";
 import Pledge from "./Pledge";
 import {
+    buildCompletedPledgesPath,
     buildCopiedPledgeDraft,
     isCompletedPledge,
+    normalizeCompletedPledgesResponse,
     splitPledgesByCompletion,
 } from "./pledgesHelpers";
 
@@ -29,10 +31,12 @@ const Pledges = props => {
 
     const [search, setSearch] = useState('');
     const [pledges, setPledges] = useState([]);
+    const [completedPledges, setCompletedPledges] = useState([]);
     const [currentPledge, setCurrentPledge] = useState();
     const [showCompleted, setShowCompleted] = useState(false);
     const [completedLoaded, setCompletedLoaded] = useState(false);
     const [completedLoading, setCompletedLoading] = useState(false);
+    const [completedNextCursor, setCompletedNextCursor] = useState('');
 
     const dateNow = Date.now();
     const tableColumnCount = props.app.current_stock_id ? 4 : 5;
@@ -87,6 +91,13 @@ const Pledges = props => {
             });
     }, [routePledgeId]);
 
+    useEffect(() => {
+        setShowCompleted(false);
+        setCompletedLoaded(false);
+        setCompletedPledges([]);
+        setCompletedNextCursor('');
+    }, [search, props.app.current_stock_id]);
+
     const addPledge = pledge => {
         setPledges([pledge, ...pledges]);
         setCurrentPledge(pledge);
@@ -102,18 +113,30 @@ const Pledges = props => {
         setCurrentPledge();
     };
 
-    const loadCompletedPledges = () => {
-        if (completedLoaded) {
+    const loadCompletedPledges = (cursor = '') => {
+        if (completedLoaded && !cursor) {
             setShowCompleted(!showCompleted);
             return;
         }
 
         setCompletedLoading(true);
 
-        rest('pledges?all=1')
+        rest(buildCompletedPledgesPath({
+            stockId: props.app.current_stock_id,
+            search,
+            limit: 50,
+            cursor,
+        }))
             .then(res => {
                 if (res.status === 200) {
-                    setPledges(res.body.map(preparePledge));
+                    const completedResponse = normalizeCompletedPledgesResponse(res.body);
+                    const preparedItems = completedResponse.items.map(preparePledge);
+
+                    setCompletedPledges(prev => cursor
+                        ? [...prev, ...preparedItems]
+                        : preparedItems
+                    );
+                    setCompletedNextCursor(completedResponse.nextCursor);
                     setCompletedLoaded(true);
                     setShowCompleted(true);
                 }
@@ -149,7 +172,10 @@ const Pledges = props => {
     };
 
     const pledgeGroups = splitPledgesByCompletion(pledges);
-    const visiblePledges = (showCompleted ? pledges : pledgeGroups.active)
+    const visiblePledges = [
+        ...pledgeGroups.active,
+        ...(showCompleted ? completedPledges : []),
+    ]
         .filter(p => !props.app.current_stock_id || props.app.current_stock_id === p.stock)
         .filter(p => {
             if (!search) return true;
@@ -294,6 +320,20 @@ const Pledges = props => {
             </Table>
 
             {renderPledgesTable(visiblePledges)}
+            {showCompleted && completedNextCursor && <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                padding: '.8rem 0 0',
+            }}>
+                <Button
+                    size="small"
+                    variant="outlined"
+                    disabled={completedLoading}
+                    onClick={() => loadCompletedPledges(completedNextCursor)}
+                >
+                    Показать еще
+                </Button>
+            </div>}
         </div>;
 };
 
