@@ -3070,6 +3070,14 @@
         -webkit-text-fill-color: transparent !important;
     }
 
+    .order-payment-method-control .MuiSelect-nativeInput,
+    .order-payment-method-control input.MuiSelect-nativeInput:disabled {
+        opacity: 0 !important;
+        color: transparent !important;
+        -webkit-text-fill-color: transparent !important;
+        background: transparent !important;
+    }
+
     :root[data-theme="dark"] .MuiOutlinedInput-notchedOutline,
     :root[data-theme="dark"] .form-control,
     :root[data-theme="dark"] .MuiTableCell-root,

@@ -223,7 +223,12 @@ export const Payments = ({order, isEditable, users = [], paymentTypes = [], canC
                         <TableCell>{paymentUserName(p, users)}</TableCell>
                         <TableCell>
                             {canChangePaymentMethods && isTodayPayment(p)
-                                ? <FormControl size="small" fullWidth disabled={savingPaymentRow === paymentRowId(p)}>
+                                ? <FormControl
+                                    className="order-payment-method-control"
+                                    size="small"
+                                    fullWidth
+                                    disabled={savingPaymentRow === paymentRowId(p)}
+                                >
                                     <Select
                                         value={paymentMethodByRow[paymentRowId(p)] ?? paymentMethodId(p)}
                                         onChange={e => changePaymentMethod(p, e.target.value)}
@@ -263,7 +268,7 @@ export const Payments = ({order, isEditable, users = [], paymentTypes = [], canC
             gap: 1,
             flexWrap: 'wrap',
         }}>
-            <FormControl sx={{ minWidth: 220 }} size="small">
+            <FormControl className="order-payment-method-control" sx={{ minWidth: 220 }} size="small">
                 <InputLabel id="order-payment-method-label">Способ</InputLabel>
                 <Select
                     labelId="order-payment-method-label"
