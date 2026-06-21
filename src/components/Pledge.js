@@ -5,6 +5,7 @@ import { intInputHandler } from "./common/InputHandlers";
 import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PrintIcon from '@mui/icons-material/Print';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useSnackbar } from "notistack";
 import Fields from "./customer/Fields";
 import rest from "./Rest";
@@ -42,7 +43,7 @@ const Pledge = props => {
     const normalizedStatus = String(pledge.status || '').toLowerCase()
     const isNewStatus = !pledge.id || ['new', 'новая'].includes(normalizedStatus)
     const isSameStock = pledge.stock === props.app.current_stock_id
-    const canEditPledge = !pledge.id || (isNewStatus && isSameStock)
+    const canEditPledge = !props.viewOnly && (!pledge.id || (isNewStatus && isSameStock))
     const timeZone = stock ? stock.timezone_offset : 0
     const isDelay = pledge.ransomdate
         ? (Date.now() - Date.parse(pledge.ransomdate)) / 3600000 + timeZone > 24
@@ -266,9 +267,10 @@ const Pledge = props => {
 
     }
 
-    const mb = (value, onClick) => <Button size="small"
+    const mb = (value, onClick, icon = null) => <Button size="small"
         color="primary"
         variant="contained"
+        startIcon={icon}
         onClick={onClick}>
         {value}
     </Button>
@@ -382,23 +384,27 @@ const Pledge = props => {
                 customer={customer}
                 setCustomer={setCustomer}
                 enablePassportOcr
+                disabled={props.viewOnly}
             />
 
             <TextField label="Наименование"
                 style={fieldsStyle}
                 value={model}
+                disabled={props.viewOnly}
                 onChange={e => pledge.id ? {} : setModel(e.target.value)}
             />
 
             <TextField label="Imei или S/N"
                 style={fieldsStyle}
                 value={imei}
+                disabled={props.viewOnly}
                 onChange={e => pledge.id ? {} : setImei(e.target.value)}
             />
 
             <TextField label="Пароль"
                 style={fieldsStyle}
                 value={password}
+                disabled={props.viewOnly}
                 onChange={e => pledge.id ? {} : setPassword(e.target.value)}
             />
 
@@ -453,8 +459,19 @@ const Pledge = props => {
             <TextField label="Примечание"
                 style={fieldsStyle}
                 value={note}
+                disabled={props.viewOnly}
                 onChange={e => setNote(e.target.value)}
             />
+
+            {props.viewOnly && props.copyPledge
+                ? <div style={{
+                    padding: '.3rem',
+                    display: "flex",
+                    justifyContent: 'space-around'
+                }}>
+                    {mb('Копировать', () => props.copyPledge(pledge), <ContentCopyIcon />)}
+                </div>
+                : null}
 
             {props.app.current_stock_id && canEditPledge
                 ? <div style={{

@@ -471,7 +471,7 @@ const CustomerForm = props => {
                 >
                     {isRecognizingDocument ? RECOGNIZING_LABEL : props.documentLabel || DOC_PHOTO_LABEL}
                 </Button>}
-                {isExistingCustomer && lockExistingCustomer && <Tooltip title={EDIT_CUSTOMER_LABEL}>
+                {!props.disabled && isExistingCustomer && lockExistingCustomer && <Tooltip title={EDIT_CUSTOMER_LABEL}>
                     <IconButton
                         size="small"
                         className="customers-select-edit-button"
