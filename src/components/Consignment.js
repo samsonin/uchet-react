@@ -736,7 +736,8 @@ const Consignment = props => {
                                 {state.consignment.products.map((product, i) => renderTr(i, product))}
                                 <TableRow>
                                     <TableCell align="center" className="pt-3">
-                                        <TextField label="Итого по накладной"
+                                        <TextField className="arrival-total-field"
+                                                   label="Итого по накладной"
                                                    disabled value={getConsignmentTotal()}
                                         />
                                     </TableCell>
@@ -747,7 +748,8 @@ const Consignment = props => {
                                         />
                                     </TableCell>
                                     <TableCell colSpan="2" align="center" className="pt-3">
-                                        <TextField label="Итого с доставкой"
+                                        <TextField className="arrival-total-field"
+                                                   label="Итого с доставкой"
                                                    disabled value={getTotal()}
                                         />
                                     </TableCell>

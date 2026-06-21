@@ -3025,6 +3025,17 @@
         caret-color: var(--text);
     }
 
+    :root[data-theme="dark"] .arrival-total-field .MuiInputBase-input.Mui-disabled {
+        color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
+    }
+
+    :root[data-theme="dark"] .arrival-total-field .MuiInputLabel-root.Mui-disabled,
+    :root[data-theme="dark"] .arrival-total-field .MuiFormLabel-root.Mui-disabled {
+        color: var(--text-muted) !important;
+        -webkit-text-fill-color: var(--text-muted) !important;
+    }
+
     :root[data-theme="dark"] .daily-payment-method-control,
     :root[data-theme="dark"] .daily-payment-method-control .MuiInputBase-root,
     :root[data-theme="dark"] .daily-payment-method-control .MuiOutlinedInput-root,
