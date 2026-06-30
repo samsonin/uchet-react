@@ -298,13 +298,21 @@ const Prepaid = props => {
             note
         })
 
-        props.history.push('/order', {
-            prepaidOrder: buildPrepaidOrderDraft(prepaid)
-        })
+        rest('zakaz/' + props.app.current_stock_id + '/' + id, 'DELETE')
+            .then(res => {
+                if (res.status === 200) {
+                    if (props.setPrepaids && res.body?.prepaids) props.setPrepaids(res.body.prepaids)
 
-        exit()
+                    props.history.push('/order', {
+                        prepaidOrder: buildPrepaidOrderDraft(prepaid)
+                    })
+
+                    exit()
+                } else {
+                    enqueueSnackbar('ошибка ' + (res.status || ''), {variant: 'error'})
+                }
+            })
     }
-
     const exit = () => {
 
         reset()
