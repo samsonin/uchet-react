@@ -608,6 +608,7 @@ const Daily = props => {
                 }}
                 preData={row}
                 preId={prepaidId}
+                history={props.history}
             />}
 
             {isSaleOpen && <SaleModal

@@ -51,6 +51,7 @@ const Order = props => {
     const classes = useStyles()
 
     const order = appOrders.find(or => or.id === id && or.stock_id === stockId) || null
+    const prepaidOrderDraft = !order ? props.location?.state?.prepaidOrder : null
 
     const canEdit = () => order
         ? order.status_id === 6
@@ -222,11 +223,12 @@ const Order = props => {
             : null}
 
         {tabId === 0 &&
-            <Info key={order ? 'order-' + order.stock_id + '-' + order.id : 'new-order'}
+            <Info key={order ? 'order-' + order.stock_id + '-' + order.id : prepaidOrderDraft ? 'new-order-prepaid-' + prepaidOrderDraft.id : 'new-order'}
                   order={order}
                   setOrder={setOrder}
                   isEditable={canEdit()}
                   needPrint={needPrint}
+            prepaidOrder={prepaidOrderDraft}
             />
         }
 

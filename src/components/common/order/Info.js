@@ -123,6 +123,13 @@ const getOrderFieldValue = (order, field) => {
 
 const getOrderTotal = order => order?.sum2 ?? order?.sum ?? 0
 
+const emptyCustomer = () => ({
+    id: 0,
+    phone_number: '',
+    fio: '',
+    contacts: [],
+})
+
 const getOrderQuickTextPath = field => {
 
     const label = String(field?.value || field?.name || '').toLowerCase()
@@ -143,6 +150,13 @@ const Info = props => {
     const appCategories = props.app.categories || []
     const fields = (appFields || []).filter(f => f.index === 'order' && f.is_valid && !f.is_system)
     const quickTextOptions = path => getQuickTextOptions(props.app.quick_texts, path)
+    const prepaidOrder = !order ? props.prepaidOrder : null
+    const getPrepaidFieldValue = field => {
+        const fieldValue = prepaidOrder?.fields?.[field.name]
+        if (fieldValue !== undefined && fieldValue !== null) return fieldValue
+        if (getOrderQuickTextPath(field) === 'orders.defects') return prepaidOrder?.fields?.defect || ''
+        return ''
+    }
     
     const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
@@ -153,21 +167,16 @@ const Info = props => {
     const [status_id, setStatus_id] = useState(order ? order.status_id : 0)
     const [category_id, setCategory_id] = useState(order ? order.category_id : 0)
     const [otherCategory, setOtherCategory] = useState('')
-    const [customer, setCustomer] = useState(order ? order.customer : {
-        id: 0,
-        phone_number: '',
-        fio: '',
-        contacts: [],
-    })
-    const [model, setModel] = useState('')
-    const [presum, setPresum] = useState(initPresum)
-    const [sum, setSum] = useState(order ? order.sum : initSum)
+    const [customer, setCustomer] = useState(order ? order.customer : prepaidOrder?.customer || emptyCustomer())
+    const [model, setModel] = useState(prepaidOrder?.model || prepaidOrder?.item || '')
+    const [presum, setPresum] = useState(prepaidOrder?.presum ?? initPresum)
+    const [sum, setSum] = useState(order ? order.sum : prepaidOrder?.sum ?? initSum)
     const [sum2, setSum2] = useState(order ? order.sum : 0)
     const [master_id, setMaster_id] = useState(order ? order.master_id : 0)
     const [for_client, setFor_client] = useState(order ? order.for_client : '')
     const [state, setState] = useState(() => {
         const fl = {}
-        fields.map(f => fl[f.name] = '')
+        fields.map(f => fl[f.name] = getPrepaidFieldValue(f))
         return fl
     })
     const [isReasonOpen, setIsReasonOpen] = useState(false)
@@ -381,6 +390,33 @@ const Info = props => {
 
     }, [order, appFields])
 
+
+    useEffect(() => {
+
+        if (order || !prepaidOrder) return
+
+        setCustomer(prepaidOrder.customer || emptyCustomer())
+        setCategory_id(prepaidOrder.category_id || 0)
+        setModel(prepaidOrder.model || prepaidOrder.item || '')
+        setPresum(prepaidOrder.presum ?? initPresum)
+        setSum(prepaidOrder.sum ?? initSum)
+        setSum2(prepaidOrder.sum ?? 0)
+        setFor_client('')
+
+        setState(prev => {
+
+            const newState = {...prev}
+
+            fields.map(f => {
+                newState[f.name] = getPrepaidFieldValue(f)
+                return f
+            })
+
+            return newState
+
+        })
+
+    }, [order, prepaidOrder, appFields])
     const warranty = () => {
 
         needPrint.current = true

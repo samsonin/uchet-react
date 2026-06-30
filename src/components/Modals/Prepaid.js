@@ -15,6 +15,7 @@ import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
 import PrintIcon from '@mui/icons-material/Print';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import CloseIcon from "@mui/icons-material/Close";
 import {makeStyles} from "muiLegacyStyles";
 
@@ -26,6 +27,7 @@ import {Print, createDate} from "../common/Print"
 import {sumField} from "../common/InputHandlers";
 import QuickTextField from "../common/QuickTextField";
 import {getQuickTextOptions} from "../common/quickTexts";
+import {buildPrepaidOrderDraft, buildPrepaidOrderPayload} from "./prepaidOrder";
 
 const statuses = [
     'Новая',
@@ -276,6 +278,33 @@ const Prepaid = props => {
 
     }
 
+    const createOrder = () => {
+        if (!id) {
+            return enqueueSnackbar('Сначала сохраните предоплату', {variant: 'warning'})
+        }
+
+        if (!props.history?.push) {
+            return enqueueSnackbar('Не удалось открыть форму заказа', {variant: 'error'})
+        }
+
+        const prepaid = buildPrepaidOrderPayload({
+            id,
+            created,
+            item,
+            presum,
+            sum,
+            customer,
+            status,
+            note
+        })
+
+        props.history.push('/order', {
+            prepaidOrder: buildPrepaidOrderDraft(prepaid)
+        })
+
+        exit()
+    }
+
     const exit = () => {
 
         reset()
@@ -397,11 +426,12 @@ const Prepaid = props => {
                         : 'Внести'}
                 </Button>
                 <Button
-                    onClick={() => id ? printPrepaid() : save(false, true)}
+                    onClick={() => createOrder()}
                     color="primary"
-                    startIcon={<PrintIcon/>}
+                    disabled={!id}
+                    startIcon={<AddShoppingCartIcon/>}
                 >
-                    Печать
+                    В заказ
                 </Button>
             </DialogActions>
         }

@@ -88,6 +88,7 @@ const Prepaids = props => {
             preId={prepaidId}
             preData={prepaidData}
             setPrepaids={setPrepaids}
+            history={props.history}
             className='non-printable'
         />}
 
