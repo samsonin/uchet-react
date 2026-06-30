@@ -1,18 +1,18 @@
-import React, {forwardRef, useState} from "react";
+import React, { forwardRef, useState } from "react";
 import Fields from "./customer/Fields";
-import {connect} from "react-redux";
-import {Button, Dialog, DialogContent, DialogTitle, TextField} from "@mui/material";
+import { connect } from "react-redux";
+import { Button, Dialog, DialogContent, DialogTitle, TextField } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import {createDate, Print} from "./common/Print";
+import { createDate, Print } from "./common/Print";
 import PrintIcon from "@mui/icons-material/Print";
-import {toLocalTimeStr} from "./common/Time";
+import { toLocalTimeStr } from "./common/Time";
 import Slide from "@mui/material/Slide";
 import DialogActions from "@mui/material/DialogActions";
 
 import rest from "./Rest"
-import {intInputHandler, line} from "./common/InputHandlers";
-import {useSnackbar} from "notistack";
+import { intInputHandler, line } from "./common/InputHandlers";
+import { useSnackbar } from "notistack";
 import EnteredGood from "./EnteredGood";
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -38,7 +38,7 @@ const Real = props => {
     const [sum, setSum] = useState(isNew ? 0 : props.current.good.sum)
     const [note, setNote] = useState(isNew ? '' : props.current.note)
 
-    const {enqueueSnackbar} = useSnackbar()
+    const { enqueueSnackbar } = useSnackbar()
 
     const doc = appDocs.find(d => d.name === 'real')
 
@@ -130,7 +130,7 @@ const Real = props => {
                 cost
             }
 
-            if (errorText) return enqueueSnackbar('введите ' + errorText, {variant: 'error'})
+            if (errorText) return enqueueSnackbar('введите ' + errorText, { variant: 'error' })
 
             if (imei) data.imei = imei
             if (props.app.current_stock_id) data.stock_id = props.app.current_stock_id
@@ -176,11 +176,11 @@ const Real = props => {
 
             <DialogActions>
                 <Button onClick={() => setDialog('')}
-                        color="secondary">
+                    color="secondary">
                     Отмена
                 </Button>
                 <Button onClick={() => isWo ? checkout() : cancel()}
-                        color="primary">
+                    color="primary">
                     Ок
                 </Button>
             </DialogActions>
@@ -189,7 +189,9 @@ const Real = props => {
 
         <div style={{
             padding: '.5rem',
-            background: '#fff',
+            background: 'var(--surface)',
+            color: 'var(--text)',
+            border: '1px solid var(--line)',
             borderRadius: 3
         }}>
 
@@ -201,19 +203,19 @@ const Real = props => {
             }}>
 
                 <IconButton onClick={() => props.setCurrent()}>
-                    <ArrowBackIcon/>
+                    <ArrowBackIcon />
                 </IconButton>
 
                 <span style={{
                     fontSize: 20, fontWeight: 'bold',
                 }}>
                     {text}
-            </span>
+                </span>
 
                 <IconButton
                     onClick={() => Print(doc, alias)}
                 >
-                    <PrintIcon/>
+                    <PrintIcon />
                 </IconButton>
 
             </div>
@@ -221,6 +223,7 @@ const Real = props => {
             <Fields
                 customer={customer}
                 setCustomer={setCustomer}
+                enablePassportOcr
             />
 
             <EnteredGood
@@ -237,14 +240,14 @@ const Real = props => {
             {line('Цена комитента:', cost, !isWo, e => handler(e.target.value, setCost))}
 
             <TextField label="Примечание"
-                       style={fieldsStyle}
-                       value={note}
-                       onChange={e => isNew ? setNote(e.target.value) : {}}
+                style={fieldsStyle}
+                value={note}
+                onChange={e => isNew ? setNote(e.target.value) : {}}
             />
 
             {!isNew && isWo && <TextField label="Статус"
-                                          style={fieldsStyle}
-                                          value={ui_wo}
+                style={fieldsStyle}
+                value={ui_wo}
             />}
 
             <div style={{
@@ -253,9 +256,9 @@ const Real = props => {
                 justifyContent: 'space-around'
             }}>
                 <Button size="small"
-                        color={isNew || isWo ? 'primary' : 'secondary'}
-                        variant="contained"
-                        onClick={() => action()}
+                    color={isNew || isWo ? 'primary' : 'secondary'}
+                    variant="contained"
+                    onClick={() => action()}
                 >
                     {title}
                 </Button>

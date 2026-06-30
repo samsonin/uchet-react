@@ -7,7 +7,8 @@ import { UiButton, UiModal } from "./common/Ui";
 
 const TreeModal = props => {
 
-    const [currentId, setCurrentId] = useState(() => props.initialCategoryId)
+    const initialCategoryId = props.initialCategoryId || props.initialcategory_id
+    const [currentId, setCurrentId] = useState(() => initialCategoryId)
 
     useEffect(() => {
         setCurrentId(props.initialCategoryId || 0);
@@ -27,7 +28,7 @@ const TreeModal = props => {
         </>}
     >
         <Tree
-            initialId={props.initialCategoryId}
+            initialId={initialCategoryId}
             categories={props.app.categories}
             onSelected={id => setCurrentId(id)}
             finished={id => props.onClose(id)}

@@ -6,10 +6,12 @@ import Button from "@mui/material/Button";
 export const BottomButtons =
     (save, cancel, disabled = false, isNew = false) => <Grid
         container
-        justify="space-evenly"
         style={{
             margin: '1rem',
-            padding: '1rem'
+            padding: '1rem',
+            justifyContent: 'center',
+            gap: '0.75rem',
+            flexWrap: 'wrap',
         }}
     >
         <Button

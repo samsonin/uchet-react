@@ -93,9 +93,9 @@ export const Customer = props => {
     if (!isRequesting && id > 0 && customer.id === undefined) {
 
         setRequesting(true)
-        rest('customers/' + id)
+        rest('customers/' + id + '?details=1&with_contacts=1')
             .then(res => {
-                if (res.ok) initial(res.body)
+                if (res.ok) initial(res.body?.customer || res.body?.customers?.[0] || res.body)
                 setRequesting(false)
             })
     }

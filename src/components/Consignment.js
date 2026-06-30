@@ -368,6 +368,89 @@ const Consignment = props => {
         ? 0
         : +val
 
+    const normalizeSearchText = value => String(value || '')
+        .toLowerCase()
+        .replace(/ё/g, 'е')
+        .trim()
+
+    const getLeafCategoryIds = () => {
+        const parentIds = new Set(appCategories.map(category => Number(category.parent_id || 0)))
+
+        return new Set(appCategories
+            .filter(category => !parentIds.has(Number(category.id)))
+            .map(category => Number(category.id)))
+    }
+
+    const getOptionCategoryIds = option => {
+        const ids = []
+
+        if (option?.category_id) ids.push(option.category_id)
+        if (Array.isArray(option?.categories)) ids.push(...option.categories)
+        if (option?.category?.id) ids.push(option.category.id)
+
+        return ids
+            .map(id => Number(id))
+            .filter(Boolean)
+    }
+
+    const getCategoryIdByNameMatch = name => {
+        const normalizedName = normalizeSearchText(name)
+        const leafCategoryIds = getLeafCategoryIds()
+
+        return appCategories
+            .filter(category => leafCategoryIds.has(Number(category.id)))
+            .map(category => ({
+                id: Number(category.id),
+                name: normalizeSearchText(category.name),
+            }))
+            .filter(category => category.name && normalizedName.includes(category.name))
+            .sort((a, b) => b.name.length - a.name.length)[0]?.id || 0
+    }
+
+    const getSuggestedCategoryId = (name, options) => {
+        const matchedCategoryId = getCategoryIdByNameMatch(name)
+        if (matchedCategoryId) return matchedCategoryId
+
+        const scores = {}
+        const normalizedName = normalizeSearchText(name)
+
+        ;(options || []).forEach(option => {
+            const optionName = normalizeSearchText(option?.name || option?.model)
+            const score = optionName.includes(normalizedName) || normalizedName.includes(optionName)
+                ? 2
+                : 1
+
+            getOptionCategoryIds(option).forEach(categoryId => {
+                scores[categoryId] = (scores[categoryId] || 0) + score
+            })
+        })
+
+        return Number(Object.entries(scores)
+            .sort((a, b) => b[1] - a[1])[0]?.[0] || 0)
+    }
+
+    const applySuggestedCategory = (i, name, options) => {
+        const categoryId = getSuggestedCategoryId(name, options)
+
+        if (!categoryId) return
+
+        setState(prev => {
+            const product = prev.consignment.products[i]
+
+            if (!product || product.category_id || product.model !== name) return prev
+
+            const newState = { ...prev }
+            newState.consignment = { ...prev.consignment }
+            newState.consignment.products = [...prev.consignment.products]
+            newState.consignment.products[i] = {
+                ...product,
+                category_id: categoryId,
+            }
+
+            return newState
+        })
+    }
+
     const productHandler = (name, reason, i) => {
 
         scanTr.current = i
@@ -383,7 +466,12 @@ const Consignment = props => {
 
                 setProductNameLoading(false)
 
-                if (res.status === 200) setProductOption(res.status === 200 ? res.body : [])
+                if (res.status === 200) {
+                    const options = res.body || []
+
+                    setProductOption(options)
+                    applySuggestedCategory(i, name, options)
+                }
 
             })
 
@@ -524,7 +612,7 @@ const Consignment = props => {
 
     const currentTr = state.consignment.products[state.currentTr]
 
-    const dailyReport = (props.app.daily || []).find(d => d.stock_id === props.app.current_stock_id)
+    const dailyReport = (props.app.daily || []).find(d => +d.stock_id === +props.app.current_stock_id)
 
     return props.app.current_stock_id
         ? <>
@@ -648,7 +736,8 @@ const Consignment = props => {
                                 {state.consignment.products.map((product, i) => renderTr(i, product))}
                                 <TableRow>
                                     <TableCell align="center" className="pt-3">
-                                        <TextField label="Итого по накладной"
+                                        <TextField className="arrival-total-field"
+                                                   label="Итого по накладной"
                                                    disabled value={getConsignmentTotal()}
                                         />
                                     </TableCell>
@@ -659,7 +748,8 @@ const Consignment = props => {
                                         />
                                     </TableCell>
                                     <TableCell colSpan="2" align="center" className="pt-3">
-                                        <TextField label="Итого с доставкой"
+                                        <TextField className="arrival-total-field"
+                                                   label="Итого с доставкой"
                                                    disabled value={getTotal()}
                                         />
                                     </TableCell>

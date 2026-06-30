@@ -1,19 +1,22 @@
-import React, {forwardRef, useEffect, useRef, useState} from 'react';
-import {connect} from "react-redux";
-import {Button, TextField} from "@mui/material";
-import {intInputHandler} from "./common/InputHandlers";
+﻿import React, { forwardRef, useEffect, useRef, useState } from 'react';
+import { connect } from "react-redux";
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from "@mui/material";
+import { intInputHandler } from "./common/InputHandlers";
 import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PrintIcon from '@mui/icons-material/Print';
-import {useSnackbar} from "notistack";
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { useSnackbar } from "notistack";
 import Fields from "./customer/Fields";
 import rest from "./Rest";
-import {createDate, Print} from "./common/Print";
+import { createDate, Print } from "./common/Print";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Dialog from "@mui/material/Dialog";
-import {makeStyles} from "muiLegacyStyles";
+import { makeStyles } from "muiLegacyStyles";
 import Slide from "@mui/material/Slide";
+import Paper from "@mui/material/Paper";
+import InteractionTableRow from "./common/InteractionTableRow";
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -37,12 +40,20 @@ const Pledge = props => {
     const classes = useStyles()
 
     const stock = appStocks.find(s => s.id === pledge.stock)
+    const normalizedStatus = String(pledge.status || '').toLowerCase()
+    const isNewStatus = !pledge.id || ['new', 'новая'].includes(normalizedStatus)
+    const isSameStock = pledge.stock === props.app.current_stock_id
+    const canEditPledge = !props.viewOnly && (!pledge.id || (isNewStatus && isSameStock))
     const timeZone = stock ? stock.timezone_offset : 0
     const isDelay = pledge.ransomdate
         ? (Date.now() - Date.parse(pledge.ransomdate)) / 3600000 + timeZone > 24
         : false
+    const pledgeSales = Array.isArray(pledge.sales)
+        ? [...pledge.sales].sort((a, b) => Date.parse(a.created_at || 0) - Date.parse(b.created_at || 0))
+        : []
+    const hasSalesHistory = pledgeSales.length > 0
 
-    const {enqueueSnackbar} = useSnackbar()
+    const { enqueueSnackbar } = useSnackbar()
 
     const needPrint = useRef(false)
 
@@ -65,9 +76,27 @@ const Pledge = props => {
     const [prolongDate, setProlongDate] = useState(nextDay)
     const [prolongSum, setProlongSum] = useState(sum2)
 
+    useEffect(() => {
+        setCustomer(pledge.customer ? pledge.customer : {})
+        setModel(pledge.model ?? '')
+        setImei(pledge.imei ?? '')
+        setPassword(pledge.password ?? '')
+        setSum(pledge.sum ?? 0)
+        setSum2(pledge.sum2 ?? 0)
+        setRansomdate(pledge.ransomdate ?? nextDay)
+        setNote(pledge.note ?? '')
+        setProlongDate(nextDay)
+        setProlongSum(pledge.sum2 ?? 0)
+    }, [pledge, nextDay])
+
     const fieldsStyle = {
         margin: '.4rem',
         width: '100%',
+    }
+
+    const salesHistoryValue = (row, valueName) => {
+        if (valueName === 'date') return String(row.created_at || '').slice(0, 16)
+        return row[valueName] ?? ''
     }
 
     const doc = appDocs.find(d => d.name === 'zalog')
@@ -109,7 +138,7 @@ const Pledge = props => {
 
         let error = ''
         if (!customer.fio) error = 'ФИО'
-        else if (!model) error = 'наменование'
+        else if (!model) error = 'наименование'
         else if (!imei) error = 'imei или S/N'
         else if (!sum) error = 'сумму залога'
         else if (!password) error = 'пароль'
@@ -147,7 +176,7 @@ const Pledge = props => {
 
     const save = () => {
 
-        rest('pledges/' + props.app.current_stock_id + '/' + pledge.id, 'PATCH', {note})
+        rest('pledges/' + props.app.current_stock_id + '/' + pledge.id, 'PATCH', { note })
             .then(res => {
 
                 if (res.status === 200) {
@@ -238,10 +267,11 @@ const Pledge = props => {
 
     }
 
-    const mb = (value, onClick) => <Button size="small"
-                                           color="primary"
-                                           variant="contained"
-                                           onClick={onClick}>
+    const mb = (value, onClick, icon = null) => <Button size="small"
+        color="primary"
+        variant="contained"
+        startIcon={icon}
+        onClick={onClick}>
         {value}
     </Button>
 
@@ -276,43 +306,45 @@ const Pledge = props => {
                     alignItems: 'center'
                 }}>
                     Необходимо оплатить: <span style={{
-                    fontWeight: 'bold',
-                }}>
-                    {checkoutSum() - pledge.sum}
-                </span>
+                        fontWeight: 'bold',
+                    }}>
+                        {checkoutSum() - pledge.sum}
+                    </span>
                 </div>
 
                 <TextField label="Продлить до"
-                           className={classes.field}
-                           type="date"
-                           value={prolongDate}
-                           onChange={e => dateHandler(e.target.value, setProlongDate)}
+                    className={classes.field}
+                    type="date"
+                    value={prolongDate}
+                    onChange={e => dateHandler(e.target.value, setProlongDate)}
                 />
 
                 <TextField label="Новая сумма выкупа"
-                           className={classes.field}
-                           value={prolongSum}
-                           onChange={e => intInputHandler(e.target.value, setProlongSum)}
+                    className={classes.field}
+                    value={prolongSum}
+                    onChange={e => intInputHandler(e.target.value, setProlongSum)}
                 />
 
             </DialogContent>
 
             <DialogActions>
                 <Button onClick={() => setIsOpen(false)}
-                        color="secondary">
+                    color="secondary">
                     Отмена
                 </Button>
                 <Button onClick={() => prolong()}
-                        color="primary">
+                    color="primary">
                     Оплатить
                 </Button>
             </DialogActions>
 
         </Dialog>
 
-        <div style={{
+        <div className="pledge-page" style={{
             padding: '0 1rem 0 0',
-            background: '#fff',
+            background: 'var(--surface)',
+            color: 'var(--text)',
+            border: '1px solid var(--line)',
             borderRadius: 3
         }}>
 
@@ -324,26 +356,26 @@ const Pledge = props => {
             }}>
 
                 <IconButton onClick={() => props.setCurrent(false)}>
-                    <ArrowBackIcon/>
+                    <ArrowBackIcon />
                 </IconButton>
 
                 <span style={{
                     fontSize: 20, fontWeight: 'bold',
                 }}>
-                Залог
-            </span>
+                    Залог
+                </span>
 
                 <span style={{
                     fontSize: 20, fontWeight: 'bold',
                 }}>
                     {renderId()}
-            </span>
+                </span>
 
-                {pledge.id && pledge.status === 'new' && pledge.stock === props.app.current_stock_id &&
+                {pledge.id && isNewStatus &&
                     <IconButton
                         onClick={() => Print(doc, alias)}
                     >
-                        <PrintIcon/>
+                        <PrintIcon />
                     </IconButton>}
 
             </div>
@@ -351,75 +383,112 @@ const Pledge = props => {
             <Fields
                 customer={customer}
                 setCustomer={setCustomer}
+                enablePassportOcr
+                disabled={props.viewOnly}
             />
 
             <TextField label="Наименование"
-                       style={fieldsStyle}
-                       value={model}
-                       onChange={e => pledge.id ? {} : setModel(e.target.value)}
+                style={fieldsStyle}
+                value={model}
+                disabled={props.viewOnly}
+                onChange={e => pledge.id ? {} : setModel(e.target.value)}
             />
 
             <TextField label="Imei или S/N"
-                       style={fieldsStyle}
-                       value={imei}
-                       onChange={e => pledge.id ? {} : setImei(e.target.value)}
+                style={fieldsStyle}
+                value={imei}
+                disabled={props.viewOnly}
+                onChange={e => pledge.id ? {} : setImei(e.target.value)}
             />
 
             <TextField label="Пароль"
-                       style={fieldsStyle}
-                       value={password}
-                       onChange={e => pledge.id ? {} : setPassword(e.target.value)}
+                style={fieldsStyle}
+                value={password}
+                disabled={props.viewOnly}
+                onChange={e => pledge.id ? {} : setPassword(e.target.value)}
             />
 
-            {pledge.time && <TextField label="Дата залога"
-                                       style={fieldsStyle}
-                                       type="date"
-                                       value={pledge.time.substring(0, 10)}
+            {hasSalesHistory && <TableContainer component={Paper} className="pledge-sales-history">
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Дата</TableCell>
+                            <TableCell>Действие</TableCell>
+                            <TableCell>Сумма</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {pledgeSales.map(row => <InteractionTableRow
+                            key={'pledge-sales-history-row-' + row.id}
+                            row={row}
+                            values={['date', 'action', 'sum']}
+                            getValue={({row, valueName}) => salesHistoryValue(row, valueName)}
+                            cellKeyPrefix="pledge-sales-history-cell"
+                        />)}
+                    </TableBody>
+                </Table>
+            </TableContainer>}
+
+            {pledge.time && !hasSalesHistory && <TextField label="Дата залога"
+                style={fieldsStyle}
+                type="date"
+                value={pledge.time.substring(0, 10)}
             />}
 
-            <TextField label="Сумма залога"
-                       style={fieldsStyle}
-                       value={sum}
-                       onChange={e => pledge.id || intInputHandler(e.target.value, setSum)}
-            />
+            {!hasSalesHistory && <TextField label="Сумма залога"
+                style={fieldsStyle}
+                value={sum}
+                onChange={e => pledge.id || intInputHandler(e.target.value, setSum)}
+            />}
 
-            <TextField label="Дата выкупа"
-                       style={fieldsStyle}
-                       type="date"
-                       value={ransomdate}
-                       error={isDelay}
-                       onChange={e => pledge.id || dateHandler(e.target.value, setRansomdate)}
-            />
+            {!hasSalesHistory && <TextField label="Дата выкупа"
+                style={fieldsStyle}
+                type="date"
+                value={ransomdate}
+                error={isDelay}
+                onChange={e => pledge.id || dateHandler(e.target.value, setRansomdate)}
+            />}
 
-            <TextField label="Сумма выкупа"
-                       style={fieldsStyle}
-                       value={checkoutSum()}
-                       error={isDelay}
-                       onChange={e => pledge.id ? {} : intInputHandler(e.target.value, setSum2)}
-            />
+            {!hasSalesHistory && <TextField label="Сумма выкупа"
+                style={fieldsStyle}
+                value={checkoutSum()}
+                error={isDelay}
+                onChange={e => pledge.id ? {} : intInputHandler(e.target.value, setSum2)}
+            />}
 
             <TextField label="Примечание"
-                       style={fieldsStyle}
-                       value={note}
-                       onChange={e => setNote(e.target.value)}
+                style={fieldsStyle}
+                value={note}
+                disabled={props.viewOnly}
+                onChange={e => setNote(e.target.value)}
             />
 
-            {props.app.current_stock_id
+            {props.viewOnly && props.copyPledge
                 ? <div style={{
-                padding: '.3rem',
-                display: "flex",
-                justifyContent: 'space-around'
-            }}>
-                {pledge.stock === props.app.current_stock_id
-                    ? <>
-                        {note === pledge.note || mb('Сохранить', () => save())}
-                        {mb('Выкупают', () => checkout())}
-                        {mb('Продлить', () => setIsOpen(true))}
-                        {isDelay && mb('На продажу', () => checkout(true))}
-                    </>
-                    : mb('Принять в залог', () => create())}
-            </div>
-            : null}
+                    padding: '.3rem',
+                    display: "flex",
+                    justifyContent: 'space-around'
+                }}>
+                    {mb('Копировать', () => props.copyPledge(pledge), <ContentCopyIcon />)}
+                </div>
+                : null}
+
+            {props.app.current_stock_id && canEditPledge
+                ? <div style={{
+                    padding: '.3rem',
+                    display: "flex",
+                    justifyContent: 'space-around'
+                }}>
+                    {isSameStock
+                        ? <>
+                            {note === pledge.note || mb('Сохранить', () => save())}
+                            {mb('Выкупают', () => checkout())}
+                            {mb('Продлить', () => setIsOpen(true))}
+                            {isDelay && mb('На продажу', () => checkout(true))}
+                        </>
+                        : mb('Принять в залог', () => create())}
+                </div>
+                : null}
 
         </div>
 

@@ -21,6 +21,8 @@ import UsersSelect from "../UsersSelect";
 import {intInputHandler} from "../InputHandlers";
 import {GoodSearch} from "../GoodSearch";
 import GoodsTable from "../CostsTable";
+import QuickTextField from "../QuickTextField";
+import {getQuickTextOptions} from "../quickTexts";
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -44,11 +46,14 @@ const useStyles = makeStyles((theme) => ({
         minHeight: '56px',
     },
     field: {
-        margin: '1rem .3rem',
         width: '100%'
     },
     content: {
-        padding: '0.75rem 1.2rem !important',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        minWidth: 'min(92vw, 440px)',
+        padding: '1.1rem 1.2rem !important',
     },
     actions: {
         padding: '0.75rem 1.2rem 1rem !important',
@@ -64,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-export const Costs = ({order, isEditable, users, providers}) => {
+export const Costs = ({order, isEditable, users, providers, quickTexts}) => {
 
     const [serviceOpen, setServiceOpen] = useState(false)
     const [job, setJob] = useState('')
@@ -168,10 +173,11 @@ export const Costs = ({order, isEditable, users, providers}) => {
 
             <DialogContent className={classes.content}>
 
-                <TextField label="Выполненная работа"
-                           className={classes.field}
-                           value={job}
-                           onChange={e => setJob(e.target.value)}
+                <QuickTextField label="Выполненная работа"
+                                className={classes.field}
+                                value={job}
+                                onChange={setJob}
+                                options={getQuickTextOptions(quickTexts, 'orders.works')}
                 />
 
                 <TextField label="Сумма"
@@ -189,6 +195,7 @@ export const Costs = ({order, isEditable, users, providers}) => {
                 />}
 
                 {!user_id && <FormControlLabel
+                    style={{marginTop: '-0.2rem'}}
                     control={<Checkbox checked={cash}
                                        onChange={() => setCash(!cash)}
                     />}

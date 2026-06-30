@@ -31,6 +31,7 @@ const Prepaids = props => {
     const [prepaidData, setPrepaidData] = useState()
     const [prepaids, setPrepaids] = useState([])
     const [search, setSearch] = useState('')
+    const routePrepaidId = +props.match.params.id || 0
 
     const getPrepaids = () => {
 
@@ -51,6 +52,14 @@ const Prepaids = props => {
         getPrepaids()
     }, [props.app.current_stock_id])
 
+    useEffect(() => {
+        if (!routePrepaidId) return
+
+        setPrepaidId(routePrepaidId)
+        setPrepaidData()
+        setIsPrepaidOpen(true)
+    }, [routePrepaidId])
+
     const openPrepaid = prepaid => {
 
         setPrepaidId(prepaid.id)
@@ -61,7 +70,9 @@ const Prepaids = props => {
 
     return <div
         style={{
-            backgroundColor: '#fff',
+            backgroundColor: 'var(--surface)',
+            color: 'var(--text)',
+            border: '1px solid var(--line)',
             borderRadius: 5,
             padding: '1rem'
         }}
@@ -72,23 +83,28 @@ const Prepaids = props => {
             close={() => {
                 setIsPrepaidOpen(false)
                 setPrepaidId(null)
+                if (routePrepaidId) props.history.push('/prepaids')
             }}
             preId={prepaidId}
             preData={prepaidData}
             setPrepaids={setPrepaids}
+            history={props.history}
             className='non-printable'
         />}
 
         {prepaids
-            ? <Table size="small">
+            ? <Table size="small" style={{
+                background: 'var(--surface)',
+                color: 'var(--text)',
+            }}>
                 <TableHead>
                     <TableRow>
-                        <TableCell colSpan={2}>
+                        <TableCell colSpan={2} style={{color: 'var(--text)'}}>
                             <Typography variant="h6">
                                 Предоплаты
                             </Typography>
                         </TableCell>
-                        <TableCell align="right">
+                        <TableCell align="right" style={{color: 'var(--text)'}}>
                             <TextField slotProps={{
                                 input: {
                                     startAdornment: (
@@ -109,7 +125,7 @@ const Prepaids = props => {
                                        onChange={e => setSearch(e.target.value)}
                             />
                         </TableCell>
-                        <TableCell align="right">
+                        <TableCell align="right" style={{color: 'var(--text)'}}>
                             <Tooltip title={'Добавить предоплату'}>
                                 <IconButton style={{
                                     padding: 0,
@@ -168,20 +184,22 @@ const Prepaids = props => {
                                 return <TableRow
                                     key={'table-row-in-prepaids' + p.id + p.time}
                                     style={{
-                                        cursor: 'pointer'
+                                        cursor: 'pointer',
+                                        background: 'var(--surface)',
+                                        color: 'var(--text)'
                                     }}
                                     onClick={() => openPrepaid(p)}
                                 >
-                                    <TableCell>
+                                    <TableCell style={{color: 'var(--text)'}}>
                                         {TwoLineInCell(date, time)}
                                     </TableCell>
-                                    <TableCell>{p.item}</TableCell>
-                                    <TableCell>
+                                    <TableCell style={{color: 'var(--text)'}}>{p.item}</TableCell>
+                                    <TableCell style={{color: 'var(--text)'}}>
                                         {p.customer
                                             ? TwoLineInCell(p.customer.phone_number, p.customer.fio)
                                             : null}
                                     </TableCell>
-                                    <TableCell>{p.status}</TableCell>
+                                    <TableCell style={{color: 'var(--text)'}}>{p.status}</TableCell>
                                 </TableRow>
                             })
                         : null}

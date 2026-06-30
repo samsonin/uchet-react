@@ -25,18 +25,39 @@ const style = {
     padding: '.5em',
 }
 
+const isJsonLikeNote = value => {
+    if (typeof value !== 'string') return false
+
+    const note = value.trim()
+    if (!note || !['{', '['].includes(note[0])) return false
+
+    try {
+        const parsed = JSON.parse(note)
+        return typeof parsed === 'object' && parsed !== null
+    } catch (error) {
+        return false
+    }
+}
+
+const getPublicNote = note => isJsonLikeNote(note) ? '' : note
+
 const Sales = props => {
 
     const appStocks = props.app.stocks || []
     const appUsers = props.app.users || []
+    const searchParams = new URLSearchParams(props.location.search || '')
+    const stockIdFromUrl = +(searchParams.get('stock_id') || searchParams.get('stock') || 0)
+    const strFromUrl = searchParams.get('str') || ''
 
-    const [stocks, setStocks] = useState(() => appStocks
-        .map(s => s.is_valid ? s.id : null)
-        .filter(s => s))
+    const [stocks, setStocks] = useState(() => stockIdFromUrl
+        ? [stockIdFromUrl]
+        : appStocks
+            .map(s => s.is_valid ? s.id : null)
+            .filter(s => s))
     const [date1, setDate1] = useState()
     const [date2, setDate2] = useState()
     const [action, setAction] = useState()
-    const [str, setStr] = useState()
+    const [str, setStr] = useState(strFromUrl)
     const [sum, setSum] = useState(0)
     const [userId, setUserId] = useState()
     const [error, setError] = useState(false)
@@ -96,6 +117,11 @@ const Sales = props => {
     }
 
     useEffect(() => {
+        if (strFromUrl) find()
+// eslint-disable-next-line
+    }, [])
+
+    useEffect(() => {
         if (props.enterPress) find()
         props.setEnterPress(false)
 // eslint-disable-next-line
@@ -108,12 +134,12 @@ const Sales = props => {
 
         total += sale.sum
 
-        return <TableRow>
+        return <TableRow className="sales-table-row">
             <TableCell>
                 {TwoLineInCell(sale.action, toLocalTimeStr(sale.unix))}
             </TableCell>
             <TableCell>
-                {TwoLineInCell(sale.item, sale.note)}
+                {TwoLineInCell(sale.item, getPublicNote(sale.note))}
             </TableCell>
             <TableCell>{sale.sum}</TableCell>
             <TableCell>
@@ -123,13 +149,8 @@ const Sales = props => {
 
     }
 
-    return <>
-        <div style={{
-            backgroundColor: '#fff',
-            borderRadius: 5,
-            padding: '.5rem',
-            paddingRight: '1rem'
-        }}>
+    return <div className="sales-page">
+        <div className="sales-panel">
 
             <StocksCheck stocks={stocks} setStocks={setStocks}/>
 
@@ -190,17 +211,11 @@ const Sales = props => {
 
         </div>
 
-        <div style={{
-            backgroundColor: '#fff',
-            borderRadius: 5,
-            marginTop: '1rem',
-            padding: '.5rem',
-            paddingRight: '1rem'
-        }}>
+        <div className="sales-panel sales-results-panel">
 
-            {sales.length ? <Table size="small">
+            {sales.length ? <Table size="small" className="sales-table">
                     <TableHead>
-                        <TableRow>
+                        <TableRow className="sales-total-row">
                             <TableCell>Действие</TableCell>
                             <TableCell>Наименование</TableCell>
                             <TableCell>Сумма</TableCell>
@@ -223,7 +238,7 @@ const Sales = props => {
 
         </div>
 
-    </>
+    </div>
 }
 
 export default connect(state => state)(Sales)

@@ -39,8 +39,11 @@ const Order = props => {
 
     const [tabId, setTabId] = useState(0)
 
-    const [id, setId] = useState(+props.match.params.order_id || null)
-    const [stockId, setStockId] = useState(+props.match.params.stock_id || null)
+    const routeOrderId = +(props.match.params.order_id || props.match.params.id || 0) || null
+    const routeStockId = +props.match.params.stock_id || null
+
+    const [id, setId] = useState(routeOrderId)
+    const [stockId, setStockId] = useState(routeStockId)
     const [created, setCreated] = useState()
 
     const needPrint = useRef(false)
@@ -48,6 +51,7 @@ const Order = props => {
     const classes = useStyles()
 
     const order = appOrders.find(or => or.id === id && or.stock_id === stockId) || null
+    const prepaidOrderDraft = !order ? props.location?.state?.prepaidOrder : null
 
     const canEdit = () => order
         ? order.status_id === 6
@@ -121,6 +125,13 @@ const Order = props => {
     }
 
     useEffect(() => {
+        setId(routeOrderId)
+        setStockId(routeStockId)
+        setCreated(undefined)
+        setTabId(0)
+    }, [routeOrderId, routeStockId])
+
+    useEffect(() => {
 
         if (stockId && id && !order) {
 
@@ -128,7 +139,7 @@ const Order = props => {
 
         }
 
-    }, [])
+    }, [stockId, id, order])
 
     const setOrder = order => {
 
@@ -212,10 +223,12 @@ const Order = props => {
             : null}
 
         {tabId === 0 &&
-            <Info order={order}
+            <Info key={order ? 'order-' + order.stock_id + '-' + order.id : prepaidOrderDraft ? 'new-order-prepaid-' + prepaidOrderDraft.id : 'new-order'}
+                  order={order}
                   setOrder={setOrder}
                   isEditable={canEdit()}
                   needPrint={needPrint}
+            prepaidOrder={prepaidOrderDraft}
             />
         }
 
@@ -224,11 +237,15 @@ const Order = props => {
                    isEditable={canEdit()}
                    users={props.app.users}
                    providers={props.app.providers}
+                   quickTexts={props.app.quick_texts}
             />
         }
 
         {order && tabId === 2 &&
             <Payments order={order}
+                      users={props.app.users}
+                      paymentTypes={props.app.payment_types}
+                      canChangePaymentMethods={props.app.current_stock_id === order.stock_id}
                       isEditable={canEdit() && isSale}
             />
         }

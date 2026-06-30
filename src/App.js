@@ -32,8 +32,12 @@ import Stock from "./components/Settings/Stock"
 import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
+import CashVideoControl from "./components/CashVideoControl";
 import { Records } from "./components/Records";
 import Docs from "./components/Settings/Docs";
+import PrintSettingsPage from "./components/Settings/Print";
+import PaymentTypes from "./components/Settings/PaymentTypes";
+import AppSettings from "./components/Settings/appSettings";
 import Daily from "./components/Daily";
 import LoginModal from "./components/LoginModal";
 import Prepaids from "./components/Prepaids";
@@ -50,9 +54,14 @@ import Zp from "./components/Zp";
 import Produce from "./components/Produce";
 import Reals from "./components/Reals";
 import { useSnackbar } from "notistack";
-import { Button } from "@mui/material";
+import { IconButton } from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
+import CheckIcon from "@mui/icons-material/Check";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Sales from "./components/Sales";
 import Users from "./components/Settings/Users";
+import PassportCapturePage from "./components/customer/PassportCapturePage";
+import GoodPictureCapturePage from "./components/Good/GoodPictureCapturePage";
 
 const LegacyRouteElement = ({ Component, componentProps = {} }) => {
 
@@ -119,12 +128,49 @@ const App = props => {
     const [globalBarcode, setGlobalBarcode] = useState()
     const [enterPress, setEnterPress] = useState(false)
     const [scrollDown, setScrollDown] = useState(false)
+    const [hiddenNeedCallbacks, setHiddenNeedCallbacks] = useState([])
+    const [deletingNeedCallbacks, setDeletingNeedCallbacks] = useState([])
 
     const barcode = useRef('')
+    const lastNetworkErrorAt = useRef(0)
 
     const { enqueueSnackbar, closeSnackbar } = useSnackbar()
 
     let path = window.location.pathname
+
+    const needCallbackKey = nc => String(nc.id || nc.callback_id || nc.phone_number || '')
+
+    const deleteNeedCallback = (nc, snackbarId) => {
+        const callbackId = nc.id || nc.callback_id
+        const callbackKey = needCallbackKey(nc)
+
+        if (!props.auth.admin || !callbackKey || deletingNeedCallbacks.includes(callbackKey)) return
+
+        setDeletingNeedCallbacks(prev => [...prev, callbackKey])
+
+        const url = callbackId
+            ? 'need-callbacks/' + encodeURIComponent(callbackId)
+            : 'need-callbacks'
+
+        const data = callbackId
+            ? ''
+            : { phone_number: nc.phone_number }
+
+        rest(url, 'DELETE', data)
+            .then(res => {
+                if (res.ok) {
+                    setHiddenNeedCallbacks(prev => prev.includes(callbackKey) ? prev : [...prev, callbackKey])
+                    closeSnackbar(snackbarId)
+                    enqueueSnackbar('Уведомление удалено', { variant: 'success' })
+                } else {
+                    enqueueSnackbar(res.body?.error || 'Не удалось удалить уведомление', { variant: 'error' })
+                }
+            })
+            .catch(() => enqueueSnackbar('Ошибка удаления уведомления', { variant: 'error' }))
+            .finally(() => {
+                setDeletingNeedCallbacks(prev => prev.filter(key => key !== callbackKey))
+            })
+    }
 
     const isBarcodeValid = barcode => {
 
@@ -148,9 +194,36 @@ const App = props => {
 
         document.addEventListener('keydown', handleKeyPress)
 
+        const handleNetworkError = event => {
+            const now = Date.now()
+
+            if (now - lastNetworkErrorAt.current < 7000) return
+
+            lastNetworkErrorAt.current = now
+
+            enqueueSnackbar(
+                event.detail?.isTimeout
+                    ? 'Запрос не вернулся. Проверьте интернет или доступность сервера.'
+                    : 'Проблемы с интернетом. Запрос не отправлен.',
+                {
+                    variant: 'error',
+                    preventDuplicate: true,
+                }
+            )
+        }
+
+        window.addEventListener('app-network-error', handleNetworkError)
+
         window.addEventListener("scroll", () => {
 
-            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+            const pageHeight = Math.max(
+                document.body.scrollHeight,
+                document.documentElement.scrollHeight,
+                document.body.offsetHeight,
+                document.documentElement.offsetHeight,
+            )
+
+            if ((window.innerHeight + window.pageYOffset) >= pageHeight - 80) {
 
                 setScrollDown(true)
 
@@ -176,6 +249,10 @@ const App = props => {
             })
 
         // eslint-disable-next-line
+        return () => {
+            document.removeEventListener('keydown', handleKeyPress)
+            window.removeEventListener('app-network-error', handleNetworkError)
+        }
     }, [])
 
     useEffect(() => {
@@ -237,16 +314,48 @@ const App = props => {
 
     const orgId = props.auth.organization_id
 
+    if (path.startsWith('/passport-capture/') || path.startsWith('/good-picture-capture/')) {
+        return <Routes>
+            <Route path="/passport-capture/:token" element={<PassportCapturePage />} />
+            <Route path="/good-picture-capture/:token" element={<GoodPictureCapturePage />} />
+            <Route path="*" element={<Navigate replace to="/" />} />
+        </Routes>
+    }
+
     return <>
 
-        {props.app.need_callbacks && props.app.need_callbacks.map(nc => {
+        {props.app.need_callbacks && props.app.need_callbacks
+            .filter(nc => !hiddenNeedCallbacks.includes(needCallbackKey(nc)))
+            .map(nc => {
 
-            const action = snackbarId => <Button onClick={() => closeSnackbar(snackbarId)}
-                size="small"
-                variant="outlined"
-            >
-                Ok
-            </Button>
+            const callbackKey = needCallbackKey(nc)
+            const isDeleting = deletingNeedCallbacks.includes(callbackKey)
+
+            const action = snackbarId => <>
+                {props.auth.admin && <Tooltip title={isDeleting ? 'Удаляем...' : 'Удалить'}>
+                    <span>
+                        <IconButton
+                            size="small"
+                            color="inherit"
+                            className="snackbar-action-button snackbar-action-button-delete"
+                            onClick={() => deleteNeedCallback(nc, snackbarId)}
+                            disabled={isDeleting}
+                        >
+                            <DeleteIcon fontSize="small" />
+                        </IconButton>
+                    </span>
+                </Tooltip>}
+                <Tooltip title="Закрыть">
+                    <IconButton
+                        size="small"
+                        color="inherit"
+                        className="snackbar-action-button"
+                        onClick={() => closeSnackbar(snackbarId)}
+                    >
+                        <CheckIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            </>
 
             enqueueSnackbar(nc.phone_number, {
                 variant: 'error',
@@ -291,6 +400,9 @@ const App = props => {
                                 <Route path="/" element={routeElement(Main)} />
                                 <Route path="/profile" element={<ProfileRedirect />} />
                                 <Route path="/settings/personal" element={routeElement(Personal)} />
+                                <Route path="/settings/app" element={routeElement(AppSettings)} />
+                                <Route path="/settings/print" element={routeElement(PrintSettingsPage)} />
+                                <Route path="/settings/payment-types" element={routeElement(PaymentTypes)} />
                                 <Route path="/subscribe" element={routeElement(Subscribe)} />
 
                                 {props.app.stocks[0] && <Route
@@ -301,6 +413,7 @@ const App = props => {
                                 />}
 
                                 <Route path="/prepaids" element={routeElement(Prepaids)} />
+                                <Route path="/prepaids/:id" element={routeElement(Prepaids)} />
                                 <Route path="/reals/:id?" element={routeElement(Reals)} />
                                 <Route path="/zp" element={routeElement(Zp)} />
                                 <Route path="/showcase" element={routeElement(Showcase)} />
@@ -323,6 +436,7 @@ const App = props => {
                                     <Route path="/customers/:id" element={routeElement(Customer)} />
                                     <Route path="/pledges" element={routeElement(Pledges)} />
                                     <Route path="/pledges/:id" element={routeElement(Pledges)} />
+                                    <Route path="/pledge/:id" element={routeElement(Pledges)} />
                                     <Route path="/entities/:id" element={routeElement(Entity)} />
                                     <Route
                                         path="/sales"
@@ -408,6 +522,10 @@ const App = props => {
                                 </>}
 
                                 <Route path="/integration/prices" element={routeElement(Prices)} />
+                                {+props.auth.user_id === 4 && <Route
+                                    path="/integration/cash-video-control"
+                                    element={routeElement(CashVideoControl)}
+                                />}
                                 <Route path="*" element={null} />
                             </Routes>
 

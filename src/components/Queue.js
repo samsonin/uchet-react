@@ -25,7 +25,8 @@ const MyPaper = styled(Paper)({
 });
 
 const MyFormControl = styled(FormControl)({
-    minWidth: 150,
+    width: 220,
+    maxWidth: '100%',
 });
 
 
@@ -34,6 +35,8 @@ const Queue = (props) => {
     const appStocks = props.app.stocks || []
     const appUsers = props.app.users || []
     const appQueue = props.app.queue || []
+    const appStockUsers = props.app.stockusers || []
+    const appDaily = props.app.daily || []
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -56,37 +59,54 @@ const Queue = (props) => {
 
     };
 
-    const getAllowedStocks = (allowedStocks = []) => allowedStocks
-        .map(id => appStocks.find(s => s.id === id && s.is_valid))
-        .filter(Boolean)
+    const getDailyStockId = userId => {
+        const daily = appDaily.find(d => Array.isArray(d.employees)
+            && d.employees.some(employeeId => +employeeId === +userId))
 
-    const hasPointChoice = queue => queue.some(q => getAllowedStocks(q.allowed_stocks).length > 1)
+        return daily ? +daily.stock_id : 0
+    }
+
+    const getSelectedStockId = q => +(q.stock_id || getDailyStockId(q.user_id) || 0)
+
+    const getAllowedStocks = q => {
+        const stockIds = appStockUsers
+            .filter(su => +su.user_id === +q.user_id)
+            .map(su => +su.stock_id)
+
+        const fallbackStockIds = (q.allowed_stocks || []).map(id => +id)
+        const selectedStockId = getSelectedStockId(q)
+
+        return [...new Set([...stockIds, ...fallbackStockIds, selectedStockId].filter(Boolean))]
+            .map(id => appStocks.find(s => +s.id === +id && s.is_valid))
+            .filter(Boolean)
+    }
 
     const renderTable = queue => <TableBody>
 
         {queue.map(q => {
 
             const user = appUsers.find(u => +u.id === q.user_id)
-            const allowedStocks = getAllowedStocks(q.allowed_stocks)
-            const canChooseStock = allowedStocks.length > 1
+            const allowedStocks = getAllowedStocks(q)
+            const selectedStockId = getSelectedStockId(q)
 
             return user
                 ? <TableRow key={'rowinqueuetablekey' + q.user_id}>
                     <TableCell>
                         {user.name}
                     </TableCell>
-                    {hasPointChoice(queue) && <TableCell>
-                        {canChooseStock && <MyFormControl variant="outlined">
+                    <TableCell>
+                        <MyFormControl variant="outlined">
                             <Select
                                 onChange={e => pointChange(q.user_id, +e.target.value)}
-                                value={q.stock_id}
-                                disabled={request}
+                                value={selectedStockId}
+                                disabled={request || !props.auth.admin}
+                                displayEmpty
                             >
                                 <MenuItem
                                     key={'queueselectstockskey' + q.user_id + '0'}
                                     value={0}
                                 >
-                                    <br />
+                                    Не выбрана
                                 </MenuItem>
 
                                 {allowedStocks.map(stock => <MenuItem
@@ -97,8 +117,8 @@ const Queue = (props) => {
                                 </MenuItem>)}
 
                             </Select>
-                        </MyFormControl>}
-                    </TableCell>}
+                        </MyFormControl>
+                    </TableCell>
                 </TableRow>
                 : null
 
@@ -119,7 +139,7 @@ const Queue = (props) => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Мастер</TableCell>
-                                {hasPointChoice(appQueue) && <TableCell>Куда вышел на смену</TableCell>}
+                                <TableCell>Куда вышел на смену</TableCell>
                             </TableRow>
                         </TableHead>
                         {renderTable(appQueue)}

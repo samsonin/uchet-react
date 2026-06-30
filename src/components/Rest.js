@@ -1,10 +1,23 @@
 import {SERVER} from '../constants';
 import store from '../store'
 
+const NETWORK_ERROR_EVENT = 'app-network-error'
+const DEFAULT_TIMEOUT_MS = 30000
 
-let response = {};
+const notifyNetworkError = detail => {
+    window.dispatchEvent(new CustomEvent(NETWORK_ERROR_EVENT, {detail}))
+}
+
+export const buildRequestUrl = (baseUrl, url) => {
+    const requestUrl = String(url);
+
+    if (/^[a-z][a-z\d+\-.]*:\/\//i.test(requestUrl)) return requestUrl;
+
+    return baseUrl + '/' + requestUrl;
+}
 
 export default function fetchPost(url, method = 'GET', data = '', isFile = false, options = {}) {
+    let response = {};
 
     const {
         auth: useAuth = true,
@@ -13,6 +26,10 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         updateStore = true,
         baseUrl = SERVER,
         credentials = 'same-origin',
+        bodyType = '',
+        fileFieldName = 'image',
+        timeoutMs = DEFAULT_TIMEOUT_MS,
+        showGlobalLoader = true,
     } = options;
 
     let authData = JSON.parse(window.localStorage.getItem('auth'));
@@ -22,7 +39,7 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         : ''
 
     let circularln = document.getElementById('circularln');
-    if (circularln && url !== 'upd') circularln.style.display = '';
+    if (showGlobalLoader && circularln && url !== 'upd') circularln.style.display = '';
 
     let init = {
         method,
@@ -38,12 +55,15 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
 
     if (data) {
 
-        if (isFile) {
+        if (bodyType === 'formData' || data instanceof FormData) {
+            delete(init.headers["Content-Type"])
+            init.body = data
+        } else if (isFile) {
             delete(init.headers["Content-Type"])
             init.enctype="multipart/form-data"
 
             const fd = new FormData()
-            fd.append('image', data)
+            fd.append(fileFieldName, data)
 
             init.body = fd
         } else {
@@ -52,7 +72,12 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
 
     }
 
-    return fetch(baseUrl + '/' + url, init)
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+
+    init.signal = controller.signal
+
+    return fetch(buildRequestUrl(baseUrl, url), init)
         .then(res => {
 
             if (res.status === 401) {
@@ -95,8 +120,19 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
                 return response;
             }
 
-            const body = await res.json();
-            response.body = body;
+            const text = await res.text();
+
+            if (!text) {
+                response.body = null;
+                return response;
+            }
+
+            try {
+                response.body = JSON.parse(text);
+            } catch (error) {
+                response.body = text;
+            }
+
             return response;
         })
         .then(res => {
@@ -114,13 +150,23 @@ export default function fetchPost(url, method = 'GET', data = '', isFile = false
         })
         .catch(error => {
 
-            console.log(error)
+            const isNetworkError = error?.name === 'AbortError' || !response.status
+
+            if (isNetworkError) {
+                notifyNetworkError({
+                    isTimeout: error?.name === 'AbortError',
+                    url,
+                })
+            } else if (!String(error?.message || '').includes('Unexpected end of JSON input')) {
+                console.log(error)
+            }
 
             if (!response.ok) response.error = error;
             return response;
         })
         .finally(() => {
-            if (circularln) circularln.style.display = 'none'
+            clearTimeout(timeout)
+            if (showGlobalLoader && circularln) circularln.style.display = 'none'
         });
 
 }

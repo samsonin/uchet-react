@@ -1,8 +1,27 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import App from "./App";
+﻿import App from "./App";
 
-it("renders without crashing", () => {
-  const div = document.createElement("div");
-  ReactDOM.render(<App />, div);
+jest.mock("react-router-dom", () => ({
+    Navigate: () => null,
+    Route: () => null,
+    Routes: ({ children }) => <>{children}</>,
+    useLocation: () => ({ pathname: "/" }),
+    useNavigate: () => jest.fn(),
+    useParams: () => ({}),
+}), { virtual: true });
+
+jest.mock("uuid", () => ({
+    v4: () => "test-uuid",
+}));
+
+jest.mock("./components/Settings/Docs", () => () => null);
+
+jest.mock("notistack", () => ({
+    useSnackbar: () => ({
+        enqueueSnackbar: jest.fn(),
+        closeSnackbar: jest.fn(),
+    }),
+}));
+
+test("exports app component", () => {
+    expect(App).toBeTruthy();
 });

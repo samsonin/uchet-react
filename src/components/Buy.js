@@ -25,6 +25,7 @@ import {intInputHandler} from "./common/InputHandlers";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import {createDate, Print} from "./common/Print";
+import {createDailyAfterPrintHandler} from "./Buy.helpers";
 
 
 const pic = {
@@ -116,7 +117,7 @@ const Buy = props => {
                             all_model: table
                         }
 
-                        Print(doc, alias, '', props.history.push('/daily'))
+                        Print(doc, alias, '', createDailyAfterPrintHandler(props.history))
 
                     } else {
 
@@ -193,6 +194,7 @@ const Buy = props => {
         {isNeedDoc && <Fields
             customer={customer}
             setCustomer={setCustomer}
+            enablePassportOcr
         />}
 
         <TableContainer component={Paper}>

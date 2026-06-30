@@ -36,6 +36,13 @@ export default function ControlledTreeView({ categories, initialId, onSelected, 
     const handleSelect = (_, nodeId) => {
         setSelected(nodeId);
         onSelected(nodeId);
+
+        const hasChildren = normalizedCategories
+            .some(cat => cat.parent_id === Number(nodeId));
+
+        if (!hasChildren && typeof finished === 'function') {
+            finished(nodeId);
+        }
     };
 
     function getExpanded(id) {

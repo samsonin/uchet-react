@@ -1,9 +1,11 @@
 import React from "react";
 import {connect} from "react-redux";
 
-import {TextField, Typography} from "@mui/material";
+import {Typography} from "@mui/material";
 
 import CategoryHandler from "./common/CategoryHandler";
+import QuickTextField from "./common/QuickTextField";
+import {getQuickTextOptions} from "./common/quickTexts";
 
 
 const EnteredGood = props => {
@@ -26,14 +28,15 @@ const EnteredGood = props => {
 
     }
 
-    const tf = (l, v, o) => <TextField size="small"
-                                       style={{
-                                           width: '100%',
-                                           padding: '.3rem'
-                                       }}
-                                       label={l}
-                                       value={v}
-                                       onChange={e => o(e.target.value)}
+    const tf = (l, v, o, options = []) => <QuickTextField size="small"
+                                                          style={{
+                                                              width: '100%',
+                                                              padding: '.3rem'
+                                                          }}
+                                                          label={l}
+                                                          value={v}
+                                                          onChange={o}
+                                                          options={options}
     />
 
 
@@ -60,7 +63,7 @@ const EnteredGood = props => {
 
         </div>
 
-        {tf("Наименование", props.model, props.setModel)}
+        {tf("Наименование", props.model, props.setModel, getQuickTextOptions(props.app.quick_texts, 'goods.models'))}
 
         {needImei() && tf("imei", props.imei, props.setImei)}
 

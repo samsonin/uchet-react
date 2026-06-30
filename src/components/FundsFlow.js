@@ -18,6 +18,7 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 
 import StocksCheck from "./common/StocksCheck";
+import { mergeFundsRowsByDate } from "../common/fundsFlow";
 
 const useStyles = makeStyles(() => ({
     typography: {
@@ -99,29 +100,7 @@ export default connect(state => state)(props => {
 
                     setActual(true)
 
-                    let totalData = []
-
-                    res.body.forEach(d => {
-
-                        let lastDay = totalData.find(t => t.date === d.date)
-
-                        if (lastDay) {
-
-                            lastDay.morning += d.morning
-                            lastDay.proceeds += d.proceeds
-                            lastDay.cashless += d.cashless
-                            lastDay.handed += d.handed
-                            lastDay.evening += d.evening
-
-                        } else {
-
-                            totalData.push(d)
-
-                        }
-
-                    })
-
-                    return setData(totalData)
+                    return setData(mergeFundsRowsByDate(res.body))
 
                 }
 

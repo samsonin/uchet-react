@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 
 import TableHead from "@mui/material/TableHead";
@@ -23,6 +23,29 @@ const Invites = props => {
     const [invite, setInvite] = useState(null);
 
     const { enqueueSnackbar } = useSnackbar()
+
+    useEffect(() => {
+        const params = new URLSearchParams(props.location?.search || "");
+
+        if (params.get("new") === "1") {
+            setInvite({});
+            setIsInviteOpen(true);
+        }
+    }, [props.location?.search]);
+
+    const closeInvite = () => {
+        setIsInviteOpen(false);
+
+        const params = new URLSearchParams(props.location?.search || "");
+
+        if (params.get("new") === "1") {
+            params.delete("new");
+            props.history.replace({
+                pathname: "/settings/invites",
+                search: params.toString() ? `?${params.toString()}` : "",
+            });
+        }
+    };
 
     const addInvite = () => {
 
@@ -57,7 +80,7 @@ const Invites = props => {
         {isInviteOpen && (
             <InviteModal
                 isOpen={isInviteOpen}
-                close={() => setIsInviteOpen(false)}
+                close={closeInvite}
                 invite={invite}
             />
         )}

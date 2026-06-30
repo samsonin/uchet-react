@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 
 import { Card, CardContent, CardHeader, Grid, TextField } from "@mui/material";
@@ -34,12 +34,15 @@ const orgFields = [
     'legal_address',
     'okved',
     'bank_code',
+    'bank_name',
     'settlement_number',
 ]
 
 const toStringValue = value => value === null || value === undefined ? '' : value.toString()
 
 const digitsOnly = value => toStringValue(value).replace(/\D/g, '')
+
+const DEBOUNCE_DADATA_MS = 550
 
 const lengthValidation = {
     inn: { label: 'ИНН', lengths: [10, 12], maxLength: 12 },
@@ -72,6 +75,30 @@ const initialState = props => {
 
 }
 
+const normalizePartySuggestion = suggestion => ({
+    inn: toStringValue(suggestion?.inn || suggestion?.data?.inn),
+    ogrn: toStringValue(suggestion?.ogrn || suggestion?.data?.ogrn),
+    kpp: toStringValue(suggestion?.kpp ?? suggestion?.data?.kpp ?? '0'),
+    organization: toStringValue(
+        suggestion?.organization
+        || suggestion?.value
+        || suggestion?.unrestricted_value
+        || suggestion?.data?.name?.full_with_opf
+        || suggestion?.data?.name?.short_with_opf
+    ),
+    legal_address: toStringValue(suggestion?.legal_address || suggestion?.data?.address?.unrestricted_value),
+    okved: toStringValue(suggestion?.okved || suggestion?.data?.okved),
+})
+
+const normalizePartyResponse = body => {
+    if (Array.isArray(body?.suggestions)) return body.suggestions.map(normalizePartySuggestion)
+    if (Array.isArray(body)) return body.map(normalizePartySuggestion)
+
+    const singleSuggestion = body?.suggestion || body?.party || body?.organization
+
+    return singleSuggestion ? [normalizePartySuggestion(singleSuggestion)] : []
+}
+
 const Organization = props => {
     const classes = useStyles()
     const organization = props.organization || {}
@@ -79,12 +106,16 @@ const Organization = props => {
     const [state, setState] = useState(() => initialState(organization))
     const [disabled, setDisabled] = useState(true)
 
-    const [innOpen, setInnOpen] = useState(false)
-    const [ogrnOpen, setOgrnOpen] = useState(false)
+    const [partyField, setPartyField] = useState(null)
 
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState([]);
     const [bankCodeTouched, setBankCodeTouched] = useState(false);
+    const lastAppliedPartyQueryRef = useRef('');
+    const partyRequestIdRef = useRef(0);
+    const lastRequestedBankCodeRef = useRef('');
+    const bankRequestIdRef = useRef(0);
+    const bankRequestTimerRef = useRef(null);
 
     const validationErrors = Object.keys(lengthValidation).reduce((acc, fieldName) => ({
         ...acc,
@@ -114,93 +145,122 @@ const Organization = props => {
 
     }, [state, organization, hasValidationErrors])
 
-    const dadataRequest = (query, isCancelled = () => false) => {
+    const applyPartySuggestion = suggestion => {
+        if (!suggestion) return
+
+        setState(prev => ({
+            ...prev,
+            ...suggestion,
+            inn: suggestion.inn || prev.inn,
+            ogrn: suggestion.ogrn || prev.ogrn,
+        }))
+    }
+
+    const dadataRequest = (query, isCancelled = () => false, shouldApplyResult = false) => {
 
         if (!query) {
             setOptions([])
             return Promise.resolve()
         }
 
+        const requestId = partyRequestIdRef.current + 1
+        partyRequestIdRef.current = requestId
+
+        const isActiveRequest = () => !isCancelled() && partyRequestIdRef.current === requestId
+
         setLoading(true)
 
-        return rest('dadata/party', 'POST', { query })
+        return rest('dadata/party', 'POST', { query }, false, { showGlobalLoader: false })
             .then(res => {
-                if (isCancelled()) return
+                if (!isActiveRequest()) return
 
                 if (!res?.ok) {
                     setOptions([])
                     return
                 }
 
-                setOptions((res.body?.suggestions || []).map(v => ({
-                    inn: v.inn || v.data?.inn || '',
-                    ogrn: v.ogrn || v.data?.ogrn || '',
-                    kpp: v.kpp || v.data?.kpp || '0',
-                    organization: v.organization || v.value || '',
-                    legal_address: v.legal_address || v.data?.address?.unrestricted_value || '',
-                    okved: v.okved || v.data?.okved || '',
-                })));
+                const nextOptions = normalizePartyResponse(res.body);
+
+                setOptions(nextOptions);
+
+                if (shouldApplyResult && nextOptions.length) {
+                    const normalizedQuery = digitsOnly(query)
+                    const exactOption = nextOptions.find(option => (
+                        digitsOnly(option.inn) === normalizedQuery || digitsOnly(option.ogrn) === normalizedQuery
+                    ))
+                    const optionToApply = exactOption || nextOptions[0]
+
+                    if (optionToApply && lastAppliedPartyQueryRef.current !== normalizedQuery) {
+                        lastAppliedPartyQueryRef.current = normalizedQuery
+                        applyPartySuggestion(optionToApply)
+                    }
+                }
 
             })
             .catch(error => {
-                if (!isCancelled()) console.log("error", error)
+                if (isActiveRequest()) console.log("error", error)
             })
             .finally(() => {
-                if (!isCancelled()) setLoading(false)
+                if (isActiveRequest()) setLoading(false)
             })
 
     }
 
     useEffect(() => {
 
-        if (!innOpen || toStringValue(state.inn).length < 5) {
+        const query = digitsOnly(state.inn)
+
+        if (partyField !== 'inn' || !lengthValidation.inn.lengths.includes(query.length)) {
             setOptions([])
+            setLoading(false)
             return undefined;
         }
 
         let cancelled = false
-
-        dadataRequest(state.inn, () => cancelled)
+        const timer = window.setTimeout(() => {
+            dadataRequest(query, () => cancelled, true)
+        }, DEBOUNCE_DADATA_MS)
 
         return () => {
             cancelled = true
+            window.clearTimeout(timer)
         }
 
-    }, [innOpen, state.inn])
+    }, [partyField, state.inn])
 
     useEffect(() => {
 
-        if (!ogrnOpen || toStringValue(state.ogrn).length < 5) {
+        const query = digitsOnly(state.ogrn)
+
+        if (partyField !== 'ogrn' || query.length < 5) {
             setOptions([])
+            setLoading(false)
             return undefined;
         }
 
         let cancelled = false
-
-        dadataRequest(state.ogrn, () => cancelled)
+        const shouldApplyResult = lengthValidation.ogrn.lengths.includes(query.length)
+        const timer = window.setTimeout(() => {
+            dadataRequest(query, () => cancelled, shouldApplyResult)
+        }, DEBOUNCE_DADATA_MS)
 
         return () => {
             cancelled = true
+            window.clearTimeout(timer)
         }
 
-    }, [ogrnOpen, state.ogrn])
+    }, [partyField, state.ogrn])
 
-    useEffect(() => {
+    const loadBankByCode = (bankCode, isCancelled = () => false) => {
+        const requestId = bankRequestIdRef.current + 1
+        bankRequestIdRef.current = requestId
+        lastRequestedBankCodeRef.current = bankCode
 
-        if (!bankCodeTouched) return undefined
+        const isActiveRequest = () => !isCancelled() && bankRequestIdRef.current === requestId
 
-        const bankCode = toStringValue(state.bank_code).replace(/\D/g, '')
-
-        if (bankCode.length !== 9) {
-            setState(prev => prev.bank_name ? { ...prev, bank_name: '' } : prev)
-            return undefined
-        }
-
-        let cancelled = false
-
-        rest('dadata/bank', 'POST', { query: bankCode })
+        return rest('dadata/bank', 'POST', { query: bankCode }, false, { showGlobalLoader: false })
             .then(res => {
-                if (cancelled || !res?.ok) return
+                if (!isActiveRequest() || !res?.ok) return
 
                 setState(prev => {
 
@@ -248,14 +308,50 @@ const Organization = props => {
 
             })
             .catch(error => {
-                if (!cancelled) console.log("error", error)
-            });
+                if (isActiveRequest()) console.log("error", error)
+            })
+    }
+
+    useEffect(() => () => {
+        if (bankRequestTimerRef.current) window.clearTimeout(bankRequestTimerRef.current)
+    }, [])
+
+    useEffect(() => {
+
+        const bankCode = digitsOnly(state.bank_code)
+
+        if (bankRequestTimerRef.current) {
+            window.clearTimeout(bankRequestTimerRef.current)
+            bankRequestTimerRef.current = null
+        }
+
+        if (bankCode.length !== 9) {
+            lastRequestedBankCodeRef.current = ''
+            if (bankCodeTouched) {
+                setState(prev => prev.bank_name ? { ...prev, bank_name: '' } : prev)
+            }
+            return undefined
+        }
+
+        if (toStringValue(state.bank_name) || lastRequestedBankCodeRef.current === bankCode) {
+            return undefined
+        }
+
+        let cancelled = false
+        bankRequestTimerRef.current = window.setTimeout(() => {
+            loadBankByCode(bankCode, () => cancelled)
+            bankRequestTimerRef.current = null
+        }, DEBOUNCE_DADATA_MS)
 
         return () => {
             cancelled = true
+            if (bankRequestTimerRef.current) {
+                window.clearTimeout(bankRequestTimerRef.current)
+                bankRequestTimerRef.current = null
+            }
         }
 
-    }, [bankCodeTouched, state.bank_code])
+    }, [bankCodeTouched, state.bank_code, state.bank_name])
 
     const cancel = () => {
         setBankCodeTouched(false)
@@ -273,8 +369,6 @@ const Organization = props => {
 
             let newState = initialState(res.body.organization);
 
-            newState.bank_name = state.bank_name;
-
             setBankCodeTouched(false)
             setState(newState)
 
@@ -283,6 +377,13 @@ const Organization = props => {
     }
 
     const updateFields = newObject => setState(prev => ({ ...prev, ...newObject }))
+
+    const handlePartySelect = suggestion => {
+        if (!suggestion) return
+
+        lastAppliedPartyQueryRef.current = digitsOnly(suggestion.inn || suggestion.ogrn)
+        applyPartySuggestion(normalizePartySuggestion(suggestion))
+    }
 
     const renderField = v => {
         const errorText = validationErrors[v.fieldName] || ''
@@ -316,7 +417,7 @@ const Organization = props => {
             <CardHeader
                 title="Организация"
                 className={classes.cardHeader}
-                titleTypographyProps={{ variant: "subtitle1" }}
+                slotProps={{ title: { variant: "subtitle1" } }}
             />
             <CardContent>
                 <Grid container spacing={2}>
@@ -327,31 +428,36 @@ const Organization = props => {
             <Autocomplete
                 className={classes.field}
             value={{ inn: state.inn }}
-            // open={innOpen}
+            inputValue={state.inn || ''}
+            freeSolo
+            filterOptions={x => x}
             onOpen={() => {
-                setInnOpen(true);
-            }}
-            onClose={() => {
-                setInnOpen(false);
+                setPartyField('inn')
             }}
             onChange={(e, v, r) => {
                 if (r === 'select-option') {
-                    updateFields(v)
+                    handlePartySelect(v)
                 }
             }}
             isOptionEqualToValue={(option, value) =>
                 Boolean(option && value && option.inn === value.inn)
             }
             getOptionLabel={option => toStringValue(option?.inn)}
-            renderOption={option => `${toStringValue(option?.inn)} ${toStringValue(option?.organization)}`}
+            renderOption={(optionProps, option) => <li {...optionProps}>
+                {`${toStringValue(option?.inn)} ${toStringValue(option?.organization)}`}
+            </li>}
             options={options}
             loading={loading}
-            onInputChange={(_, v) => {
+            onInputChange={(_, v, reason) => {
+                if (reason !== 'input' && reason !== 'clear') return
+                lastAppliedPartyQueryRef.current = ''
+                setPartyField('inn')
                 updateFields({ inn: v })
             }}
             renderInput={params => {
-                const htmlInputProps = params.inputProps || {}
-                const inputProps = params.InputProps || {}
+                const slotProps = params.slotProps || {}
+                const htmlInputProps = slotProps.htmlInput || params.inputProps || {}
+                const inputProps = slotProps.input || params.InputProps || {}
 
                 return <TextField
                     {...params}
@@ -361,7 +467,9 @@ const Organization = props => {
                     fullWidth
                     error={Boolean(validationErrors.inn)}
                     helperText={validationErrors.inn}
+                    onFocus={() => setPartyField('inn')}
                     slotProps={{
+                        ...slotProps,
                         htmlInput: {
                             ...htmlInputProps,
                             maxLength: lengthValidation.inn.maxLength,
@@ -385,31 +493,36 @@ const Organization = props => {
             <Autocomplete
                 className={classes.field}
             value={{ ogrn: state.ogrn }}
-            // open={innOpen}
+            inputValue={state.ogrn || ''}
+            freeSolo
+            filterOptions={x => x}
             onOpen={() => {
-                setOgrnOpen(true);
-            }}
-            onClose={() => {
-                setOgrnOpen(false);
+                setPartyField('ogrn')
             }}
             onChange={(e, v, r) => {
                 if (r === 'select-option') {
-                    updateFields(v)
+                    handlePartySelect(v)
                 }
             }}
             isOptionEqualToValue={(option, value) =>
                 Boolean(option && value && option.ogrn === value.ogrn)
             }
             getOptionLabel={option => toStringValue(option?.ogrn)}
-            renderOption={option => `${toStringValue(option?.ogrn)} ${toStringValue(option?.organization)}`}
+            renderOption={(optionProps, option) => <li {...optionProps}>
+                {`${toStringValue(option?.ogrn)} ${toStringValue(option?.organization)}`}
+            </li>}
             options={options}
             loading={loading}
-            onInputChange={(_, v) => {
+            onInputChange={(_, v, reason) => {
+                if (reason !== 'input' && reason !== 'clear') return
+                lastAppliedPartyQueryRef.current = ''
+                setPartyField('ogrn')
                 updateFields({ ogrn: v })
             }}
             renderInput={params => {
-                const htmlInputProps = params.inputProps || {}
-                const inputProps = params.InputProps || {}
+                const slotProps = params.slotProps || {}
+                const htmlInputProps = slotProps.htmlInput || params.inputProps || {}
+                const inputProps = slotProps.input || params.InputProps || {}
 
                 return <TextField
                     {...params}
@@ -419,7 +532,9 @@ const Organization = props => {
                     fullWidth
                     error={Boolean(validationErrors.ogrn)}
                     helperText={validationErrors.ogrn}
+                    onFocus={() => setPartyField('ogrn')}
                     slotProps={{
+                        ...slotProps,
                         htmlInput: {
                             ...htmlInputProps,
                             maxLength: lengthValidation.ogrn.maxLength,
@@ -454,7 +569,7 @@ const Organization = props => {
             <CardHeader
                 title="Реквизиты счета"
                 className={classes.cardHeader}
-                titleTypographyProps={{ variant: "subtitle1" }}
+                slotProps={{ title: { variant: "subtitle1" } }}
             />
             <CardContent>
                 <Grid container spacing={2}>

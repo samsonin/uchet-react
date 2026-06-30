@@ -17,6 +17,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Slide from "@mui/material/Slide";
 import {connect} from "react-redux";
+import QuickTextField from "../QuickTextField";
+import {getQuickTextOptions} from "../quickTexts";
 
 const fieldsStyle = {
     margin: '.4rem',
@@ -30,14 +32,131 @@ const Transition = forwardRef(function Transition(props, ref) {
 const initSum = 'Предварительная стоимость'
 const initPresum = 'Предоплата при оформлении заказа'
 
+const parseOrderJson = order => {
+
+    if (!order?.json) return {}
+    if (typeof order.json === 'object') return order.json
+
+    try {
+        const parsed = JSON.parse(order.json)
+        return typeof parsed === 'string' ? JSON.parse(parsed) : parsed
+    } catch (e) {
+        return {}
+    }
+
+}
+
+const normalizeFieldKey = value => String(value || '')
+    .trim()
+    .toLowerCase()
+    .replaceAll('ё', 'е')
+    .replace(/[^a-zа-я0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+
+const getOrderFieldNames = field => {
+
+    const names = [field?.name]
+
+    return names
+        .filter(value => value !== undefined && value !== null && String(value).trim() !== '')
+        .reduce((acc, value) => {
+            const normalized = normalizeFieldKey(value)
+            return acc.includes(value) || acc.includes(normalized)
+                ? acc
+                : acc.concat(value, normalized)
+        }, [])
+
+}
+
+const getValueByFieldNames = (source, fieldNames) => {
+
+    if (!source || typeof source !== 'object') return undefined
+
+    for (const fieldName of fieldNames) {
+        if (source[fieldName] !== undefined && source[fieldName] !== null) return source[fieldName]
+    }
+
+    const normalizedSource = Object.keys(source).reduce((acc, key) => {
+        acc[normalizeFieldKey(key)] = source[key]
+        return acc
+    }, {})
+
+    for (const fieldName of fieldNames.map(normalizeFieldKey)) {
+        if (normalizedSource[fieldName] !== undefined && normalizedSource[fieldName] !== null) return normalizedSource[fieldName]
+    }
+
+    return undefined
+
+}
+
+const getValueFromFieldList = (fieldsValue, fieldNames) => {
+
+    if (!Array.isArray(fieldsValue)) return undefined
+
+    const normalizedFieldNames = fieldNames.map(normalizeFieldKey)
+    const fieldValue = fieldsValue.find(item => {
+        const itemKeys = [item?.name, item?.key, item?.field].map(normalizeFieldKey)
+        return itemKeys.some(key => normalizedFieldNames.includes(key))
+    })
+
+    return fieldValue?.value ?? fieldValue?.value_value ?? fieldValue?.val ?? fieldValue?.text ?? fieldValue?.answer
+
+}
+
+const getOrderFieldValue = (order, field) => {
+
+    const json = parseOrderJson(order)
+    const fieldNames = getOrderFieldNames(field)
+    const sources = [order, json, json?.fields, json?.order, order?.fields]
+
+    for (const source of sources) {
+        const value = Array.isArray(source)
+            ? getValueFromFieldList(source, fieldNames)
+            : getValueByFieldNames(source, fieldNames)
+
+        if (value !== undefined && value !== null) return value
+    }
+
+    return ''
+
+}
+
+const getOrderTotal = order => order?.sum2 ?? order?.sum ?? 0
+
+const emptyCustomer = () => ({
+    id: 0,
+    phone_number: '',
+    fio: '',
+    contacts: [],
+})
+
+const getOrderQuickTextPath = field => {
+
+    const label = String(field?.value || field?.name || '').toLowerCase()
+
+    if (label.includes('неисправ') || label.includes('defect')) return 'orders.defects'
+    if (label.includes('работ') || label.includes('work')) return 'orders.works'
+
+    return null
+
+}
+
 const Info = props => {
 
     const {order, setOrder, needPrint} = props
-    const appFields = props.app.fields?.allElements || []
+    const appFields = props.app.fields?.allElements
     const appStatuses = props.app.statuses || []
     const appUsers = props.app.users || []
     const appCategories = props.app.categories || []
-    const fields = appFields.filter(f => f.index === 'order' && f.is_valid && !f.is_system)
+    const fields = (appFields || []).filter(f => f.index === 'order' && f.is_valid && !f.is_system)
+    const quickTextOptions = path => getQuickTextOptions(props.app.quick_texts, path)
+    const prepaidOrder = !order ? props.prepaidOrder : null
+    const getPrepaidFieldValue = field => {
+        const fieldValue = prepaidOrder?.fields?.[field.name]
+        if (fieldValue !== undefined && fieldValue !== null) return fieldValue
+        if (getOrderQuickTextPath(field) === 'orders.defects') return prepaidOrder?.fields?.defect || ''
+        return ''
+    }
     
     const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
@@ -48,20 +167,16 @@ const Info = props => {
     const [status_id, setStatus_id] = useState(order ? order.status_id : 0)
     const [category_id, setCategory_id] = useState(order ? order.category_id : 0)
     const [otherCategory, setOtherCategory] = useState('')
-    const [customer, setCustomer] = useState(order ? order.customer : {
-        id: 0,
-        phone_number: '',
-        fio: '',
-    })
-    const [model, setModel] = useState('')
-    const [presum, setPresum] = useState(initPresum)
-    const [sum, setSum] = useState(order ? order.sum : initSum)
+    const [customer, setCustomer] = useState(order ? order.customer : prepaidOrder?.customer || emptyCustomer())
+    const [model, setModel] = useState(prepaidOrder?.model || prepaidOrder?.item || '')
+    const [presum, setPresum] = useState(prepaidOrder?.presum ?? initPresum)
+    const [sum, setSum] = useState(order ? order.sum : prepaidOrder?.sum ?? initSum)
     const [sum2, setSum2] = useState(order ? order.sum : 0)
     const [master_id, setMaster_id] = useState(order ? order.master_id : 0)
     const [for_client, setFor_client] = useState(order ? order.for_client : '')
     const [state, setState] = useState(() => {
         const fl = {}
-        fields.map(f => fl[f.name] = '')
+        fields.map(f => fl[f.name] = getPrepaidFieldValue(f))
         return fl
     })
     const [isReasonOpen, setIsReasonOpen] = useState(false)
@@ -72,7 +187,7 @@ const Info = props => {
         setState(prev => {
 
             const newState = {...prev}
-            newState[name] = value || ''
+            newState[name] = value ?? ''
             return newState
 
         })
@@ -109,9 +224,11 @@ const Info = props => {
     const create = () => {
 
         let error = ''
+        const hasCustomerContact = Array.isArray(customer.contacts)
+            && customer.contacts.some(contact => String(contact?.value || '').trim())
 
         if (!props.app.current_stock_id) error = 'Выберите точку'
-        if (!(customer.id || customer.fio || customer.phone_number)) error = 'Нет заказчика'
+        if (!(customer.id || customer.fio || customer.phone_number || hasCustomerContact)) error = 'Нет заказчика'
         if (customer.phone_number && customer.phone_number.length !== 10) error = 'неправильный номер телефона'
         if (!category_id) error = 'Выберите категорию'
         if (category_id === 1000 && !otherCategory) error = 'Впишите другую категорию'
@@ -249,20 +366,57 @@ const Info = props => {
                 id: 0,
                 phone_number: '',
                 fio: '',
+                contacts: [],
             })
             setCategory_id(order.category_id)
             setModel(order.model || '')
-            setSum(order.sum)
-            setSum2(order.sum2)
+            setSum(order.sum ?? initSum)
+            setSum2(getOrderTotal(order))
             setFor_client(order.for_client || '')
 
-            fields.map(f => {
-                setField(f.name, order[f.name])
+            setState(prev => {
+
+                const newState = {...prev}
+
+                fields.map(f => {
+                    newState[f.name] = getOrderFieldValue(order, f)
+                    return f
+                })
+
+                return newState
+
             })
         }
 
-    }, [order])
+    }, [order, appFields])
 
+
+    useEffect(() => {
+
+        if (order || !prepaidOrder) return
+
+        setCustomer(prepaidOrder.customer || emptyCustomer())
+        setCategory_id(prepaidOrder.category_id || 0)
+        setModel(prepaidOrder.model || prepaidOrder.item || '')
+        setPresum(prepaidOrder.presum ?? initPresum)
+        setSum(prepaidOrder.sum ?? initSum)
+        setSum2(prepaidOrder.sum ?? 0)
+        setFor_client('')
+
+        setState(prev => {
+
+            const newState = {...prev}
+
+            fields.map(f => {
+                newState[f.name] = getPrepaidFieldValue(f)
+                return f
+            })
+
+            return newState
+
+        })
+
+    }, [order, prepaidOrder, appFields])
     const warranty = () => {
 
         needPrint.current = true
@@ -305,10 +459,11 @@ const Info = props => {
 
             <DialogContent>
 
-                <TextField label="Неисправность"
-                           style={{width: '100%'}}
-                           value={reason}
-                           onChange={e => setReason(e.target.value)}
+                <QuickTextField label="Неисправность"
+                                style={{width: '100%'}}
+                                value={reason}
+                                onChange={setReason}
+                                options={quickTextOptions('warranty.defects')}
                 />
 
             </DialogContent>
@@ -358,6 +513,8 @@ const Info = props => {
                 customer={customer}
                 setCustomer={setCustomer}
                 disabled={!!order || !isEditable}
+                allowAdditionalContacts={!order}
+                enablePassportOcr={!order}
             />
             : null}
 
@@ -409,24 +566,28 @@ const Info = props => {
                                             disabled={!isEditable}
         />}
 
-        <TextField label="Модель телефона, планшета, ноутбука или другого устройства"
-                   style={fieldsStyle}
-                   value={model || ''}
-                   onChange={e => setModel(e.target.value)}
-                   disabled={!isEditable}
+        <QuickTextField label="Модель телефона, планшета, ноутбука или другого устройства"
+                        style={fieldsStyle}
+                        value={model || ''}
+                        onChange={setModel}
+                        disabled={!isEditable}
+                        options={quickTextOptions(order ? 'warranty.models' : 'orders.models')}
         />
 
-        {fields.map(f => <TextField label={f.value}
-                                    key={'text-field-keys-in-info-' + f.value + f.name}
-                                    disabled={!isEditable}
-                                    style={fieldsStyle}
-                                    value={state[f.name] || ''}
-                                    onChange={e => setField([f.name], e.target.value)}
+        {fields.map(f => <QuickTextField label={f.value}
+                                         key={'text-field-keys-in-info-' + f.value + f.name}
+                                         disabled={!isEditable}
+                                         style={fieldsStyle}
+                                         value={state[f.name] ?? ''}
+                                         onChange={value => setField(f.name, value)}
+                                         options={quickTextOptions(getOrderQuickTextPath(f))}
         />)}
 
         {order
             ? <TextField label="В чек для заказчика"
                          disabled={!isEditable}
+                         multiline
+                         minRows={3}
                          variant="outlined"
                          style={{
                              ...fieldsStyle,

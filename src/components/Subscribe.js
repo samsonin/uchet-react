@@ -11,17 +11,21 @@ import Typography from '@mui/material/Typography';
 
 
 const useStyles = makeStyles(theme => ({
+    page: {
+        color: 'var(--text)',
+    },
     root: {
         flexGrow: 1,
     },
     heading: {
         margin: theme.spacing(4, 2, 1),
         textAlign: 'center',
+        color: 'var(--text)',
     },
     subheading: {
         margin: theme.spacing(0, 2, 4),
         textAlign: 'center',
-        color: theme.palette.text.secondary,
+        color: 'var(--text-muted)',
     },
     paper: {
         marginTop: 20,
@@ -31,13 +35,15 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'column',
         borderRadius: 20,
         overflow: 'hidden',
-        border: '1px solid rgba(15, 23, 42, 0.08)',
-        boxShadow: '0 18px 40px rgba(15, 23, 42, 0.08)',
+        color: 'var(--text)',
+        background: 'var(--surface)',
+        border: '1px solid var(--line)',
+        boxShadow: 'var(--shadow-subtle)',
         transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
         '&:hover': {
             transform: 'translateY(-4px)',
-            boxShadow: '0 24px 48px rgba(15, 23, 42, 0.12)',
-            borderColor: 'rgba(15, 159, 143, 0.22)',
+            boxShadow: 'var(--shadow-soft)',
+            borderColor: 'rgba(15, 159, 143, 0.34)',
         }
     },
     paperFeatured: {
@@ -47,10 +53,10 @@ const useStyles = makeStyles(theme => ({
     },
     cardHeader: {
         padding: theme.spacing(3, 3, 2),
-        background: 'linear-gradient(180deg, rgba(15, 159, 143, 0.08) 0%, rgba(255,255,255,1) 100%)',
+        background: 'linear-gradient(180deg, var(--brand-soft) 0%, var(--surface) 100%)',
     },
     cardHeaderFeatured: {
-        background: 'linear-gradient(180deg, rgba(15, 159, 143, 0.18) 0%, rgba(255,255,255,1) 100%)',
+        background: 'linear-gradient(180deg, rgba(15, 159, 143, 0.22) 0%, var(--surface) 100%)',
     },
     badges: {
         display: 'flex',
@@ -68,8 +74,8 @@ const useStyles = makeStyles(theme => ({
         fontSize: 12,
         fontWeight: 700,
         lineHeight: 1.2,
-        backgroundColor: 'rgba(15, 23, 42, 0.06)',
-        color: '#0f172a',
+        backgroundColor: 'var(--surface-tint)',
+        color: 'var(--text)',
     },
     badgeAccent: {
         backgroundColor: '#0f9f8f',
@@ -78,11 +84,12 @@ const useStyles = makeStyles(theme => ({
     planTitle: {
         textAlign: 'center',
         fontWeight: 700,
+        color: 'var(--text)',
     },
     planSubtitle: {
         textAlign: 'center',
         marginTop: theme.spacing(1),
-        color: theme.palette.text.secondary,
+        color: 'var(--text-muted)',
     },
     cardBody: {
         display: 'flex',
@@ -94,9 +101,15 @@ const useStyles = makeStyles(theme => ({
     },
     oldPrice: {
         textAlign: 'center',
-        color: theme.palette.text.secondary,
+        color: 'var(--text-muted)',
         textDecoration: 'line-through',
         minHeight: 24,
+    },
+    priceText: {
+        color: 'var(--text)',
+    },
+    priceUnit: {
+        color: 'var(--text-muted)',
     },
     total: {
         display: 'flex',
@@ -107,13 +120,15 @@ const useStyles = makeStyles(theme => ({
     },
     totalText: {
         fontWeight: 600,
+        color: 'var(--text-muted)',
     },
     savingsBlock: {
         margin: theme.spacing(0, 3, 2),
         padding: theme.spacing(1.5, 2),
         borderRadius: 14,
-        backgroundColor: 'rgba(15, 159, 143, 0.08)',
-        color: '#0f5e55',
+        backgroundColor: 'var(--brand-soft)',
+        color: 'var(--brand-strong)',
+        border: '1px solid rgba(15, 159, 143, 0.16)',
         textAlign: 'center',
     },
     savingsText: {
@@ -121,7 +136,7 @@ const useStyles = makeStyles(theme => ({
     },
     savingsHint: {
         marginTop: theme.spacing(0.5),
-        color: 'rgba(15, 94, 85, 0.82)',
+        color: 'var(--text-muted)',
         fontSize: 13,
     },
     featureList: {
@@ -133,7 +148,7 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         alignItems: 'center',
         gap: theme.spacing(1),
-        color: theme.palette.text.secondary,
+        color: 'var(--text-muted)',
         fontSize: 14,
     },
     featureDot: {
@@ -150,7 +165,7 @@ const useStyles = makeStyles(theme => ({
         padding: theme.spacing(0, 3, 3),
     },
     footer: {
-        borderTop: `1px solid ${theme.palette.divider}`,
+        borderTop: '1px solid var(--line)',
         marginTop: theme.spacing(8),
         paddingTop: theme.spacing(3),
         paddingBottom: theme.spacing(3),
@@ -186,16 +201,17 @@ const useStyles = makeStyles(theme => ({
         width: '100%',
         padding: theme.spacing(3, 3.5),
         borderRadius: 20,
-        background: 'linear-gradient(135deg, rgba(15, 159, 143, 0.08) 0%, rgba(15, 23, 42, 0.03) 100%)',
-        border: '1px solid rgba(15, 159, 143, 0.14)',
+        background: 'linear-gradient(135deg, var(--brand-soft) 0%, var(--surface-soft) 100%)',
+        border: '1px solid var(--line)',
         textAlign: 'center',
     },
     supportTitle: {
         fontWeight: 700,
         marginBottom: theme.spacing(1),
+        color: 'var(--text)',
     },
     supportText: {
-        color: theme.palette.text.secondary,
+        color: 'var(--text-muted)',
         marginBottom: theme.spacing(2.5),
     },
     supportLink: {
@@ -208,8 +224,8 @@ const useStyles = makeStyles(theme => ({
         textDecoration: 'none',
         fontWeight: 700,
         color: '#0f9f8f',
-        backgroundColor: '#fff',
-        border: '1px solid rgba(15, 159, 143, 0.18)',
+        backgroundColor: 'var(--surface)',
+        border: '1px solid var(--line)',
         boxShadow: '0 10px 24px rgba(15, 159, 143, 0.08)',
         transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
         '&:hover': {
@@ -321,7 +337,7 @@ const Subscribe = ({ organization_id }) => {
     const activeCurrencyMeta = currencies[activeCurrency];
 
     return (
-        <div>
+        <div className={classes.page}>
             <Typography variant="h3" className={classes.heading}>
                 Пожалуйста продлите подписку
             </Typography>
@@ -358,15 +374,15 @@ const Subscribe = ({ organization_id }) => {
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.cardBody}>
-                            <Typography component="h2" variant="h3" color="textPrimary">
+                            <Typography component="h2" variant="h3" className={classes.priceText}>
                                 {formatMoney(monthlyPrice, activeCurrency)}
                             </Typography>
-                            <Typography variant="h6" color="textSecondary">
+                            <Typography variant="h6" className={classes.priceUnit}>
                                 &nbsp;{activeCurrencyMeta.perMonthLabel}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.total}>
-                            <Typography variant="body1" color="textSecondary" className={classes.totalText}>
+                            <Typography variant="body1" className={classes.totalText}>
                                 {activeCurrencyMeta.totalLabel}: {formatMoney(totalPrice, activeCurrency)} руб.
                             </Typography>
                         </CardContent>

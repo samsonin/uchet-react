@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 
 import {
@@ -10,6 +10,7 @@ import {
     Fade,
     TextField,
 } from "@mui/material";
+import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import { makeStyles } from "muiLegacyStyles";
 import { useSnackbar } from "notistack";
 
@@ -21,9 +22,22 @@ import rest from "../Rest";
 import { Print } from "../common/Print";
 import { groupAlias } from "../common/GroupAliases";
 import AddCosts from "../common/AddCosts";
-import { line, note } from "../common/InputHandlers";
+import { line } from "../common/InputHandlers";
 import CategoryHandler from "../common/CategoryHandler";
 import GoodHistory from "./GoodHistory";
+import QuickTextField from "../common/QuickTextField";
+import {getQuickTextOptions} from "../common/quickTexts";
+import { GOOD_PICTURE_SESSION_PATH } from "../../constants";
+import GoodPictureQrDialog from "./GoodPictureQrDialog";
+import {
+    getGoodPictureFromSession,
+    getGoodPictureSessionStatusPath,
+    isMatchingGoodPictureSession,
+    normalizeGoodPictureSession,
+} from "./goodPictureQr";
+import { openOrderInNewTab } from "./GoodContent.helpers";
+
+const GOOD_PICTURE_POLL_INTERVAL_MS = 3000;
 
 const woAlliases = {
     use: "В пользовании",
@@ -79,14 +93,20 @@ const GoodContent = props => {
     const [responsibleId, setResponsibleId] = useState(0)
     const [privateNote, setPrivateNote] = useState()
     const [publicNote, setPublicNote] = useState()
+    const [isPictureQrOpen, setIsPictureQrOpen] = useState(false)
+    const [pictureQrSession, setPictureQrSession] = useState(null)
+    const [pictureQrStatus, setPictureQrStatus] = useState('waiting')
+    const [pictureQrError, setPictureQrError] = useState('')
+    const manualPictureInputRef = useRef(null)
 
     const [reason, setReason] = useState('')
     const [isReasonOpen, setIsReasonOpen] = useState(false)
 
     const classes = useStyles()
-    const { enqueueSnackbar } = useSnackbar()
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar()
 
     const good = props.app.good
+    const quickTextOptions = path => getQuickTextOptions(props.app.quick_texts, path)
 
     useEffect(() => {
 
@@ -144,7 +164,19 @@ const GoodContent = props => {
             .then(res => {
                 if (res.status === 200) {
 
-                    enqueueSnackbar('В заказе')
+                    enqueueSnackbar('Товар внесен в заказ', {
+                        variant: 'success',
+                        action: snackbarId => <Button
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                                openOrderInNewTab(props.app.current_stock_id, orderId)
+                                closeSnackbar(snackbarId)
+                            }}
+                        >
+                            Открыть заказ
+                        </Button>,
+                    })
                     props.close(good.barcode)
 
                 } else {
@@ -219,6 +251,25 @@ const GoodContent = props => {
 
     }
 
+    const noteField = (label, value, onChange) => {
+        if (!isEditable && !value) return null
+
+        const hasValue = !!(value && value.trim())
+
+        return <div className={`good-note-card ${hasValue ? '' : 'is-empty'}`}>
+            <div className="good-note-label">{label}</div>
+            <QuickTextField
+                multiline
+                minRows={hasValue ? 3 : 1}
+                className="good-note-textarea"
+                value={value || ''}
+                onChange={nextValue => onChange({target: {value: nextValue}})}
+                disabled={!isEditable}
+                options={quickTextOptions(label.includes('сотрудников') ? 'goods.private_notes' : 'goods.public_notes')}
+            />
+        </div>
+    }
+
 
     const onDrag = (e, isLeave) => {
 
@@ -265,11 +316,105 @@ const GoodContent = props => {
 
     }
 
+    const applyGoodPictureSession = session => {
+        if (!session) return
+
+        if (session.status) setPictureQrStatus(session.status)
+
+        const nextPicture = getGoodPictureFromSession(session)
+        if (nextPicture) {
+            file = null
+            setImage()
+            setPicture(nextPicture)
+            setPictureQrStatus(session.status || 'uploaded')
+            setIsPictureQrOpen(false)
+            enqueueSnackbar('Фото товара загружено', { variant: 'success' })
+        }
+
+        if (session.status === 'error' || session.status === 'expired') {
+            setPictureQrError(session.error || '')
+        }
+    }
+
+    const openGoodPictureQr = async () => {
+        setPictureQrError('')
+        setPictureQrStatus('waiting')
+        setPictureQrSession(null)
+        setIsPictureQrOpen(true)
+
+        const res = await rest(GOOD_PICTURE_SESSION_PATH, 'POST', { barcode: good.barcode }, false, {
+            updateStore: false,
+            responseType: 'auto',
+        })
+
+        const session = res.body?.session || res.body
+
+        if (!res.ok || !session?.capture_url) {
+            setPictureQrStatus('error')
+            setPictureQrError('Не удалось создать QR-ссылку.')
+            return
+        }
+
+        setPictureQrSession(session)
+    }
+
+    useEffect(() => {
+        const incomingSession = props.app.good_picture_session
+
+        if (!isPictureQrOpen || !isMatchingGoodPictureSession(incomingSession, pictureQrSession, good.barcode)) return
+
+        applyGoodPictureSession(incomingSession)
+    }, [props.app.good_picture_session, isPictureQrOpen, pictureQrSession, good.barcode])
+
+    useEffect(() => {
+        if (!isPictureQrOpen || !pictureQrSession) return
+
+        const statusPath = getGoodPictureSessionStatusPath(GOOD_PICTURE_SESSION_PATH, pictureQrSession)
+        if (!statusPath) return
+
+        let isCancelled = false
+
+        const pollGoodPictureSession = async () => {
+            const res = await rest(statusPath, 'GET', '', false, {
+                updateStore: false,
+                responseType: 'auto',
+                showGlobalLoader: false,
+            })
+
+            if (isCancelled || !res.ok) return
+
+            const incomingSession = normalizeGoodPictureSession(res.body)
+            if (!isMatchingGoodPictureSession(incomingSession, pictureQrSession, good.barcode)) return
+
+            applyGoodPictureSession(incomingSession)
+        }
+
+        pollGoodPictureSession()
+        const intervalId = window.setInterval(pollGoodPictureSession, GOOD_PICTURE_POLL_INTERVAL_MS)
+
+        return () => {
+            isCancelled = true
+            window.clearInterval(intervalId)
+        }
+    }, [isPictureQrOpen, pictureQrSession, good.barcode])
+
+    const closeGoodPictureQr = () => {
+        setIsPictureQrOpen(false)
+        setPictureQrSession(null)
+        setPictureQrStatus('waiting')
+        setPictureQrError('')
+    }
+
+    const uploadGoodPictureFromComputer = () => {
+        closeGoodPictureQr()
+        manualPictureInputRef.current?.click()
+    }
+
     reader.onloadend = () => {
         setImage(reader.result)
     }
 
-    const border = isDrag ? '3px dashed black' : '3px black'
+    const border = isDrag ? '3px dashed var(--text-muted)' : '3px solid var(--line)'
 
     let ui_wo = good.ui_wo
 
@@ -356,9 +501,9 @@ const GoodContent = props => {
 
     const pictureRender = () => <img
         src={
-            isFullUrl(good.picture)
-                ? good.picture
-                : 'https://uchet.store/uploads/' + good.picture
+            isFullUrl(picture)
+                ? picture
+                : 'https://uchet.store/uploads/' + picture
         }
         alt={good.model}
         width={'100%'}
@@ -379,7 +524,7 @@ const GoodContent = props => {
                 flexDirection: 'column',
                 justifyContent: 'space-around',
                 padding: '0 1rem',
-            }}>
+            }} className="good-dialog-content-root">
 
                 {isEditable
                     ? image
@@ -413,7 +558,7 @@ const GoodContent = props => {
                                 <div style={{
                                     width: '100%',
                                     height: '100px',
-                                    backgroundColor: 'lightgray',
+                                    backgroundColor: isDrag ? 'var(--surface)' : 'var(--surface-soft)',
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',
@@ -427,7 +572,22 @@ const GoodContent = props => {
                                         ? 'Отпустите фото, чтобы загрузить'
                                         : 'Перетащите фото, чтобы загрузить'}
                                 </div>
-                                <input type='file' onChange={e => onManualSelect(e.target.files[0])} />
+                                <div className="good-picture-upload-actions">
+                                    <Button
+                                        className="good-picture-upload-button"
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<AddPhotoAlternateOutlinedIcon />}
+                                        onClick={openGoodPictureQr}>
+                                        Загрузить фото
+                                    </Button>
+                                    <input
+                                        ref={manualPictureInputRef}
+                                        type='file'
+                                        accept="image/*"
+                                        onChange={e => onManualSelect(e.target.files[0])}
+                                    />
+                                </div>
                             </>
                     : picture && pictureRender()}
 
@@ -438,7 +598,7 @@ const GoodContent = props => {
                     />
                     : category && line('Категория:', category.name, isEditable)}
 
-                {line('Наименование:', model, isEditable, e => setModel(e.target.value))}
+                {line('Наименование:', model, isEditable, e => setModel(e.target.value), quickTextOptions('goods.models'))}
 
                 {isShowcase && line('imei, S/N', imei, isEditable, e => setImei(e.target.value))}
 
@@ -454,16 +614,16 @@ const GoodContent = props => {
 
                 {good.wo === 't' || line('Точка:', stock ? stock.name : null, isEditable)}
 
-                {!good.wo && line('Хранение', storagePlace, isEditable, e => setStoragePlace(e.target.value))}
+                {!good.wo && line('Хранение', storagePlace, isEditable, e => setStoragePlace(e.target.value), quickTextOptions('goods.storage_places'))}
 
                 {isEditable && (!isPublic || props.auth.admin) && <IsPublicCheckBox
                     value={isPublic}
                     onChange={() => setIsPublic(!isPublic)}
                 />}
 
-                {note('Информация для сотрудников:', privateNote, isEditable, e => setPrivateNote(e.target.value))}
+                {noteField('\u0418\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u044f \u0434\u043b\u044f \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u043e\u0432', privateNote, e => setPrivateNote(e.target.value))}
 
-                {note('Информация для покупателей:', publicNote, isEditable, e => setPublicNote(e.target.value))}
+                {noteField('\u0418\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u044f \u0434\u043b\u044f \u043f\u043e\u043a\u0443\u043f\u0430\u0442\u0435\u043b\u0435\u0439', publicNote, e => setPublicNote(e.target.value))}
 
                 {isEditable
                     ? <UsersSelect
@@ -503,6 +663,15 @@ const GoodContent = props => {
                         </Button>
                     : null
                 }
+
+                <GoodPictureQrDialog
+                    open={isPictureQrOpen}
+                    session={pictureQrSession}
+                    status={pictureQrStatus}
+                    error={pictureQrError}
+                    onCancel={closeGoodPictureQr}
+                    onComputerUpload={uploadGoodPictureFromComputer}
+                />
 
             </div>
 

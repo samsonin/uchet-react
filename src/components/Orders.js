@@ -4,6 +4,7 @@ import {connect} from "react-redux";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid";
+import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Table from "@mui/material/Table";
@@ -12,12 +13,12 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import {useSnackbar} from "notistack";
+import SearchIcon from "@mui/icons-material/Search";
 
 import rest from "../components/Rest"
 import CustomersSelect from "../components/common/CustomersSelect"
 import TwoLineInCell from "./common/TwoLineInCell";
 import {toLocalTimeStr} from "./common/Time"
-import {intInputHandler} from "./common/InputHandlers";
 import UsersSelect from "./common/UsersSelect";
 import StatusesSelect from "./common/StatusesSelect";
 import {OrderText} from "./common/OrderText"
@@ -54,6 +55,22 @@ const getContrastText = color => {
     return darkContrast > whiteContrast ? '#102331' : '#ffffff';
 }
 
+const prioritizeExactOrderMatch = (orders, search) => {
+    const exactSearch = search.trim()
+
+    if (!exactSearch || !Array.isArray(orders)) return orders
+
+    const exactIndex = orders.findIndex(order => [order.id, order.order_id]
+        .some(value => String(value || '') === exactSearch))
+
+    if (exactIndex < 1) return orders
+
+    const nextOrders = [...orders]
+    const [exactOrder] = nextOrders.splice(exactIndex, 1)
+
+    return [exactOrder, ...nextOrders]
+}
+
 const Orders = props => {
 
     const appStocks = props.app.stocks || []
@@ -66,7 +83,7 @@ const Orders = props => {
         .map(s => s.is_valid ? s.id : null)
         .filter(s => s))
 
-    const [id, setId] = useState(0)
+    const [search, setSearch] = useState('')
     const [customer, setCustomer] = useState(initCustomer)
     const [createdDate, setCreatedDate] = useState()
     const [createdDate2, setCreatedDate2] = useState()
@@ -92,10 +109,11 @@ const Orders = props => {
         if (res.status === 200) {
 
             setParameters(false)
-            setOrders(res.body)
+            setOrders(prioritizeExactOrderMatch(res.body, search))
 
         } else if (res.status === 204) {
 
+            setOrders([])
             enqueueSnackbar('Заказов не найдено', {variant: 'error'})
 
         }
@@ -144,7 +162,15 @@ const Orders = props => {
         if (model) url += 'model=' + model + '&'
         if (imei) url += 'imei=' + imei + '&'
 
-        if (id) url = 'orders?id=' + id
+        const universalSearch = search.trim()
+
+        if (universalSearch) {
+            const searchParams = new URLSearchParams({search: universalSearch})
+
+            if (/^\d+$/.test(universalSearch)) searchParams.set('id', universalSearch)
+
+            url = 'orders?' + searchParams.toString()
+        }
         else if (customer.id) url = 'orders?customer_id=' + customer.id
         else if (customer.fio || customer.phone_number) {
             url = 'orders?fio=' + customer.fio + '&phone_number=' + customer.phone_number
@@ -204,10 +230,17 @@ const Orders = props => {
 
             <TextField
                 className="orders-id-field"
-                label={"Заказ №"}
-                value={id ? id.toString() : ''}
-                onChange={e => intInputHandler(e.target.value, setId)}
+                placeholder="Поиск"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
                 inputRef={inputRef}
+                slotProps={{
+                    input: {
+                        startAdornment: <InputAdornment position="start">
+                            <SearchIcon/>
+                        </InputAdornment>,
+                    },
+                }}
             />
 
             {parameters || findButton()}
@@ -234,13 +267,13 @@ const Orders = props => {
 
         {parameters && <>
 
-            {!id && <CustomersSelect
+            {!search.trim() && <CustomersSelect
                 customer={customer}
                 setCustomer={setCustomer}
                 onlySearch={true}
             />}
 
-            {!id && !(customer.id || customer.fio || customer.phone_number) && <>
+            {!search.trim() && !(customer.id || customer.fio || customer.phone_number) && <>
                 <div className="w-100 m-2 p-2">
 
                     <StocksCheck stocks={stocks} setStocks={setStocks}/>

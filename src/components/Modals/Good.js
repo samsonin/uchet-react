@@ -20,13 +20,13 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const useStyles = makeStyles((theme) => ({
     dialogTitle: {
-        padding: '1rem 4.25rem 0.9rem 1.2rem !important',
+        padding: '1rem 4.75rem 1rem 1.2rem !important',
         borderBottom: '1px solid rgba(144, 160, 176, 0.22)',
     },
     closeButton: {
         position: 'absolute',
         right: theme.spacing(1.25),
-        top: theme.spacing(1),
+        top: theme.spacing(1.15),
         color: theme.palette.grey[500],
         zIndex: 2,
     },
@@ -86,7 +86,7 @@ const Good = props => {
                 alias={alias}
             />
 
-            <IconButton aria-label="close" className={classes.closeButton}
+            <IconButton aria-label="close" className={`${classes.closeButton} good-dialog-close-button`}
                         onClick={() => close()}>
                 <CloseIcon/>
             </IconButton>

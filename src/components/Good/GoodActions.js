@@ -117,15 +117,15 @@ const GoodActions = props => {
                                             : good.wo === "shortage" && props.auth.admin
                                                 ? actions.restore
                                                 : ""
-                                : <>
-                                    {canPrintBarcode && actions.barcode}
-                                    {actions.transit}
-                                    {actions.reject}
-                                    {actions.repair}
-                                    {props.auth.admin && actions.use}
-                                </>
-                        : ""
-                : ""}
+                                        : <>
+                                            {canPrintBarcode && actions.barcode}
+                                            {actions.transit}
+                                            {actions.reject}
+                                            {actions.repair}
+                                            {props.auth.admin && actions.use}
+                                        </>
+                                : ""
+                        : ""}
         </div>
     </div>;
 };

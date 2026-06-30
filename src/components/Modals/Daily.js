@@ -17,6 +17,8 @@ import IconButton from "@mui/material/IconButton";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import {numberInputHandler} from "../common/InputHandlers";
+import QuickTextField from "../common/QuickTextField";
+import {getQuickTextOptions} from "../common/quickTexts";
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -24,9 +26,19 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const useStyles = makeStyles((theme) => ({
     title: {
-        position: 'relative',
-        padding: '1rem 3.5rem 0.85rem 1.2rem !important',
+        padding: '1rem 1.2rem 0.85rem !important',
         minHeight: '56px',
+    },
+    titleRow: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '0.75rem',
+        width: '100%',
+    },
+    titleText: {
+        flex: '1 1 auto',
+        minWidth: 0,
     },
     field: {
         margin: '0 !important',
@@ -43,11 +55,9 @@ const useStyles = makeStyles((theme) => ({
         gap: '0.65rem'
     },
     closeButton: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1),
+        flex: '0 0 auto',
         color: theme.palette.grey[500],
-        zIndex: 1,
+        marginRight: '-0.35rem',
     }
 }));
 
@@ -76,6 +86,16 @@ const itemToDate = item => {
 const toZp = (date1, date2) => date1.substring(8, 10) + '.' + date1.substring(5, 7) + '-' +
     date2.substring(8, 10) + '.' + date2.substring(5, 7)
 
+const getItemQuickTextPath = type => {
+
+    if (type === 'Работы, услуги') return 'jobs.services'
+    if (type === 'Предоплаты') return 'preorders.items'
+    if (type === 'Расходы, зарплата') return 'sales.expenses'
+
+    return 'sales.items'
+
+}
+
 
 const DailyModal = props => {
 
@@ -89,6 +109,7 @@ const DailyModal = props => {
     const [sum, setSum] = useState(0)
     const [employee, setEmployee] = useState(0)
     const [note, setNote] = useState('')
+    const quickTextOptions = path => getQuickTextOptions(props.quick_texts, path)
 
     const reset = () => {
 
@@ -211,6 +232,8 @@ const DailyModal = props => {
         onClose={() => props.close()}
     >
         <DialogTitle className={classes.title}>
+            <div className={classes.titleRow}>
+                <div className={classes.titleText}>
 
             {props.type === 'Расходы, зарплата'
                 ? <Select
@@ -229,11 +252,13 @@ const DailyModal = props => {
                 : props.type
             }
 
+                </div>
+
             <IconButton aria-label="close" className={classes.closeButton}
                         onClick={() => props.close()}>
                 <CloseIcon/>
             </IconButton>
-
+            </div>
         </DialogTitle>
         <DialogContent className={classes.content}>
 
@@ -254,11 +279,12 @@ const DailyModal = props => {
                                onChange={e => setDate2(e.target.value)}
                     />
                 </>
-                : <TextField label="Наименование"
-                             disabled={props.disabled}
-                             className={classes.field}
-                             value={item}
-                             onChange={e => setItem(e.target.value)}
+                : <QuickTextField label="Наименование"
+                                  disabled={props.disabled}
+                                  className={classes.field}
+                                  value={item}
+                                  onChange={setItem}
+                                  options={quickTextOptions(getItemQuickTextPath(props.type))}
                 />}
 
             <TextField label="Сумма"
@@ -277,11 +303,12 @@ const DailyModal = props => {
                     onlyValid={true}
                 />
 
-            <TextField label="Примечание"
-                       disabled={props.disabled}
-                       className={classes.field}
-                       value={note}
-                       onChange={e => setNote(e.target.value)}
+            <QuickTextField label="Примечание"
+                            disabled={props.disabled}
+                            className={classes.field}
+                            value={note}
+                            onChange={setNote}
+                            options={quickTextOptions(props.type === 'Предоплаты' ? 'preorders.notes' : 'sales.notes')}
             />
 
         </DialogContent>
