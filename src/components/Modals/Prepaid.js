@@ -15,7 +15,6 @@ import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
 import PrintIcon from '@mui/icons-material/Print';
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import CloseIcon from "@mui/icons-material/Close";
 import {makeStyles} from "muiLegacyStyles";
 
@@ -437,7 +436,6 @@ const Prepaid = props => {
                     onClick={() => createOrder()}
                     color="primary"
                     disabled={!id}
-                    startIcon={<AddShoppingCartIcon/>}
                 >
                     В заказ
                 </Button>
