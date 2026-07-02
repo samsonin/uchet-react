@@ -1,7 +1,7 @@
 import React, {forwardRef, useEffect, useState} from "react";
 import StatusesSelect from "../StatusesSelect";
 import Button from "@mui/material/Button";
-import {DialogTitle, FormControl, TextField} from "@mui/material";
+import {Checkbox, DialogTitle, FormControl, FormControlLabel, TextField} from "@mui/material";
 import {useSnackbar} from "notistack";
 
 import rest from "../../Rest"
@@ -19,6 +19,7 @@ import Slide from "@mui/material/Slide";
 import {connect} from "react-redux";
 import QuickTextField from "../QuickTextField";
 import {getQuickTextOptions} from "../quickTexts";
+import {buildOrderCreatePayload} from "./orderCreatePayload";
 
 const fieldsStyle = {
     margin: '.4rem',
@@ -148,6 +149,7 @@ const Info = props => {
     const appStatuses = props.app.statuses || []
     const appUsers = props.app.users || []
     const appCategories = props.app.categories || []
+    const canNotifyTelegram = props.auth.organization_id === 1
     const fields = (appFields || []).filter(f => f.index === 'order' && f.is_valid && !f.is_system)
     const quickTextOptions = path => getQuickTextOptions(props.app.quick_texts, path)
     const prepaidOrder = !order ? props.prepaidOrder : null
@@ -174,6 +176,7 @@ const Info = props => {
     const [sum2, setSum2] = useState(order ? order.sum : 0)
     const [master_id, setMaster_id] = useState(order ? order.master_id : 0)
     const [for_client, setFor_client] = useState(order ? order.for_client : '')
+    const [notifyTelegram, setNotifyTelegram] = useState(false)
     const [state, setState] = useState(() => {
         const fl = {}
         fields.map(f => fl[f.name] = getPrepaidFieldValue(f))
@@ -236,14 +239,16 @@ const Info = props => {
 
         if (error) return enqueueSnackbar(error, {variant: 'error'})
 
-        const data = {
+        const data = buildOrderCreatePayload({
             customer,
             category_id: category_id === 1000 ? 0 : category_id,
             model: category_id === 1000 ? otherCategory + ' ' + model : model,
             presum,
             sum,
-            ...state
-        }
+            fields: state,
+            notifyTelegram,
+            canNotifyTelegram
+        })
 
         needPrint.current = true
 
@@ -595,6 +600,18 @@ const Info = props => {
                          }}
                          value={for_client || ''}
                          onChange={e => setFor_client(e.target.value)}
+            />
+            : null}
+
+        {!order && canNotifyTelegram
+            ? <FormControlLabel
+                style={fieldsStyle}
+                control={<Checkbox
+                    checked={notifyTelegram}
+                    onChange={() => setNotifyTelegram(!notifyTelegram)}
+                    disabled={isRest}
+                />}
+                label="Уведомить в Telegram"
             />
             : null}
 
