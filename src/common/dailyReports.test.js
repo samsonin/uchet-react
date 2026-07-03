@@ -1,6 +1,8 @@
 import {
     findCashPaymentDiscrepancyBySaleId,
     findCashPaymentDiscrepanciesBySaleId,
+    canViewDailyGoodsProfit,
+    getDailySalesProfit,
     getUnmatchedCashPaymentDiscrepancies,
     normalizeCashPaymentDiscrepancies,
     normalizeDailyEmployees,
@@ -102,5 +104,19 @@ describe("daily report normalization", () => {
             { saleId: null, url: "https://example.test/none.mp4" },
             { saleId: "", url: "https://example.test/empty.mp4" },
         ]);
+    });
+
+    test("calculates sales profit from sale price and goods cost", () => {
+        expect(getDailySalesProfit([
+            { sum: 5000, good: { cost: 3200 } },
+            { sum: 2000, good: { remcost: 1200 } },
+            { sum: 900, wf: { cost: 300 } },
+        ])).toBe(3200);
+    });
+
+    test("shows daily goods profit only for organization owner in organization 1", () => {
+        expect(canViewDailyGoodsProfit({ admin: true, organization_id: 1 })).toBe(true);
+        expect(canViewDailyGoodsProfit({ admin: true, organization_id: 2 })).toBe(false);
+        expect(canViewDailyGoodsProfit({ admin: false, organization_id: 1 })).toBe(false);
     });
 });
