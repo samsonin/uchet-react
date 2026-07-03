@@ -808,7 +808,7 @@ const Daily = props => {
                                                 </TableCell>
                                                 {t.profit !== undefined && t.profit !== null
                                                     ? <TableCell align="right">
-                                                        Прибыль: {t.profit}
+                                                        {t.profit}
                                                     </TableCell>
                                                     : null}
                                             </TableRow>
