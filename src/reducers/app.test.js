@@ -45,6 +45,19 @@ describe("app reducer", () => {
         expect(state.cash_payment_discrepancies).toEqual([{ id: 28, sale_id: 93953 }]);
     });
 
+    test("stores CRM leads in common app state", () => {
+        const state = app(undefined, {
+            type: UPD_APP,
+            data: {
+                crm_leads: [
+                    { id: 15, status: "new", customer_name: "Ivan" },
+                ],
+            },
+        });
+
+        expect(state.crm_leads).toEqual([{ id: 15, status: "new", customer_name: "Ivan" }]);
+    });
+
     test("normalizes stored daily reports", () => {
         window.localStorage.setItem("app", JSON.stringify({
             daily: {

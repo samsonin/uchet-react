@@ -62,6 +62,7 @@ import Sales from "./components/Sales";
 import Users from "./components/Settings/Users";
 import PassportCapturePage from "./components/customer/PassportCapturePage";
 import GoodPictureCapturePage from "./components/Good/GoodPictureCapturePage";
+import CrmLeads from "./components/CrmLeads";
 
 const LegacyRouteElement = ({ Component, componentProps = {} }) => {
 
@@ -422,6 +423,7 @@ const App = props => {
                                 <Route path="/inventory" element={routeElement(Inventory)} />
                                 <Route path="/customers" element={routeElement(Customers)} />
                                 <Route path="/entities" element={routeElement(Entities)} />
+                                <Route path="/crm/leads" element={routeElement(CrmLeads)} />
                                 <Route path="/order" element={routeElement(Order)} />
                                 <Route path="/order/:stock_id/:order_id" element={routeElement(Order)} />
                                 <Route
