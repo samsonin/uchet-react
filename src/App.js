@@ -484,7 +484,7 @@ const App = props => {
                                 <Route path="/settings/app" element={routeElement(AppSettings)} />
                                 <Route path="/settings/print" element={routeElement(PrintSettingsPage)} />
                                 <Route path="/settings/payment-types" element={routeElement(PaymentTypes)} />
-                                <Route path="/subscribe" element={routeElement(Subscribe)} />
+                                <Route path="/subscribe" element={<Navigate replace to="/" />} />
 
                                 {props.app.stocks[0] && <Route
                                     path="/daily"
