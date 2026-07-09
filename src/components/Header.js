@@ -218,7 +218,7 @@ const NavbarPage = props => {
             <UiDropdownItem to="/settings/personal" onClick={close}>
                 Настройки
             </UiDropdownItem>
-            <UiDropdownItem to="/" onClick={close}>
+            <UiDropdownItem to="/subscribe" onClick={close}>
                 Подписка до: {toLocalTimeStr(props.auth.expiration_time).slice(0, -9)}
             </UiDropdownItem>
 
