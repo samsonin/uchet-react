@@ -32,6 +32,7 @@ import Stock from "./components/Settings/Stock"
 import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
+import IntegrationSmsPhone from "./components/IntegrationSmsPhone";
 import CashVideoControl from "./components/CashVideoControl";
 import { Records } from "./components/Records";
 import Docs from "./components/Settings/Docs";
@@ -601,6 +602,7 @@ const App = props => {
                                         />}
                                     />
                                     <Route path="/integration/sms_ru" element={routeElement(IntegrationSmsRu)} />
+                                    <Route path="/integration/sms-phone" element={routeElement(IntegrationSmsPhone)} />
                                 </>}
 
                                 <Route path="/integration/prices" element={routeElement(Prices)} />

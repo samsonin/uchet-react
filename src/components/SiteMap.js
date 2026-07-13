@@ -55,6 +55,7 @@ export const siteMap = (isAdmin, userId = 0) => {
 
             { id: 51, path: "integration/mango", text: "Mango-office.ru" },
             { id: 52, path: "integration/sms_ru", text: "Sms.ru" },
+            { id: 55, path: "integration/sms-phone", text: "SMS-телефон" },
 
         ])
 
