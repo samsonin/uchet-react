@@ -21,6 +21,8 @@ import {
     buildMobileDevicePairingPayload,
     getMobileDeviceQrPayload,
     isSuccessfulPairingCodeResponse,
+    resolveMobileDeviceStockId,
+    shouldSelectMobileDeviceStock,
 } from "./mobileDevicePairing";
 
 const formatExpiresAt = value => {
@@ -32,8 +34,10 @@ const formatExpiresAt = value => {
 
 const IntegrationSmsPhone = props => {
     const validStocks = (props.app.stocks || []).filter(stock => stock.is_valid !== false);
-    const defaultStock = props.app.current_stock_id || validStocks[0]?.id || 0;
-    const [stockId, setStockId] = useState(defaultStock);
+    const globalStockId = Number(props.app.current_stock_id || 0);
+    const [manualStockId, setManualStockId] = useState(0);
+    const stockId = globalStockId || manualStockId || resolveMobileDeviceStockId(0, validStocks);
+    const shouldSelectStock = shouldSelectMobileDeviceStock(globalStockId, validStocks);
     const [pairingCode, setPairingCode] = useState(null);
     const [isLoading, setLoading] = useState(false);
     const [devices, setDevices] = useState(props.app.sms_phones || []);
@@ -101,12 +105,12 @@ const IntegrationSmsPhone = props => {
             </Typography>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        {shouldSelectStock && <Grid item xs={12} md={6}>
             {validStocks.length > 1
                 ? <StocksSelect
                     stocks={validStocks}
-                    stock={stockId}
-                    setStock={setStockId}
+                    stock={manualStockId}
+                    setStock={setManualStockId}
                     classes="w-100"
                 />
                 : <FormControl className="w-100">
@@ -115,7 +119,7 @@ const IntegrationSmsPhone = props => {
                         labelId="sms-phone-stock-label"
                         value={stockId || ""}
                         label="Точка"
-                        onChange={e => setStockId(e.target.value)}
+                        onChange={e => setManualStockId(e.target.value)}
                     >
                         {validStocks.map(stock => <MenuItem
                             key={"sms-phone-stock-" + stock.id}
@@ -125,13 +129,13 @@ const IntegrationSmsPhone = props => {
                         </MenuItem>)}
                     </Select>
                 </FormControl>}
-        </Grid>
+        </Grid>}
 
         <Grid item xs={12}>
             <Button
                 variant="contained"
                 color="primary"
-                disabled={isLoading}
+                disabled={isLoading || !stockId}
                 onClick={createPairingCode}
                 startIcon={pairingCode ? <RefreshIcon/> : <LinkIcon/>}
             >

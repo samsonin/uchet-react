@@ -28,6 +28,8 @@ export const siteMap = (isAdmin, userId = 0) => {
 
         { id: 53, path: "integration/prices", text: "\u041f\u0440\u0430\u0439\u0441-\u043b\u0438\u0441\u0442\u044b" },
 
+        { id: 55, path: "integration/sms-phone", text: "SMS-телефон" },
+        { id: 56, path: "integration/app", text: "Для Android" },
     ]
 
     if (+userId === 4) {
@@ -55,8 +57,6 @@ export const siteMap = (isAdmin, userId = 0) => {
 
             { id: 51, path: "integration/mango", text: "Mango-office.ru" },
             { id: 52, path: "integration/sms_ru", text: "Sms.ru" },
-            { id: 55, path: "integration/sms-phone", text: "SMS-телефон" },
-
         ])
 
         : map
