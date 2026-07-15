@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 import {QRCodeCanvas} from "qrcode.react";
 import {
@@ -36,8 +36,33 @@ const IntegrationSmsPhone = props => {
     const [stockId, setStockId] = useState(defaultStock);
     const [pairingCode, setPairingCode] = useState(null);
     const [isLoading, setLoading] = useState(false);
+    const [devices, setDevices] = useState(props.app.sms_phones || []);
     const {enqueueSnackbar} = useSnackbar();
     const qrPayload = getMobileDeviceQrPayload(pairingCode);
+
+    const refreshDevices = () => rest("mobile-devices", "GET", undefined, false, {
+        updateStore: false,
+    }).then(res => {
+        if (res.status === 200) setDevices(res.body?.mobile_devices || []);
+    });
+
+    useEffect(() => {
+        refreshDevices();
+    }, []);
+
+    const disconnectDevice = device => {
+        if (!window.confirm("Отключить этот SMS-телефон?")) return;
+
+        rest("mobile-devices/" + device.id, "DELETE", undefined, false, {
+            updateStore: false,
+        }).then(res => {
+            if (res.status === 204) {
+                refreshDevices();
+                return;
+            }
+            enqueueSnackbar(res.body?.error || "Не удалось отключить SMS-телефон", {variant: "error"});
+        });
+    };
 
     const createPairingCode = () => {
         setLoading(true);
@@ -49,6 +74,7 @@ const IntegrationSmsPhone = props => {
 
             if (isSuccessfulPairingCodeResponse(res)) {
                 setPairingCode(res.body);
+                setTimeout(refreshDevices, 1000);
                 return;
             }
 
@@ -69,6 +95,9 @@ const IntegrationSmsPhone = props => {
             <Typography variant="body1">
                 Создайте одноразовый QR-код и отсканируйте его в Android-приложении через действие
                 {" "}«Подключить SMS-телефон». Код действует ограниченное время.
+            </Typography>
+            <Typography variant="body2" style={{marginTop: "0.5rem"}}>
+                Для отправки SMS поддерживаются только телефоны с Android и разрешением на отправку SMS.
             </Typography>
         </Grid>
 
@@ -121,6 +150,21 @@ const IntegrationSmsPhone = props => {
                 Действует до: {formatExpiresAt(pairingCode.expires_at)}
             </Typography>}
         </Grid>}
+
+        <Grid item xs={12}>
+            <Typography variant="h5">Подключенные SMS-телефоны</Typography>
+            {devices.length === 0 && <Typography variant="body2">Нет подключенных телефонов.</Typography>}
+            {devices.map(device => <Paper key={"sms-device-" + device.id} style={{padding: "1rem", marginTop: "0.5rem"}}>
+                <Typography>{device.device_name || "Android-телефон"}</Typography>
+                <Typography variant="body2">
+                    Точка: {validStocks.find(stock => +stock.id === +device.stock_id)?.name || "Все точки"}.
+                    {" "}Статус: {device.is_active ? "подключен" : "отключен"}.
+                </Typography>
+                {device.is_active && <Button color="secondary" onClick={() => disconnectDevice(device)}>
+                    Отключить
+                </Button>}
+            </Paper>)}
+        </Grid>
     </Grid>;
 };
 

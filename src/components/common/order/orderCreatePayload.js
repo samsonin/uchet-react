@@ -6,7 +6,9 @@ export const buildOrderCreatePayload = ({
     sum,
     fields,
     notifyTelegram,
-    canNotifyTelegram = true
+    canNotifyTelegram = true,
+    notifySms,
+    canNotifySms = false
 }) => {
     const payload = {
         customer,
@@ -18,6 +20,7 @@ export const buildOrderCreatePayload = ({
     };
 
     if (canNotifyTelegram) payload.notify_telegram = Boolean(notifyTelegram);
+    if (canNotifySms) payload.notify_sms = Boolean(notifySms);
 
     return payload;
 };

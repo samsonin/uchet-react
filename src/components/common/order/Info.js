@@ -150,6 +150,8 @@ const Info = props => {
     const appUsers = props.app.users || []
     const appCategories = props.app.categories || []
     const canNotifyTelegram = props.auth.organization_id === 1
+    const smsStockIds = props.app.notification_channels?.android_sms?.available_stock_ids || []
+    const canNotifySms = smsStockIds.includes(Number(props.app.current_stock_id))
     const fields = (appFields || []).filter(f => f.index === 'order' && f.is_valid && !f.is_system)
     const quickTextOptions = path => getQuickTextOptions(props.app.quick_texts, path)
     const prepaidOrder = !order ? props.prepaidOrder : null
@@ -177,6 +179,7 @@ const Info = props => {
     const [master_id, setMaster_id] = useState(order ? order.master_id : 0)
     const [for_client, setFor_client] = useState(order ? order.for_client : '')
     const [notifyTelegram, setNotifyTelegram] = useState(false)
+    const [notifySms, setNotifySms] = useState(canNotifySms)
     const [state, setState] = useState(() => {
         const fl = {}
         fields.map(f => fl[f.name] = getPrepaidFieldValue(f))
@@ -247,7 +250,9 @@ const Info = props => {
             sum,
             fields: state,
             notifyTelegram,
-            canNotifyTelegram
+            canNotifyTelegram,
+            notifySms,
+            canNotifySms
         })
 
         needPrint.current = true
@@ -360,6 +365,10 @@ const Info = props => {
             })
 
     }
+
+    useEffect(() => {
+        setNotifySms(canNotifySms)
+    }, [canNotifySms])
 
     useEffect(() => {
 
@@ -612,6 +621,18 @@ const Info = props => {
                     disabled={isRest}
                 />}
                 label="Уведомить в Telegram"
+            />
+            : null}
+
+        {!order && canNotifySms
+            ? <FormControlLabel
+                style={fieldsStyle}
+                control={<Checkbox
+                    checked={notifySms}
+                    onChange={() => setNotifySms(!notifySms)}
+                    disabled={isRest}
+                />}
+                label="Уведомить по SMS"
             />
             : null}
 
