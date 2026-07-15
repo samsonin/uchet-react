@@ -45,6 +45,7 @@ const probableKeys = [
     'description_tolerance',
     'payment_types',
     'quick_texts',
+    'notification_channels',
     'crm_leads',
     'cash_payment_discrepancies',
     'passport_ocr_session',
