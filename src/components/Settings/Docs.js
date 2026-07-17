@@ -168,7 +168,14 @@ const getDocsSource = appDocs => Array.isArray(appDocs)
 
 const getDocId = doc => doc?.id;
 const getDocName = doc => doc?.name || doc?.doc_name || "";
-const getDocTitle = doc => doc?.title || doc?.doc_title || "";
+const notificationDocTitles = {
+    sms_for_messages: "Уведомления о приёмке",
+    sms: "Уведомления о готовности",
+};
+const getDocTitle = doc => {
+    const name = getDocName(doc).trim().toLowerCase();
+    return notificationDocTitles[name] || doc?.title || doc?.doc_title || "";
+};
 const getDocText = doc => doc?.text || doc?.doc_text || "";
 const internalDocNames = new Set(["remont", "buy", "checkout"]);
 
