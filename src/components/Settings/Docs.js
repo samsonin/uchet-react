@@ -342,9 +342,10 @@ const Docs = props => {
 
     useEffect(() => {
         if (!docs.length || !currentDoc) return;
+        if (selectedDocName) return;
 
         replaceDocSearch(getDocName(currentDoc));
-    }, [currentDoc, docs.length]);
+    }, [currentDoc, docs.length, selectedDocName]);
 
     const updateDocsInStore = (nextDoc, html) => {
         const nextDocs = docs.map((doc, index) => index === currentIndex

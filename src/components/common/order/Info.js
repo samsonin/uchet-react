@@ -3,6 +3,8 @@ import StatusesSelect from "../StatusesSelect";
 import Button from "@mui/material/Button";
 import {Checkbox, DialogTitle, FormControl, FormControlLabel, TextField} from "@mui/material";
 import {useSnackbar} from "notistack";
+import {Link} from "react-router-dom";
+import EditIcon from "@mui/icons-material/Edit";
 
 import rest from "../../Rest"
 import CustomersSelect from "../CustomersSelect";
@@ -20,6 +22,7 @@ import {connect} from "react-redux";
 import QuickTextField from "../QuickTextField";
 import {getQuickTextOptions} from "../quickTexts";
 import {buildOrderCreatePayload} from "./orderCreatePayload";
+import {orderNotificationDocLinks} from "./orderNotificationDocs";
 
 const fieldsStyle = {
     margin: '.4rem',
@@ -455,6 +458,17 @@ const Info = props => {
         {label}
     </Button>
 
+    const notificationDocLink = (label, to) => <Button
+        component={Link}
+        to={to}
+        variant="text"
+        size="small"
+        className="m-1"
+        startIcon={<EditIcon fontSize="small" />}
+    >
+        {label}
+    </Button>
+
     let categories = [0, 5, 41, 38]
 
     return <>
@@ -625,15 +639,20 @@ const Info = props => {
             : null}
 
         {!order && canNotifySms
-            ? <FormControlLabel
-                style={fieldsStyle}
-                control={<Checkbox
-                    checked={notifySms}
-                    onChange={() => setNotifySms(!notifySms)}
-                    disabled={isRest}
-                />}
-                label="Уведомить по SMS"
-            />
+            ? <div style={fieldsStyle}>
+                <FormControlLabel
+                    control={<Checkbox
+                        checked={notifySms}
+                        onChange={() => setNotifySms(!notifySms)}
+                        disabled={isRest}
+                    />}
+                    label="Уведомить по SMS"
+                />
+                <div>
+                    {notificationDocLink("Уведомление о готовности", orderNotificationDocLinks.ready)}
+                    {notificationDocLink("Уведомление о приемке", orderNotificationDocLinks.acceptance)}
+                </div>
+            </div>
             : null}
 
         {order
