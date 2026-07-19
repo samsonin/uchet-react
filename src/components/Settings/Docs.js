@@ -69,9 +69,11 @@ const useStyles = makeStyles({
         minHeight: 440,
         padding: 14,
         background: "#fff",
+        color: "#263238",
         "& .ProseMirror": {
             minHeight: 410,
             outline: "none",
+            color: "#263238",
         },
         "& table": {
             borderCollapse: "collapse",
@@ -171,6 +173,7 @@ const getDocName = doc => doc?.name || doc?.doc_name || "";
 const getDocTitle = doc => doc?.title || doc?.doc_title || "";
 const getDocText = doc => doc?.text || doc?.doc_text || "";
 const internalDocNames = new Set(["remont", "buy", "checkout"]);
+const textOnlyDocNames = new Set(["sms", "sms_for_messages"]);
 
 const previewPaperSizes = {
     a4: {
@@ -225,6 +228,57 @@ const updateDocShape = (doc, title, text) => ({
 
 const normalizeEditorHtml = html => (html || "").trim();
 const normalizeDocToken = value => (value || "").trim().toLowerCase();
+const isTextOnlyDoc = doc => textOnlyDocNames.has(normalizeDocToken(getDocName(doc)));
+const escapeHtml = value => (value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+const normalizeTextOnlyTemplateHtml = html => {
+    const div = document.createElement("div");
+    div.innerHTML = html || "";
+    const lines = [];
+
+    const walk = node => {
+        if (node.nodeType === window.Node.TEXT_NODE) {
+            lines.push(escapeHtml(node.textContent));
+            return;
+        }
+
+        if (node.nodeType !== window.Node.ELEMENT_NODE) return;
+
+        const tagName = node.tagName.toLowerCase();
+
+        if (tagName === "input" && node.getAttribute("type") === "button") {
+            const name = node.getAttribute("name") || "";
+            const value = node.getAttribute("value") || name;
+
+            lines.push(`<input type="button" name="${escapeHtml(name)}" value="${escapeHtml(value)}">`);
+            return;
+        }
+
+        if (tagName === "br") {
+            lines.push("\n");
+            return;
+        }
+
+        node.childNodes.forEach(walk);
+
+        if (["p", "div", "li", "tr"].includes(tagName)) {
+            lines.push("\n");
+        }
+    };
+
+    div.childNodes.forEach(walk);
+
+    return lines
+        .join("")
+        .replace(/[ \t]+\n/g, "\n")
+        .replace(/\n[ \t]+/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim()
+        .replace(/\n/g, "<br/>");
+};
 const DOC_EDITOR_TITLE = String.fromCharCode(1056,1077,1076,1072,1082,1090,1080,1088,1086,1074,1072,1085,1080,1077,32,1076,1086,1082,1091,1084,1077,1085,1090,1072);
 const DOC_LABEL = String.fromCharCode(1044,1086,1082,1091,1084,1077,1085,1090);
 
@@ -247,6 +301,7 @@ const Docs = props => {
     const [previewOrientation, setPreviewOrientation] = useState("portrait");
 
     const currentDoc = docs[currentIndex] || docs[0];
+    const currentDocIsTextOnly = isTextOnlyDoc(currentDoc);
 
     const syncDirty = (nextTitle = title, nextHtml = editor?.getHTML() || "") => {
         setDirty(
@@ -292,11 +347,17 @@ const Docs = props => {
             TableCell,
             TemplateVariable,
         ],
-        content: "",
-        onUpdate: ({ editor }) => {
-            syncDirty(title, editor.getHTML());
-        },
-    });
+            content: "",
+            enableInputRules: !currentDocIsTextOnly,
+            enablePasteRules: !currentDocIsTextOnly,
+            onUpdate: ({ editor }) => {
+                const nextHtml = currentDocIsTextOnly
+                    ? normalizeTextOnlyTemplateHtml(editor.getHTML())
+                    : editor.getHTML();
+
+                syncDirty(title, nextHtml);
+            },
+        });
 
     useEffect(() => {
         if (!docs.length) {
@@ -332,13 +393,15 @@ const Docs = props => {
         const nextTitle = getDocTitle(currentDoc);
 
         editor.commands.setContent(text || "", false);
-        const nextHtml = normalizeEditorHtml(editor.getHTML());
+        const nextHtml = currentDocIsTextOnly
+            ? normalizeEditorHtml(normalizeTextOnlyTemplateHtml(editor.getHTML()))
+            : normalizeEditorHtml(editor.getHTML());
 
         setTitle(nextTitle);
         setSavedTitle(nextTitle);
         setSavedHtml(nextHtml);
         setDirty(false);
-    }, [currentDoc, editor]);
+    }, [currentDoc, currentDocIsTextOnly, editor]);
 
     useEffect(() => {
         if (!docs.length || !currentDoc) return;
@@ -371,7 +434,9 @@ const Docs = props => {
     const saveDoc = async () => {
         if (!editor || !currentDoc) return;
 
-        const html = normalizeEditorHtml(editor.getHTML());
+        const html = currentDocIsTextOnly
+            ? normalizeEditorHtml(normalizeTextOnlyTemplateHtml(editor.getHTML()))
+            : normalizeEditorHtml(editor.getHTML());
 
         if (!html || html === "<p></p>") {
             enqueueSnackbar("Документ пустой", { variant: "error" });
@@ -466,7 +531,9 @@ const Docs = props => {
     const openPreview = () => {
         if (!editor) return;
 
-        setPreviewHtml(buildPreviewHtml(editor.getHTML()));
+        setPreviewHtml(buildPreviewHtml(
+            currentDocIsTextOnly ? normalizeTextOnlyTemplateHtml(editor.getHTML()) : editor.getHTML()
+        ));
         setPreviewOpen(true);
     };
 
@@ -524,7 +591,7 @@ const Docs = props => {
                             </Grid>
 
                             <Grid item xs={12}>
-                                <div className={classes.toolbar}>
+                                {!currentDocIsTextOnly && <div className={classes.toolbar}>
                                     <ButtonGroup size="small" variant="outlined">
                                         <Button onClick={() => editor?.chain().focus().toggleBold().run()}>B</Button>
                                         <Button onClick={() => editor?.chain().focus().toggleItalic().run()}>I</Button>
@@ -555,7 +622,7 @@ const Docs = props => {
                                         <Button onClick={() => editor?.chain().focus().undo().run()}>Назад</Button>
                                         <Button onClick={() => editor?.chain().focus().redo().run()}>Вперед</Button>
                                     </ButtonGroup>
-                                </div>
+                                </div>}
 
                                 <EditorContent editor={editor} className={`${classes.editor} docs-editor`} />
                             </Grid>
