@@ -60,3 +60,49 @@ export const getUnmatchedCashPaymentDiscrepancies = discrepancies => (
     (Array.isArray(discrepancies) ? discrepancies : [])
         .filter(item => item.saleId === null || item.saleId === undefined || item.saleId === "")
 );
+
+const parseMaybeJson = value => {
+    if (!value || typeof value !== "string") return value || {};
+
+    try {
+        return JSON.parse(value);
+    } catch (error) {
+        return {};
+    }
+};
+
+const firstNumericValue = values => {
+    const found = values.find(value => value !== undefined && value !== null && value !== "");
+    const number = Number(found);
+
+    return Number.isFinite(number) ? number : 0;
+};
+
+export const getDailySaleProfit = row => {
+    const wf = parseMaybeJson(row?.wf);
+    const good = row?.good || {};
+    const price = firstNumericValue([row?.sum]);
+    const cost = firstNumericValue([
+        good.remcost,
+        good.cost,
+        good.purchase_price,
+        good.cost_price,
+        wf.remcost,
+        wf.cost,
+        wf.purchase_price,
+        wf.cost_price,
+        row?.remcost,
+        row?.cost,
+        row?.purchase_price,
+        row?.cost_price,
+    ]);
+
+    return price - cost;
+};
+
+export const getDailySalesProfit = rows => (
+    (Array.isArray(rows) ? rows : [])
+        .reduce((sum, row) => sum + getDailySaleProfit(row), 0)
+);
+
+export const canViewDailyGoodsProfit = auth => !!auth?.admin && +auth?.organization_id === 1;

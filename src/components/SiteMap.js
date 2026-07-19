@@ -16,6 +16,7 @@ export const siteMap = (isAdmin, userId = 0) => {
         { id: 21, path: "customers", text: "\u0424\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u043b\u0438\u0446\u0430" },
         { id: 22, path: "entities", text: "\u042e\u0440\u0438\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u043b\u0438\u0446\u0430" },
         { id: 24, path: "call_records", text: "\u0417\u0430\u043f\u0438\u0441\u0438 \u0440\u0430\u0437\u0433\u043e\u0432\u043e\u0440\u043e\u0432" },
+        { id: 25, path: "crm/leads", text: "\u0417\u0430\u044f\u0432\u043a\u0438" },
 
         { id: 31, path: "daily", text: "\u0415\u0436\u0435\u0434\u043d\u0435\u0432\u043d\u044b\u0439 \u043e\u0442\u0447\u0435\u0442" },
         { id: 35, path: "sales", text: "\u041f\u043e\u0438\u0441\u043a \u043f\u043e \u043f\u0440\u043e\u0434\u0430\u0436\u0430\u043c" },
@@ -27,6 +28,8 @@ export const siteMap = (isAdmin, userId = 0) => {
 
         { id: 53, path: "integration/prices", text: "\u041f\u0440\u0430\u0439\u0441-\u043b\u0438\u0441\u0442\u044b" },
 
+        { id: 55, path: "integration/sms-phone", text: "SMS-телефон" },
+        { id: 56, path: "integration/app", text: "Для Android" },
     ]
 
     if (+userId === 4) {
@@ -54,7 +57,6 @@ export const siteMap = (isAdmin, userId = 0) => {
 
             { id: 51, path: "integration/mango", text: "Mango-office.ru" },
             { id: 52, path: "integration/sms_ru", text: "Sms.ru" },
-
         ])
 
         : map

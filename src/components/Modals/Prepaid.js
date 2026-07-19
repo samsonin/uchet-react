@@ -15,7 +15,6 @@ import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
 import PrintIcon from '@mui/icons-material/Print';
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import CloseIcon from "@mui/icons-material/Close";
 import {makeStyles} from "muiLegacyStyles";
 
@@ -298,13 +297,21 @@ const Prepaid = props => {
             note
         })
 
-        props.history.push('/order', {
-            prepaidOrder: buildPrepaidOrderDraft(prepaid)
-        })
+        rest('zakaz/' + props.app.current_stock_id + '/' + id, 'DELETE')
+            .then(res => {
+                if (res.status === 200) {
+                    if (props.setPrepaids && res.body?.prepaids) props.setPrepaids(res.body.prepaids)
 
-        exit()
+                    props.history.push('/order', {
+                        prepaidOrder: buildPrepaidOrderDraft(prepaid)
+                    })
+
+                    exit()
+                } else {
+                    enqueueSnackbar('ошибка ' + (res.status || ''), {variant: 'error'})
+                }
+            })
     }
-
     const exit = () => {
 
         reset()
@@ -429,7 +436,6 @@ const Prepaid = props => {
                     onClick={() => createOrder()}
                     color="primary"
                     disabled={!id}
-                    startIcon={<AddShoppingCartIcon/>}
                 >
                     В заказ
                 </Button>

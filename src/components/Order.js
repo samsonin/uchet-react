@@ -73,8 +73,6 @@ const Order = props => {
     const doc = docs.find(d => docNames.includes(d.name || d.doc_name))
     const editableDocName = order && order.status_id === 6 ? 'checkout' : 'remont'
 
-    const notificationDocName = 'sms_for_messages'
-
     const category = order ? appCategories.find(c => c.id === order.category_id) : null
 
     const stock = order ? appStocks.find(s => s.id === order.stock_id) : null
@@ -174,14 +172,6 @@ const Order = props => {
         props.history.push(`/settings/docs?doc=${editableDocName}`)
     }
 
-    const openNotificationTemplate = () => {
-        props.history.push(`/settings/docs?doc=${encodeURIComponent(notificationDocName)}`)
-    }
-
-    const openReadyNotificationTemplate = () => {
-        props.history.push('/settings/docs?doc=sms')
-    }
-
     return <div className="order-page">
 
         <Grid container
@@ -238,9 +228,7 @@ const Order = props => {
                   setOrder={setOrder}
                   isEditable={canEdit()}
                   needPrint={needPrint}
-                  prepaidOrder={prepaidOrderDraft}
-                  onEditNotificationTemplate={openNotificationTemplate}
-                  onEditReadyNotificationTemplate={openReadyNotificationTemplate}
+            prepaidOrder={prepaidOrderDraft}
             />
         }
 

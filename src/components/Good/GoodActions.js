@@ -21,6 +21,7 @@ import rest from "../Rest";
 import { PrintBarcodes } from "../common/PrintBarcodes";
 import { Print } from "../common/Print";
 import store from "../../store";
+import {canReturnGoodToProvider} from "./GoodActions.helpers";
 
 const GoodActions = props => {
     const { enqueueSnackbar } = useSnackbar();
@@ -119,6 +120,8 @@ const GoodActions = props => {
                                                 : ""
                                         : <>
                                             {canPrintBarcode && actions.barcode}
+                                            {canReturnGoodToProvider(good) && actions.refund}
+                                            {canReturnGoodToProvider(good) && actions.accountRefund}
                                             {actions.transit}
                                             {actions.reject}
                                             {actions.repair}

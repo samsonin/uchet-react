@@ -40,7 +40,9 @@ import { numberInputHandler } from "./common/InputHandlers";
 import InteractionTableRow from "./common/InteractionTableRow";
 import { setInRange, today } from "./common/Time";
 import {
+    canViewDailyGoodsProfit,
     findCashPaymentDiscrepanciesBySaleId,
+    getDailySalesProfit,
     getUnmatchedCashPaymentDiscrepancies,
     normalizeCashPaymentDiscrepancies,
     normalizeDailyEmployees,
@@ -266,6 +268,7 @@ const Daily = props => {
     const canChange = date === today && props.app.current_stock_id === stock
 
     const canAdminChange = date === today && props.auth.admin
+    const canViewGoodsProfit = canViewDailyGoodsProfit(props.auth)
 
     const afterRes = (res, local, text) => {
 
@@ -405,6 +408,7 @@ const Daily = props => {
     let [sales, salesSum] = makeForTable(salesArray)
     let [services, serviceSum] = makeForTable(serviceArray)
     let [costs, costSum] = makeForTable(costsArray)
+    const salesProfit = getDailySalesProfit(sales)
     const paymentTotals = getPaymentTotals(daily?.sales || [], appPaymentTypes)
 
     let imprests = daily && daily.imprests
@@ -707,6 +711,7 @@ const Daily = props => {
                             rows: sales,
                             rowsValues: ['action', 'item', 'sum', 'note'],
                             sum: salesSum,
+                            profit: canViewGoodsProfit ? salesProfit : null,
                         },
                         {
                             title: 'Работы, услуги', addText: 'Продать услугу',
@@ -801,6 +806,11 @@ const Daily = props => {
                                                 <TableCell>
                                                     {t.sum}
                                                 </TableCell>
+                                                {t.profit !== undefined && t.profit !== null
+                                                    ? <TableCell align="right">
+                                                        {t.profit}
+                                                    </TableCell>
+                                                    : null}
                                             </TableRow>
                                         </TableHead>
 

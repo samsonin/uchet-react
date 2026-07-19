@@ -6,7 +6,7 @@ export const buildOrderCreatePayload = ({
     sum,
     fields,
     notifyTelegram,
-    canNotifyTelegram = false,
+    canNotifyTelegram = true,
     notifySms,
     canNotifySms = false
 }) => {

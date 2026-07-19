@@ -32,6 +32,8 @@ import Stock from "./components/Settings/Stock"
 import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
+import IntegrationSmsPhone from "./components/IntegrationSmsPhone";
+import IntegrationSmsPhoneApp from "./components/IntegrationSmsPhoneApp";
 import CashVideoControl from "./components/CashVideoControl";
 import { Records } from "./components/Records";
 import Docs from "./components/Settings/Docs";
@@ -42,7 +44,7 @@ import Daily from "./components/Daily";
 import LoginModal from "./components/LoginModal";
 import Prepaids from "./components/Prepaids";
 import { bindActionCreators } from "redux";
-import { init_user } from "./actions/actionCreator";
+import { init_user, upd_app } from "./actions/actionCreator";
 import Showcase from "./components/Showcase";
 import Prices from "./components/Prices";
 import Pledges from "./components/Pledges";
@@ -58,10 +60,17 @@ import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import Sales from "./components/Sales";
 import Users from "./components/Settings/Users";
 import PassportCapturePage from "./components/customer/PassportCapturePage";
 import GoodPictureCapturePage from "./components/Good/GoodPictureCapturePage";
+import CrmLeads from "./components/CrmLeads";
+import {
+    crmLeadNotificationKey,
+    crmLeadNotificationText,
+    unprocessedCrmLeads,
+} from "./components/crmLeadNotifications";
 
 const LegacyRouteElement = ({ Component, componentProps = {} }) => {
 
@@ -130,6 +139,8 @@ const App = props => {
     const [scrollDown, setScrollDown] = useState(false)
     const [hiddenNeedCallbacks, setHiddenNeedCallbacks] = useState([])
     const [deletingNeedCallbacks, setDeletingNeedCallbacks] = useState([])
+    const [hiddenCrmLeads, setHiddenCrmLeads] = useState([])
+    const [processingCrmLeads, setProcessingCrmLeads] = useState([])
 
     const barcode = useRef('')
     const lastNetworkErrorAt = useRef(0)
@@ -169,6 +180,34 @@ const App = props => {
             .catch(() => enqueueSnackbar('Ошибка удаления уведомления', { variant: 'error' }))
             .finally(() => {
                 setDeletingNeedCallbacks(prev => prev.filter(key => key !== callbackKey))
+            })
+    }
+
+    const processCrmLead = (lead, snackbarId) => {
+        const leadKey = crmLeadNotificationKey(lead)
+
+        if (!leadKey || processingCrmLeads.includes(leadKey)) return
+
+        setProcessingCrmLeads(prev => [...prev, leadKey])
+
+        rest('crm/' + props.auth.organization_id + '/leads/' + lead.id, 'PATCH', { status: 'processed' }, false, {
+            updateStore: false,
+        })
+            .then(res => {
+                if (res.ok) {
+                    props.upd_app({
+                        crm_leads: (props.app.crm_leads || []).filter(item => item.id !== lead.id)
+                    })
+                    setHiddenCrmLeads(prev => prev.includes(leadKey) ? prev : [...prev, leadKey])
+                    closeSnackbar(snackbarId)
+                    enqueueSnackbar('Заявка обработана', { variant: 'success' })
+                } else {
+                    enqueueSnackbar(res.body?.error || 'Не удалось обработать заявку', { variant: 'error' })
+                }
+            })
+            .catch(() => enqueueSnackbar('Ошибка обработки заявки', { variant: 'error' }))
+            .finally(() => {
+                setProcessingCrmLeads(prev => prev.filter(key => key !== leadKey))
             })
     }
 
@@ -366,6 +405,50 @@ const App = props => {
 
         })}
 
+        {unprocessedCrmLeads(props.app.crm_leads)
+            .filter(lead => !hiddenCrmLeads.includes(crmLeadNotificationKey(lead)))
+            .map(lead => {
+
+                const leadKey = crmLeadNotificationKey(lead)
+                const isProcessing = processingCrmLeads.includes(leadKey)
+
+                const action = snackbarId => <>
+                    <Tooltip title={isProcessing ? 'Обрабатываем...' : 'Отметить обработанной'}>
+                        <span>
+                            <IconButton
+                                size="small"
+                                color="inherit"
+                                className="snackbar-action-button snackbar-action-button-delete"
+                                onClick={() => processCrmLead(lead, snackbarId)}
+                                disabled={isProcessing}
+                            >
+                                <CheckIcon fontSize="small" />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                    <Tooltip title="Открыть заявки">
+                        <IconButton
+                            size="small"
+                            color="inherit"
+                            className="snackbar-action-button"
+                            onClick={() => window.open('/crm/leads', '_blank')}
+                        >
+                            <OpenInNewIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </>
+
+                enqueueSnackbar(crmLeadNotificationText(lead), {
+                    key: 'crm-lead-' + leadKey,
+                    variant: 'error',
+                    persist: true,
+                    preventDuplicate: true,
+                    action
+                })
+
+                return null
+            })}
+
         <Header className={'d-print-none'} />
 
         <div className="d-flex d-print-none" id="wrapper">
@@ -422,6 +505,7 @@ const App = props => {
                                 <Route path="/inventory" element={routeElement(Inventory)} />
                                 <Route path="/customers" element={routeElement(Customers)} />
                                 <Route path="/entities" element={routeElement(Entities)} />
+                                <Route path="/crm/leads" element={routeElement(CrmLeads)} />
                                 <Route path="/order" element={routeElement(Order)} />
                                 <Route path="/order/:stock_id/:order_id" element={routeElement(Order)} />
                                 <Route
@@ -522,6 +606,9 @@ const App = props => {
                                 </>}
 
                                 <Route path="/integration/prices" element={routeElement(Prices)} />
+                                <Route path="/integration/sms-phone" element={routeElement(IntegrationSmsPhone)} />
+                                <Route path="/integration/app" element={routeElement(IntegrationSmsPhoneApp)} />
+                                <Route path="/integration/sms-phone/app" element={routeElement(IntegrationSmsPhoneApp)} />
                                 {+props.auth.user_id === 4 && <Route
                                     path="/integration/cash-video-control"
                                     element={routeElement(CashVideoControl)}
@@ -543,6 +630,7 @@ const App = props => {
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     init_user,
+    upd_app,
 }, dispatch);
 
 export default connect(state => state, mapDispatchToProps)(App);

@@ -1,8 +1,10 @@
 import React, {forwardRef, useEffect, useState} from "react";
 import StatusesSelect from "../StatusesSelect";
 import Button from "@mui/material/Button";
-import {Checkbox, DialogTitle, FormControl, FormControlLabel, Link, TextField, Typography} from "@mui/material";
+import {Checkbox, DialogTitle, FormControl, FormControlLabel, TextField} from "@mui/material";
 import {useSnackbar} from "notistack";
+import {Link} from "react-router-dom";
+import EditIcon from "@mui/icons-material/Edit";
 
 import rest from "../../Rest"
 import CustomersSelect from "../CustomersSelect";
@@ -20,6 +22,7 @@ import {connect} from "react-redux";
 import QuickTextField from "../QuickTextField";
 import {getQuickTextOptions} from "../quickTexts";
 import {buildOrderCreatePayload} from "./orderCreatePayload";
+import {orderNotificationDocLinks} from "./orderNotificationDocs";
 
 const fieldsStyle = {
     margin: '.4rem',
@@ -367,9 +370,7 @@ const Info = props => {
     }
 
     useEffect(() => {
-
         setNotifySms(canNotifySms)
-
     }, [canNotifySms])
 
     useEffect(() => {
@@ -454,6 +455,17 @@ const Info = props => {
                                                      className="m-1"
                                                      onClick={onClick}
                                                      color="primary">
+        {label}
+    </Button>
+
+    const notificationDocLink = (label, to) => <Button
+        component={Link}
+        to={to}
+        variant="text"
+        size="small"
+        className="m-1"
+        startIcon={<EditIcon fontSize="small" />}
+    >
         {label}
     </Button>
 
@@ -614,47 +626,32 @@ const Info = props => {
             />
             : null}
 
-        {!order && (canNotifyTelegram || canNotifySms)
-            ? <div style={{...fieldsStyle, marginTop: '1rem'}}>
-                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem', flexWrap: 'wrap'}}>
-                    <Typography variant="subtitle2">Уведомления заказчику</Typography>
-                    <div style={{display: 'flex', gap: '.75rem', flexWrap: 'wrap'}}>
-                        <Link
-                            component="button"
-                            type="button"
-                            underline="hover"
-                            onClick={props.onEditNotificationTemplate}
-                        >
-                            ✎ Уведомление о приёмке
-                        </Link>
-                        <Link
-                            component="button"
-                            type="button"
-                            underline="hover"
-                            onClick={props.onEditReadyNotificationTemplate}
-                        >
-                            ✎ Уведомление о готовности
-                        </Link>
-                    </div>
-                </div>
-
-                {canNotifyTelegram && <FormControlLabel
-                    control={<Checkbox
-                        checked={notifyTelegram}
-                        onChange={() => setNotifyTelegram(!notifyTelegram)}
-                        disabled={isRest}
-                    />}
-                    label="Уведомить в Telegram"
+        {!order && canNotifyTelegram
+            ? <FormControlLabel
+                style={fieldsStyle}
+                control={<Checkbox
+                    checked={notifyTelegram}
+                    onChange={() => setNotifyTelegram(!notifyTelegram)}
+                    disabled={isRest}
                 />}
+                label="Уведомить в Telegram"
+            />
+            : null}
 
-                {canNotifySms && <FormControlLabel
+        {!order && canNotifySms
+            ? <div style={fieldsStyle}>
+                <FormControlLabel
                     control={<Checkbox
                         checked={notifySms}
                         onChange={() => setNotifySms(!notifySms)}
                         disabled={isRest}
                     />}
                     label="Уведомить по SMS"
-                />}
+                />
+                <div>
+                    {notificationDocLink("Уведомление о готовности", orderNotificationDocLinks.ready)}
+                    {notificationDocLink("Уведомление о приемке", orderNotificationDocLinks.acceptance)}
+                </div>
             </div>
             : null}
 
