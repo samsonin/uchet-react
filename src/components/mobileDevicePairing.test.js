@@ -33,14 +33,14 @@ describe("mobile device pairing helpers", () => {
     test("renders qr_payload from backend response", () => {
         expect(getMobileDeviceQrPayload({
             pairing_uri: "wrong",
-            qr_payload: "uchet-sms://pair?code=AB12-CD34",
-        })).toBe("uchet-sms://pair?code=AB12-CD34");
+            qr_payload: "https://api.uchet.store/mobile-devices/pair?code=AB12-CD34",
+        })).toBe("https://api.uchet.store/mobile-devices/pair?code=AB12-CD34");
     });
 
     test("accepts created pairing code responses", () => {
         expect(isSuccessfulPairingCodeResponse({
             status: 201,
-            body: {qr_payload: "uchet-sms://pair?code=AB12-CD34"},
+            body: {qr_payload: "https://api.uchet.store/mobile-devices/pair?code=AB12-CD34"},
         })).toBe(true);
     });
 });

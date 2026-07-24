@@ -33,7 +33,6 @@ import Fields from "./components/Settings/Fields";
 import IntegrationMango from "./components/IntegrationMango";
 import IntegrationSmsRu from "./components/IntegrationSmsRu";
 import IntegrationSmsPhone from "./components/IntegrationSmsPhone";
-import IntegrationSmsPhoneApp from "./components/IntegrationSmsPhoneApp";
 import CashVideoControl from "./components/CashVideoControl";
 import { Records } from "./components/Records";
 import Docs from "./components/Settings/Docs";
@@ -607,8 +606,8 @@ const App = props => {
 
                                 <Route path="/integration/prices" element={routeElement(Prices)} />
                                 <Route path="/integration/sms-phone" element={routeElement(IntegrationSmsPhone)} />
-                                <Route path="/integration/app" element={routeElement(IntegrationSmsPhoneApp)} />
-                                <Route path="/integration/sms-phone/app" element={routeElement(IntegrationSmsPhoneApp)} />
+                                <Route path="/integration/app" element={<Navigate to="/integration/sms-phone" replace />} />
+                                <Route path="/integration/sms-phone/app" element={<Navigate to="/integration/sms-phone" replace />} />
                                 {+props.auth.user_id === 4 && <Route
                                     path="/integration/cash-video-control"
                                     element={routeElement(CashVideoControl)}
