@@ -15,7 +15,6 @@ import {
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LinkIcon from "@mui/icons-material/Link";
 import DownloadIcon from "@mui/icons-material/Download";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import {useSnackbar} from "notistack";
 
 import rest from "./Rest";
@@ -28,8 +27,7 @@ import {
     shouldSelectMobileDeviceStock,
 } from "./mobileDevicePairing";
 
-const APK_URL = "https://f005.backblazeb2.com/file/uchet-store/mobile/uchet-sms-phone-latest.apk";
-const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=store.uchet.app";
+const GATEWAY_APK_URL = "https://f005.backblazeb2.com/file/uchet-store/mobile/uchet-sms-gateway-latest.apk";
 const PRIVACY_URL = "https://uchet.store/privacy";
 
 const formatExpiresAt = value => {
@@ -106,37 +104,26 @@ const IntegrationSmsPhone = props => {
         <Grid item xs={12}>
             <Typography variant="h4">SMS-телефон</Typography>
             <Typography variant="body1" style={{marginTop: "0.5rem"}}>
-                Подключите Android-телефон, чтобы отправлять клиентам SMS из Учет.
+                Подключите выделенный Android-телефон, чтобы отправлять клиентам SMS из Учет.
             </Typography>
         </Grid>
 
         <Grid item xs={12} md={5}>
             <Paper style={{padding: "1.25rem", height: "100%", boxSizing: "border-box"}}>
-                <Typography variant="h5">1. Подготовьте телефон</Typography>
+                <Typography variant="h5">1. Установите SMS Gateway</Typography>
                 <Typography variant="body2" style={{marginTop: "0.5rem"}}>
-                    Нужен Android 7.0 или новее, SIM-карта и доступ к интернету. Установите Учет и разрешите ему отправлять SMS.
+                    Нужен Android 8.0 или новее, SIM-карта и доступ к интернету. Установите служебное приложение Uchet SMS Gateway и разрешите ему отправлять SMS.
                 </Typography>
                 <Grid container spacing={1} style={{marginTop: "0.75rem"}}>
                     <Grid item>
                         <Button
                             variant="contained"
                             startIcon={<DownloadIcon/>}
-                            href={APK_URL}
+                            href={GATEWAY_APK_URL}
                             target="_blank"
                             rel="noreferrer"
                         >
-                            Скачать APK
-                        </Button>
-                    </Grid>
-                    <Grid item>
-                        <Button
-                            variant="outlined"
-                            startIcon={<OpenInNewIcon/>}
-                            href={GOOGLE_PLAY_URL}
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            Google Play
+                            Скачать Uchet SMS Gateway
                         </Button>
                     </Grid>
                 </Grid>
@@ -196,12 +183,12 @@ const IntegrationSmsPhone = props => {
                         <QRCodeCanvas value={qrPayload} size={256} includeMargin/>
                     </Grid>
                     <Grid item xs={12} sm>
-                        <Typography variant="h5">3. Откройте QR-код телефоном</Typography>
+                        <Typography variant="h5">3. Откройте QR-код в SMS Gateway</Typography>
                         <Typography variant="body1" style={{marginTop: "0.5rem"}}>
-                            Отсканируйте код обычной камерой Android-телефона. Если Учет уже установлен, телефон подключится автоматически.
+                            В Uchet SMS Gateway отсканируйте код камерой или вставьте код подключения вручную. Телефон подключится к выбранной точке.
                         </Typography>
                         <Typography variant="body2" style={{marginTop: "0.5rem"}}>
-                            Если приложения нет, откроется установка в Google Play. После установки откройте «Учет» — одноразовый код применится автоматически. Для APK вернитесь на страницу и нажмите «Открыть Учет».
+                            Если приложение ещё не установлено, сначала скачайте Uchet SMS Gateway по ссылке выше. Это отдельное служебное приложение, не основное CRM Учет.
                         </Typography>
                         <Typography variant="body2" style={{marginTop: "1rem"}}>
                             Код для ручного ввода: <strong>{pairingCode.code}</strong>
