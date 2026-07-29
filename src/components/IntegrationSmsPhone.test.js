@@ -16,5 +16,6 @@ describe("GatewayDownloadActions", () => {
 
         expect(left.props.xs).toBe(true);
         expect(right.props.xs).toBe("auto");
+        expect(right.props.style.marginLeft).toBe("auto");
     });
 });

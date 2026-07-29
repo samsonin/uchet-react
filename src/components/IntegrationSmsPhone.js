@@ -49,7 +49,7 @@ export const GatewayDownloadActions = () => <Grid container spacing={1} alignIte
             Скачать Uchet SMS Gateway
         </Button>
     </Grid>
-    <Grid item xs="auto">
+    <Grid item xs="auto" style={{marginLeft: "auto"}}>
         <GatewayDownloadQr/>
     </Grid>
 </Grid>;
