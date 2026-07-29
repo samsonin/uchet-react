@@ -27,9 +27,15 @@ import {
     shouldSelectMobileDeviceStock,
 } from "./mobileDevicePairing";
 
-const GATEWAY_APK_URL = "https://f005.backblazeb2.com/file/uchet-store/mobile/uchet-sms-gateway-latest.apk";
+export const GATEWAY_APK_URL = "https://f005.backblazeb2.com/file/uchet-store/mobile/uchet-sms-gateway-latest.apk";
 const PRIVACY_URL = "https://api.uchet.store/legal/sms-gateway/privacy";
 const TERMS_URL = "https://api.uchet.store/legal/sms-gateway/terms";
+
+export const GatewayDownloadQr = () => <QRCodeCanvas
+    value={GATEWAY_APK_URL}
+    size={160}
+    includeMargin
+/>;
 
 const auditEventLabels = {
     pairing_code_created: "Создан код подключения",
@@ -139,7 +145,7 @@ const IntegrationSmsPhone = props => {
                 <Typography variant="body2" style={{marginTop: "0.5rem"}}>
                     Нужен Android 8.0 или новее, SIM-карта и доступ к интернету. Установите служебное приложение Uchet SMS Gateway и разрешите ему отправлять SMS.
                 </Typography>
-                <Grid container spacing={1} style={{marginTop: "0.75rem"}}>
+                <Grid container spacing={1} alignItems="center" style={{marginTop: "0.75rem"}}>
                     <Grid item>
                         <Button
                             variant="contained"
@@ -150,6 +156,9 @@ const IntegrationSmsPhone = props => {
                         >
                             Скачать Uchet SMS Gateway
                         </Button>
+                    </Grid>
+                    <Grid item xs="auto">
+                        <GatewayDownloadQr/>
                     </Grid>
                 </Grid>
             </Paper>
