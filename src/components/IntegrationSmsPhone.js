@@ -31,6 +31,20 @@ const GATEWAY_APK_URL = "https://f005.backblazeb2.com/file/uchet-store/mobile/uc
 const PRIVACY_URL = "https://api.uchet.store/legal/sms-gateway/privacy";
 const TERMS_URL = "https://api.uchet.store/legal/sms-gateway/terms";
 
+const auditEventLabels = {
+    pairing_code_created: "Создан код подключения",
+    device_disconnected: "Телефон отключен",
+    command_created: "Подготовлена SMS-команда",
+    sent_to_fcm: "Команда отправлена на телефон",
+    fcm_failed: "Команда не доставлена на телефон",
+    rate_limited: "SMS заблокирована лимитом",
+    dispatch_blocked: "SMS не отправлена",
+    result_sent: "SMS принята оператором",
+    result_delivered: "SMS доставлена",
+    result_delivery_failed: "Нет подтверждения доставки",
+    result_failed: "Не удалось отправить SMS",
+};
+
 const formatExpiresAt = value => {
     if (!value) return "";
 
@@ -54,6 +68,7 @@ const IntegrationSmsPhone = props => {
     const [pairingCode, setPairingCode] = useState(null);
     const [isLoading, setLoading] = useState(false);
     const [devices, setDevices] = useState(props.app.sms_phones || []);
+    const [auditEvents, setAuditEvents] = useState([]);
     const {enqueueSnackbar} = useSnackbar();
     const qrPayload = getMobileDeviceQrPayload(pairingCode);
 
@@ -63,8 +78,15 @@ const IntegrationSmsPhone = props => {
         if (res.status === 200) setDevices(res.body?.mobile_devices || []);
     });
 
+    const refreshAuditEvents = () => rest("sms-gateway/audit-events", "GET", undefined, false, {
+        updateStore: false,
+    }).then(res => {
+        if (res.status === 200) setAuditEvents(res.body?.audit_events || []);
+    });
+
     useEffect(() => {
         refreshDevices();
+        refreshAuditEvents();
     }, []);
 
     const disconnectDevice = device => {
@@ -75,6 +97,7 @@ const IntegrationSmsPhone = props => {
         }).then(res => {
             if (res.status === 204) {
                 refreshDevices();
+                refreshAuditEvents();
                 return;
             }
             enqueueSnackbar(res.body?.error || "Не удалось отключить SMS-телефон", {variant: "error"});
@@ -92,6 +115,7 @@ const IntegrationSmsPhone = props => {
             if (isSuccessfulPairingCodeResponse(res)) {
                 setPairingCode(res.body);
                 setTimeout(refreshDevices, 1000);
+                refreshAuditEvents();
                 return;
             }
 
@@ -226,6 +250,24 @@ const IntegrationSmsPhone = props => {
                         </Button>
                     </Grid>}
                 </Grid>
+            </Paper>)}
+        </Grid>
+
+        <Grid item xs={12}>
+            <Typography variant="h5">Журнал SMS Gateway</Typography>
+            <Typography variant="body2" style={{marginTop: "0.25rem"}}>
+                Журнал содержит технические события и причины ошибок, но не показывает номер получателя и текст SMS.
+            </Typography>
+            {auditEvents.length === 0 && <Paper style={{padding: "1rem", marginTop: "0.75rem"}}>
+                <Typography variant="body2">Событий пока нет.</Typography>
+            </Paper>}
+            {auditEvents.map(event => <Paper key={"sms-audit-" + event.id} style={{padding: "0.75rem 1rem", marginTop: "0.5rem"}}>
+                <Typography>{auditEventLabels[event.event_type] || event.event_type}</Typography>
+                <Typography variant="body2">
+                    {formatLastSeen(event.created_at)}
+                    {event.mobile_device_id ? " · телефон #" + event.mobile_device_id : ""}
+                    {event.reason ? " · " + event.reason : ""}
+                </Typography>
             </Paper>)}
         </Grid>
 
