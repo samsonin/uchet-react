@@ -37,8 +37,8 @@ export const GatewayDownloadQr = () => <QRCodeCanvas
     includeMargin
 />;
 
-export const GatewayDownloadActions = () => <div style={{display: "flex", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem", marginTop: "0.75rem"}}>
-    <div style={{flex: "1 1 auto", minWidth: 0}}>
+export const GatewayDownloadActions = () => <div style={{display: "flex", alignItems: "flex-start", flexWrap: "nowrap", gap: "1rem", marginTop: "0.75rem"}}>
+    <div style={{flex: "1 1 0", minWidth: 0}}>
         <Typography variant="h5">1. Установите SMS Gateway</Typography>
         <Typography variant="body2" style={{marginTop: "0.5rem"}}>
             Нужен Android 8.0 или новее, SIM-карта и доступ к интернету. Установите служебное приложение Uchet SMS Gateway и разрешите ему отправлять SMS.
