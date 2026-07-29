@@ -15,8 +15,9 @@ describe("GatewayDownloadActions", () => {
         const [left, right] = actions.props.children;
 
         expect(left.props.children[0].props.children).toBe("1. Установите SMS Gateway");
-        expect(left.props.xs).toBe(true);
-        expect(right.props.xs).toBe("auto");
-        expect(right.props.style.marginLeft).toBe("auto");
+        expect(actions.type).toBe("div");
+        expect(actions.props.style.display).toBe("flex");
+        expect(left.props.style.flex).toBe("1 1 auto");
+        expect(right.props.style.flex).toBe("0 0 auto");
     });
 });
