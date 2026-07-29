@@ -28,7 +28,8 @@ import {
 } from "./mobileDevicePairing";
 
 const GATEWAY_APK_URL = "https://f005.backblazeb2.com/file/uchet-store/mobile/uchet-sms-gateway-latest.apk";
-const PRIVACY_URL = "https://uchet.store/privacy";
+const PRIVACY_URL = "https://api.uchet.store/legal/sms-gateway/privacy";
+const TERMS_URL = "https://api.uchet.store/legal/sms-gateway/terms";
 
 const formatExpiresAt = value => {
     if (!value) return "";
@@ -230,7 +231,8 @@ const IntegrationSmsPhone = props => {
 
         <Grid item xs={12}>
             <Typography variant="body2">
-                Перед установкой ознакомьтесь с <Link href={PRIVACY_URL} target="_blank" rel="noreferrer">политикой конфиденциальности</Link>.
+                Перед установкой ознакомьтесь с <Link href={PRIVACY_URL} target="_blank" rel="noreferrer">политикой конфиденциальности</Link>
+                {" и "}<Link href={TERMS_URL} target="_blank" rel="noreferrer">условиями использования Uchet SMS Gateway</Link>.
             </Typography>
         </Grid>
     </Grid>;
