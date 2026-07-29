@@ -14,6 +14,7 @@ describe("GatewayDownloadActions", () => {
         const actions = GatewayDownloadActions();
         const [left, right] = actions.props.children;
 
+        expect(left.props.children[0].props.children).toBe("1. Установите SMS Gateway");
         expect(left.props.xs).toBe(true);
         expect(right.props.xs).toBe("auto");
         expect(right.props.style.marginLeft).toBe("auto");

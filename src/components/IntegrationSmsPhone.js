@@ -39,6 +39,10 @@ export const GatewayDownloadQr = () => <QRCodeCanvas
 
 export const GatewayDownloadActions = () => <Grid container spacing={1} alignItems="center" style={{marginTop: "0.75rem"}}>
     <Grid item xs>
+        <Typography variant="h5">1. Установите SMS Gateway</Typography>
+        <Typography variant="body2" style={{marginTop: "0.5rem"}}>
+            Нужен Android 8.0 или новее, SIM-карта и доступ к интернету. Установите служебное приложение Uchet SMS Gateway и разрешите ему отправлять SMS.
+        </Typography>
         <Button
             variant="contained"
             startIcon={<DownloadIcon/>}
@@ -158,10 +162,8 @@ const IntegrationSmsPhone = props => {
 
         <Grid item xs={12} md={5}>
             <Paper style={{padding: "1.25rem", height: "100%", boxSizing: "border-box"}}>
-                <Typography variant="h5">1. Установите SMS Gateway</Typography>
-                <Typography variant="body2" style={{marginTop: "0.5rem"}}>
-                    Нужен Android 8.0 или новее, SIM-карта и доступ к интернету. Установите служебное приложение Uchet SMS Gateway и разрешите ему отправлять SMS.
-                </Typography>
+
+
                 <GatewayDownloadActions/>
             </Paper>
         </Grid>
