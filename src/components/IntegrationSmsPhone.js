@@ -3,6 +3,11 @@ import {connect} from "react-redux";
 import {QRCodeCanvas} from "qrcode.react";
 import {
     Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
     FormControl,
     Grid,
     InputLabel,
@@ -97,6 +102,7 @@ const IntegrationSmsPhone = props => {
     const [pairingCode, setPairingCode] = useState(null);
     const [isLoading, setLoading] = useState(false);
     const [deviceActionId, setDeviceActionId] = useState(null);
+    const [pendingDeviceAction, setPendingDeviceAction] = useState(null);
     const [devices, setDevices] = useState(props.app.sms_phones || []);
     const [auditEvents, setAuditEvents] = useState([]);
     const {enqueueSnackbar} = useSnackbar();
@@ -122,16 +128,21 @@ const IntegrationSmsPhone = props => {
     const changeDeviceState = async device => {
         const isActive = Boolean(device.is_active);
         const action = isActive ? "Отключить" : "Удалить";
-        if (!window.confirm(`${action} этот SMS-телефон?`)) return;
 
         setDeviceActionId(device.id);
-        const res = await rest("mobile-devices/" + device.id, "DELETE", undefined, false, {
-            updateStore: false,
-        });
-        setDeviceActionId(null);
+        let res;
+
+        try {
+            res = await rest("mobile-devices/" + device.id, "DELETE", undefined, false, {
+                updateStore: false,
+            });
+        } finally {
+            setDeviceActionId(null);
+        }
 
         if (res.status === 204) {
             setDevices(current => applyMobileDeviceAction(current, device));
+            setPendingDeviceAction(null);
             enqueueSnackbar(isActive ? "Телефон отключен" : "Телефон удален", {variant: "success"});
             refreshDevices();
             refreshAuditEvents();
@@ -272,7 +283,7 @@ const IntegrationSmsPhone = props => {
                             variant="outlined"
                             color={device.is_active ? "warning" : "error"}
                             disabled={String(deviceActionId) === String(device.id)}
-                            onClick={() => changeDeviceState(device)}
+                            onClick={() => setPendingDeviceAction(device)}
                         >
                             {device.is_active ? "Отключить" : "Удалить"}
                         </Button>
@@ -280,6 +291,35 @@ const IntegrationSmsPhone = props => {
                 </Grid>
             </Paper>)}
         </Grid>
+
+        <Dialog
+            open={Boolean(pendingDeviceAction)}
+            onClose={() => !deviceActionId && setPendingDeviceAction(null)}
+        >
+            <DialogTitle>
+                {pendingDeviceAction?.is_active ? "Отключить SMS-телефон?" : "Удалить SMS-телефон?"}
+            </DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    {pendingDeviceAction?.is_active
+                        ? `Телефон «${pendingDeviceAction.device_name || "Android-телефон"}» перестанет получать команды на отправку SMS.`
+                        : `Запись о телефоне «${pendingDeviceAction?.device_name || "Android-телефон"}» будет удалена без возможности восстановления.`}
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button disabled={Boolean(deviceActionId)} onClick={() => setPendingDeviceAction(null)}>
+                    Отмена
+                </Button>
+                <Button
+                    variant="contained"
+                    color={pendingDeviceAction?.is_active ? "warning" : "error"}
+                    disabled={Boolean(deviceActionId)}
+                    onClick={() => changeDeviceState(pendingDeviceAction)}
+                >
+                    {pendingDeviceAction?.is_active ? "Отключить" : "Удалить"}
+                </Button>
+            </DialogActions>
+        </Dialog>
 
         <Grid item xs={12}>
             <Typography variant="h5">Журнал SMS Gateway</Typography>
