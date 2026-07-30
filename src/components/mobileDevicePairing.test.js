@@ -1,4 +1,5 @@
 import {
+    applyMobileDeviceAction,
     buildMobileDevicePairingPayload,
     getMobileDeviceQrPayload,
     isSuccessfulPairingCodeResponse,
@@ -42,5 +43,24 @@ describe("mobile device pairing helpers", () => {
             status: 201,
             body: {qr_payload: "https://api.uchet.store/mobile-devices/pair?code=AB12-CD34"},
         })).toBe(true);
+    });
+
+    test("updates the list immediately after disconnecting a phone", () => {
+        expect(applyMobileDeviceAction([
+            {id: 2, is_active: true},
+            {id: 3, is_active: true},
+        ], {id: 2, is_active: true})).toEqual([
+            {id: 2, is_active: false},
+            {id: 3, is_active: true},
+        ]);
+    });
+
+    test("removes an inactive phone from the list immediately", () => {
+        expect(applyMobileDeviceAction([
+            {id: 2, is_active: false},
+            {id: 3, is_active: true},
+        ], {id: 2, is_active: false})).toEqual([
+            {id: 3, is_active: true},
+        ]);
     });
 });

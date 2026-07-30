@@ -23,6 +23,7 @@ import {
     buildMobileDevicePairingPayload,
     getMobileDeviceQrPayload,
     isSuccessfulPairingCodeResponse,
+    applyMobileDeviceAction,
     resolveMobileDeviceStockId,
     shouldSelectMobileDeviceStock,
 } from "./mobileDevicePairing";
@@ -95,6 +96,7 @@ const IntegrationSmsPhone = props => {
     const shouldSelectStock = shouldSelectMobileDeviceStock(globalStockId, validStocks);
     const [pairingCode, setPairingCode] = useState(null);
     const [isLoading, setLoading] = useState(false);
+    const [deviceActionId, setDeviceActionId] = useState(null);
     const [devices, setDevices] = useState(props.app.sms_phones || []);
     const [auditEvents, setAuditEvents] = useState([]);
     const {enqueueSnackbar} = useSnackbar();
@@ -117,21 +119,26 @@ const IntegrationSmsPhone = props => {
         refreshAuditEvents();
     }, []);
 
-    const changeDeviceState = device => {
+    const changeDeviceState = async device => {
         const isActive = Boolean(device.is_active);
         const action = isActive ? "Отключить" : "Удалить";
         if (!window.confirm(`${action} этот SMS-телефон?`)) return;
 
-        rest("mobile-devices/" + device.id, "DELETE", undefined, false, {
+        setDeviceActionId(device.id);
+        const res = await rest("mobile-devices/" + device.id, "DELETE", undefined, false, {
             updateStore: false,
-        }).then(res => {
-            if (res.status === 204) {
-                refreshDevices();
-                refreshAuditEvents();
-                return;
-            }
-            enqueueSnackbar(res.body?.error || `Не удалось ${action.toLowerCase()} SMS-телефон`, {variant: "error"});
         });
+        setDeviceActionId(null);
+
+        if (res.status === 204) {
+            setDevices(current => applyMobileDeviceAction(current, device));
+            enqueueSnackbar(isActive ? "Телефон отключен" : "Телефон удален", {variant: "success"});
+            refreshDevices();
+            refreshAuditEvents();
+            return;
+        }
+
+        enqueueSnackbar(res.body?.error || `Не удалось ${action.toLowerCase()} SMS-телефон`, {variant: "error"});
     };
 
     const createPairingCode = () => {
@@ -264,6 +271,7 @@ const IntegrationSmsPhone = props => {
                         <Button
                             variant="outlined"
                             color={device.is_active ? "warning" : "error"}
+                            disabled={String(deviceActionId) === String(device.id)}
                             onClick={() => changeDeviceState(device)}
                         >
                             {device.is_active ? "Отключить" : "Удалить"}

@@ -18,3 +18,16 @@ export const getMobileDeviceQrPayload = pairingCode => pairingCode?.qr_payload |
 export const isSuccessfulPairingCodeResponse = res => (
     res?.status >= 200 && res.status < 300 && !!res.body?.qr_payload
 );
+
+export const applyMobileDeviceAction = (devices = [], device) => {
+    const sameDevice = current => String(current.id) === String(device.id);
+
+    if (device.is_active) {
+        return devices.map(current => sameDevice(current)
+            ? {...current, is_active: false}
+            : current
+        );
+    }
+
+    return devices.filter(current => !sameDevice(current));
+};
