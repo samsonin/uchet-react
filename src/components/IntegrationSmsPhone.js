@@ -61,6 +61,7 @@ export const GatewayDownloadActions = () => <div style={{display: "flex", alignI
 const auditEventLabels = {
     pairing_code_created: "Создан код подключения",
     device_disconnected: "Телефон отключен",
+    device_deleted: "Телефон удален",
     command_created: "Подготовлена SMS-команда",
     sent_to_fcm: "Команда отправлена на телефон",
     fcm_failed: "Команда не доставлена на телефон",
@@ -105,7 +106,7 @@ const IntegrationSmsPhone = props => {
         if (res.status === 200) setDevices(res.body?.mobile_devices || []);
     });
 
-    const refreshAuditEvents = () => rest("sms-gateway/audit-events", "GET", undefined, false, {
+    const refreshAuditEvents = () => rest("sms-gateway/audit-events?limit=5", "GET", undefined, false, {
         updateStore: false,
     }).then(res => {
         if (res.status === 200) setAuditEvents(res.body?.audit_events || []);
@@ -116,8 +117,10 @@ const IntegrationSmsPhone = props => {
         refreshAuditEvents();
     }, []);
 
-    const disconnectDevice = device => {
-        if (!window.confirm("Отключить этот SMS-телефон?")) return;
+    const changeDeviceState = device => {
+        const isActive = Boolean(device.is_active);
+        const action = isActive ? "Отключить" : "Удалить";
+        if (!window.confirm(`${action} этот SMS-телефон?`)) return;
 
         rest("mobile-devices/" + device.id, "DELETE", undefined, false, {
             updateStore: false,
@@ -127,7 +130,7 @@ const IntegrationSmsPhone = props => {
                 refreshAuditEvents();
                 return;
             }
-            enqueueSnackbar(res.body?.error || "Не удалось отключить SMS-телефон", {variant: "error"});
+            enqueueSnackbar(res.body?.error || `Не удалось ${action.toLowerCase()} SMS-телефон`, {variant: "error"});
         });
     };
 
@@ -257,29 +260,31 @@ const IntegrationSmsPhone = props => {
                             {" "}Последняя связь: {formatLastSeen(device.last_seen_at)}.
                         </Typography>
                     </Grid>
-                    {device.is_active && <Grid item>
-                        <Button color="secondary" onClick={() => disconnectDevice(device)}>
-                            Отключить
+                    <Grid item>
+                        <Button
+                            variant="outlined"
+                            color={device.is_active ? "warning" : "error"}
+                            onClick={() => changeDeviceState(device)}
+                        >
+                            {device.is_active ? "Отключить" : "Удалить"}
                         </Button>
-                    </Grid>}
+                    </Grid>
                 </Grid>
             </Paper>)}
         </Grid>
 
         <Grid item xs={12}>
             <Typography variant="h5">Журнал SMS Gateway</Typography>
-            <Typography variant="body2" style={{marginTop: "0.25rem"}}>
-                Журнал содержит технические события и причины ошибок, но не показывает номер получателя и текст SMS.
-            </Typography>
             {auditEvents.length === 0 && <Paper style={{padding: "1rem", marginTop: "0.75rem"}}>
                 <Typography variant="body2">Событий пока нет.</Typography>
             </Paper>}
-            {auditEvents.map(event => <Paper key={"sms-audit-" + event.id} style={{padding: "0.75rem 1rem", marginTop: "0.5rem"}}>
+            {auditEvents.slice(0, 5).map(event => <Paper key={"sms-audit-" + event.id} style={{padding: "0.75rem 1rem", marginTop: "0.5rem"}}>
                 <Typography>{auditEventLabels[event.event_type] || event.event_type}</Typography>
                 <Typography variant="body2">
                     {formatLastSeen(event.created_at)}
-                    {event.mobile_device_id ? " · телефон #" + event.mobile_device_id : ""}
-                    {event.reason ? " · " + event.reason : ""}
+                    {event.mobile_device_id && devices.find(device => +device.id === +event.mobile_device_id)?.device_name
+                        ? " · " + devices.find(device => +device.id === +event.mobile_device_id).device_name
+                        : ""}
                 </Typography>
             </Paper>)}
         </Grid>
