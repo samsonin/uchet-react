@@ -12,6 +12,7 @@ export const siteMap = (isAdmin, userId = 0) => {
         { id: 15, path: "prepaids", text: "\u041f\u0440\u0435\u0434\u043e\u043f\u043b\u0430\u0442\u044b" },
         { id: 16, path: "reals", text: "\u0420\u0435\u0430\u043b\u0438\u0437\u0430\u0446\u0438\u044f" },
         { id: 17, path: "pledges", text: "\u0417\u0430\u043b\u043e\u0433\u0438" },
+        { id: 18, path: "barcode-inventory", text: "Инвентаризация по штрих-коду" },
 
         { id: 21, path: "customers", text: "\u0424\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u043b\u0438\u0446\u0430" },
         { id: 22, path: "entities", text: "\u042e\u0440\u0438\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u043b\u0438\u0446\u0430" },

@@ -49,6 +49,7 @@ import Prices from "./components/Prices";
 import Pledges from "./components/Pledges";
 import Buy from "./components/Buy";
 import Inventory from "./components/Inventory";
+import BarcodeInventoryPage from "./components/BarcodeInventoryPage";
 import ArrivalToday from "./components/ArrivalToday";
 import Store from "./components/Store";
 import Zp from "./components/Zp";
@@ -298,7 +299,7 @@ const App = props => {
         if (!ourBarcode) return
 
         if (path.substring(0, 6) === '/order') return
-        if (['/transit', '/arrival/today'].includes(path)) return
+        if (['/transit', '/arrival/today', '/barcode-inventory'].includes(path)) return
 
         rest('goods/' + ourBarcode)
         setOurBarcode()
@@ -502,6 +503,13 @@ const App = props => {
                                 <Route path="/showcase/buy" element={routeElement(Buy)} />
                                 <Route path="/store/showcase/buy" element={<Navigate replace to="/showcase/buy" />} />
                                 <Route path="/inventory" element={routeElement(Inventory)} />
+                                <Route
+                                    path="/barcode-inventory"
+                                    element={routeElement(BarcodeInventoryPage, {
+                                        newScan: ourBarcode,
+                                        setOurBarcode,
+                                    })}
+                                />
                                 <Route path="/customers" element={routeElement(Customers)} />
                                 <Route path="/entities" element={routeElement(Entities)} />
                                 <Route path="/crm/leads" element={routeElement(CrmLeads)} />
