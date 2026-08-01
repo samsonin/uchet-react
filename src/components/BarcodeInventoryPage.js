@@ -23,6 +23,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import rest from './Rest';
 import {useSnackbar} from 'notistack';
+import {inventoryScanSound} from './inventoryScanSound';
 import {
     applyInventoryScan,
     filterInventoryRows,
@@ -90,10 +91,16 @@ const BarcodeInventoryPage = props => {
 
         rest(`inventory/${stockId}/${normalizedBarcode}`, 'POST', {scope})
             .then(res => {
-                if (res.status === 200 && res.body?.result === 'accounted') {
+                if (!res.status) {
+                    inventoryScanSound('network_error');
+                    enqueueSnackbar(scanMessage('network_error'), {variant: 'error'});
+                }
+                else if (res.status === 200 && res.body?.result === 'accounted') {
                     setSnapshot(prev => applyInventoryScan(prev, res.body));
+                    inventoryScanSound('accounted');
                     enqueueSnackbar('Позиция учтена', {variant: 'success'});
                 } else {
+                    inventoryScanSound(res.body?.result);
                     enqueueSnackbar(res.body?.error || scanMessage(res.body?.result), {variant: 'warning'});
                 }
             })
