@@ -1,6 +1,6 @@
 # Barcode Inventory Sound Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Play the legacy inventory WAV feedback sounds after each barcode scan on `/barcode-inventory`.
 
@@ -28,7 +28,7 @@
 **Interfaces:**
 - Produces: `inventoryScanSound(result)` which plays the matching legacy file for `accounted`, rejected scan results, and network errors.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```js
 import {inventoryScanSound, inventoryScanSoundUrl} from './inventoryScanSound';
@@ -46,13 +46,13 @@ test('plays a warning sound for a rejected scan', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/inventoryScanSound.test.js`
 
 Expected: FAIL because `inventoryScanSound` is not defined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```js
 export const inventoryScanSoundUrl = result => result === 'accounted'
@@ -67,13 +67,13 @@ export const inventoryScanSound = result => {
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/inventoryScanSound.test.js`
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add public/sounds src/components/inventoryScanSound.js src/components/inventoryScanSound.test.js
@@ -90,7 +90,7 @@ git commit -m "feat: add inventory scan sounds"
 - Consumes: `inventoryScanSound(result)` from `inventoryScanSound.js`.
 - Produces: successful, rejected, and failed requests trigger their corresponding sound after scan handling.
 
-- [ ] **Step 1: Extend the failing test**
+- [x] **Step 1: Extend the failing test**
 
 ```js
 test('maps a network failure to the legacy danger sound', () => {
@@ -98,13 +98,13 @@ test('maps a network failure to the legacy danger sound', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/inventoryScanSound.test.js`
 
 Expected: FAIL because `network_error` is mapped to the warning file.
 
-- [ ] **Step 3: Connect the page**
+- [x] **Step 3: Connect the page**
 
 ```js
 if (res.status === 200 && res.body?.result === 'accounted') {
@@ -115,7 +115,7 @@ if (res.status === 200 && res.body?.result === 'accounted') {
 // Add .catch(() => inventoryScanSound('network_error')) to the scan request.
 ```
 
-- [ ] **Step 4: Run focused tests and production build**
+- [x] **Step 4: Run focused tests and production build**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/inventoryScanSound.test.js src/components/barcodeInventory.test.js src/components/BarcodeInventoryNavigation.test.js`
 
@@ -123,7 +123,7 @@ Run: `npm run build`
 
 Expected: all focused tests and the production build pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/BarcodeInventoryPage.js src/components/inventoryScanSound.test.js
