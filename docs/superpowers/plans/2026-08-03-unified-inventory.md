@@ -1,6 +1,6 @@
 # Unified Inventory Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Serve ordinary and barcode inventory from one `/inventory` page with a scanner checkbox at the top.
 
@@ -27,7 +27,7 @@
 - Consumes: `newScan` and `setOurBarcode` props from `App`.
 - Produces: a checkbox-controlled view rendering `Inventory` when disabled and `BarcodeInventoryPage` when enabled.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```js
 test('starts in ordinary inventory mode and switches to barcode inventory after enabling scanner', async () => {
@@ -42,13 +42,13 @@ test('starts in ordinary inventory mode and switches to barcode inventory after 
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/UnifiedInventory.test.js`
 
 Expected: FAIL because `UnifiedInventory` does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```js
 const [scannerEnabled, setScannerEnabled] = useState(false);
@@ -59,13 +59,13 @@ return <>
 </>;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/UnifiedInventory.test.js`
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/UnifiedInventory.js src/components/UnifiedInventory.test.js
@@ -83,7 +83,7 @@ git commit -m "feat: add unified inventory mode switch"
 - Consumes: `UnifiedInventory` from Task 1.
 - Produces: `/inventory` unified route, `/barcode-inventory` redirect, and one inventory navigation item.
 
-- [ ] **Step 1: Extend the failing navigation test**
+- [x] **Step 1: Extend the failing navigation test**
 
 ```js
 expect(siteMap(false, 1)).toContainEqual(
@@ -94,20 +94,20 @@ expect(siteMap(false, 1)).not.toContainEqual(
 );
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/BarcodeInventoryNavigation.test.js`
 
 Expected: FAIL because navigation still includes `barcode-inventory`.
 
-- [ ] **Step 3: Update the route and map**
+- [x] **Step 3: Update the route and map**
 
 ```js
 <Route path="/inventory" element={routeElement(UnifiedInventory, {newScan: ourBarcode, setOurBarcode})} />
 <Route path="/barcode-inventory" element={<Navigate replace to="/inventory" />} />
 ```
 
-- [ ] **Step 4: Run focused tests and production build**
+- [x] **Step 4: Run focused tests and production build**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/UnifiedInventory.test.js src/components/BarcodeInventoryNavigation.test.js src/components/barcodeInventory.test.js src/components/BarcodeInventoryPage.sound.test.js src/components/inventoryScanSound.test.js`
 
@@ -115,7 +115,7 @@ Run: `npm run build`
 
 Expected: all focused tests and the production build pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/App.js src/components/SiteMap.js src/components/BarcodeInventoryNavigation.test.js
