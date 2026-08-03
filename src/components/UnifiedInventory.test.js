@@ -2,8 +2,8 @@ import React, {act} from 'react';
 import {createRoot} from 'react-dom/client';
 import UnifiedInventory from './UnifiedInventory';
 
-jest.mock('./Inventory', () => () => <div>Обычная инвентаризация</div>);
-jest.mock('./BarcodeInventoryPage', () => () => <div>Инвентаризация по штрих-кодам</div>);
+jest.mock('./Inventory', () => () => <div data-testid="ordinary-inventory"/>);
+jest.mock('./BarcodeInventoryPage', () => () => <div data-testid="barcode-inventory"/>);
 
 describe('unified inventory', () => {
     let container;
@@ -26,15 +26,25 @@ describe('unified inventory', () => {
             root.render(<UnifiedInventory app={{current_stock_id: 1}}/>);
         });
 
-        expect(container.textContent).toContain('Включить сканер');
-        expect(container.textContent).toContain('Обычная инвентаризация');
-        expect(container.textContent).not.toContain('Инвентаризация по штрих-кодам');
+        expect(container.querySelector('label').textContent).toContain('\u0412\u043a\u043b\u044e\u0447\u0438\u0442\u044c \u0441\u043a\u0430\u043d\u0435\u0440');
+        expect(container.querySelector('[data-testid="ordinary-inventory"]')).not.toBeNull();
+        expect(container.querySelector('[data-testid="barcode-inventory"]')).toBeNull();
 
         await act(async () => {
             container.querySelector('input[type="checkbox"]').click();
         });
 
-        expect(container.textContent).toContain('Инвентаризация по штрих-кодам');
-        expect(container.textContent).not.toContain('Обычная инвентаризация');
+        expect(container.querySelector('[data-testid="barcode-inventory"]')).not.toBeNull();
+        expect(container.querySelector('[data-testid="ordinary-inventory"]')).toBeNull();
+    });
+
+    test('clears a pending global scan while scanner mode is disabled', async () => {
+        const setOurBarcode = jest.fn();
+
+        await act(async () => {
+            root.render(<UnifiedInventory app={{current_stock_id: 1}} newScan="112116000000000" setOurBarcode={setOurBarcode}/>);
+        });
+
+        expect(setOurBarcode).toHaveBeenCalledTimes(1);
     });
 });

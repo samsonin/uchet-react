@@ -48,8 +48,7 @@ import Showcase from "./components/Showcase";
 import Prices from "./components/Prices";
 import Pledges from "./components/Pledges";
 import Buy from "./components/Buy";
-import Inventory from "./components/Inventory";
-import BarcodeInventoryPage from "./components/BarcodeInventoryPage";
+import UnifiedInventory from "./components/UnifiedInventory";
 import ArrivalToday from "./components/ArrivalToday";
 import Store from "./components/Store";
 import Zp from "./components/Zp";
@@ -299,7 +298,7 @@ const App = props => {
         if (!ourBarcode) return
 
         if (path.substring(0, 6) === '/order') return
-        if (['/transit', '/arrival/today', '/barcode-inventory'].includes(path)) return
+        if (['/transit', '/arrival/today', '/inventory', '/barcode-inventory'].includes(path)) return
 
         rest('goods/' + ourBarcode)
         setOurBarcode()
@@ -502,14 +501,14 @@ const App = props => {
                                 <Route path="/showcase" element={routeElement(Showcase)} />
                                 <Route path="/showcase/buy" element={routeElement(Buy)} />
                                 <Route path="/store/showcase/buy" element={<Navigate replace to="/showcase/buy" />} />
-                                <Route path="/inventory" element={routeElement(Inventory)} />
                                 <Route
-                                    path="/barcode-inventory"
-                                    element={routeElement(BarcodeInventoryPage, {
+                                    path="/inventory"
+                                    element={routeElement(UnifiedInventory, {
                                         newScan: ourBarcode,
                                         setOurBarcode,
                                     })}
                                 />
+                                <Route path="/barcode-inventory" element={<Navigate replace to="/inventory" />} />
                                 <Route path="/customers" element={routeElement(Customers)} />
                                 <Route path="/entities" element={routeElement(Entities)} />
                                 <Route path="/crm/leads" element={routeElement(CrmLeads)} />

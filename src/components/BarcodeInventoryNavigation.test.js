@@ -1,17 +1,14 @@
 import {siteMap} from './SiteMap';
 
-describe('barcode inventory navigation', () => {
-    test('makes barcode inventory available to a non-admin employee', () => {
+describe('unified inventory navigation', () => {
+    test('makes unified inventory available to a non-admin employee without a separate barcode page', () => {
         const employeeItems = siteMap(false);
 
         expect(employeeItems).toEqual(expect.arrayContaining([
-            expect.objectContaining({path: 'barcode-inventory', text: 'Инвентаризация по штрих-коду'}),
+            expect.objectContaining({path: 'inventory', text: 'Инвентаризация'}),
         ]));
-    });
-
-    test('keeps the legacy inventory entry restricted to administrators', () => {
-        expect(siteMap(false)).not.toEqual(expect.arrayContaining([
-            expect.objectContaining({path: 'inventory'}),
+        expect(employeeItems).not.toEqual(expect.arrayContaining([
+            expect.objectContaining({path: 'barcode-inventory'}),
         ]));
     });
 });
