@@ -12,6 +12,7 @@ export const siteMap = (isAdmin, userId = 0) => {
         { id: 15, path: "prepaids", text: "\u041f\u0440\u0435\u0434\u043e\u043f\u043b\u0430\u0442\u044b" },
         { id: 16, path: "reals", text: "\u0420\u0435\u0430\u043b\u0438\u0437\u0430\u0446\u0438\u044f" },
         { id: 17, path: "pledges", text: "\u0417\u0430\u043b\u043e\u0433\u0438" },
+        { id: 18, path: "inventory", text: "\u0418\u043d\u0432\u0435\u043d\u0442\u0430\u0440\u0438\u0437\u0430\u0446\u0438\u044f" },
 
         { id: 21, path: "customers", text: "\u0424\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u043b\u0438\u0446\u0430" },
         { id: 22, path: "entities", text: "\u042e\u0440\u0438\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u043b\u0438\u0446\u0430" },
@@ -40,9 +41,6 @@ export const siteMap = (isAdmin, userId = 0) => {
     return isAdmin
 
         ? map.concat([
-
-            { id: 19, path: "inventory", text: "\u0418\u043d\u0432\u0435\u043d\u0442\u0430\u0440\u0438\u0437\u0430\u0446\u0438\u044f" },
-
             { id: 32, path: "funds", text: "\u0414\u0432\u0438\u0436\u0435\u043d\u0438\u0435 \u0434\u0435\u043d\u0435\u0433" },
             { id: 33, path: "zp", text: "\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430" },
 
