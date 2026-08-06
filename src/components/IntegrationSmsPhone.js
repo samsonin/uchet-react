@@ -2,6 +2,9 @@ import React, {useEffect, useState} from "react";
 import {connect} from "react-redux";
 import {QRCodeCanvas} from "qrcode.react";
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
     Button,
     Dialog,
     DialogActions,
@@ -20,6 +23,7 @@ import {
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LinkIcon from "@mui/icons-material/Link";
 import DownloadIcon from "@mui/icons-material/Download";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {useSnackbar} from "notistack";
 
 import rest from "./Rest";
@@ -322,19 +326,29 @@ const IntegrationSmsPhone = props => {
         </Dialog>
 
         <Grid item xs={12}>
-            <Typography variant="h5">Журнал SMS Gateway</Typography>
-            {auditEvents.length === 0 && <Paper style={{padding: "1rem", marginTop: "0.75rem"}}>
-                <Typography variant="body2">Событий пока нет.</Typography>
-            </Paper>}
-            {auditEvents.slice(0, 5).map(event => <Paper key={"sms-audit-" + event.id} style={{padding: "0.75rem 1rem", marginTop: "0.5rem"}}>
-                <Typography>{auditEventLabels[event.event_type] || event.event_type}</Typography>
-                <Typography variant="body2">
-                    {formatLastSeen(event.created_at)}
-                    {event.mobile_device_id && devices.find(device => +device.id === +event.mobile_device_id)?.device_name
-                        ? " · " + devices.find(device => +device.id === +event.mobile_device_id).device_name
-                        : ""}
-                </Typography>
-            </Paper>)}
+            <Accordion disableGutters elevation={1}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <div>
+                        <Typography variant="h5">Журнал SMS Gateway</Typography>
+                        <Typography variant="body2">Последние пять событий отправки SMS</Typography>
+                    </div>
+                </AccordionSummary>
+                <AccordionDetails>
+                    {auditEvents.length === 0 && <Typography variant="body2">Событий пока нет.</Typography>}
+                    {auditEvents.slice(0, 5).map(event => <Paper key={"sms-audit-" + event.id} style={{padding: "0.75rem 1rem", marginTop: "0.5rem"}}>
+                        <Typography>{auditEventLabels[event.event_type] || event.event_type}</Typography>
+                        {event.message && <Typography variant="body2" style={{marginTop: "0.35rem", whiteSpace: "pre-wrap"}}>
+                            Сообщение: {event.message}
+                        </Typography>}
+                        <Typography variant="body2" style={{marginTop: event.message ? "0.35rem" : 0}}>
+                            {formatLastSeen(event.created_at)}
+                            {event.mobile_device_id && devices.find(device => +device.id === +event.mobile_device_id)?.device_name
+                                ? " · " + devices.find(device => +device.id === +event.mobile_device_id).device_name
+                                : ""}
+                        </Typography>
+                    </Paper>)}
+                </AccordionDetails>
+            </Accordion>
         </Grid>
 
         <Grid item xs={12}>
