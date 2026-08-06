@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { Dialog, DialogContent, DialogTitle, Typography } from "@mui/material";
 
 import { UiDropdown } from "../common/Ui";
 import {
@@ -15,6 +16,8 @@ import {
 
 const UpdatesMenu = ({ userId }) => {
     const [seenIds, setSeenIds] = useState(() => getSeenUpdateIds(userId));
+    const [activeVideo, setActiveVideo] = useState(null);
+    const [isVideoUnavailable, setVideoUnavailable] = useState(false);
 
     useEffect(() => {
         setSeenIds(getSeenUpdateIds(userId));
@@ -29,6 +32,18 @@ const UpdatesMenu = ({ userId }) => {
 
     const markAllSeen = () => {
         setSeenIds(markAllUpdatesSeen(userId));
+    };
+
+    const openVideo = (update, close) => {
+        setSeenIds(markUpdateSeen(update.id, userId));
+        setVideoUnavailable(false);
+        setActiveVideo(update.video);
+        close();
+    };
+
+    const closeVideo = () => {
+        setActiveVideo(null);
+        setVideoUnavailable(false);
     };
 
     return <>
@@ -75,19 +90,14 @@ const UpdatesMenu = ({ userId }) => {
                                 <div className="updates-item-title">{update.title}</div>
                                 <div className="updates-item-text">{update.description}</div>
                                 <div className="updates-item-actions">
-                                    {update.video?.src && <a
-                                        href={update.video.src}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    {update.video?.src && <button
+                                        type="button"
                                         className="updates-action-secondary"
-                                        onClick={() => {
-                                            markSeen(update.id);
-                                            close();
-                                        }}
+                                        onClick={() => openVideo(update, close)}
                                     >
                                         <PlayArrowIcon fontSize="small" />
                                         Видео
-                                    </a>}
+                                    </button>}
                                 </div>
                             </div>
                         </div>;
@@ -95,6 +105,23 @@ const UpdatesMenu = ({ userId }) => {
                 </div>
             </div>}
         </UiDropdown>
+        <Dialog open={Boolean(activeVideo)} onClose={closeVideo} maxWidth="md" fullWidth>
+            <DialogTitle>{activeVideo?.title || "Видео"}</DialogTitle>
+            <DialogContent>
+                {isVideoUnavailable ? <Typography>
+                    Видео временно недоступно. Попробуйте открыть его позже.
+                </Typography> : activeVideo && <video
+                    autoPlay
+                    controls
+                    poster={activeVideo.poster}
+                    style={{display: "block", width: "100%", maxHeight: "70vh"}}
+                    onError={() => setVideoUnavailable(true)}
+                >
+                    <source src={activeVideo.src} type="video/mp4" />
+                    Ваш браузер не поддерживает воспроизведение видео.
+                </video>}
+            </DialogContent>
+        </Dialog>
     </>;
 };
 

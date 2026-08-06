@@ -19,7 +19,7 @@ afterEach(() => {
 });
 
 describe("UpdatesMenu", () => {
-    it("opens update videos in a separate tab", () => {
+    it("opens update videos inside the application", () => {
         const container = document.createElement("div");
         document.body.appendChild(container);
         const root = createRoot(container);
@@ -32,12 +32,42 @@ describe("UpdatesMenu", () => {
             container.querySelector(".updates-menu-button").click();
         });
 
-        const videoLink = container.querySelector(".updates-action-secondary");
+        const videoButton = container.querySelector(".updates-action-secondary");
 
-        expect(videoLink.tagName).toBe("A");
-        expect(videoLink.getAttribute("href")).toBe("https://f005.backblazeb2.com/file/uchet-store/updates/good-picture-qr.mp4");
-        expect(videoLink.getAttribute("target")).toBe("_blank");
-        expect(videoLink.getAttribute("rel")).toBe("noopener noreferrer");
+        expect(videoButton.tagName).toBe("BUTTON");
+
+        act(() => {
+            videoButton.click();
+        });
+
+        expect(document.body.querySelector("video source").getAttribute("src"))
+            .toBe("https://f005.backblazeb2.com/file/uchet-store/updates/good-picture-qr.mp4");
+
+        act(() => root.unmount());
+    });
+
+    it("shows a friendly message when video storage is unavailable", () => {
+        const container = document.createElement("div");
+        document.body.appendChild(container);
+        const root = createRoot(container);
+
+        act(() => {
+            root.render(<UpdatesMenu userId={7} />);
+        });
+
+        act(() => {
+            container.querySelector(".updates-menu-button").click();
+        });
+
+        act(() => {
+            container.querySelector(".updates-action-secondary").click();
+        });
+
+        act(() => {
+            document.body.querySelector("video").dispatchEvent(new Event("error"));
+        });
+
+        expect(document.body.textContent).toContain("Видео временно недоступно");
 
         act(() => root.unmount());
     });
