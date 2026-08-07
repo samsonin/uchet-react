@@ -27,7 +27,7 @@
 **Interfaces:**
 - Produces: `groupSmsGatewayAuditEvents(events)` returning `{key, latest, message, events, isSms}` entries in source order.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```js
 const groups = groupSmsGatewayAuditEvents([
@@ -43,13 +43,13 @@ expect(groups[0].events).toHaveLength(3);
 expect(groups[1]).toMatchObject({isSms: false, latest: {event_type: 'pairing_code_created'}});
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/smsGatewayAudit.test.js`
 
 Expected: FAIL because `groupSmsGatewayAuditEvents` does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```js
 export const groupSmsGatewayAuditEvents = events => events.reduce((groups, event) => {
@@ -63,13 +63,13 @@ export const groupSmsGatewayAuditEvents = events => events.reduce((groups, event
 }, []);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/smsGatewayAudit.test.js`
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/smsGatewayAudit.js src/components/smsGatewayAudit.test.js
@@ -86,7 +86,7 @@ git commit -m "feat: group sms gateway audit events"
 - Consumes: `groupSmsGatewayAuditEvents(events)` from Task 1.
 - Produces: journal summaries with one message and details containing prior status-time transitions.
 
-- [ ] **Step 1: Extend the failing test**
+- [x] **Step 1: Extend the failing test**
 
 ```js
 expect(groups[0].events.slice(1).map(event => event.event_type)).toEqual([
@@ -95,13 +95,13 @@ expect(groups[0].events.slice(1).map(event => event.event_type)).toEqual([
 ]);
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/smsGatewayAudit.test.js`
 
 Expected: FAIL because the helper does not preserve earlier transitions.
 
-- [ ] **Step 3: Render the groups**
+- [x] **Step 3: Render the groups**
 
 ```js
 const auditGroups = groupSmsGatewayAuditEvents(auditEvents);
@@ -112,7 +112,7 @@ const auditGroups = groupSmsGatewayAuditEvents(auditEvents);
 </Accordion>)}
 ```
 
-- [ ] **Step 4: Run focused tests and production build**
+- [x] **Step 4: Run focused tests and production build**
 
 Run: `npx react-scripts test --watchAll=false --runInBand src/components/smsGatewayAudit.test.js src/components/IntegrationSmsPhone.test.js`
 
@@ -120,7 +120,7 @@ Run: `npm run build`
 
 Expected: all focused tests and the production build pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/IntegrationSmsPhone.js src/components/smsGatewayAudit.test.js
