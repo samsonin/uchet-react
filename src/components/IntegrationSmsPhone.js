@@ -36,6 +36,7 @@ import {
     resolveMobileDeviceStockId,
     shouldSelectMobileDeviceStock,
 } from "./mobileDevicePairing";
+import {groupSmsGatewayAuditEvents} from "./smsGatewayAudit";
 
 export const GATEWAY_APK_URL = "https://f005.backblazeb2.com/file/uchet-store/mobile/uchet-sms-gateway-latest.apk";
 const PRIVACY_URL = "https://api.uchet.store/legal/sms-gateway/privacy";
@@ -111,6 +112,7 @@ const IntegrationSmsPhone = props => {
     const [auditEvents, setAuditEvents] = useState([]);
     const {enqueueSnackbar} = useSnackbar();
     const qrPayload = getMobileDeviceQrPayload(pairingCode);
+    const auditGroups = groupSmsGatewayAuditEvents(auditEvents);
 
     const refreshDevices = () => rest("mobile-devices", "GET", undefined, false, {
         updateStore: false,
@@ -118,7 +120,7 @@ const IntegrationSmsPhone = props => {
         if (res.status === 200) setDevices(res.body?.mobile_devices || []);
     });
 
-    const refreshAuditEvents = () => rest("sms-gateway/audit-events?limit=5", "GET", undefined, false, {
+    const refreshAuditEvents = () => rest("sms-gateway/audit-events?limit=30", "GET", undefined, false, {
         updateStore: false,
     }).then(res => {
         if (res.status === 200) setAuditEvents(res.body?.audit_events || []);
@@ -330,23 +332,42 @@ const IntegrationSmsPhone = props => {
                 <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
                     <div>
                         <Typography variant="h5">Журнал SMS Gateway</Typography>
-                        <Typography variant="body2">Последние пять событий отправки SMS</Typography>
+                        <Typography variant="body2">Последние пять SMS и системных событий</Typography>
                     </div>
                 </AccordionSummary>
                 <AccordionDetails>
                     {auditEvents.length === 0 && <Typography variant="body2">Событий пока нет.</Typography>}
-                    {auditEvents.slice(0, 5).map(event => <Paper key={"sms-audit-" + event.id} style={{padding: "0.75rem 1rem", marginTop: "0.5rem"}}>
-                        <Typography>{auditEventLabels[event.event_type] || event.event_type}</Typography>
-                        {event.message && <Typography variant="body2" style={{marginTop: "0.35rem", whiteSpace: "pre-wrap"}}>
-                            Сообщение: {event.message}
-                        </Typography>}
-                        <Typography variant="body2" style={{marginTop: event.message ? "0.35rem" : 0}}>
-                            {formatLastSeen(event.created_at)}
-                            {event.mobile_device_id && devices.find(device => +device.id === +event.mobile_device_id)?.device_name
-                                ? " · " + devices.find(device => +device.id === +event.mobile_device_id).device_name
-                                : ""}
-                        </Typography>
-                    </Paper>)}
+                    {auditGroups.slice(0, 5).map(group => {
+                        const latest = group.latest;
+                        const deviceName = latest.mobile_device_id && devices.find(device => +device.id === +latest.mobile_device_id)?.device_name;
+
+                        if (!group.isSms) return <Paper key={group.key} style={{padding: "0.75rem 1rem", marginTop: "0.5rem"}}>
+                            <Typography>{auditEventLabels[latest.event_type] || latest.event_type}</Typography>
+                            <Typography variant="body2">
+                                {formatLastSeen(latest.created_at)}{deviceName ? " \u00b7 " + deviceName : ""}
+                            </Typography>
+                        </Paper>;
+
+                        return <Accordion key={group.key} disableGutters elevation={1} style={{marginTop: "0.5rem"}}>
+                            <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                                <div>
+                                    <Typography>{auditEventLabels[latest.event_type] || latest.event_type}</Typography>
+                                    {group.message && <Typography variant="body2" style={{marginTop: "0.35rem", whiteSpace: "pre-wrap"}}>
+                                        {"\u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435:"} {group.message}
+                                    </Typography>}
+                                    <Typography variant="body2" style={{marginTop: group.message ? "0.35rem" : 0}}>
+                                        {formatLastSeen(latest.created_at)}{deviceName ? " \u00b7 " + deviceName : ""}
+                                    </Typography>
+                                </div>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                {group.events.length === 1 && <Typography variant="body2">{"\u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0445 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439 \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u043f\u043e\u043a\u0430 \u043d\u0435\u0442."}</Typography>}
+                                {group.events.slice(1).map(event => <Typography key={event.id} variant="body2" style={{marginTop: "0.35rem"}}>
+                                    {formatLastSeen(event.created_at)} {"\u2014"} {auditEventLabels[event.event_type] || event.event_type}
+                                </Typography>)}
+                            </AccordionDetails>
+                        </Accordion>;
+                    })}
                 </AccordionDetails>
             </Accordion>
         </Grid>

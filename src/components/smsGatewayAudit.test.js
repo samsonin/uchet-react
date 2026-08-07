@@ -16,6 +16,10 @@ describe('SMS Gateway audit grouping', () => {
             latest: {event_type: 'result_delivered'},
         });
         expect(groups[0].events).toHaveLength(3);
+        expect(groups[0].events.slice(1).map(event => event.event_type)).toEqual([
+            'result_sent',
+            'sent_to_fcm',
+        ]);
         expect(groups[1]).toMatchObject({
             isSms: false,
             latest: {event_type: 'pairing_code_created'},
