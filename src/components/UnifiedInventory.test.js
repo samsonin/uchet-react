@@ -21,12 +21,13 @@ describe('unified inventory', () => {
         container.remove();
     });
 
-    test('starts in ordinary inventory mode and switches to barcode inventory after enabling scanner', async () => {
+    test('starts with only equipment enabled and switches to barcode inventory when disabled', async () => {
         await act(async () => {
             root.render(<UnifiedInventory app={{current_stock_id: 1}}/>);
         });
 
-        expect(container.querySelector('label').textContent).toContain('\u0412\u043a\u043b\u044e\u0447\u0438\u0442\u044c \u0441\u043a\u0430\u043d\u0435\u0440');
+        expect(container.querySelector('label').textContent).toContain('Только техника');
+        expect(container.querySelector('input[type="checkbox"]').checked).toBe(true);
         expect(container.querySelector('[data-testid="ordinary-inventory"]')).not.toBeNull();
         expect(container.querySelector('[data-testid="barcode-inventory"]')).toBeNull();
 
@@ -38,7 +39,7 @@ describe('unified inventory', () => {
         expect(container.querySelector('[data-testid="ordinary-inventory"]')).toBeNull();
     });
 
-    test('clears a pending global scan while scanner mode is disabled', async () => {
+    test('clears a pending global scan while only equipment is enabled', async () => {
         const setOurBarcode = jest.fn();
 
         await act(async () => {

@@ -4,20 +4,20 @@ import Inventory from './Inventory';
 import BarcodeInventoryPage from './BarcodeInventoryPage';
 
 const UnifiedInventory = props => {
-    const [scannerEnabled, setScannerEnabled] = useState(false);
+    const [onlyEquipment, setOnlyEquipment] = useState(true);
 
     useEffect(() => {
-        if (!scannerEnabled && props.newScan) props.setOurBarcode?.();
-    }, [props.newScan, props.setOurBarcode, scannerEnabled]);
+        if (onlyEquipment && props.newScan) props.setOurBarcode?.();
+    }, [onlyEquipment, props.newScan, props.setOurBarcode]);
 
     return <>
         <FormControlLabel
-            control={<Checkbox checked={scannerEnabled} onChange={event => setScannerEnabled(event.target.checked)}/>}
-            label={'\u0412\u043a\u043b\u044e\u0447\u0438\u0442\u044c \u0441\u043a\u0430\u043d\u0435\u0440'}
+            control={<Checkbox checked={onlyEquipment} onChange={event => setOnlyEquipment(event.target.checked)}/>}
+            label="Только техника"
         />
-        {scannerEnabled
-            ? <BarcodeInventoryPage {...props}/>
-            : <Inventory {...props}/>
+        {onlyEquipment
+            ? <Inventory {...props}/>
+            : <BarcodeInventoryPage {...props}/>
         }
     </>;
 };
