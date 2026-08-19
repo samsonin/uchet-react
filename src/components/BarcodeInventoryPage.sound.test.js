@@ -11,6 +11,10 @@ jest.mock('react-redux', () => ({
 
 jest.mock('./Rest', () => jest.fn());
 
+jest.mock('./common/CategoryHandler', () => props => (
+    <button type="button" onClick={() => props.setId(6)}>Выбрать категорию</button>
+));
+
 jest.mock('notistack', () => ({
     useSnackbar: () => ({enqueueSnackbar: mockEnqueueSnackbar}),
 }));
@@ -71,5 +75,24 @@ describe('barcode inventory scan sound', () => {
         });
 
         expect(global.Audio).toHaveBeenCalledWith('/sounds/success.wav');
+    });
+
+    test('reloads the inventory with the selected category filter', async () => {
+        await act(async () => {
+            root.render(<BarcodeInventoryPage app={{current_stock_id: 1}} setOurBarcode={jest.fn()}/>);
+            await Promise.resolve();
+        });
+
+        rest.mockClear();
+
+        await act(async () => {
+            [...container.querySelectorAll('button')]
+                .find(button => button.textContent === 'Выбрать категорию')
+                .click();
+            await Promise.resolve();
+            await Promise.resolve();
+        });
+
+        expect(rest).toHaveBeenCalledWith('inventory/1?scope=all&category_id=6');
     });
 });

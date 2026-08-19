@@ -23,6 +23,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import rest from './Rest';
 import {useSnackbar} from 'notistack';
+import CategoryHandler from './common/CategoryHandler';
 import {inventoryScanSound} from './inventoryScanSound';
 import {
     applyInventoryScan,
@@ -51,6 +52,7 @@ const scanMessage = result => ({
     consumed: 'Позиция уже израсходована',
     other_stock: 'Позиция относится к другой точке',
     out_of_scope: 'Позиция не входит в выбранный охват',
+    out_of_category: 'Позиция не входит в выбранную категорию',
     invalid_scope: 'Выберите корректный охват инвентаризации',
 }[result] || 'Не удалось учесть позицию');
 
@@ -58,6 +60,7 @@ const BarcodeInventoryPage = props => {
     const stockId = props.app.current_stock_id;
     const {enqueueSnackbar} = useSnackbar();
     const [scope, setScope] = useState('all');
+    const [categoryId, setCategoryId] = useState(0);
     const [snapshot, setSnapshot] = useState(emptySnapshot);
     const [search, setSearch] = useState('');
     const [hideReconciled, setHideReconciled] = useState(false);
@@ -71,12 +74,14 @@ const BarcodeInventoryPage = props => {
             return;
         }
 
-        rest(`inventory/${stockId}?scope=${scope}`)
+        const categoryQuery = categoryId ? `&category_id=${categoryId}` : '';
+
+        rest(`inventory/${stockId}?scope=${scope}${categoryQuery}`)
             .then(res => {
                 if (res.status === 200) setSnapshot(res.body);
                 else enqueueSnackbar(res.body?.error || 'Не удалось загрузить инвентаризацию', {variant: 'error'});
             });
-    }, [enqueueSnackbar, scope, stockId]);
+    }, [categoryId, enqueueSnackbar, scope, stockId]);
 
     useEffect(() => {
         loadSnapshot();
@@ -89,7 +94,7 @@ const BarcodeInventoryPage = props => {
 
         isSubmitting.current = true;
 
-        rest(`inventory/${stockId}/${normalizedBarcode}`, 'POST', {scope})
+        rest(`inventory/${stockId}/${normalizedBarcode}`, 'POST', {scope, category_id: categoryId})
             .then(res => {
                 if (!res.status) {
                     inventoryScanSound('network_error');
@@ -109,7 +114,7 @@ const BarcodeInventoryPage = props => {
                 setBarcode('');
                 props.setOurBarcode?.();
             });
-    }, [enqueueSnackbar, props, scope, stockId]);
+    }, [categoryId, enqueueSnackbar, props, scope, stockId]);
 
     useEffect(() => {
         if (props.newScan) submitBarcode(props.newScan);
@@ -118,7 +123,7 @@ const BarcodeInventoryPage = props => {
     const resetInventory = () => {
         if (!stockId) return;
 
-        rest(`inventory/${stockId}`, 'DELETE', {scope})
+        rest(`inventory/${stockId}`, 'DELETE', {scope, category_id: categoryId})
             .then(res => {
                 if (res.status === 200) {
                     setSnapshot(res.body);
@@ -161,6 +166,7 @@ const BarcodeInventoryPage = props => {
                     {inventoryScopeLabel(value)}
                 </Button>)}
             </ButtonGroup>
+            <CategoryHandler id={categoryId} setId={setCategoryId}/>
             <Button color="error" onClick={() => setIsResetOpen(true)}>Сбросить результаты</Button>
         </div>
 
