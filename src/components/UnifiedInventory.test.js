@@ -21,31 +21,31 @@ describe('unified inventory', () => {
         container.remove();
     });
 
-    test('starts with only equipment enabled and switches to barcode inventory when disabled', async () => {
+    test('starts with only equipment disabled and switches to ordinary inventory when enabled', async () => {
         await act(async () => {
             root.render(<UnifiedInventory app={{current_stock_id: 1}}/>);
         });
 
         expect(container.querySelector('label').textContent).toContain('Только техника');
-        expect(container.querySelector('input[type="checkbox"]').checked).toBe(true);
-        expect(container.querySelector('[data-testid="ordinary-inventory"]')).not.toBeNull();
-        expect(container.querySelector('[data-testid="barcode-inventory"]')).toBeNull();
+        expect(container.querySelector('input[type="checkbox"]').checked).toBe(false);
+        expect(container.querySelector('[data-testid="barcode-inventory"]')).not.toBeNull();
+        expect(container.querySelector('[data-testid="ordinary-inventory"]')).toBeNull();
 
         await act(async () => {
             container.querySelector('input[type="checkbox"]').click();
         });
 
-        expect(container.querySelector('[data-testid="barcode-inventory"]')).not.toBeNull();
-        expect(container.querySelector('[data-testid="ordinary-inventory"]')).toBeNull();
+        expect(container.querySelector('[data-testid="ordinary-inventory"]')).not.toBeNull();
+        expect(container.querySelector('[data-testid="barcode-inventory"]')).toBeNull();
     });
 
-    test('clears a pending global scan while only equipment is enabled', async () => {
+    test('keeps a pending global scan while only equipment is disabled', async () => {
         const setOurBarcode = jest.fn();
 
         await act(async () => {
             root.render(<UnifiedInventory app={{current_stock_id: 1}} newScan="112116000000000" setOurBarcode={setOurBarcode}/>);
         });
 
-        expect(setOurBarcode).toHaveBeenCalledTimes(1);
+        expect(setOurBarcode).not.toHaveBeenCalled();
     });
 });

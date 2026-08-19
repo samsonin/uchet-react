@@ -4,7 +4,7 @@ import Inventory from './Inventory';
 import BarcodeInventoryPage from './BarcodeInventoryPage';
 
 const UnifiedInventory = props => {
-    const [onlyEquipment, setOnlyEquipment] = useState(true);
+    const [onlyEquipment, setOnlyEquipment] = useState(false);
 
     useEffect(() => {
         if (onlyEquipment && props.newScan) props.setOurBarcode?.();
