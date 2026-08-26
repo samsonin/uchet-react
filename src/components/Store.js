@@ -27,6 +27,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import store from "../store";
 import { makeGroup } from "../Models/Good";
 import { PrintBarcodes } from "./common/PrintBarcodes";
+import { hasMoreStoreGoods } from "./storePagination";
 
 const oftenUsedButtons = [
     { label: 'Аксессуары', catId: 6 },
@@ -68,6 +69,7 @@ const Store = props => {
 
     const limit = useRef(25);
     const isRequest = useRef(false);
+    const hasMore = useRef(true);
     const requestId = useRef(0);
     const currentStock = appStocks.find(s => s.id === props.app.current_stock_id);
     const validStocks = useMemo(() => appStocks.filter(s => s.is_valid), [appStocks]);
@@ -102,7 +104,10 @@ const Store = props => {
     const sendRequest = ({ reset = false, append = false } = {}) => {
         const currentRequestId = ++requestId.current;
         isRequest.current = true;
-        if (reset) setGoods([]);
+        if (reset) {
+            hasMore.current = true;
+            setGoods([]);
+        }
 
         let url = 'goods?';
         if (catId) url += '&category_id=' + catId;
@@ -110,13 +115,15 @@ const Store = props => {
         if (!isAllStocks && currentStock) url += '&stock_id=' + currentStock.id;
         if (isPublic) url += '&is_public=1';
         if (isReject) url += '&is_reject=1';
-        if (!isGroup && limit.current > 0) url += '&limit=' + limit.current;
+        if (!isGroup && limit.current > 0) url += '&limit=' + (limit.current + 1);
 
         rest(url).then(res => {
             if (currentRequestId !== requestId.current) return;
 
             if (res.status === 200) {
-                const nextGoods = Array.isArray(res.body) ? res.body : [];
+                const responseGoods = Array.isArray(res.body) ? res.body : [];
+                hasMore.current = hasMoreStoreGoods(responseGoods.length, limit.current, isGroup);
+                const nextGoods = isGroup ? responseGoods : responseGoods.slice(0, limit.current);
 
                 setGoods(prev => {
                     if (!append) return nextGoods;
@@ -136,13 +143,14 @@ const Store = props => {
 
     useEffect(() => {
 
-        if (props.scrollDown) {
+        if (!props.scrollDown) return;
 
-            props.setScrollDown(false)
-            limit.current += 25
-            sendRequest({ append: true })
+        props.setScrollDown(false)
 
-        }
+        if (isRequest.current || !hasMore.current) return;
+
+        limit.current += 25
+        sendRequest({ append: true })
 
     }, [props.scrollDown])
 
@@ -199,6 +207,7 @@ const Store = props => {
 
     useEffect(() => {
         limit.current = 25
+        hasMore.current = true
     }, [search])
 
     const setCat = id => {
@@ -231,6 +240,7 @@ const Store = props => {
 
         setError(false)
         limit.current = 25
+        hasMore.current = true
         requestId.current++
         setGoods(prev => prev.filter(g => matchesStoreSearch(g, v)))
         setSearch(v)
