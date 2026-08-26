@@ -23,6 +23,7 @@ import QuickTextField from "../QuickTextField";
 import {getQuickTextOptions} from "../quickTexts";
 import {buildOrderCreatePayload} from "./orderCreatePayload";
 import {orderNotificationDocLinks} from "./orderNotificationDocs";
+import {getCheckoutShiftOptions, getCheckoutShiftPromptText} from "./checkoutShiftPrompt";
 
 const fieldsStyle = {
     margin: '.4rem',
@@ -190,6 +191,7 @@ const Info = props => {
     })
     const [isReasonOpen, setIsReasonOpen] = useState(false)
     const [reason, setReason] = useState('')
+    const [checkoutShiftPrompt, setCheckoutShiftPrompt] = useState(null)
 
     const setField = (name, value) => {
 
@@ -220,6 +222,11 @@ const Info = props => {
         if (res.status === 200) {
 
             setOrder(res.body.order)
+
+        } else if (res.status === 409 && res.body?.checkout_shift_required) {
+
+            needPrint.current = false
+            setCheckoutShiftPrompt(res.body)
 
         } else {
 
@@ -294,7 +301,7 @@ const Info = props => {
         })
     }
 
-    const checkoutRest = () => {
+    const checkoutRest = checkoutShift => {
 
         needPrint.current = true
 
@@ -306,6 +313,7 @@ const Info = props => {
             model,
             sum2,
             for_client,
+            ...(checkoutShift ? {checkout_shift: checkoutShift} : {}),
             ...state
         })
 
@@ -509,6 +517,32 @@ const Info = props => {
 
         </Dialog>
 
+
+        <Dialog
+            open={!!checkoutShiftPrompt}
+            onClose={() => setCheckoutShiftPrompt(null)}
+            className='non-printable'
+        >
+            <DialogTitle>К какой смене отнести закрытие?</DialogTitle>
+            <DialogContent>
+                {getCheckoutShiftPromptText(checkoutShiftPrompt)}
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => setCheckoutShiftPrompt(null)} color="secondary">
+                    Отмена
+                </Button>
+                {getCheckoutShiftOptions(checkoutShiftPrompt).map(option => <Button
+                    key={option.value}
+                    onClick={() => {
+                        setCheckoutShiftPrompt(null)
+                        checkoutRest(option.value)
+                    }}
+                    color="primary"
+                >
+                    {option.label}
+                </Button>)}
+            </DialogActions>
+        </Dialog>
 
         {order
             ? <>
