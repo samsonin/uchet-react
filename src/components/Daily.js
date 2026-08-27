@@ -48,6 +48,7 @@ import {
     normalizeDailyEmployees,
     normalizeDailyReport,
 } from "../common/dailyReports";
+import { getRefundPaymentLabel } from "./dailyPayments";
 
 const mainUrl = document.location.protocol + '//' + document.location.host
 
@@ -450,6 +451,7 @@ const Daily = props => {
     }
     const renderSumCell = (row, value) => {
         const videos = findCashPaymentDiscrepanciesBySaleId(cashPaymentDiscrepancies, getSaleId(row))
+        const refundPaymentLabel = getRefundPaymentLabel(row, appPaymentTypes)
 
         return <span style={{
             display: 'inline-flex',
@@ -457,6 +459,18 @@ const Daily = props => {
             gap: 8,
         }}>
             <span>{value}</span>
+            {refundPaymentLabel && <Button
+                size="small"
+                variant="outlined"
+                onClick={event => openPayments(event, row)}
+                style={{
+                    minWidth: 0,
+                    padding: '1px 6px',
+                    lineHeight: 1.4,
+                }}
+            >
+                {refundPaymentLabel}
+            </Button>}
             {videos.length > 0 && <Button
                 size="small"
                 variant="outlined"

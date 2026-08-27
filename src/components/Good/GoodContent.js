@@ -35,7 +35,7 @@ import {
     isMatchingGoodPictureSession,
     normalizeGoodPictureSession,
 } from "./goodPictureQr";
-import { openOrderInNewTab } from "./GoodContent.helpers";
+import { getSaleUrl, openOrderInNewTab, withSaleSum } from "./GoodContent.helpers";
 
 const GOOD_PICTURE_POLL_INTERVAL_MS = 3000;
 
@@ -192,13 +192,13 @@ const GoodContent = props => {
 
     const toSale = () => {
 
-        rest('sales/' + props.app.current_stock_id + '/' + good.barcode + '/' + sum, 'POST')
+        rest(getSaleUrl(props.app.current_stock_id, good.barcode, sum), 'POST')
             .then(res => {
                 if (res.status === 200) {
 
                     props.close(good.barcode)
 
-                    if (isShowcase) Print(doc, props.alias)
+                    if (isShowcase) Print(doc, withSaleSum(props.alias, sum))
                     else enqueueSnackbar('продано!', { variant: 'success' })
 
                 } else {
