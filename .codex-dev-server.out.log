@@ -1,0 +1,26 @@
+
+> uchet.store@0.1.7 start
+> cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start
+
+Starting the development server...
+
+Compiled successfully!
+
+You can now view uchet.store in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://172.19.0.1:3000
+
+Note that the development build is not optimized.
+To create a production build, use yarn build.
+
+webpack compiled [1m[32msuccessfully[39m[22m
+Compiling...
+Compiled successfully!
+webpack compiled [1m[32msuccessfully[39m[22m
+Compiling...
+Compiled successfully!
+webpack compiled [1m[32msuccessfully[39m[22m
+Compiling...
+Compiled successfully!
+webpack compiled [1m[32msuccessfully[39m[22m
