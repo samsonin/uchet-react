@@ -28,6 +28,7 @@ import store from "../store";
 import { makeGroup } from "../Models/Good";
 import { PrintBarcodes } from "./common/PrintBarcodes";
 import { hasMoreStoreGoods } from "./storePagination";
+import { isStoreFindDisabled } from "./storeSearch";
 
 const oftenUsedButtons = [
     { label: 'Аксессуары', catId: 6 },
@@ -407,7 +408,7 @@ const Store = props => {
                     style={{
                         marginInline: '.3rem'
                     }}
-                    disabled={isRequest.current}
+                    disabled={isStoreFindDisabled(isRequest.current, search)}
                     variant="contained"
                     color="primary"
                     size="small"
