@@ -48,7 +48,7 @@ import {
     normalizeDailyEmployees,
     normalizeDailyReport,
 } from "../common/dailyReports";
-import { getRefundPaymentLabel } from "./dailyPayments";
+import { getDailyPaymentSaleId } from "./dailyPayments";
 
 const mainUrl = document.location.protocol + '//' + document.location.host
 
@@ -171,11 +171,6 @@ const getPaymentDraftRows = (row, paymentTypes) => {
     const currentPayment = currentPayments[0]
 
     return currentPayment ? [currentPayment] : []
-}
-
-const getSaleId = row => {
-    const wf = parseMaybeJson(row?.wf)
-    return row?.sale_id ?? wf?.sale_id ?? row?.id
 }
 
 const Daily = props => {
@@ -450,8 +445,7 @@ const Daily = props => {
         setCashPaymentVideos(videos)
     }
     const renderSumCell = (row, value) => {
-        const videos = findCashPaymentDiscrepanciesBySaleId(cashPaymentDiscrepancies, getSaleId(row))
-        const refundPaymentLabel = getRefundPaymentLabel(row, appPaymentTypes)
+        const videos = findCashPaymentDiscrepanciesBySaleId(cashPaymentDiscrepancies, getDailyPaymentSaleId(row))
 
         return <span style={{
             display: 'inline-flex',
@@ -459,18 +453,6 @@ const Daily = props => {
             gap: 8,
         }}>
             <span>{value}</span>
-            {refundPaymentLabel && <Button
-                size="small"
-                variant="outlined"
-                onClick={event => openPayments(event, row)}
-                style={{
-                    minWidth: 0,
-                    padding: '1px 6px',
-                    lineHeight: 1.4,
-                }}
-            >
-                {refundPaymentLabel}
-            </Button>}
             {videos.length > 0 && <Button
                 size="small"
                 variant="outlined"
@@ -502,7 +484,7 @@ const Daily = props => {
 
         setPaymentSaving(true)
 
-        rest('sales/' + stock + '/' + getSaleId(paymentRow), 'PATCH', payload)
+        rest('sales/' + stock + '/' + getDailyPaymentSaleId(paymentRow), 'PATCH', payload)
             .then(res => {
                 if (res.status === 200) {
                     const nextWf = parseMaybeJson(paymentRow.wf)

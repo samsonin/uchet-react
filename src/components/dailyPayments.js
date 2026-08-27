@@ -1,5 +1,3 @@
-const CASH_PAYMENT_LABEL = 'Наличные';
-
 const parsePaymentData = value => {
     if (!value || typeof value !== 'string') return value || {};
 
@@ -10,13 +8,9 @@ const parsePaymentData = value => {
     }
 };
 
-export const getRefundPaymentLabel = (row, paymentTypes = []) => {
-    if (row?.action !== 'вернули') return '';
+export const getDailyPaymentSaleId = row => {
+    if (row?.action === 'вернули') return row.id;
 
-    const wf = parsePaymentData(row.wf);
-    const paymentId = wf?.payment_id ?? row?.payment_id ?? 0;
-
-    if (+paymentId === 0) return CASH_PAYMENT_LABEL;
-
-    return paymentTypes.find(type => +type.id === +paymentId)?.name || `#${paymentId}`;
+    const wf = parsePaymentData(row?.wf);
+    return row?.sale_id ?? wf?.sale_id ?? row?.id;
 };
