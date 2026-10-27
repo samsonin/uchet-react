@@ -64,6 +64,7 @@ import Sales from "./components/Sales";
 import Users from "./components/Settings/Users";
 import PassportCapturePage from "./components/customer/PassportCapturePage";
 import GoodPictureCapturePage from "./components/Good/GoodPictureCapturePage";
+import QrPaymentPage from "./components/QrPayment/QrPaymentPage";
 import CrmLeads from "./components/CrmLeads";
 import {
     crmLeadNotificationKey,
@@ -358,6 +359,11 @@ const App = props => {
             <Route path="/good-picture-capture/:token" element={<GoodPictureCapturePage />} />
             <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
+    }
+
+    // Partner order paid by SBP QR: no login, the token is in the fragment.
+    if (path === '/pay' || path === '/pay/') {
+        return <QrPaymentPage />
     }
 
     return <>
