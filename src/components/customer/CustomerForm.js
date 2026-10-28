@@ -27,6 +27,7 @@ import {
     normalizeCustomerFromBase,
 } from "./customerFormHelpers";
 import {
+    PASSPORT_UPLOAD_TIMEOUT_MS,
     getPassportOcrSessionStatusPath,
     isMatchingPassportOcrSession,
     normalizePassportOcrSession,
@@ -292,6 +293,7 @@ const CustomerForm = props => {
                 bodyType: "formData",
                 updateStore: false,
                 responseType: "auto",
+                timeoutMs: PASSPORT_UPLOAD_TIMEOUT_MS,
             });
 
             const recognizedFields = normalizePassportPayload(res.body);

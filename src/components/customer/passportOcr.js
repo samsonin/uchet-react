@@ -1,3 +1,6 @@
+// Recognition runs within the upload request and may try several OCR providers.
+export const PASSPORT_UPLOAD_TIMEOUT_MS = 5 * 60 * 1000;
+
 const passportFieldAliases = {
     fio: ["fio", "full_name", "name"],
     birthday: ["birthday", "birth_date", "date_of_birth"],

@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 
 import { PASSPORT_OCR_SESSION_PATH } from "../../constants";
 import rest from "../Rest";
+import { PASSPORT_UPLOAD_TIMEOUT_MS } from "./passportOcr";
 
 export default function PassportCapturePage() {
     const { token } = useParams();
@@ -35,11 +36,14 @@ export default function PassportCapturePage() {
             bodyType: "formData",
             updateStore: false,
             responseType: "auto",
+            timeoutMs: PASSPORT_UPLOAD_TIMEOUT_MS,
         });
 
         if (!res.ok) {
             setStatus("error");
-            setError(res.body?.message || "Не удалось загрузить фото. Проверьте ссылку или попробуйте еще раз.");
+            setError(res.body?.message || (res.error?.name === "AbortError"
+                ? "Сервер не успел обработать фото. Попробуйте еще раз."
+                : "Не удалось загрузить фото. Проверьте ссылку или попробуйте еще раз."));
             return;
         }
 
