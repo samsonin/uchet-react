@@ -21,6 +21,17 @@
     -->
 
     <title>Uchet.store – Онлайн учет, CRM система для малого бизнеса</title>
+    <script>
+      // /pay is the SBP payment page for buyers of partner shops: no "install the app" offer there.
+      // Without the manifest the browser does not offer to install; the event handler also hides
+      // Chrome's install bar should the browser have read the manifest already.
+      if (/^\/pay\/?$/.test(window.location.pathname)) {
+        document.title = 'Оплата через СБП';
+        var manifest = document.querySelector('link[rel="manifest"]');
+        if (manifest) manifest.parentNode.removeChild(manifest);
+        window.addEventListener('beforeinstallprompt', function (event) { event.preventDefault(); });
+      }
+    </script>
 
 </head>
 <body>

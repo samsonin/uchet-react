@@ -4013,9 +4013,14 @@
     line-height: 0;
 }
 
-.qr-payment-code svg {
+.qr-payment-code svg,
+.qr-payment-image {
     width: min(232px, 64vw);
     height: auto;
+}
+
+.qr-payment-image {
+    display: block;
 }
 
 .qr-payment-test {
