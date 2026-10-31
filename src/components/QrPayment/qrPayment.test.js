@@ -1,9 +1,11 @@
 import {
+    QR_PAYMENT_BANK_OPENED_PATH,
     formatAmount,
     formatCountdown,
     isFinalStatus,
     isMobileUserAgent,
     pageStateFromResponse,
+    reportBankOpen,
     safePaymentLink,
     secondsLeft,
     tokenFromHash,
@@ -61,5 +63,55 @@ describe("QR payment page helpers", () => {
         expect(isMobileUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)")).toBe(true);
         expect(isMobileUserAgent("Mozilla/5.0 (Linux; Android 15)")).toBe(true);
         expect(isMobileUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)")).toBe(false);
+    });
+
+    it("reports the move to the bank without touching the bank link", () => {
+        const calls = [];
+        const url = `https://api.uchet.store/${QR_PAYMENT_BANK_OPENED_PATH}`;
+        expect(reportBankOpen(TOKEN, {
+            url,
+            sendBeacon: (target, body) => {
+                calls.push({ target, body });
+                return true;
+            },
+        })).toBe(true);
+        expect(calls).toHaveLength(1);
+        expect(calls[0].target).toBe(url);
+        expect(calls[0].body.get("token")).toBe(TOKEN);
+        // Only the token travels: no pay link, no order details.
+        expect(Array.from(calls[0].body.keys())).toEqual(["token"]);
+
+        // A malformed token is never reported anywhere.
+        expect(reportBankOpen("short", { sendBeacon: () => { throw new Error("must not be called"); } })).toBe(false);
+        expect(reportBankOpen("", { sendBeacon: () => { throw new Error("must not be called"); } })).toBe(false);
+    });
+
+    it("survives a missing beacon, a network error and a blocked report", async () => {
+        let request = null;
+        expect(reportBankOpen(TOKEN, {
+            fetch: (target, init) => {
+                request = { target, init };
+                return Promise.reject(new Error("offline"));
+            },
+        })).toBe(true);
+        expect(request.init.method).toBe("POST");
+        expect(request.init.keepalive).toBe(true);
+        expect(request.init.body.get("token")).toBe(TOKEN);
+
+        // A beacon that refuses the queue falls through to fetch.
+        let fetched = 0;
+        expect(reportBankOpen(TOKEN, {
+            sendBeacon: () => false,
+            fetch: () => {
+                fetched += 1;
+                return Promise.resolve({ ok: true });
+            },
+        })).toBe(true);
+        expect(fetched).toBe(1);
+
+        // Nothing available or everything throwing: the bank still opens.
+        expect(reportBankOpen(TOKEN, { sendBeacon: null, fetch: null })).toBe(false);
+        expect(reportBankOpen(TOKEN, { sendBeacon: () => { throw new Error("blocked"); }, fetch: null })).toBe(false);
+        await Promise.resolve();
     });
 });

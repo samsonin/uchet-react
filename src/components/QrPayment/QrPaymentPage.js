@@ -8,7 +8,9 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlineOutlined";
 
 import rest from "../Rest";
+import { SERVER } from "../../constants";
 import {
+    QR_PAYMENT_BANK_OPENED_PATH,
     QR_PAYMENT_POLL_MS,
     QR_PAYMENT_SESSION_PATH,
     formatAmount,
@@ -16,6 +18,7 @@ import {
     isFinalStatus,
     isMobileUserAgent,
     pageStateFromResponse,
+    reportBankOpen,
     safePaymentLink,
     secondsLeft,
     tokenFromHash,
@@ -41,6 +44,8 @@ export default function QrPaymentPage() {
     const [qrImage, setQrImage] = useState(null);
     const timer = useRef(null);
     const finished = useRef(false);
+    // Leaving for the bank is reported once per order, however often the button is pressed.
+    const bankReported = useRef(false);
     const qrCanvasBox = useRef(null);
     const mobile = isMobileUserAgent(window.navigator.userAgent);
 
@@ -81,6 +86,13 @@ export default function QrPaymentPage() {
             window.removeEventListener("pageshow", recheck);
         };
     }, [token, load]);
+
+    // The move to the bank is a hint for the promised payment: it never blocks the bank.
+    const openBank = useCallback(() => {
+        if (bankReported.current || !token) return;
+        bankReported.current = true;
+        reportBankOpen(token, { url: `${SERVER}/${QR_PAYMENT_BANK_OPENED_PATH}` });
+    }, [token]);
 
     const order = state.kind === "order" ? state.order : null;
     const link = order?.status === "pending" ? safePaymentLink(order.qrPayload) : null;
@@ -152,7 +164,8 @@ export default function QrPaymentPage() {
                     : "Отсканируйте QR-код камерой телефона или в приложении банка и подтвердите оплату."}
             </Typography>
             {/* A new tab keeps this page, which notices the payment as soon as the buyer comes back. */}
-            {mobile && <Button variant="contained" size="large" href={link} target="_blank" rel="noopener noreferrer">
+            {mobile && <Button variant="contained" size="large" href={link} target="_blank" rel="noopener noreferrer"
+                               onClick={openBank}>
                 Открыть приложение банка
             </Button>}
             {mobile && qrImage && <Button variant="outlined" size="large" href={qrImage}
