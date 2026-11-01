@@ -7,7 +7,6 @@ import Typography from "@mui/material/Typography";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlineOutlined";
 
-import rest from "../Rest";
 import { SERVER } from "../../constants";
 import {
     QR_PAYMENT_BANK_OPENED_PATH,
@@ -15,7 +14,9 @@ import {
     QR_PAYMENT_SESSION_PATH,
     formatAmount,
     formatCountdown,
-    isFinalStatus,
+    isFinalOrder,
+    fetchPaymentSession,
+    returnUrlFromHash,
     isMobileUserAgent,
     pageStateFromResponse,
     reportBankOpen,
@@ -23,13 +24,6 @@ import {
     secondsLeft,
     tokenFromHash,
 } from "./qrPayment";
-
-const requestOptions = {
-    auth: false,
-    updateStore: false,
-    showGlobalLoader: false,
-    responseType: "auto",
-};
 
 const Message = ({ icon, title, children }) => <div className="qr-payment-message">
     {icon}
@@ -39,33 +33,54 @@ const Message = ({ icon, title, children }) => <div className="qr-payment-messag
 
 export default function QrPaymentPage() {
     const [token] = useState(() => tokenFromHash(window.location.hash));
+    const [returnUrl] = useState(() => returnUrlFromHash(window.location.hash));
     const [state, setState] = useState(() => token ? { kind: "loading" } : { kind: "not-found" });
     const [now, setNow] = useState(Date.now());
     const [qrImage, setQrImage] = useState(null);
     const timer = useRef(null);
     const finished = useRef(false);
+    const active = useRef(false);
+    const inFlight = useRef(null);
     // Leaving for the bank is reported once per order, however often the button is pressed.
     const bankReported = useRef(false);
     const qrCanvasBox = useRef(null);
     const mobile = isMobileUserAgent(window.navigator.userAgent);
 
     const load = useCallback(async () => {
+        if (!active.current || inFlight.current) return;
         clearTimeout(timer.current);
-        const response = await rest(QR_PAYMENT_SESSION_PATH, "POST", { token }, false, requestOptions);
+        const controller = new AbortController();
+        inFlight.current = controller;
+        const timeout = setTimeout(() => controller.abort(), 30000);
+        const response = await fetchPaymentSession(token, {
+            url: `${SERVER}/${QR_PAYMENT_SESSION_PATH}`, signal: controller.signal,
+        });
+        clearTimeout(timeout);
+        if (inFlight.current === controller) inFlight.current = null;
+        if (!active.current || controller.signal.aborted) {
+            if (active.current) timer.current = setTimeout(load, QR_PAYMENT_POLL_MS);
+            return;
+        }
         const next = pageStateFromResponse(response);
-        // A lost poll keeps the QR on screen; only the first load shows the network error.
-        setState(current => next.kind === "network" && current.kind === "order" ? current : next);
-        const status = next.kind === "order" ? next.order.status : null;
-        finished.current = !!status && isFinalStatus(status);
-        if (next.kind === "network" || (status && !isFinalStatus(status))) {
+        const transient = next.kind === "network" || next.kind === "unavailable";
+        // A lost poll keeps the QR; a temporary 503 must also recover without a new order.
+        setState(current => transient && current.kind === "order" ? current : next);
+        finished.current = next.kind === "order" && isFinalOrder(next.order);
+        if (transient || (next.kind === "order" && !finished.current)) {
             timer.current = setTimeout(load, QR_PAYMENT_POLL_MS);
         }
     }, [token]);
 
     useEffect(() => {
         document.title = "Оплата через СБП";
+        active.current = true;
         if (token) load();
-        return () => clearTimeout(timer.current);
+        return () => {
+            active.current = false;
+            clearTimeout(timer.current);
+            inFlight.current?.abort();
+            inFlight.current = null;
+        };
     }, [token, load]);
 
     useEffect(() => {
@@ -131,7 +146,13 @@ export default function QrPaymentPage() {
     } else if (order.status === "paid") {
         body = <Message icon={<CheckCircleOutlineIcon className="qr-payment-icon qr-payment-icon--ok" />}
                         title="Оплата получена">
-            Заказ №{order.orderNo} оплачен. Можно закрыть эту страницу и вернуться в приложение.
+            {order.fulfilled === false
+                ? order.fulfillmentReview
+                    ? `Оплата заказа №${order.orderNo} получена. Выдача доступа требует проверки. Обратитесь в поддержку на странице, где начинали оплату, и укажите номер заказа. Повторно платить не нужно.`
+                    : `Оплата заказа №${order.orderNo} получена. Ожидаем подтверждение выдачи доступа. Страница обновится сама. Повторно платить не нужно.`
+                : <>Заказ №{order.orderNo} оплачен. {returnUrl
+                    ? <Button className="qr-payment-retry" variant="contained" href={returnUrl}>Вернуться к подключению</Button>
+                    : "Вернитесь на страницу, где начинали оплату, или в приложение."}</>}
         </Message>;
     } else if (order.status === "review") {
         body = <Message icon={<CheckCircleOutlineIcon className="qr-payment-icon" />} title="Оплата проверяется">
@@ -141,7 +162,8 @@ export default function QrPaymentPage() {
     } else if (order.status === "failed") {
         body = <Message icon={<ErrorOutlineIcon className="qr-payment-icon qr-payment-icon--error" />}
                         title="Платёж не прошёл">
-            Деньги не списаны. Вернитесь на страницу, где начинали оплату, и создайте новый заказ.
+            Платёж по этому заказу не подтверждён. Если деньги списаны, не платите повторно: обратитесь в поддержку
+            на странице, где начинали оплату, и укажите номер заказа. Если не платили, создайте новый заказ.
         </Message>;
     } else if (order.status === "expired" || !link || left === 0) {
         body = <Message icon={<ErrorOutlineIcon className="qr-payment-icon qr-payment-icon--error" />}

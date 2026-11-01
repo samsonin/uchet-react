@@ -7,11 +7,48 @@ const FINAL_STATUSES = ["paid", "failed", "expired", "review"];
 
 /** The token travels only in the fragment, so it never reaches a server log. */
 export const tokenFromHash = hash => {
-    const token = String(hash || "").replace(/^#/, "").trim();
+    const token = String(hash || "").replace(/^#/, "").split("&")[0].trim();
     return TOKEN_PATTERN.test(token) ? token : null;
 };
 
 export const isFinalStatus = status => FINAL_STATUSES.includes(status);
+
+/** A bank receipt is final for the buyer only after the partner issued the access. */
+export const isFinalOrder = order => isFinalStatus(order?.status)
+    && !(order.status === "paid" && order.fulfilled === false && !order.fulfillmentReview);
+
+/** Only Flux's existing paid-key page can be the return destination; never an arbitrary redirect. */
+export const returnUrlFromHash = hash => {
+    try {
+        const raw = new URLSearchParams(String(hash || "").replace(/^#/, "")).get("returnTo");
+        const url = new URL(raw);
+        if (!["https://appblog.ru", "https://www.fluxvpn.pro", "https://fluxvpn.pro"].includes(url.origin)
+            || url.username || url.password || url.pathname !== "/pro" || url.hash
+            || url.searchParams.get("paid") !== "1"
+            || !/^cp_[a-f0-9]{48}$/.test(url.searchParams.get("payment") || "")
+            || Array.from(url.searchParams.keys()).some(key => !["lang", "paid", "payment"].includes(key))) return null;
+        return url.toString();
+    } catch (e) {
+        return null;
+    }
+};
+
+/** Public payment requests never read the CRM's login or localStorage. */
+export const fetchPaymentSession = async (token, { url = QR_PAYMENT_SESSION_PATH, signal, request = fetch } = {}) => {
+    try {
+        const response = await request(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "omit",
+            cache: "no-store",
+            signal,
+            body: JSON.stringify({ token }),
+        });
+        return { ok: response.ok, status: response.status, body: await response.json() };
+    } catch (e) {
+        return { ok: false, status: 0 };
+    }
+};
 
 export const formatAmount = (amount, currency) => {
     const value = Number(amount);

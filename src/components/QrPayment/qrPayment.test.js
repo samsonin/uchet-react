@@ -3,6 +3,9 @@ import {
     formatAmount,
     formatCountdown,
     isFinalStatus,
+    isFinalOrder,
+    fetchPaymentSession,
+    returnUrlFromHash,
     isMobileUserAgent,
     pageStateFromResponse,
     reportBankOpen,
@@ -113,5 +116,48 @@ describe("QR payment page helpers", () => {
         expect(reportBankOpen(TOKEN, { sendBeacon: null, fetch: null })).toBe(false);
         expect(reportBankOpen(TOKEN, { sendBeacon: () => { throw new Error("blocked"); }, fetch: null })).toBe(false);
         await Promise.resolve();
+    });
+});
+
+
+describe("QR checkout recovery", () => {
+    const returnUrl = `https://appblog.ru/pro?lang=ru&paid=1&payment=cp_${"b".repeat(48)}`;
+    it("keeps legacy payment links and returns only to the bought-key page", () => {
+        const hash = `#${TOKEN}&returnTo=${encodeURIComponent(returnUrl)}`;
+        expect(tokenFromHash(hash)).toBe(TOKEN);
+        expect(returnUrlFromHash(hash)).toBe(returnUrl);
+        expect(returnUrlFromHash(`#${TOKEN}`)).toBeNull();
+        for (const bad of [
+            returnUrl.replace("appblog.ru", "appblog.ru.evil.test"),
+            returnUrl.replace("https:", "http:"),
+            returnUrl.replace("/pro?", "/other?"),
+            returnUrl + "&redirect=https://evil.test",
+            returnUrl + "#private-key",
+            returnUrl.replace("cp_", "bad_"),
+        ]) expect(returnUrlFromHash(`#${TOKEN}&returnTo=${encodeURIComponent(bad)}`)).toBeNull();
+    });
+    it("separates money received from access delivered and preserves older API answers", () => {
+        expect(isFinalOrder({ status: "pending" })).toBe(false);
+        expect(isFinalOrder({ status: "paid", fulfilled: false })).toBe(false);
+        expect(isFinalOrder({ status: "paid", fulfilled: true })).toBe(true);
+        expect(isFinalOrder({ status: "paid", fulfilled: false, fulfillmentReview: true })).toBe(true);
+        expect(isFinalOrder({ status: "paid" })).toBe(true);
+    });
+    it("requests the public order without reading CRM login storage", async () => {
+        const storage = jest.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new Error("blocked"); });
+        try {
+            const request = jest.fn(async () => ({ ok: true, status: 200, json: async () => ({ status: "pending" }) }));
+            const result = await fetchPaymentSession(TOKEN, { request });
+            expect(result).toEqual({ ok: true, status: 200, body: { status: "pending" } });
+            expect(storage).not.toHaveBeenCalled();
+            expect(request.mock.calls[0][1].credentials).toBe("omit");
+            expect(request.mock.calls[0][1].headers.Authorization).toBeUndefined();
+        } finally { storage.mockRestore(); }
+    });
+    it("returns network failures and temporary service errors to the retry loop", async () => {
+        expect(await fetchPaymentSession(TOKEN, { request: async () => { throw new Error("offline"); } }))
+            .toEqual({ ok: false, status: 0 });
+        const response = await fetchPaymentSession(TOKEN, { request: async () => ({ ok: false, status: 503, json: async () => ({}) }) });
+        expect(pageStateFromResponse(response)).toEqual({ kind: "unavailable" });
     });
 });
