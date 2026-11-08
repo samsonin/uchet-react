@@ -17,6 +17,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import LineWeightIcon from "@mui/icons-material/LineWeight";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 
 import rest from "./Rest";
 import TwoLineInCell from "./common/TwoLineInCell";
@@ -27,6 +28,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import store from "../store";
 import { makeGroup } from "../Models/Good";
 import { PrintBarcodes } from "./common/PrintBarcodes";
+import { usePriceTagQueue } from "./common/PriceTagQueue";
+import { getProductPriceTag } from "./common/PriceTags";
 import { hasMoreStoreGoods } from "./storePagination";
 import { isStoreFindDisabled } from "./storeSearch";
 
@@ -67,6 +70,8 @@ const Store = props => {
     const [isPublic, setIsPublic] = useState(false);
     const [isReject, setIsReject] = useState(false);
     const [showButtons, setShowButtons] = useState(false);
+    const [priceTagSelection, setPriceTagSelection] = useState(() => new Set());
+    const priceTagQueue = usePriceTagQueue();
 
     const limit = useRef(25);
     const isRequest = useRef(false);
@@ -101,6 +106,22 @@ const Store = props => {
     }, [goodsView, isReject, isAllStocks, currentStock, search]);
 
     const showGroupedBarcodes = isGroup && props.auth.admin;
+    const pricedGoodsByBarcode = useMemo(() => new Map(goods
+        .filter(getProductPriceTag)
+        .map(good => [good.barcode, good])), [goods]);
+    const getRowPriceTagGoods = good => (isGroup ? good.barcodes : [good.barcode])
+        .map(barcode => pricedGoodsByBarcode.get(barcode)).filter(Boolean);
+    const selectedPriceTagRows = filteredGoods.filter(good => priceTagSelection.has(getGoodKey(good)));
+    const selectedPriceTagGoods = selectedPriceTagRows.flatMap(getRowPriceTagGoods);
+
+    const addSelectedPriceTags = async () => {
+        if (!await priceTagQueue.addGoods(selectedPriceTagGoods)) return;
+        setPriceTagSelection(previous => {
+            const next = new Set(previous);
+            selectedPriceTagRows.forEach(good => next.delete(getGoodKey(good)));
+            return next;
+        });
+    };
 
     const sendRequest = ({ reset = false, append = false } = {}) => {
         const currentRequestId = ++requestId.current;
@@ -260,6 +281,7 @@ const Store = props => {
     const setGood = barcode => rest('goods/' + barcode);
 
     const renderRow = g => {
+        const rowKey = getGoodKey(g);
         const color = transitBarcodes.includes(g.barcode)
             ? 'green'
             : g.wo === 'reject' ? 'red' : 'black';
@@ -295,10 +317,27 @@ const Store = props => {
 
         return (
             <TableRow
-                key={g.barcode || `${g.category_id}-${g.model}-${g.stock_id}`}
+                key={rowKey}
                 style={{ cursor: 'pointer', opacity }}
                 onClick={() => isGroup ? null : setGood(g.barcode)}
             >
+                <TableCell padding="checkbox" onClick={event => event.stopPropagation()}>
+                    <Checkbox
+                        size="small"
+                        checked={priceTagSelection.has(rowKey)}
+                        disabled={!getRowPriceTagGoods(g).length}
+                        slotProps={{ input: { "aria-label": `Выбрать для ценника — ${g.model}` } }}
+                        onChange={event => {
+                            const checked = event.target.checked;
+                            setPriceTagSelection(previous => {
+                                const next = new Set(previous);
+                                if (checked) next.add(rowKey);
+                                else next.delete(rowKey);
+                                return next;
+                            });
+                        }}
+                    />
+                </TableCell>
                 {!isGroup && <TableCell style={{ color }}>{g.id}</TableCell>}
                 <TableCell style={{ color }}>
                     {TwoLineInCell(g.model, description)}
@@ -445,6 +484,12 @@ const Store = props => {
                     <Checkbox checked={isReject} onChange={() => setIsReject(!isReject)} />}
                     label={"только брак"}
                 />
+                <Button size="small" variant="outlined" startIcon={<LocalOfferOutlinedIcon />} onClick={priceTagQueue.openQueue}>
+                    Ценники{priceTagQueue.count ? ` (${priceTagQueue.count})` : ""}
+                </Button>
+                {selectedPriceTagGoods.length > 0 && <Button size="small" variant="contained" onClick={addSelectedPriceTags}>
+                    Добавить в ценники ({selectedPriceTagGoods.length})
+                </Button>}
 
             </div>
 
@@ -452,6 +497,9 @@ const Store = props => {
                 <Table size="small" style={{ background: 'white' }}>
                     <TableHead>
                         <TableRow>
+                            <TableCell padding="checkbox" aria-label="Выбор для печати ценников">
+                                <LocalOfferOutlinedIcon fontSize="small" color="action" />
+                            </TableCell>
                             {!isGroup && <TableCell>#</TableCell>}
                             <TableCell>Товар</TableCell>
                             <TableCell>Цена / Себестоимость</TableCell>
@@ -464,7 +512,7 @@ const Store = props => {
 
                         {isRequest.current && (
                             <TableRow>
-                                <TableCell colSpan={showGroupedBarcodes ? 5 : 4}>
+                                <TableCell colSpan={isGroup && !showGroupedBarcodes ? 4 : 5}>
                                     <LinearProgress />
                                 </TableCell>
                             </TableRow>

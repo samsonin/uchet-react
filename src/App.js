@@ -23,6 +23,7 @@ import Transit from "./components/Transit";
 import FundsFlow from "./components/FundsFlow";
 import rest from "./components/Rest";
 import GoodModal from "./components/Modals/Good";
+import { PriceTagQueueProvider } from "./components/common/PriceTagQueue";
 import Config from "./components/Settings/Config";
 import Organization from "./components/Settings/Organization";
 import Employees from "./components/Settings/Employees";
@@ -366,7 +367,13 @@ const App = props => {
         return <QrPaymentPage />
     }
 
-    return <>
+    const priceTagScope = `${orgId}:${props.auth.user_id}`
+
+    const organization = props.app.organization
+    const priceTagSeller = [organization?.organization, organization?.name].filter(Boolean).join(' ')
+
+    return <PriceTagQueueProvider key={priceTagScope} scope={priceTagScope} seller={priceTagSeller}
+                                  stockId={props.app.current_stock_id}>
 
         {props.app.need_callbacks && props.app.need_callbacks
             .filter(nc => !hiddenNeedCallbacks.includes(needCallbackKey(nc)))
@@ -636,7 +643,7 @@ const App = props => {
 
         </div>
 
-    </>
+    </PriceTagQueueProvider>
 
 }
 

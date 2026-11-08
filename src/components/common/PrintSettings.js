@@ -38,7 +38,7 @@ export const DEFAULT_PRINT_SETTINGS = {
         preset: "custom",
         orientation: "portrait",
         width: 40,
-        height: 30,
+        height: 50,
         margin: 0,
     },
     barcode: {

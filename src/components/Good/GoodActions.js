@@ -14,17 +14,21 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 
 import { useSnackbar } from "notistack";
 
 import rest from "../Rest";
 import { PrintBarcodes } from "../common/PrintBarcodes";
 import { Print } from "../common/Print";
+import { usePriceTagQueue } from "../common/PriceTagQueue";
+import { getProductPriceTag } from "../common/PriceTags";
 import store from "../../store";
 import {canReturnGoodToProvider} from "./GoodActions.helpers";
 
 const GoodActions = props => {
     const { enqueueSnackbar } = useSnackbar();
+    const { addGoods } = usePriceTagQueue();
 
     const good = props.app.good;
     const doc = props.app.docs.find(d => d.name === "sale_showcase");
@@ -98,6 +102,7 @@ const GoodActions = props => {
 
         <div className="good-actions-toolbar">
             {actions.history}
+            {getProductPriceTag(good) && renderIcon("Ценник", () => addGoods([good], true), <LocalOfferOutlinedIcon />)}
             {props.app.current_stock_id
                 ? good.wo === "t"
                     ? actions.transit
