@@ -1,9 +1,13 @@
-import { getDefaultPrintSettings } from "./PrintSettings";
+import { getDefaultPrintSettings, getSavedPrintSettings, savePrintSettings } from "./PrintSettings";
 import { getPriceTagLayout, getProductPriceTag, mergePriceTags, printPriceTags } from "./PriceTags";
 
 const settings = getDefaultPrintSettings("priceTag");
+const settingsKey = "uchet-print-settings-priceTag";
 
-afterEach(() => jest.restoreAllMocks());
+afterEach(() => {
+    jest.restoreAllMocks();
+    localStorage.removeItem(settingsKey);
+});
 
 const mockPrintWindow = () => {
     const popup = {
@@ -36,6 +40,26 @@ it("uses the saved orientation and rejects dimensions with no space inside the m
         .toMatchObject({ width: 25, height: 55 });
     expect(getPriceTagLayout({ ...settings, margin: 20 })).toBeNull();
     expect(getPriceTagLayout({ ...settings, preset: "a4" })).toMatchObject({ sheetCapacity: 0 });
+});
+
+it.each([
+    [40, 30, "landscape"],
+    [30, 40, "portrait"],
+    [40, 30, "portrait"],
+])("upgrades old %i × %i mm price tag settings (%s)", (width, height, orientation) => {
+    localStorage.setItem(settingsKey, JSON.stringify({ ...settings, width, height, orientation, margin: 2 }));
+
+    expect(getPriceTagLayout(getSavedPrintSettings("priceTag"))).toMatchObject({
+        width: 40, height: 50, margin: 2,
+    });
+});
+
+it("retains other saved sizes and lets the user select 30 × 40 mm again", () => {
+    localStorage.setItem(settingsKey, JSON.stringify({ ...settings, width: 45, height: 60 }));
+    expect(getPriceTagLayout(getSavedPrintSettings("priceTag"))).toMatchObject({ width: 45, height: 60 });
+
+    savePrintSettings("priceTag", { ...settings, width: 30, height: 40 });
+    expect(getPriceTagLayout(getSavedPrintSettings("priceTag"))).toMatchObject({ width: 30, height: 40 });
 });
 
 it("puts all copies in one print job and starts a new A4 page when the first one fills", () => {

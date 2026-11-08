@@ -1,4 +1,5 @@
 const PRINT_SETTINGS_STORAGE_PREFIX = "uchet-print-settings-";
+const PRICE_TAG_SIZE_VERSION = 1;
 
 export const PRINT_PRESETS = {
     a4: {
@@ -70,10 +71,20 @@ export const getSavedPrintSettings = type => {
     try {
         const saved = JSON.parse(localStorage.getItem(getStorageKey(type)) || "null");
 
-        return {
+        const settings = {
             ...defaults,
             ...(saved || {}),
         };
+        if (type === "priceTag" && !settings.sizeVersion && settings.preset === "custom") {
+            const width = Number(settings.width);
+            const height = Number(settings.height);
+            const isOldSize = (width === 40 && height === 30) || (width === 30 && height === 40);
+
+            if (isOldSize) {
+                return { ...defaults, margin: settings.margin };
+            }
+        }
+        return settings;
     } catch (error) {
         return defaults;
     }
@@ -87,6 +98,7 @@ export const savePrintSettings = (type, settings) => {
         width: toPrintNumber(settings.width, defaults.width),
         height: toPrintNumber(settings.height, defaults.height),
         margin: toPrintNumber(settings.margin, defaults.margin),
+        ...(type === "priceTag" ? { sizeVersion: PRICE_TAG_SIZE_VERSION } : {}),
     };
 
     try {
